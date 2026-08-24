@@ -68,7 +68,8 @@ The affine part of a composite label is represented by the transfer matrices of
   instance on nonnegative-slope labels and the `MulAction` on `ℝ`.
 * `DirectedTransport.MaxAffineTransport.Label.ofAffine`,
   `DirectedTransport.MaxAffineTransport.Label.ofAffineHom`,
-  `DirectedTransport.MaxAffineTransport.Label.ofMaxAffine` -- the two embeddings of
+  `DirectedTransport.MaxAffineTransport.Label.ofMaxAffine`,
+  `DirectedTransport.MaxAffineTransport.Label.ofMaxAffineHom` -- the two embeddings of
   `DirectedTransport.TransferSummary`'s classes.
 * `DirectedTransport.MaxAffineTransport.Label.toTransferMatrix` -- affine summaries as
   `2 × 2` transfer matrices.
@@ -528,6 +529,28 @@ theorem ofMaxAffine_comp (outer inner : TransferSummary.MaxAffineSummary) :
   change ((max outer.floor (outer.shift + outer.slope * inner.floor) : ℝ) : WithBot ℝ)
     = (outer.floor : WithBot ℝ) ⊔ pushFloor outer.shift outer.slope (inner.floor : WithBot ℝ)
   rw [pushFloor_coe, ← WithBot.coe_sup, WithBot.coe_inj]
+
+/-- The finite-floor embedding is injective: a label determines the summary it
+comes from. -/
+theorem ofMaxAffine_injective : Function.Injective ofMaxAffine := by
+  intro f g hfg
+  have hfloor : (f.floor : WithBot ℝ) = (g.floor : WithBot ℝ) := congrArg Label.floor hfg
+  exact TransferSummary.MaxAffineSummary.ext (WithBot.coe_inj.mp hfloor)
+    (congrArg Label.shift hfg) (congrArg Label.slope hfg)
+
+/-- **The finite-floor embedding as a homomorphism of semigroups.**  The
+nonnegative-slope max-affine summaries have no identity
+(`TransferSummary.MaxAffineSummary.not_exists_apply_eq_id`), so they form only a
+semigroup; the labels supply the missing identity `(⊥, 0, 1)` and this map
+identifies that semigroup with the coerced-floor part of the label monoid. -/
+def ofMaxAffineHom :
+    {f : TransferSummary.MaxAffineSummary // 0 ≤ f.slope} →ₙ* {f : Label // 0 ≤ f.slope} where
+  toFun f := ⟨ofMaxAffine f.1, show (0 : ℝ) ≤ f.1.slope from f.2⟩
+  map_mul' outer inner := Subtype.ext (ofMaxAffine_comp outer.1 inner.1)
+
+/-- The finite-floor semigroup homomorphism is injective. -/
+theorem ofMaxAffineHom_injective : Function.Injective ofMaxAffineHom := fun _ _ hfg =>
+  Subtype.ext (ofMaxAffine_injective (Subtype.ext_iff.mp hfg))
 
 /-- **Affine summaries as transfer matrices.**  The upper-triangular matrices
 of `InverseCoordinate.affineTransferMatrix` carry the composition law of
