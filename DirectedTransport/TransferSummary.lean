@@ -87,17 +87,21 @@ still has a bounded number of coefficients.
   period), with the explicit post-regeneration formula
   `DirectedTransport.TransferSummary.reflectedIter_eq_sup'_of_eq_zero`.
 
+## Implementation notes
+
+The max-affine class of this file lacks an identity only because floors are finite: over floors
+extended
+by a bottom element the class becomes a monoid with identity `(⊥, 0, 1)`, in which the affine
+summaries sit at the bottom floor and the max-affine summaries at the coerced floors. That
+extension is `DirectedTransport.MaxAffineTransport.Label`, whose monoid instance on the
+nonnegative-slope labels, action on the line, and two embeddings
+`DirectedTransport.MaxAffineTransport.Label.ofAffine` and
+`DirectedTransport.MaxAffineTransport.Label.ofMaxAffine` are stated there and not here: the
+extended class needs the order structure of `WithBot ℝ`, whereas the classes of this file
+need only the field, and every consumer of the extension already depends on both.
+
 ## TODO
 
-* The max-affine class lacks an identity only because floors are finite: over floors extended
-  by a bottom element the class becomes a monoid with identity `(⊥, 0, 1)`, in which the affine
-  summaries sit at the bottom floor and the max-affine summaries at the coerced floors. That
-  extension is `DirectedTransport.MaxAffineTransport.Label`, whose monoid instance on the
-  nonnegative-slope labels, action on the line, and two embeddings
-  `DirectedTransport.MaxAffineTransport.Label.ofAffine` and
-  `DirectedTransport.MaxAffineTransport.Label.ofMaxAffine` are stated there and not here: the
-  extended class needs the order structure of `WithBot ℝ`, whereas the classes of this file
-  need only the field, and every consumer of the extension already depends on both.
 * The stationary theory of the Lindley recursion under stationary inputs (Loynes) and the
   two-sided reflection.
 * Iteration of a *single* affine summary: its fixed point `d / (1 - c)`, the closed form of
