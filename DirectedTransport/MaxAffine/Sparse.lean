@@ -31,7 +31,7 @@ the generic finite-inequality theory.
 ## Main results
 
 * `DirectedTransport.MaxAffineTransport.exists_sparse_infeasible_branch_subsystem`: **Helly
-  sparsity** — if no lax section exists, some subsystem of at most `Fintype.card V + 1`
+  sparsity** - if no lax section exists, some subsystem of at most `Fintype.card V + 1`
   genuine branches is already infeasible. Absent floors are not branches, so they never
   enter the subsystem.
 * `DirectedTransport.MaxAffineTransport.exists_sparse_farkas_certificate`: that sparse

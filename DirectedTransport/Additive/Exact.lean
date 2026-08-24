@@ -55,7 +55,7 @@ orientation for nonnegative charges and bounded path budgets.
 * `DirectedTransport.CycleCoboundary.coboundary` and
   `DirectedTransport.CycleCoboundary.IsCoboundary`.
 * `DirectedTransport.CycleCoboundary.HasZeroCycleSums`.
-* `DirectedTransport.CycleCoboundary.translationTransport` — the direct additive reading as
+* `DirectedTransport.CycleCoboundary.translationTransport` - the direct additive reading as
   a `DirectedTransport.Transport`.
 
 The walk sum `DirectedTransport.walkSum` that this file consumes lives in
@@ -66,16 +66,16 @@ The walk sum `DirectedTransport.walkSum` that this file consumes lives in
 
 ## Main results
 
-* `DirectedTransport.CycleCoboundary.exists_coboundary_of_baseCycleSums_eq_zero` — reconstruct
+* `DirectedTransport.CycleCoboundary.exists_coboundary_of_baseCycleSums_eq_zero` - reconstruct
   a potential from path sums based at one vertex.
-* `DirectedTransport.CycleCoboundary.isCoboundary_iff_hasZeroCycleSums` — exactness iff all
+* `DirectedTransport.CycleCoboundary.isCoboundary_iff_hasZeroCycleSums` - exactness iff all
   cycle sums vanish on a strongly connected graph.
-* `DirectedTransport.CycleCoboundary.isCoboundary_iff_exists_isSection` — exactness iff the
+* `DirectedTransport.CycleCoboundary.isCoboundary_iff_exists_isSection` - exactness iff the
   translation transport has a section, without a connectivity hypothesis.
-* `DirectedTransport.CycleCoboundary.hasZeroCycleSums_iff_hasTrivialHolonomy` — cycle sums are
+* `DirectedTransport.CycleCoboundary.hasZeroCycleSums_iff_hasTrivialHolonomy` - cycle sums are
   precisely translation holonomy.
 * `DirectedTransport.CycleCoboundary.exists_edge_defect_ge_of_pos` and
-  `DirectedTransport.CycleCoboundary.exists_edge_abs_defect_ge` — quantitative obstruction
+  `DirectedTransport.CycleCoboundary.exists_edge_abs_defect_ge` - quantitative obstruction
   bounds from a positive cycle sum.
 
 ## Implementation notes
@@ -186,9 +186,9 @@ end Coboundary
 The converse construction needs the endpoints of every edge to lie on a closed
 walk through a fixed base vertex: a walk out to the endpoint and a walk back.
 In a directed graph neither direction follows from the other.  The scopes
-themselves — `DirectedTransport.LinkedTo`,
+themselves - `DirectedTransport.LinkedTo`,
 `DirectedTransport.IsStronglyConnectedAt`, and
-`DirectedTransport.EdgeEndpointsLinkedTo` — are walk-existence notions with no
+`DirectedTransport.EdgeEndpointsLinkedTo` - are walk-existence notions with no
 additive content and live in `DirectedTransport.EdgeGraph`. -/
 
 /-! ### The exactness criterion -/

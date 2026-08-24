@@ -39,17 +39,17 @@ satisfy every cycle-product equation vacuously while carrying a zero slope.
   when every slope is at most one, feasibility reduces exactly to the affine rows of the unit-slope
   edges; floors and strictly subunit rows are noncritical.
 * `MaxAffineTransport.exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_slope_le_one`:
-  the resulting cycle criterion — a lax section exists exactly when every closed walk of the
+  the resulting cycle criterion - a lax section exists exactly when every closed walk of the
   unit-slope subgraph has nonpositive shift sum.
 * `MaxAffineTransport.exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_one_le_slope`:
   the same criterion in the superunit regime, which additionally requires every floor absent.
 * `DirectedTransport.MaxAffineTransport.exists_nonexpansiveGauge_iff_cycleProduct_le_one`:
-  **positive gauge theorem** — for nonnegative slopes on a finite graph, a nonexpansive gauge
+  **positive gauge theorem** - for nonnegative slopes on a finite graph, a nonexpansive gauge
   exists exactly when every directed cycle product is at most one.
 * `DirectedTransport.MaxAffineTransport.exists_expansiveGauge_iff_one_le_cycleProduct`: the
   dual statement, under the stronger hypothesis that every slope is strictly positive.
 * `MaxAffineTransport.cycleProduct_eq_one_iff_exists_slopeGauge_of_stronglyConnected`:
-  **multiplicative holonomy equivalence** — on a strongly connected graph, nonnegative slopes
+  **multiplicative holonomy equivalence** - on a strongly connected graph, nonnegative slopes
   have unit product around every closed walk exactly when they are ratios of one positive
   vertex gauge. Strong connectivity is needed: see the DAG remark above.
 -/

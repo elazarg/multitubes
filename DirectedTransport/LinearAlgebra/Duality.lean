@@ -60,7 +60,7 @@ linearly ordered field.
   `DirectedTransport.LinearAlgebra.exists_objective_ge_iff_forall_isDualFeasible`: **strong
   duality**, as a threshold equivalence.
 * `DirectedTransport.LinearAlgebra.exists_isDualFeasible_objective_le_of_forall_le`: **dual
-  attainment** — an attained primal optimum is matched by an attained dual optimum.
+  attainment** - an attained primal optimum is matched by an attained dual optimum.
 * `DirectedTransport.LinearAlgebra.complementarySlackness_iff_objective_eq`,
   `DirectedTransport.LinearAlgebra.complementarySlackness_iff_forall_ne_zero`:
   **complementary slackness**, and its support form.

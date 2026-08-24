@@ -41,9 +41,9 @@ and the affine recurrence has the closed form `g t = c ^ t * (g 0 - p) + p` arou
   and transport of interiority, strict monotonicity, and vanishing between the two coordinates.
 * `IsHazardBalance`, the worked family `a * h (t + 1) * (1 - h t) = h t` with `1 < a`. Its inverse
   coordinate obeys `g (t + 1) = a * g t - a` with fixed point `a / (a - 1)`. The seeds of positive
-  orbits are exactly `Set.Ioc 0 (hazardCeiling a)` — necessary by
+  orbits are exactly `Set.Ioc 0 (hazardCeiling a)` - necessary by
   `IsHazardBalance.le_hazardCeiling` and realized by `hazardOrbit`, whose closed form is
-  `isHazardBalance_hazardOrbit` — and among positive orbits the vanishing ones are exactly those
+  `isHazardBalance_hazardOrbit` - and among positive orbits the vanishing ones are exactly those
   with seed strictly below `hazardCeiling a = (a - 1) / a`.
 * `affineTransferMatrix` and `linearFractionalTransferMatrix`, whose products compose the
   corresponding steps, are conjugate by `inversionMatrix`, and act on `OnePoint ℝ` by the Möbius
@@ -97,8 +97,8 @@ composition law, so this file is independent of
 ## TODO
 
 * Only single steps and two-phase composites are treated. The classification of periodic orbits
-  of an `n`-phase coefficient cycle by the trace of its product transfer matrix — the elliptic,
-  parabolic and hyperbolic cases of the projective action — is not developed here.
+  of an `n`-phase coefficient cycle by the trace of its product transfer matrix - the elliptic,
+  parabolic and hyperbolic cases of the projective action - is not developed here.
 
 ## Tags
 

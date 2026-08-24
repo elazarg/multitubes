@@ -27,8 +27,8 @@ switch: `DirectedTransport.switch` takes `η : V → Mˣ`.  Over a group every e
 and the classical notion is recovered.
 
 Switching corrects walk labels at their endpoints only
-(`DirectedTransport.walkLabel_switch`), so balance — trivial labels on all closed walks,
-`DirectedTransport.HasTrivialCycleLabels` — is a switching invariant.
+(`DirectedTransport.walkLabel_switch`), so balance - trivial labels on all closed walks,
+`DirectedTransport.HasTrivialCycleLabels` - is a switching invariant.
 `DirectedTransport.switch_switch` and `DirectedTransport.switch_one` make switching an
 action of the group of unit-valued vertex functions on gains; it is stated as rewriting
 lemmas rather than as a `MulAction` instance because the action depends on the edge graph,
@@ -43,15 +43,15 @@ uniqueness: the switching functions trivializing a flat gain form a torsor for t
 
 ## Main definitions
 
-* `DirectedTransport.switch` — the switching of a gain by a unit-valued vertex function.
+* `DirectedTransport.switch` - the switching of a gain by a unit-valued vertex function.
 
 ## Main results
 
-* `DirectedTransport.walkLabel_switch` — walk labels transform by endpoint correction.
-* `DirectedTransport.switch_switch` and `DirectedTransport.switch_one` — switching is an
+* `DirectedTransport.walkLabel_switch` - walk labels transform by endpoint correction.
+* `DirectedTransport.switch_switch` and `DirectedTransport.switch_one` - switching is an
   action of the group of unit-valued vertex functions on gains.
-* `DirectedTransport.hasTrivialCycleLabels_switch_iff` — balance is a switching invariant.
-* `DirectedTransport.hasTrivialCycleLabels_iff_exists_switch_one` — when every edge
+* `DirectedTransport.hasTrivialCycleLabels_switch_iff` - balance is a switching invariant.
+* `DirectedTransport.hasTrivialCycleLabels_iff_exists_switch_one` - when every edge
   endpoint is linked to a base vertex, a gain is balanced exactly when it is a switching
   of the trivial gain.
 

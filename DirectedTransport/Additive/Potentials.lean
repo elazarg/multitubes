@@ -32,7 +32,7 @@ A **potential** is a `𝕜`-valued function on vertices satisfying the edge
 increment inequality `φ (source e) + weight e ≤ φ (target e)`.  The central
 result is the duality between potentials and closed walks: with finitely many
 edges, a potential exists exactly when no closed walk has strictly positive
-weight.  The vertex type is arbitrary — a walk visiting pairwise distinct
+weight.  The vertex type is arbitrary - a walk visiting pairwise distinct
 vertices traverses pairwise distinct edges, so the edge count already bounds
 every pruned walk.  The scalars are arbitrary too: the witness is a maximum over
 the finitely many walks that traverse pairwise distinct edges, so no supremum,
@@ -50,31 +50,31 @@ root.
 
 ## Main definitions
 
-- `DirectedTransport.MaxPlusPotential.walkWeight` — total weight of a finite typed walk
-- `DirectedTransport.MaxPlusPotential.IsPotential` — the edge increment inequality
-- `DirectedTransport.MaxPlusPotential.defect` — the amount by which one edge fails it
+- `DirectedTransport.MaxPlusPotential.walkWeight` - total weight of a finite typed walk
+- `DirectedTransport.MaxPlusPotential.IsPotential` - the edge increment inequality
+- `DirectedTransport.MaxPlusPotential.defect` - the amount by which one edge fails it
 - `DirectedTransport.MaxPlusPotential.incomingWeights`,
-  `DirectedTransport.MaxPlusPotential.nodupIncomingWeights` — the weights of the walks
+  `DirectedTransport.MaxPlusPotential.nodupIncomingWeights` - the weights of the walks
   arriving at a vertex, and of those among them that repeat no edge
-- `DirectedTransport.MaxPlusPotential.maxIncomingWeight` — the canonical potential, the
+- `DirectedTransport.MaxPlusPotential.maxIncomingWeight` - the canonical potential, the
   greatest weight of a walk arriving at a vertex without repeating an edge
 - `DirectedTransport.MaxPlusPotential.matrixGraph`,
   `DirectedTransport.MaxPlusPotential.matrixWeight`,
-  `DirectedTransport.MaxPlusPotential.IsSubeigenvector` — the max-plus matrix reading
+  `DirectedTransport.MaxPlusPotential.IsSubeigenvector` - the max-plus matrix reading
 
 ## Main results
 
-- `DirectedTransport.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos` — the
+- `DirectedTransport.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos` - the
   duality, for finitely many edges, an arbitrary vertex type and arbitrary
   linearly ordered field of weights
-- `DirectedTransport.MaxPlusPotential.isGreatest_incomingWeights` — with no positive closed
+- `DirectedTransport.MaxPlusPotential.isGreatest_incomingWeights` - with no positive closed
   walk, `maxIncomingWeight` is the greatest weight of a walk arriving at a vertex
-- `DirectedTransport.MaxPlusPotential.maxIncomingWeight_eq_sSup` — over `ℝ` it is therefore
+- `DirectedTransport.MaxPlusPotential.maxIncomingWeight_eq_sSup` - over `ℝ` it is therefore
   the supremum of the weights of all arriving walks
-- `DirectedTransport.MaxPlusPotential.exists_edge_defect_ge` — a closed walk of weight at
+- `DirectedTransport.MaxPlusPotential.exists_edge_defect_ge` - a closed walk of weight at
   least `γ` forces some edge to fail the inequality by at least `γ` divided by
   the length of that walk, for every candidate function
-- `DirectedTransport.MaxPlusPotential.exists_subeigenvector_iff_forall_closedWalk_le` — for a
+- `DirectedTransport.MaxPlusPotential.exists_subeigenvector_iff_forall_closedWalk_le` - for a
   max-plus matrix, a subeigenvector for `lam` exists exactly when every cycle has
   mean weight at most `lam`
 
@@ -89,7 +89,7 @@ signed weights and cycles.
 
 The weights live in a linearly ordered field `𝕜`, matching the generality of
 `DirectedTransport.LinearAlgebra`.  Multiplication is used only where the
-statements themselves involve it — rescaling an edge weighting by a constant, and
+statements themselves involve it - rescaling an edge weighting by a constant, and
 the cycle *means* of the quantitative and matrix sections; the duality itself is
 purely additive.  The candidate potential is a `Finset.max'` over the weights of
 the walks arriving at a vertex without repeating an edge, of which `[Finite E]`
@@ -239,10 +239,10 @@ theorem IsPotential.closedWalk_nonpos {weight : E → 𝕜} {φ : V → 𝕜}
 
 /-! ### The duality
 
-The finite-walk calculus this rests on — the visited-vertex list
+The finite-walk calculus this rests on - the visited-vertex list
 `DirectedTransport.EdgeGraph.Walk.visited`, the split at a visited vertex, and the
 closed-subwalk extraction `DirectedTransport.EdgeGraph.Walk.exists_closedSubwalk_of_not_nodup`
-— lives in `DirectedTransport.EdgeGraph`. -/
+- lives in `DirectedTransport.EdgeGraph`. -/
 
 /-- Weights of the finite walks arriving at a vertex. -/
 def incomingWeights (G : EdgeGraph V E) (weight : E → 𝕜) (vertex : V) : Set 𝕜 :=
@@ -399,7 +399,7 @@ theorem walkWeight_le_maxIncomingWeight {weight : E → 𝕜}
   exact hle.trans (le_maxIncomingWeight ⟨_, pruned, pruned.edges_nodup_of_visited_nodup hnd, rfl⟩)
 
 /-- With no closed walk of positive weight, the canonical potential is the
-greatest weight of a walk arriving at the vertex — the maximum over walks that
+greatest weight of a walk arriving at the vertex - the maximum over walks that
 repeat no edge is attained on the whole family. -/
 theorem isGreatest_incomingWeights {weight : E → 𝕜}
     (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)

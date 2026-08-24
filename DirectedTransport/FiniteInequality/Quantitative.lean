@@ -36,7 +36,7 @@ threshold is attainable, which is precisely the unbounded-below case.
 ## Main results
 
 * `DirectedTransport.FiniteInequality.worstResidualAtMost_iff_normalizedDual_le`: the exact
-  threshold duality — a worst-residual threshold is attainable exactly when every normalized
+  threshold duality - a worst-residual threshold is attainable exactly when every normalized
   certificate has objective at most that threshold.  It is stated level by level rather than
   through an extended-real infimum, which is what keeps the certificate-free case meaningful.
 * `DirectedTransport.FiniteInequality.certificateValue_le_of_worstResidualAtMost`: the easy

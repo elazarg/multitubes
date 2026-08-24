@@ -63,7 +63,7 @@ namespace Label
 /-! ## The affine part around its fixed point
 
 Every classification in this file reduces to the position of the candidate
-point relative to the fixed point of the affine part — `f.shift / (1 - f.slope)`
+point relative to the fixed point of the affine part - `f.shift / (1 - f.slope)`
 below unit slope, `-f.shift / (f.slope - 1)` above it.  The lemmas of this
 section state those reductions once, in both slope regimes: the sublevel sets
 of the affine residual `f.affinePart x - x` are rays, and the level-zero and

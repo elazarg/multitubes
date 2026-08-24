@@ -28,7 +28,7 @@ alone.
 ## Main results
 
 * `DirectedTransport.AdditiveTransport.symmetricResidualAtMost_iff_signedGraph`: the structural
-  step the rest of the file rests on — symmetric residual feasibility on `G` is ordinary
+  step the rest of the file rests on - symmetric residual feasibility on `G` is ordinary
   directed residual feasibility on `signedGraph G`.  It needs no finiteness.
 * `DirectedTransport.AdditiveTransport.circuitCoefficient_isNormalizedCertificate`: every
   nonempty circuit in the doubled graph is a normalized signed-circulation certificate.
@@ -36,7 +36,7 @@ alone.
   `symmetricResidualAtMost_iff_simpleSignedCycles_le`: symmetric feasibility is the mean bound
   on every circuit of the doubled graph, and testing simple circuits alone suffices.
 * `DirectedTransport.AdditiveTransport.normalizedSignedDual_le_iff_signedClosedWalk_le` and
-  `normalizedSignedDual_le_iff_simpleSignedCycles_le`: the dual reading of the same pair —
+  `normalizedSignedDual_le_iff_simpleSignedCycles_le`: the dual reading of the same pair -
   normalized signed circulations and directed circuits impose exactly the same thresholds.
 -/
 

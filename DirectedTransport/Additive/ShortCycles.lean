@@ -37,7 +37,7 @@ walk witness of length at most `Fintype.card V`.
   one-sided residual threshold holds exactly when it holds on closed walks of length at most
   `Fintype.card V`.
 * `DirectedTransport.AdditiveTransport.exists_short_closedWalk_of_not_worstDirectedResidualAtMost`:
-  the witness form of the same fact — a failing threshold is refuted by one short closed walk.
+  the witness form of the same fact - a failing threshold is refuted by one short closed walk.
 * `DirectedTransport.AdditiveTransport.exists_short_closedWalk_maximizing_mean`: if any
   nonempty closed walk exists, one of length at most `Fintype.card V` attains the maximum mean
   among all nonempty closed walks.

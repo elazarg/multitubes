@@ -27,8 +27,8 @@ A *standard-form* polyhedron is the nonnegative affine fiber
 ordered field. This file develops the basic theory of such polyhedra and of linear
 optimization over them.
 
-Almost everything here — the fiber itself, its convexity, Farkas' lemma, and the identification
-of the extreme points with the basic feasible solutions — is proved over an arbitrary linearly
+Almost everything here - the fiber itself, its convexity, Farkas' lemma, and the identification
+of the extreme points with the basic feasible solutions - is proved over an arbitrary linearly
 ordered field `𝕜`, with the certificate direction of Farkas coming from the theorem of the
 alternative in `DirectedTransport.LinearAlgebra.FourierMotzkin`. Only the three results that
 genuinely use topology are stated over `ℝ`: closedness of the fiber, the continuous functional

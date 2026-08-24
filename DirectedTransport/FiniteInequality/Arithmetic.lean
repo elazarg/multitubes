@@ -40,7 +40,7 @@ finitely many coefficient denominators gives an integral certificate.
   infeasibility of a rational system is witnessed by a rational certificate.
 * `DirectedTransport.FiniteInequality.exists_integralCertificate_of_real_infeasible`: for
   integral data the certificate can be taken integer-valued.  Note only the certificate's
-  denominators are cleared — the intermediate
+  denominators are cleared - the intermediate
   `exists_integralCoefficientCertificate_of_real_infeasible` still states its balance and
   objective over `ℚ`.
 -/

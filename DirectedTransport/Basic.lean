@@ -53,34 +53,34 @@ products of slopes.
 
 ## Main definitions
 
-* `DirectedTransport.Transport` — vertex-indexed fibers with edge maps.
-* `DirectedTransport.Transport.walkMap` — transport along a typed walk.
-* `DirectedTransport.Transport.holonomy` — transport around a closed walk.
-* `DirectedTransport.Transport.HasTrivialHolonomy` — every closed-walk
+* `DirectedTransport.Transport` - vertex-indexed fibers with edge maps.
+* `DirectedTransport.Transport.walkMap` - transport along a typed walk.
+* `DirectedTransport.Transport.holonomy` - transport around a closed walk.
+* `DirectedTransport.Transport.HasTrivialHolonomy` - every closed-walk
   map is the identity.
 * `DirectedTransport.Transport.IsSection` and
   `DirectedTransport.Transport.IsLaxSection`.
-* `DirectedTransport.ofEdgeAct` and `DirectedTransport.transport` —
+* `DirectedTransport.ofEdgeAct` and `DirectedTransport.transport` -
   the constant-fiber case.
 * `DirectedTransport.walkLabel` and
-  `DirectedTransport.HasTrivialCycleLabels` — monoid-labelled walks and
+  `DirectedTransport.HasTrivialCycleLabels` - monoid-labelled walks and
   trivial cycle labels.
-* `DirectedTransport.walkSum` — the additive walk sum, the additive sibling
+* `DirectedTransport.walkSum` - the additive walk sum, the additive sibling
   of `walkLabel`.
 
 ## Main results
 
-* `DirectedTransport.Transport.walkMap_append` — path composition.
-* `DirectedTransport.Transport.IsSection.walkMap_eq` — exact transport of
+* `DirectedTransport.Transport.walkMap_append` - path composition.
+* `DirectedTransport.Transport.IsSection.walkMap_eq` - exact transport of
   sections.
-* `DirectedTransport.Transport.IsLaxSection.walkMap_le` — monotone
+* `DirectedTransport.Transport.IsLaxSection.walkMap_le` - monotone
   transport of lax sections.
-* `DirectedTransport.walkMap_ofEdgeAct` — the dependent and constant-fiber
+* `DirectedTransport.walkMap_ofEdgeAct` - the dependent and constant-fiber
   semantics agree.
 * `DirectedTransport.transport_eq_smul` and
-  `DirectedTransport.walkMap_ofSMul_eq_walkLabel_smul` — a monoid-labelled
+  `DirectedTransport.walkMap_ofSMul_eq_walkLabel_smul` - a monoid-labelled
   walk acts by its composite label.
-* `DirectedTransport.hasTrivialHolonomy_ofSMul` — trivial cycle labels
+* `DirectedTransport.hasTrivialHolonomy_ofSMul` - trivial cycle labels
   imply trivial holonomy of the induced transport.
 
 ## Implementation notes

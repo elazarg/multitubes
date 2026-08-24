@@ -37,7 +37,7 @@ residual inequality.
 ## Main results
 
 * `DirectedTransport.exists_potential_or_nonnegative_incompatibility`: the theorem of
-  alternatives — either one potential meets every lower bound, or a nonnegative balanced
+  alternatives - either one potential meets every lower bound, or a nonnegative balanced
   dependence among the rows has strictly positive weighted lower bound.
 * `DirectedTransport.not_nonnegative_incompatibility_of_potential`: the two alternatives
   exclude each other.

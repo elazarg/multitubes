@@ -17,8 +17,8 @@ the value `1`. The result is a standard-form polyhedron in the sense of
 `DirectedTransport.LinearAlgebra.StandardForm`: a bounded slice of the certificate cone that
 meets every ray of it on which the mass is positive.
 
-This file is only the change of coordinates. Everything proved about the resulting set —
-closedness, Farkas duality, extreme points and their sparsity, attainment of linear optima —
+This file is only the change of coordinates. Everything proved about the resulting set -
+closedness, Farkas duality, extreme points and their sparsity, attainment of linear optima -
 comes from `DirectedTransport.LinearAlgebra.StandardForm`, which this file re-exports.
 
 ## Main definitions

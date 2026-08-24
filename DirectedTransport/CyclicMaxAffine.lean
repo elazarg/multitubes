@@ -33,7 +33,7 @@ Write `P = ∏_{k < L} q k` for the *deleted survival product* and
 
     W = ∑_{k < L} (∏_{k' < k} q k') * p k
 
-for the *survival-weighted accumulated rate* — each rate weighted by the product of the survival
+for the *survival-weighted accumulated rate* - each rate weighted by the product of the survival
 factors strictly before it, not counted raw. As soon as `P < 1`, the value at the base point is
 pinned between
 
@@ -204,8 +204,8 @@ theorem CyclicSolution.prefix_le (h : CyclicSolution p q C L) :
       nlinarith [hscaled]
 
 /-- **The prefix dichotomy.** Walking forward from the base point, either the affine branch is
-taken all the way to `m` — and then the base value is the weighted rate plus the surviving
-remainder — or some earlier phase `j` takes the capped branch `1 - p j`, and the base value is
+taken all the way to `m` - and then the base value is the weighted rate plus the surviving
+remainder - or some earlier phase `j` takes the capped branch `1 - p j`, and the base value is
 pinned by that phase. -/
 theorem CyclicSolution.prefix_dichotomy (h : CyclicSolution p q C L) :
     ∀ m ≤ L,
@@ -278,7 +278,7 @@ theorem CyclicSolution.le_max_weightedRate (h : CyclicSolution p q C L)
       nlinarith [mul_nonneg hs0 (h.rate_nonneg j), hs1]
     linarith
 
-/-- If no phase caps — the max resolves to its affine branch everywhere — the base value is
+/-- If no phase caps - the max resolves to its affine branch everywhere - the base value is
 exactly `W / (1 - P)`, the left endpoint of the estimate. -/
 theorem CyclicSolution.eq_div_of_affine (h : CyclicSolution p q C L)
     (hP : survivalProduct q L < 1) (haffine : ∀ k < L, C k = q k * C (k + 1) + p k) :
@@ -445,7 +445,7 @@ theorem fin_weightedRate_bounds {p q C : Fin L → ℝ}
 
 /-- **The corollary in cyclic `Fin L` form.** For any solution of the cyclic system on `Fin L`
 whose rates sum to at most `A`, the base value is bounded by `max (A / (1 - P)) (A + 1)` with
-`P = ∏ k, q k` — independently of `L`. -/
+`P = ∏ k, q k` - independently of `L`. -/
 theorem fin_le_max_of_sum_le {p q C : Fin L → ℝ}
     (hp : ∀ k, 0 ≤ p k) (hq0 : ∀ k, 0 ≤ q k) (hq1 : ∀ k, q k ≤ 1)
     (hC : ∀ k, C k = max (1 - p k) (q k * C (k + 1) + p k))

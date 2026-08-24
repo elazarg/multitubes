@@ -29,7 +29,7 @@ multigraph circuits.
 ## Main definitions
 
 * `DirectedTransport.AdditiveTransport.IsUnitSignedCirculation`: the explicit signed-circulation
-  polytope — vertex balance together with `l1` mass at most one.
+  polytope - vertex balance together with `l1` mass at most one.
 * `DirectedTransport.AdditiveTransport.signedProjection` and `signedCircuitVector`: the
   difference of the forward and reverse masses over each original edge, and its value on a
   doubled-graph circuit.
@@ -51,8 +51,8 @@ multigraph circuits.
   certificates.
 * `DirectedTransport.AdditiveTransport.exists_genuineSignedCircuitVector_decomposition`: the
   literal decomposition with backtrack terms erased.  The surviving coefficients are
-  nonnegative with total mass at most one — not exactly one, since erasing backtracks discards
-  mass — and every positively weighted cycle is a genuine multigraph circuit.
+  nonnegative with total mass at most one - not exactly one, since erasing backtracks discards
+  mass - and every positively weighted cycle is a genuine multigraph circuit.
 * `DirectedTransport.AdditiveTransport.unitSignedCirculationObjective_le_iff_genuineCircuitMean_le`:
   the support function of the polytope is controlled exactly by absolute signed means of
   genuine circuits.  The separate `0 ≤ level` conjunct is not redundant; it is the value

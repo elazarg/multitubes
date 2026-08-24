@@ -38,12 +38,12 @@ At a raw residual level, the exact critical-cycle bound is `T_C / S_C`, where
 
 * `MaxAffineTransport.worstResidualAtMost_iff_criticalAffineResidualAtMost_of_nonexpansiveGauge`:
   at every raw residual threshold, a nonexpansive gauge deletes exactly the noncritical branch rows
-  — floors and strictly contracting rows never bind.
+  - floors and strictly contracting rows never bind.
 * `MaxAffineTransport.worstResidualAtMost_iff_criticalAffineResidualAtMost_of_expansiveGauge`:
   the same reduction for an expansive gauge, which additionally requires every floor absent.
 * `DirectedTransport.MaxAffineTransport.worstResidualAtMost_iff_cycleRatio_le_of_nonexpansiveGauge`,
   `MaxAffineTransport.worstResidualAtMost_iff_cycleRatio_le_of_expansiveGauge`: the
-  **quantitative gauge theorems** — the exact raw worst-residual threshold is the supremum of
+  **quantitative gauge theorems** - the exact raw worst-residual threshold is the supremum of
   `gaugeCriticalCycleRatio` over *nonempty* critical cycles, in both gauge regimes.
 * `MaxAffineTransport.exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_nonexpansiveGauge`,
   `MaxAffineTransport.exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_expansiveGauge`:

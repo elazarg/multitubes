@@ -8,17 +8,10 @@ A standalone, mathlib-idiomatic Lean library for the theory of **directed transp
 operator-labelled transition graphs, their walks, holonomy, sections and lax sections, and
 the exact, additive, finite-inequality, join-semidirect, and max-affine specializations.
 
-It is extracted from the `MathUE/DirectedTransport` subtree of the `UniformEquilibrium`
-research repository (`~/UniformEquilibrium`), which remains the reference for the original
-proofs. That repository is pinned to Lean `v4.32.2`; this one targets `v4.33.1`, so ported
-proofs occasionally need small repairs.
-
 ## Conventions
 
 - Toolchain: `leanprover/lean4:v4.33.1`, mathlib pinned to `v4.33.1`.
-- Root namespace is `DirectedTransport`. The source's `Math.*` namespaces are dropped:
-  `Math.EdgeGraph` becomes `DirectedTransport.EdgeGraph`, `Math.TransferSummary.X` becomes
-  `DirectedTransport.TransferSummary.X`, and so on.
+- Root namespace is `DirectedTransport`.
 - License is Apache 2.0. Every file starts with the mathlib copyright header, verbatim:
 
   ```
@@ -60,9 +53,9 @@ through; fix the code instead.
 Four properties are checked and must hold before anything is committed. They are what the
 project's claims rest on, so treat a regression in any of them as a build failure:
 
-1. **A rebuild from clean** (`rm -rf .lake/build && lake build`) ends at zero errors and zero
+1. **A rebuild from clean** ends at zero errors and zero
    warnings. An incremental build is not evidence; nor is a build that does not reach the file
-   you changed — a new file absent from `DirectedTransport/All.lean` is not compiled at all.
+   you changed - a new file absent from `DirectedTransport/All.lean` is not compiled at all.
 2. **Zero docstring drift**: every declaration named in a `## Main ...` section resolves against
    the compiled environment.
 3. **Zero declarations depend on `sorryAx`**, checked at the kernel by `Lean.collectAxioms`. The
@@ -71,7 +64,7 @@ project's claims rest on, so treat a regression in any of them as a build failur
 
 ## Working rules
 
-- Never introduce `sorry`. Work that needs one is unfinished — say so rather than committing it.
+- Never introduce `sorry`. Work that needs one is unfinished - say so rather than committing it.
 - Never weaken a theorem to make it provable, and never present a weaker result under a stronger
   name. If a statement will not go through, report where it fails; a quietly weakened theorem is
   worse than an absent one, because the library's value is that its claims are checkable.

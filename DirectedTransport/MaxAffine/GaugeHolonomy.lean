@@ -44,7 +44,7 @@ slack mean is the normalized shift sum divided by the reciprocal-target mass.
   sides take the value `0` on the empty cycle by totalized division.
 * `DirectedTransport.MaxAffineTransport.hasCyclicSlack_gaugeCriticalCycle_iff_cycleRatio_le`: on a
   nonempty critical cycle, the exact original slack criterion is that ratio bound. Floors stay
-  arbitrary — at raw product one they do not move the threshold.
+  arbitrary - at raw product one they do not move the threshold.
 * `MaxAffineTransport.exists_isLaxSection_iff_prefixedCycleHolonomies_of_nonexpansiveGauge`,
   `MaxAffineTransport.exists_isLaxSection_iff_prefixedCycleHolonomies_of_expansiveGauge`:
   feasibility is equivalent to pre-fixedness of every *original* cycle holonomy, not only the
