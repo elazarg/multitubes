@@ -57,6 +57,7 @@ public import DirectedTransport.MaxAffine.Basic
 public import DirectedTransport.MaxAffine.CycleSlack
 public import DirectedTransport.MaxAffine.Duality
 public import DirectedTransport.MaxAffine.Farkas
+public import DirectedTransport.MaxAffine.FixedPoint
 public import DirectedTransport.MaxAffine.GaugeFeasibility
 public import DirectedTransport.MaxAffine.GaugeHolonomy
 public import DirectedTransport.MaxAffine.JoinSemidirect

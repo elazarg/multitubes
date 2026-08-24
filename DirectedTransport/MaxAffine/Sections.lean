@@ -61,9 +61,13 @@ achieves the same reduction without enlarging the graph.
 
 Mixed slopes are not addressed here.  `DirectedTransport.MaxAffine.Farkas`
 settles them by a linear rather than a cyclewise test, and shows the cyclewise
-test of this file is not sufficient once slopes straddle one.  What remains
-open is the fixed-point problem for monotone max-affine networks in its own
-terms, whose setting is the Perron--Frobenius theory of topical maps.
+test of this file is not sufficient once slopes straddle one.  The fixed-point
+reading of a lax section, and the eigenvalue problem in the topical regime of
+unit-slope floorless labels, are settled in
+`DirectedTransport.MaxAffine.FixedPoint`.  What remains open is the eigenvalue
+problem for mixed slopes, where the vertex operator is monotone but not
+additively homogeneous, so the Perron--Frobenius theory of topical maps does not
+apply verbatim.
 
 ## References
 

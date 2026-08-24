@@ -115,8 +115,12 @@ general labels.
 
 ## TODO
 
-Eigenvalue problems for the vertex operator remain outside this file; their
-natural setting is the fixed-point theory of topical maps.
+Eigenvalue problems for the vertex operator remain outside this file.  The
+vertex operator itself, the identification of a lax section with one of its
+sub-fixed points, and its eigenvectors in the topical regime are the subject of
+`DirectedTransport.MaxAffine.FixedPoint`; what remains open is the eigenvalue
+problem once the labels are no longer translations, where additive homogeneity
+fails and the Perron--Frobenius theory of topical maps no longer applies.
 
 ## References
 
