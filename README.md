@@ -34,7 +34,8 @@ fibers and edge maps are and asks when sections or lax sections exist:
 - **exact** (`Exact.lean`, `SCC.lean`, `NormalForms.lean`, `PotentialRigidity.lean`) — equality of
   forward path maps, without assuming labels form a group; strongly connected and rooted-path
   normal forms, and rigidity of the resulting potentials;
-- **additive** (`Additive/`) — real-valued potentials, cycle sums, and circulation duality;
+- **additive** (`Additive/`) — additive potentials over a linearly ordered field, cycle sums, and
+  circulation duality;
 - **finite-inequality** (`FiniteInequality/`) — Farkas-style certificates for finite systems;
 - **join-semidirect** (`JoinSemidirect.lean`) — labels `(floor, action)` acting by
   `x ↦ floor ⊔ action • x`, composing as a semidirect product;

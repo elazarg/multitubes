@@ -89,10 +89,31 @@ This file proves only the structural walk-induction lemmas.  Existence of
 sections or lax sections is label-specific potential theory and belongs in the
 specialization that supplies the label algebra.
 
+The development is stratified by how much order structure the fibers carry, and
+the strata are worth naming because they behave differently under a change of
+order.  Transport itself -- `walkMap`, `holonomy`, `IsSection`, and the exact
+theory built on them -- assumes no order at all; edge maps are arbitrary
+functions between fibers.  `IsLaxSection` and the monotone transport lemmas
+assume only a `Preorder`.  Everything beyond that needs a *join*: the least lax
+majorant of `DirectedTransport.Closure` is an indexed supremum over all walks
+and assumes a `CompleteLattice`, the labels of `DirectedTransport.JoinSemidirect`
+act through `⊔` and assume a `SemilatticeSup`, and a max-affine label is defined
+by a join against its floor.
+
+So the exact and lax layers are available for any preordered fiber, while the
+Bellman and max-affine layers are not: they are unavailable exactly when the
+fiber order has no binary joins.  The standard example is the Löwner order on
+positive semidefinite operators, which is an anti-lattice -- a supremum exists
+only for a comparable pair (Kadison) -- so those layers have no operator-valued
+analogue, while the layers below them do.
+
 ## References
 
 * T. Zaslavsky, *Biased graphs. I. Bias, balance, and gains*, J. Combin. Theory
   Ser. B 47 (1989), 32-52, for gain and voltage graphs.
+* R. V. Kadison, *Order properties of bounded self-adjoint operators*, Proc.
+  Amer. Math. Soc. 2 (1951), 505-510, for the anti-lattice property of the
+  Löwner order referred to in the implementation notes.
 
 ## Tags
 
