@@ -1,0 +1,50 @@
+name = "directedTransport"
+version = "0.1.0"
+keywords = ["math"]
+defaultTargets = ["DirectedTransport"]
+
+# Mathlib's own style linters, enabled project-wide. These are the canonical
+# implementations shipped in `Mathlib.Tactic.Linter.*`; enabling them here is
+# what keeps this library in mathlib style, so no bespoke linting script is
+# needed. The expected license string defaults to the Apache 2.0 line used
+# throughout mathlib, which is also this project's license.
+#
+# Each option is set through `weak.` deliberately. A linter option only exists
+# once the file has (transitively) imported the module that registers it, so a
+# plain `-Dlinter.style.emptyLine` is a hard build error in a file with narrow
+# imports. `weak.` makes such a setting a no-op there instead. The trade-off is
+# that a linter is silently skipped in a file that does not import it, so do not
+# read a clean build of a narrow file as proof that every check ran.
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+weak.linter.style.header = true
+weak.linter.style.longLine = true
+weak.linter.style.longFile = 1500
+weak.linter.style.lambdaSyntax = true
+weak.linter.style.dollarSyntax = true
+weak.linter.style.openClassical = true
+weak.linter.style.cdot = true
+weak.linter.style.cases = true
+weak.linter.style.induction = true
+weak.linter.style.refine = true
+weak.linter.style.show = true
+weak.linter.style.admit = true
+weak.linter.style.nativeDecide = true
+weak.linter.style.setOption = true
+weak.linter.style.missingEnd = true
+weak.linter.style.multiGoal = true
+weak.linter.style.emptyLine = true
+weak.linter.style.whitespace = true
+weak.linter.style.docString = true
+weak.linter.style.nameCheck = true
+weak.linter.style.maxHeartbeats = true
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.33.1"
+
+[[lean_lib]]
+name = "DirectedTransport"
