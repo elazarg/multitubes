@@ -59,10 +59,11 @@ achieves the same reduction without enlarging the graph.
 
 ## TODO
 
-Mixed slopes are not addressed here: nothing in this file says when a lax
-section exists for a labelling whose slopes straddle one.  That is the
-fixed-point problem for monotone max-affine networks, whose setting is the
-Perron--Frobenius theory of topical maps.
+Mixed slopes are not addressed here.  `DirectedTransport.MaxAffine.Farkas`
+settles them by a linear rather than a cyclewise test, and shows the cyclewise
+test of this file is not sufficient once slopes straddle one.  What remains
+open is the fixed-point problem for monotone max-affine networks in its own
+terms, whose setting is the Perron--Frobenius theory of topical maps.
 
 ## References
 

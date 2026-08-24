@@ -23,7 +23,8 @@ even though the ambient labels live in an arbitrary monoid.
   over a reachable root.
 * `DirectedTransport.hasTrivialCycleLabels_iff_exists_unitPotential`: flatness is exactly
   the existence of a unit-valued coboundary potential.
-* `DirectedTransport.isUnit_edge_of_trivialCycleLabels`: every edge label is a unit.
+* `DirectedTransport.isUnit_edge_of_trivialCycleLabels`: every edge label is a unit as
+  soon as its endpoints are linked to a base vertex.
 * `DirectedTransport.unitPotential_eq_mul_constant_of_rootReaches`: two potentials for the
   same labelling differ by one global right factor.
 * `DirectedTransport.unitPotential_eq_of_rootReaches_of_eq_base`: agreement at the root
@@ -82,27 +83,27 @@ theorem hasTrivialCycleLabels_iff_parallelLabels {base : V}
   · intro hparallel vertex cycle
     simpa using hparallel cycle (.nil : G.Walk vertex vertex)
 
-/-- On a strongly connected graph, flatness is equivalent to existence of a
-unit-valued coboundary potential. -/
+/-- When every edge endpoint is linked to a base vertex, flatness is equivalent
+to existence of a unit-valued coboundary potential. -/
 theorem hasTrivialCycleLabels_iff_exists_unitPotential {base : V}
-    (hconnected : IsStronglyConnectedAt G base) :
+    (hlinked : EdgeEndpointsLinkedTo G base) :
     HasTrivialCycleLabels G label ↔
       ∃ potential : V → Mˣ, ∀ edge : E,
         label edge =
           (potential (G.target edge) *
             (potential (G.source edge))⁻¹ : Mˣ) := by
   constructor
-  · exact exists_unitPotential_of_trivialCycleLabels hconnected
+  · exact exists_unitPotential_of_trivialCycleLabels hlinked
   · rintro ⟨potential, hpotential⟩
     exact hasTrivialCycleLabels_of_unitPotential potential hpotential
 
 /-- Every recurrent edge label is a unit under global flatness. -/
 theorem isUnit_edge_of_trivialCycleLabels {base : V}
-    (hconnected : IsStronglyConnectedAt G base)
+    (hlinked : EdgeEndpointsLinkedTo G base)
     (hflat : HasTrivialCycleLabels G label) (edge : E) :
     IsUnit (label edge) := by
   obtain ⟨potential, hpotential⟩ :=
-    exists_unitPotential_of_trivialCycleLabels hconnected hflat
+    exists_unitPotential_of_trivialCycleLabels hlinked hflat
   refine ⟨potential (G.target edge) *
     (potential (G.source edge))⁻¹, ?_⟩
   exact (hpotential edge).symm
@@ -191,7 +192,8 @@ theorem existsUnique_normalizedUnitPotential_of_trivialCycleLabels
             (potential (G.target edge) *
               (potential (G.source edge))⁻¹ : Mˣ) := by
   obtain ⟨potential, hpotential⟩ :=
-    exists_unitPotential_of_trivialCycleLabels hconnected hflat
+    exists_unitPotential_of_trivialCycleLabels
+      hconnected.edgeEndpointsLinkedTo hflat
   let normalized : V → Mˣ :=
     fun vertex => potential vertex * (potential base)⁻¹
   have hnormalized (edge : E) :

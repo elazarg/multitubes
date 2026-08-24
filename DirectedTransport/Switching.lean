@@ -34,8 +34,8 @@ action of the group of unit-valued vertex functions on gains; it is stated as re
 lemmas rather than as a `MulAction` instance because the action depends on the edge graph,
 not only on the types involved.
 
-The main result says that on a strongly connected graph balance is exactly
-switching-triviality: a gain has trivial cycle labels precisely when it is a switching of
+The main result says that when every edge endpoint is linked to a base vertex balance is
+exactly switching-triviality: a gain has trivial cycle labels precisely when it is a switching of
 the constant-one gain.  The switching function exhibited is the unit potential of
 `DirectedTransport.exists_unitPotential_of_trivialCycleLabels`, and
 `DirectedTransport.existsUnique_normalizedUnitPotential_of_trivialCycleLabels` measures its
@@ -51,8 +51,9 @@ uniqueness: the switching functions trivializing a flat gain form a torsor for t
 * `DirectedTransport.switch_switch` and `DirectedTransport.switch_one` — switching is an
   action of the group of unit-valued vertex functions on gains.
 * `DirectedTransport.hasTrivialCycleLabels_switch_iff` — balance is a switching invariant.
-* `DirectedTransport.hasTrivialCycleLabels_iff_exists_switch_one` — on a strongly connected
-  graph, a gain is balanced exactly when it is a switching of the trivial gain.
+* `DirectedTransport.hasTrivialCycleLabels_iff_exists_switch_one` — when every edge
+  endpoint is linked to a base vertex, a gain is balanced exactly when it is a switching
+  of the trivial gain.
 
 ## References
 
@@ -145,17 +146,17 @@ theorem hasTrivialCycleLabels_switch_iff (η : V → Mˣ) :
   · rw [walkLabel_switch, h vertex cycle]
     simp
 
-/-- **Balance is switching-triviality.**  On a strongly connected graph a monoid-valued
-gain is balanced exactly when it is a switching of the trivial gain.  The switching
-function exhibited in the forward direction is the unit potential of
+/-- **Balance is switching-triviality.**  When every edge endpoint is linked to a base
+vertex, a monoid-valued gain is balanced exactly when it is a switching of the trivial
+gain.  The switching function exhibited in the forward direction is the unit potential of
 `DirectedTransport.exists_unitPotential_of_trivialCycleLabels`. -/
 theorem hasTrivialCycleLabels_iff_exists_switch_one {base : V}
-    (hconnected : IsStronglyConnectedAt G base) :
+    (hlinked : EdgeEndpointsLinkedTo G base) :
     HasTrivialCycleLabels G label ↔ ∃ η : V → Mˣ, label = switch G η 1 := by
   constructor
   · intro hflat
     obtain ⟨potential, hpotential⟩ :=
-      exists_unitPotential_of_trivialCycleLabels hconnected hflat
+      exists_unitPotential_of_trivialCycleLabels hlinked hflat
     refine ⟨potential, funext fun edge => ?_⟩
     rw [hpotential edge, switch_apply, Pi.one_apply, mul_one, Units.val_mul]
   · rintro ⟨η, rfl⟩

@@ -36,6 +36,13 @@ proofs occasionally need small repairs.
 - Every file has a `/-! ... -/` module docstring with `# Title`, prose, and `## Main
   definitions` / `## Main results` sections naming fully-qualified declarations.
 - Structure fields and all public declarations need doc comments.
+- Section headings come from mathlib's own vocabulary and nothing else: `Main definitions`,
+  `Main results`, `Implementation notes`, `TODO`, `References`, `Tags`. A census of the pinned
+  snapshot found the alternatives this library once used (`Scope`, `Vocabulary`, and the rest)
+  occur zero times in mathlib.
+- Docstrings state mathematics, not history. No mention of porting, extraction, provenance, this
+  repository's own development, or other project documents; and "this file", never "this
+  library".
 
 ## Style is enforced by mathlib's own linters
 
@@ -48,14 +55,30 @@ lines, 1500-line files, `fun` over `λ`, `<|` over `$`, `open Classical` scoping
 failure, not a pass. Do not silence a linter with `set_option ... false` to get a file
 through; fix the code instead.
 
+## Invariants
+
+Four properties are checked and must hold before anything is committed. They are what the
+project's claims rest on, so treat a regression in any of them as a build failure:
+
+1. **A rebuild from clean** (`rm -rf .lake/build && lake build`) ends at zero errors and zero
+   warnings. An incremental build is not evidence; nor is a build that does not reach the file
+   you changed — a new file absent from `DirectedTransport/All.lean` is not compiled at all.
+2. **Zero docstring drift**: every declaration named in a `## Main ...` section resolves against
+   the compiled environment.
+3. **Zero declarations depend on `sorryAx`**, checked at the kernel by `Lean.collectAxioms`. The
+   only axioms used anywhere are `propext`, `Classical.choice` and `Quot.sound`.
+4. **No line exceeds 100 characters**, and no `set_option` survives in a committed file.
+
 ## Working rules
 
-- Never introduce `sorry`. The source library is entirely sorry-free and axiom-free, and so
-  is this one; a port that needs a `sorry` is an unfinished port — say so rather than
-  committing it.
-- Do not weaken a theorem statement to make a v4.33.1 proof go through. If a proof cannot be
-  repaired, report it rather than restating the theorem.
-- Prefer fixing a broken proof idiomatically over patching around it. When a proof breaks
-  because of a transparency or dependent-argument change, restating the lemma in a form that
-  avoids the dependency (e.g. `List.head?` instead of `List.head` with a nonemptiness proof)
-  is usually better than forcing the original.
+- Never introduce `sorry`. Work that needs one is unfinished — say so rather than committing it.
+- Never weaken a theorem to make it provable, and never present a weaker result under a stronger
+  name. If a statement will not go through, report where it fails; a quietly weakened theorem is
+  worse than an absent one, because the library's value is that its claims are checkable.
+- State the hypotheses a proof actually uses, not the ones the textbook assumes. Several results
+  here hold under strictly weaker assumptions than their classical statements, and each says so.
+- Prefer fixing a proof idiomatically over patching around it. When one breaks on a transparency
+  or dependent-argument issue, restating the lemma to avoid the dependency (`List.head?` rather
+  than `List.head` with a nonemptiness proof) usually beats forcing the original.
+- Put a declaration where a reader would look for it, not where it was first needed. A statement
+  mentioning only walks belongs in the walk calculus even if only one specialization uses it.

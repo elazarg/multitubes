@@ -101,9 +101,11 @@ place where completeness is used, and it is a corollary rather than a step.
 ## TODO
 
 This file develops the potential (subeigenvector) side of max-plus spectral
-theory only.  Not developed here: existence of genuine eigenvectors, the
-Collatz--Wielandt characterization of the max cycle mean as an attained
-maximum over cycles, the critical graph, and the Kleene-star (all-pairs
+theory.  The equality side is `DirectedTransport.Additive.Eigenvector`, and the
+attained cycle-mean characterization is `DirectedTransport.Additive.CycleMean`.
+
+Not developed anywhere yet: the critical graph as a subgraph in its own right,
+the description of the whole eigenspace, and the Kleene-star (all-pairs
 longest-walk) operator, of which `maxIncomingWeight` is one row.  The natural
 common setting for those is the fixed-point theory of topical maps.
 

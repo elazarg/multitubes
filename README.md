@@ -34,13 +34,17 @@ fibers and edge maps are and asks when sections or lax sections exist:
 - **exact** (`Exact.lean`, `SCC.lean`, `NormalForms.lean`, `PotentialRigidity.lean`) — equality of
   forward path maps, without assuming labels form a group; strongly connected and rooted-path
   normal forms, and rigidity of the resulting potentials;
-- **additive** (`Additive/`) — additive potentials over a linearly ordered field, cycle sums, and
-  circulation duality;
+- **additive** (`Additive/`) — additive potentials over a linearly ordered field, cycle sums and
+  circulation duality, decomposition of feasibility over strongly connected components, and the
+  max-plus spectral theory: Karp's cycle mean formula and existence of an eigenvector whose
+  eigenvalue is the maximum cycle mean;
 - **finite-inequality** (`FiniteInequality/`) — Farkas-style certificates for finite systems;
 - **join-semidirect** (`JoinSemidirect.lean`) — labels `(floor, action)` acting by
   `x ↦ floor ⊔ action • x`, composing as a semidirect product;
 - **max-affine** (`MaxAffine/`) — edges labelled by `x ↦ max floor (shift + slope * x)`, its
-  duality theory and its scalar classifications.
+  duality theory and its scalar classifications;
+- **gain graphs** (`Switching.lean`) — Zaslavsky's switching action on a monoid-valued labelling,
+  balance as a switching invariant, and balance as switching-triviality.
 
 `Closure.lean` supplies the complete-lattice machinery for the lax side: an explicit closure over
 all directed walks, and a least lax majorant as the least fixed point of a Bellman operator.
@@ -62,7 +66,7 @@ Everything lives under `DirectedTransport/`.
 | `ChargedRelation.lean` | bounded path budgets are exactly bounded potentials |
 | `CyclicMaxAffine.lean` | a cyclic max-affine system and its survival-weighted bound |
 | `InverseCoordinate.lean` | linearizing rational recurrences in the reciprocal coordinate |
-| `LinearAlgebra/` | Fourier–Motzkin elimination, standard-form LP, normalized Farkas data |
+| `LinearAlgebra/` | Fourier–Motzkin elimination, the theorem of the alternative, standard-form LP, and LP duality |
 
 **Theory proper** — `Basic.lean` and the other root files for the generic layer and its exact
 specialization, then `Additive/`, `FiniteInequality/`, and `MaxAffine/`.

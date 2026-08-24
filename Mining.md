@@ -136,7 +136,7 @@ finiteness for). A combined corollary — base-flat + Dedekind-finite +
 propagation argument restricted to edge endpoints (every vertex on a nonempty cycle is
 an edge endpoint), but was **not** formalized: SKETCH.
 
-### 1.3 Standard-form Farkas is algebraic; only the topology needs ℝ — INSPECTED
+### 1.3 Standard-form Farkas is algebraic; only the topology needs ℝ — VERIFIED and APPLIED
 
 `LinearAlgebra/StandardForm.lean` states everything over `ℝ`. Reading the proofs splits
 the file cleanly:
@@ -159,7 +159,7 @@ Not build-tested: doing it properly means splitting the file into an algebraic a
 topological section with different scalars, which is a restructuring, not a one-line
 weakening.
 
-### 1.4 The duality over an arbitrary linearly ordered field — SKETCH
+### 1.4 The duality over an arbitrary linearly ordered field — APPLIED
 
 With 1.1 in place, the only use of completeness of `ℝ` in
 `exists_isPotential_iff_forall_closedWalk_nonpos` is `sSup (incomingWeights …)`. Since
@@ -222,7 +222,7 @@ lemma sets are already parallel. Low value; noted for completeness.
 
 ## 3. Missing connections
 
-### 3.1 The max-plus spectral radius theorem is derivable but absent — VERIFIED
+### 3.1 The max-plus spectral radius theorem is derivable but absent — VERIFIED and APPLIED
 
 `Additive/Potentials.lean` ends with the subeigenvector criterion
 (`exists_subeigenvector_iff_forall_closedWalk_le`) and its Scope note says the
@@ -244,7 +244,7 @@ in the library. (Reference: Baccelli–Cohen–Olsder–Quadrat, *Synchronizatio
 Linearity*, Ch. 3; the eigen*vector* existence and the critical graph remain genuinely
 absent, see 4.2.)
 
-### 3.2 Gordan's transposition theorem is a corollary of `theorem_of_alternative` — VERIFIED; the other classical variants are within reach
+### 3.2 Gordan's transposition theorem is a corollary of `theorem_of_alternative` — APPLIED; the other classical variants are within reach
 
 No Gordan/Stiemke/Ville/Motzkin transposition variant is stated anywhere. Gordan is a
 ~60-line corollary of `theorem_of_alternative` at `b = 1`, over the same ordered-field
@@ -258,7 +258,7 @@ positive balanced `u`) and **Motzkin's transposition** (mixed strict/weak rows) 
 block right-hand sides `(1, 0)`. **Ville** is Gordan transposed. If `FourierMotzkin.lean`
 is a mathlib candidate, these four names are what reviewers will look for first.
 
-### 3.3 The categorical dictionary is sound but never used: the two retract developments are defeq-equal — VERIFIED
+### 3.3 The categorical dictionary is sound but never used: the two retract developments are defeq-equal — APPLIED
 
 The library proves the retract normal form twice: concretely
 (`Transport.compressed_walkMap_eq` and friends, `Exact.lean`) and categorically
@@ -303,7 +303,7 @@ For the next miner: these leads from the module docstrings are *not* gaps.
 
 ## 4. New theorems
 
-### 4.1 Switching and balance for gain graphs — known-but-absent; prototype VERIFIED
+### 4.1 Switching and balance for gain graphs — APPLIED
 
 `Basic.lean` and `Exact.lean` cite Zaslavsky's gain graphs and prove
 balance-as-unit-potential, but the *switching* half of that theory — the group
@@ -327,7 +327,7 @@ switching only by *unit-valued* `η` — is a remark worth making in the docstri
 `PotentialRigidity.lean`'s torsor theorem says precisely that the switching functions
 trivializing a flat monoid gain form an `Mˣ`-torsor.
 
-### 4.2 Karp's formula and the max-plus eigenproblem — known-but-absent
+### 4.2 Karp's formula and the max-plus eigenproblem — APPLIED (both halves)
 
 Named in `Potentials.lean`'s own Scope note; recorded here with what each would take.
 
@@ -344,7 +344,7 @@ Named in `Potentials.lean`'s own Scope note; recorded here with what each would 
   (`topical`) specialization of `MaxAffine`, per the Scope notes' own pointer to
   Gaubert–Gunawardena. Large effort.
 
-### 4.3 LP strong duality and complementary slackness — known-but-absent
+### 4.3 LP strong duality and complementary slackness — APPLIED
 
 `LinearAlgebra/StandardForm.lean` stops at Farkas + basic feasible solutions +
 attainment at an extreme point. The two theorems any reader will expect next:
@@ -364,7 +364,7 @@ would be: `∀ t, (∃ feasible z, ⟨c,z⟩ ≥ t) ↔ (∀ dual-feasible y, �
 sidesteps attainment and matches `MaxAffine/Duality.lean`'s
 `worstResidualAtMost_iff_normalizedDual_le` exactly.
 
-### 4.4 Condensation-based decomposition of lax feasibility — known-but-absent
+### 4.4 Condensation-based decomposition of lax feasibility — APPLIED
 
 `SCC.lean` proves the condensation acyclic and `NormalForms.lean` gives the
 componentwise normal form for the *exact* case

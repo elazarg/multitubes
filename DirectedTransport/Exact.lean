@@ -46,7 +46,8 @@ invertibility is derived on recurrent flat regions.
 * `DirectedTransport.hasTrivialCycleLabels_of_base_of_dedekindFinite`: direct finiteness
   is the sufficient one-sided-inverse hypothesis used to move flatness between bases.
 * `DirectedTransport.exists_unitPotential_of_trivialCycleLabels`: arbitrary monoid-valued
-  flat labels on a strongly connected graph live in the unit group.
+  flat labels live in the unit group as soon as every edge endpoint is linked to a base
+  vertex.
 * `DirectedTransport.exists_addUnitPotential_of_zeroCycleSums`: the additive
   commutative-monoid version, requiring no ambient subtraction or group completion.
 -/
@@ -403,38 +404,65 @@ def unitPotential (hflat : HasTrivialCycleLabels G label) {base : V}
   val_inv := by simpa using hflat vertex ((returns vertex).append (paths vertex))
   inv_val := by simpa using hflat base ((paths vertex).append (returns vertex))
 
-/-- Every flat monoid labelling on a strongly connected graph is a
-unit-valued coboundary, even when the ambient monoid is not a group. -/
+/-- Every flat monoid labelling whose edge endpoints are all linked to a base
+vertex is a unit-valued coboundary, even when the ambient monoid is not a group.
+Vertices not linked to the base receive the trivial unit; the edge equation only
+ever consults linked vertices. -/
 theorem exists_unitPotential_of_trivialCycleLabels {base : V}
-    (hconnected : IsStronglyConnectedAt G base)
+    (hlinked : EdgeEndpointsLinkedTo G base)
     (hflat : HasTrivialCycleLabels G label) :
     ∃ potential : V → Mˣ, ∀ edge : E,
       label edge =
         (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ) := by
-  let paths : ∀ vertex, G.Walk base vertex :=
-    fun vertex ↦ (hconnected vertex).1.some
-  let returns : ∀ vertex, G.Walk vertex base :=
-    fun vertex ↦ (hconnected vertex).2.some
-  let potential : V → Mˣ := unitPotential hflat paths returns
+  classical
+  let potential : V → Mˣ := fun vertex ↦
+    if h : LinkedTo G base vertex then
+      { val := walkLabel label h.1.some
+        inv := walkLabel label h.2.some
+        val_inv := by simpa using hflat vertex (h.2.some.append h.1.some)
+        inv_val := by simpa using hflat base (h.1.some.append h.2.some) }
+    else 1
   refine ⟨potential, fun edge ↦ ?_⟩
+  obtain ⟨hsourceLinked, htargetLinked⟩ := hlinked edge
+  have hsource : potential (G.source edge) =
+      { val := walkLabel label hsourceLinked.1.some
+        inv := walkLabel label hsourceLinked.2.some
+        val_inv := by
+          simpa using hflat (G.source edge)
+            (hsourceLinked.2.some.append hsourceLinked.1.some)
+        inv_val := by
+          simpa using hflat base
+            (hsourceLinked.1.some.append hsourceLinked.2.some) } := by
+    simp only [potential, dif_pos hsourceLinked]
+  have htarget : potential (G.target edge) =
+      { val := walkLabel label htargetLinked.1.some
+        inv := walkLabel label htargetLinked.2.some
+        val_inv := by
+          simpa using hflat (G.target edge)
+            (htargetLinked.2.some.append htargetLinked.1.some)
+        inv_val := by
+          simpa using hflat base
+            (htargetLinked.1.some.append htargetLinked.2.some) } := by
+    simp only [potential, dif_pos htargetLinked]
+  rw [hsource, htarget]
   have hparallel := walkLabel_eq_of_trivialCycleLabels_of_return hflat
-    ((paths (G.source edge)).concat edge rfl) (paths (G.target edge))
-    (returns (G.target edge))
+    (hsourceLinked.1.some.concat edge rfl) htargetLinked.1.some
+    htargetLinked.2.some
   simp only [walkLabel_concat] at hparallel
-  have hpathReturn : walkLabel label (paths (G.source edge)) *
-      walkLabel label (returns (G.source edge)) = 1 := by
+  have hpathReturn : walkLabel label hsourceLinked.1.some *
+      walkLabel label hsourceLinked.2.some = 1 := by
     simpa using hflat (G.source edge)
-      ((returns (G.source edge)).append (paths (G.source edge)))
-  change label edge = walkLabel label (paths (G.target edge)) *
-    walkLabel label (returns (G.source edge))
+      (hsourceLinked.2.some.append hsourceLinked.1.some)
+  change label edge = walkLabel label htargetLinked.1.some *
+    walkLabel label hsourceLinked.2.some
   calc
     label edge = label edge *
-        (walkLabel label (paths (G.source edge)) *
-          walkLabel label (returns (G.source edge))) := by rw [hpathReturn, mul_one]
-    _ = (label edge * walkLabel label (paths (G.source edge))) *
-        walkLabel label (returns (G.source edge)) := by rw [mul_assoc]
-    _ = walkLabel label (paths (G.target edge)) *
-        walkLabel label (returns (G.source edge)) := by rw [hparallel]
+        (walkLabel label hsourceLinked.1.some *
+          walkLabel label hsourceLinked.2.some) := by rw [hpathReturn, mul_one]
+    _ = (label edge * walkLabel label hsourceLinked.1.some) *
+        walkLabel label hsourceLinked.2.some := by rw [mul_assoc]
+    _ = walkLabel label htargetLinked.1.some *
+        walkLabel label hsourceLinked.2.some := by rw [hparallel]
 
 /-- A unit-valued coboundary has trivial labels on every closed walk. -/
 theorem hasTrivialCycleLabels_of_unitPotential
@@ -473,7 +501,8 @@ theorem hasTrivialCycleLabels_iff_parallelLabels_and_unitPotential {base : V}
           (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ)) := by
   constructor
   · intro hflat
-    refine ⟨?_, exists_unitPotential_of_trivialCycleLabels hconnected hflat⟩
+    refine ⟨?_, exists_unitPotential_of_trivialCycleLabels
+      hconnected.edgeEndpointsLinkedTo hflat⟩
     intro start finish first second
     exact walkLabel_eq_of_trivialCycleLabels_of_return hflat first second
       (hconnected.nonempty_walk finish start).some

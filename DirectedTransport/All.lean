@@ -38,7 +38,7 @@ public import DirectedTransport.FiniteInequality.Basic
 public import DirectedTransport.FiniteInequality.Quantitative
 public import DirectedTransport.FiniteInequality.Sparse
 
--- Additive transport: cycles, circulations, and potentials
+-- Additive transport: cycles, circulations, potentials, and max-plus spectra
 public import DirectedTransport.Additive.Circuits
 public import DirectedTransport.Additive.CirculationDecomposition
 public import DirectedTransport.Additive.Condensation
@@ -76,9 +76,9 @@ the computational graph, walks, holonomy, and sections -- are required.
 
 The development covers the generic theory of exact and lax directed transport:
 categorical and strongly connected normal forms, complete-lattice closure,
-additive cycle and circulation duality, finite inequality certificates,
-join-semidirect labels, and max-affine transport, all without game-semantic
-assumptions.
+gain-graph switching and balance, additive cycle and circulation duality with
+its max-plus spectral theory, finite inequality certificates, join-semidirect
+labels, and max-affine transport.
 
 The foundational layer supplies the carriers the theory runs on: directed
 multigraphs with edge identities and their typed walks
@@ -90,5 +90,5 @@ affine and max-affine transfer summaries
 inverse-coordinate estimates.  `DirectedTransport.LinearAlgebra` carries the
 duality used by the certificate theory: the theorem of the alternative by
 Fourier-Motzkin elimination, and standard-form linear programming --
-feasibility, optimality, and extreme-point sparsity.
+feasibility, optimality, extreme-point sparsity, and duality.
 -/
