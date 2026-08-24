@@ -59,8 +59,6 @@ same recursion run to stationarity.
 * `DirectedTransport.MaxPlusPotential.exists_critical_cycle_subeigenvector_iff`: the
   attained max-plus spectral threshold, a short cycle deciding subeigenvector existence for
   every candidate eigenvalue.
-* `DirectedTransport.EdgeGraph.Walk.exists_split_of_length_le`: the walk-splitting lemma the
-  lower half needs, stated where it is used rather than in the walk calculus.
 
 ## Implementation notes
 
@@ -100,33 +98,6 @@ Karp, cycle mean, max cycle mean, max-plus, tropical, Perron root, Bellman, mean
 namespace DirectedTransport
 
 noncomputable section
-
-namespace EdgeGraph.Walk
-
-universe uV uE
-
-variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
-
-/-- A walk splits after any prescribed number of its edges. -/
-theorem exists_split_of_length_le {start finish : V} (walk : G.Walk start finish)
-    {count : ℕ} (hcount : count ≤ walk.length) :
-    ∃ (middle : V) (before : G.Walk start middle) (after : G.Walk middle finish),
-      before.length = count ∧ walk.edges = before.edges ++ after.edges := by
-  induction walk with
-  | nil =>
-      have hzero : count = 0 := Nat.le_zero.mp hcount
-      exact ⟨start, .nil, .nil, hzero.symm ▸ rfl, by simp⟩
-  | @concat middle walkSoFar edge legal ih =>
-      rcases Nat.lt_or_ge count (walkSoFar.length + 1) with hlt | hge
-      · obtain ⟨mid, before, after, hlen, hedges⟩ := ih (Nat.lt_succ_iff.mp hlt)
-        exact ⟨mid, before, after.concat edge legal, hlen, by
-          simp only [edges_concat, hedges, List.append_assoc]⟩
-      · have hEq : count = walkSoFar.length + 1 := by
-          simp only [length_concat] at hcount
-          omega
-        exact ⟨_, walkSoFar.concat edge legal, .nil, by simp [hEq], by simp⟩
-
-end EdgeGraph.Walk
 
 namespace MaxPlusPotential
 

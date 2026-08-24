@@ -48,6 +48,8 @@ circulations, and application-specific semantics belong in files that import thi
 * `DirectedTransport.EdgeGraph.Walk.edges_nodup_of_visited_nodup`: pairwise distinct visited
   vertices force pairwise distinct edges.
 * `DirectedTransport.EdgeGraph.Walk.exists_splitAtEdge`: a walk splits at any edge it uses.
+* `DirectedTransport.EdgeGraph.Walk.exists_split_of_length_le`: a walk splits after any
+  prescribed number of its edges.
 * `DirectedTransport.EdgeGraph.Walk.exists_split_of_mem_visited`: a walk splits at any vertex
   it visits.
 * `DirectedTransport.EdgeGraph.Walk.exists_closedSubwalk_of_not_nodup`: a walk revisiting a
@@ -371,6 +373,25 @@ theorem exists_splitAtEdge (walk : G.Walk start finish) (edge : E) (hmem : edge 
         simp [List.append_assoc]
       · subst finalEdge
         exact ⟨walkSoFar.castFinish legal.symm, .nil, by simp⟩
+
+/-- A walk splits after any prescribed number of its edges. -/
+theorem exists_split_of_length_le {start finish : V} (walk : G.Walk start finish)
+    {count : ℕ} (hcount : count ≤ walk.length) :
+    ∃ (middle : V) (before : G.Walk start middle) (after : G.Walk middle finish),
+      before.length = count ∧ walk.edges = before.edges ++ after.edges := by
+  induction walk with
+  | nil =>
+      have hzero : count = 0 := Nat.le_zero.mp hcount
+      exact ⟨start, .nil, .nil, hzero.symm ▸ rfl, by simp⟩
+  | @concat middle walkSoFar edge legal ih =>
+      rcases Nat.lt_or_ge count (walkSoFar.length + 1) with hlt | hge
+      · obtain ⟨mid, before, after, hlen, hedges⟩ := ih (Nat.lt_succ_iff.mp hlt)
+        exact ⟨mid, before, after.concat edge legal, hlen, by
+          simp only [edges_concat, hedges, List.append_assoc]⟩
+      · have hEq : count = walkSoFar.length + 1 := by
+          simp only [length_concat] at hcount
+          omega
+        exact ⟨_, walkSoFar.concat edge legal, .nil, by simp [hEq], by simp⟩
 
 /-- A witness that a typed walk passes through a specified vertex. -/
 structure VertexSplit (walk : G.Walk start finish) (vertex : V) where
