@@ -48,6 +48,11 @@ and the affine recurrence has the closed form `g t = c ^ t * (g 0 - p) + p` arou
 * `affineTransferMatrix` and `linearFractionalTransferMatrix`, whose products compose the
   corresponding steps, are conjugate by `inversionMatrix`, and act on `OnePoint ℝ` by the Möbius
   action `OnePoint.instGLAction` through `linearFractionalGL`.
+* `affineCycleMatrix`, the product transfer matrix of an `n`-phase coefficient cycle, and the
+  classification of a `2 × 2` matrix by the sign of `projectiveDiscriminant`. A product of affine
+  transfer matrices is again affine, with slope `affineCycleSlope` and shift `affineCycleShift`,
+  so its discriminant is the square `(affineCycleSlope l - 1) ^ 2`: an affine cycle is never
+  elliptic, and is hyperbolic exactly when its slope product differs from `1`.
 
 The linear-fractional map is also called a Möbius transformation, a homographic map, or a
 fractional linear transformation. The closed form of the affine recurrence is the
@@ -73,6 +78,14 @@ The coordinate change used here is the exact reciprocal `h ↦ h⁻¹`, not the 
   `DirectedTransport.InverseCoordinate.linearFractionalTransferMatrix`,
   `DirectedTransport.InverseCoordinate.inversionMatrix`,
   `DirectedTransport.InverseCoordinate.linearFractionalGL`: the matrix reading.
+* `DirectedTransport.InverseCoordinate.affineCycleSlope`,
+  `DirectedTransport.InverseCoordinate.affineCycleShift`,
+  `DirectedTransport.InverseCoordinate.affineCycleStep`,
+  `DirectedTransport.InverseCoordinate.affineCycleMatrix`: the `n`-phase cycle.
+* `DirectedTransport.InverseCoordinate.projectiveDiscriminant`,
+  `DirectedTransport.InverseCoordinate.IsProjectiveHyperbolic`,
+  `DirectedTransport.InverseCoordinate.IsProjectiveParabolic`,
+  `DirectedTransport.InverseCoordinate.IsProjectiveElliptic`: the classification.
 
 ## Main results
 
@@ -87,6 +100,18 @@ The coordinate change used here is the exact reciprocal `h ↦ h⁻¹`, not the 
   multiplication.
 * `DirectedTransport.InverseCoordinate.linearFractionalGL_smul_coe`,
   `DirectedTransport.InverseCoordinate.linearFractionalGL_cycle_smul`: the projective action.
+* `DirectedTransport.InverseCoordinate.affineCycleMatrix_eq`,
+  `DirectedTransport.InverseCoordinate.affineCycleStep_eq`: an `n`-phase affine cycle is a single
+  affine step, at matrix and at scalar level.
+* `DirectedTransport.InverseCoordinate.isProjectiveHyperbolic_or_parabolic_or_elliptic`: the
+  trichotomy.
+* `DirectedTransport.InverseCoordinate.not_isProjectiveElliptic_affineCycleMatrix`,
+  `DirectedTransport.InverseCoordinate.isProjectiveHyperbolic_affineCycleMatrix_iff`,
+  `DirectedTransport.InverseCoordinate.isProjectiveParabolic_affineCycleMatrix_iff`: the affine
+  degeneration of the classification.
+* `DirectedTransport.InverseCoordinate.affineCycleStep_eq_self_iff_of_slope_ne_one`,
+  `DirectedTransport.InverseCoordinate.affineCycleStep_eq_self_iff_of_slope_one`: the periodic
+  seeds of a cycle in each case.
 
 ## Implementation notes
 
@@ -94,11 +119,22 @@ The coordinate change used here is the exact reciprocal `h ↦ h⁻¹`, not the 
 composition law, so this file is independent of
 `DirectedTransport.TransferSummary`.
 
+A coefficient cycle is a `List (ℝ × ℝ)` of slope-shift pairs, with the head applied last, so that
+`affineCycleMatrix` is the plain product of the transfer matrices in list order. The shift
+accumulates by Horner's rule, matching the coefficient law of `affineTransferMatrix_mul`.
+
 ## TODO
 
-* Only single steps and two-phase composites are treated. The classification of periodic orbits
-  of an `n`-phase coefficient cycle by the trace of its product transfer matrix - the elliptic,
-  parabolic and hyperbolic cases of the projective action - is not developed here.
+* The classification is stated for the discriminant of a `2 × 2` matrix and computed for products
+  of affine transfer matrices, where the elliptic case is vacuous. The elliptic case itself, which
+  needs matrices of negative determinant such as `inversionMatrix`, and the identification of the
+  fixed points of a hyperbolic action as the roots of the associated quadratic, are not developed
+  here.
+
+## References
+
+* A. F. Beardon, *The Geometry of Discrete Groups*, Springer, 1983, §4.3, for the classification
+  of Möbius transformations by the trace of a representing matrix.
 
 ## Tags
 
@@ -596,6 +632,171 @@ theorem linearFractionalGL_cycle_smul {c₁ c₂ : ℝ} (d₁ d₂ : ℝ) (h₁ 
     linearFractionalGL d₁ h₁ • (linearFractionalGL d₂ h₂ • z) =
       linearFractionalGL (c := c₁ * c₂) (c₁ * d₂ + d₁) (mul_ne_zero h₁ h₂) • z := by
   rw [← mul_smul, linearFractionalGL_mul]
+
+/-! ### `n`-phase cycles and the discriminant classification -/
+
+/-- The slope of an `n`-phase affine coefficient cycle: the product of the individual slopes. -/
+def affineCycleSlope (l : List (ℝ × ℝ)) : ℝ := (l.map Prod.fst).prod
+
+/-- The shift of an `n`-phase affine coefficient cycle, accumulated by Horner's rule. -/
+def affineCycleShift : List (ℝ × ℝ) → ℝ
+  | [] => 0
+  | (c, d) :: l => c * affineCycleShift l + d
+
+/-- The composite of an `n`-phase cycle of affine steps, the head applied last. -/
+def affineCycleStep : List (ℝ × ℝ) → ℝ → ℝ
+  | [], x => x
+  | (c, d) :: l, x => affineStep c d (affineCycleStep l x)
+
+/-- The product transfer matrix of an `n`-phase affine coefficient cycle. -/
+def affineCycleMatrix (l : List (ℝ × ℝ)) : Matrix (Fin 2) (Fin 2) ℝ :=
+  (l.map fun p => affineTransferMatrix p.1 p.2).prod
+
+/-- The slope of a cycle is multiplicative over concatenation. -/
+theorem affineCycleSlope_cons (c d : ℝ) (l : List (ℝ × ℝ)) :
+    affineCycleSlope ((c, d) :: l) = c * affineCycleSlope l := by
+  simp [affineCycleSlope]
+
+/-- **The `n`-phase product transfer matrix.** A product of affine transfer matrices is again
+one, with the cycle's slope and shift as coefficients. -/
+theorem affineCycleMatrix_eq (l : List (ℝ × ℝ)) :
+    affineCycleMatrix l = affineTransferMatrix (affineCycleSlope l) (affineCycleShift l) := by
+  induction l with
+  | nil =>
+      simp [affineCycleMatrix, affineCycleSlope, affineCycleShift, affineTransferMatrix,
+        Matrix.one_fin_two]
+  | cons p l ih =>
+      obtain ⟨c, d⟩ := p
+      rw [affineCycleMatrix, List.map_cons, List.prod_cons, ← affineCycleMatrix, ih,
+        affineTransferMatrix_mul, affineCycleSlope_cons]
+      rfl
+
+/-- **The composite of a cycle of affine steps** is the affine step of the cycle's slope and
+shift; this is the scalar shadow of `affineCycleMatrix_eq`. -/
+theorem affineCycleStep_eq (l : List (ℝ × ℝ)) (x : ℝ) :
+    affineCycleStep l x = affineStep (affineCycleSlope l) (affineCycleShift l) x := by
+  induction l with
+  | nil => simp [affineCycleStep, affineStep, affineCycleSlope, affineCycleShift]
+  | cons p l ih =>
+      obtain ⟨c, d⟩ := p
+      rw [affineCycleStep, ih, affineStep_comp, affineCycleSlope_cons]
+      rfl
+
+/-- The determinant of the product transfer matrix of an affine cycle is the cycle's slope. -/
+theorem det_affineCycleMatrix (l : List (ℝ × ℝ)) :
+    (affineCycleMatrix l).det = affineCycleSlope l := by
+  rw [affineCycleMatrix_eq, det_affineTransferMatrix]
+
+/-- The trace of the product transfer matrix of an affine cycle is the cycle's slope plus one. -/
+theorem trace_affineCycleMatrix (l : List (ℝ × ℝ)) :
+    (affineCycleMatrix l).trace = affineCycleSlope l + 1 := by
+  rw [affineCycleMatrix_eq, affineTransferMatrix, Matrix.trace_fin_two_of]
+
+/-- The discriminant `trace ^ 2 - 4 * det` of a `2 × 2` matrix, whose sign classifies the fixed
+points of the induced projective action. -/
+def projectiveDiscriminant (M : Matrix (Fin 2) (Fin 2) ℝ) : ℝ := M.trace ^ 2 - 4 * M.det
+
+/-- A matrix is *hyperbolic* when its projective action has two real fixed points, that is when
+the discriminant is positive. -/
+def IsProjectiveHyperbolic (M : Matrix (Fin 2) (Fin 2) ℝ) : Prop := 0 < projectiveDiscriminant M
+
+/-- A matrix is *parabolic* when its projective action has a single real fixed point, that is when
+the discriminant vanishes. -/
+def IsProjectiveParabolic (M : Matrix (Fin 2) (Fin 2) ℝ) : Prop := projectiveDiscriminant M = 0
+
+/-- A matrix is *elliptic* when its projective action has no real fixed point, that is when the
+discriminant is negative. -/
+def IsProjectiveElliptic (M : Matrix (Fin 2) (Fin 2) ℝ) : Prop := projectiveDiscriminant M < 0
+
+/-- **Trichotomy of the projective classification.** Every `2 × 2` real matrix is hyperbolic,
+parabolic or elliptic. -/
+theorem isProjectiveHyperbolic_or_parabolic_or_elliptic (M : Matrix (Fin 2) (Fin 2) ℝ) :
+    IsProjectiveHyperbolic M ∨ IsProjectiveParabolic M ∨ IsProjectiveElliptic M := by
+  rcases lt_trichotomy (projectiveDiscriminant M) 0 with h | h | h
+  · exact Or.inr (Or.inr h)
+  · exact Or.inr (Or.inl h)
+  · exact Or.inl h
+
+/-- The three cases of the classification are mutually exclusive. -/
+theorem IsProjectiveHyperbolic.not_parabolic {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (h : IsProjectiveHyperbolic M) : ¬ IsProjectiveParabolic M := h.ne'
+
+/-- A hyperbolic matrix is not elliptic. -/
+theorem IsProjectiveHyperbolic.not_elliptic {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (h : IsProjectiveHyperbolic M) : ¬ IsProjectiveElliptic M := asymm h
+
+/-- A parabolic matrix is not elliptic. -/
+theorem IsProjectiveParabolic.not_elliptic {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (h : IsProjectiveParabolic M) : ¬ IsProjectiveElliptic M := by
+  rw [IsProjectiveElliptic, h]
+  exact lt_irrefl 0
+
+/-- **The discriminant of an affine cycle is a square.** It is the square of the defect of the
+slope product from `1`. -/
+theorem projectiveDiscriminant_affineCycleMatrix (l : List (ℝ × ℝ)) :
+    projectiveDiscriminant (affineCycleMatrix l) = (affineCycleSlope l - 1) ^ 2 := by
+  rw [projectiveDiscriminant, trace_affineCycleMatrix, det_affineCycleMatrix]
+  ring
+
+/-- **An affine cycle is never elliptic.** The elliptic case of the projective classification is
+unreachable by products of affine transfer matrices, whatever the number of phases: their
+discriminant is a square. Ellipticity needs a matrix of negative determinant, such as
+`inversionMatrix`. -/
+theorem not_isProjectiveElliptic_affineCycleMatrix (l : List (ℝ × ℝ)) :
+    ¬ IsProjectiveElliptic (affineCycleMatrix l) := by
+  rw [IsProjectiveElliptic, projectiveDiscriminant_affineCycleMatrix]
+  exact not_lt.2 (sq_nonneg _)
+
+/-- **An affine cycle is hyperbolic exactly when its slope product differs from one.** -/
+theorem isProjectiveHyperbolic_affineCycleMatrix_iff (l : List (ℝ × ℝ)) :
+    IsProjectiveHyperbolic (affineCycleMatrix l) ↔ affineCycleSlope l ≠ 1 := by
+  rw [IsProjectiveHyperbolic, projectiveDiscriminant_affineCycleMatrix]
+  constructor
+  · intro h hval
+    rw [hval] at h
+    norm_num at h
+  · intro h
+    exact lt_of_le_of_ne (sq_nonneg _) (Ne.symm (pow_ne_zero 2 (sub_ne_zero.mpr h)))
+
+/-- **An affine cycle is parabolic exactly when its slope product is one.** -/
+theorem isProjectiveParabolic_affineCycleMatrix_iff (l : List (ℝ × ℝ)) :
+    IsProjectiveParabolic (affineCycleMatrix l) ↔ affineCycleSlope l = 1 := by
+  rw [IsProjectiveParabolic, projectiveDiscriminant_affineCycleMatrix, pow_eq_zero_iff two_ne_zero,
+    sub_eq_zero]
+
+/-- **Periodic orbits of a hyperbolic affine cycle.** When the slope product is not `1` the cycle
+returns a seed to itself exactly at the composite's unique fixed point. -/
+theorem affineCycleStep_eq_self_iff_of_slope_ne_one {l : List (ℝ × ℝ)}
+    (hs : affineCycleSlope l ≠ 1) (x : ℝ) :
+    affineCycleStep l x = x ↔ x = affineFixedPoint (affineCycleSlope l) (affineCycleShift l) := by
+  have hne : (1 : ℝ) - affineCycleSlope l ≠ 0 := sub_ne_zero.mpr (Ne.symm hs)
+  rw [affineCycleStep_eq, affineStep_apply, affineFixedPoint]
+  constructor
+  · intro h
+    field_simp
+    linarith
+  · intro h
+    rw [h]
+    field_simp
+    ring
+
+/-- **Periodic orbits of a parabolic affine cycle.** When the slope product is `1` the cycle is a
+translation: it returns every seed if the shift vanishes, and none otherwise. -/
+theorem affineCycleStep_eq_self_iff_of_slope_one {l : List (ℝ × ℝ)}
+    (hs : affineCycleSlope l = 1) (x : ℝ) :
+    affineCycleStep l x = x ↔ affineCycleShift l = 0 := by
+  rw [affineCycleStep_eq, affineStep_apply, hs, one_mul]
+  constructor
+  · intro h; linarith
+  · intro h; rw [h, add_zero]
+
+/-- **The periodic seed of a hyperbolic cycle is fixed by every iterate**, so the orbit of the
+`n`-phase recurrence through it is genuinely periodic with period dividing the cycle length. -/
+theorem affineCycleStep_iterate_affineFixedPoint {l : List (ℝ × ℝ)}
+    (hs : affineCycleSlope l ≠ 1) (t : ℕ) :
+    (affineCycleStep l)^[t] (affineFixedPoint (affineCycleSlope l) (affineCycleShift l)) =
+      affineFixedPoint (affineCycleSlope l) (affineCycleShift l) :=
+  Function.iterate_fixed ((affineCycleStep_eq_self_iff_of_slope_ne_one hs _).2 rfl) t
 
 end DirectedTransport.InverseCoordinate
 
