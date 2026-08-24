@@ -104,10 +104,14 @@ This file develops the potential (subeigenvector) side of max-plus spectral
 theory.  The equality side is `DirectedTransport.Additive.Eigenvector`, and the
 attained cycle-mean characterization is `DirectedTransport.Additive.CycleMean`.
 
-Not developed anywhere yet: the critical graph as a subgraph in its own right,
-the description of the whole eigenspace, and the Kleene-star (all-pairs
-longest-walk) operator, of which `maxIncomingWeight` is one row.  The natural
-common setting for those is the fixed-point theory of topical maps.
+The critical graph as a subgraph in its own right, the description of the whole
+eigenspace, and the Kleene-star (all-pairs longest-walk) operator, of which
+`maxIncomingWeight` is one row by
+`DirectedTransport.MaxPlusPotential.isGreatest_range_maxRootedWeight`, are
+`DirectedTransport.Additive.CriticalGraph`.  Not developed anywhere yet: the
+strongly connected components of the critical graph and the resulting count of a
+minimal generating family of the eigenspace.  The natural common setting for
+those is the fixed-point theory of topical maps.
 
 ## References
 

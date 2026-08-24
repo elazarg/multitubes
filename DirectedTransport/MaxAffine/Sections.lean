@@ -64,10 +64,13 @@ settles them by a linear rather than a cyclewise test, and shows the cyclewise
 test of this file is not sufficient once slopes straddle one.  The fixed-point
 reading of a lax section, and the eigenvalue problem in the topical regime of
 unit-slope floorless labels, are settled in
-`DirectedTransport.MaxAffine.FixedPoint`.  What remains open is the eigenvalue
-problem for mixed slopes, where the vertex operator is monotone but not
-additively homogeneous, so the Perron--Frobenius theory of topical maps does not
-apply verbatim.
+`DirectedTransport.MaxAffine.FixedPoint`.  Mixed slopes below unit modulus are
+settled metrically in `DirectedTransport.MaxAffine.Contraction`, which also
+exhibits a strongly connected labelling with a negative slope and no
+eigenvector.  What remains open is the eigenvalue problem for nonnegative
+slopes straddling one, where the vertex operator is monotone but neither
+additively homogeneous nor contracting, so neither the Perron--Frobenius theory
+of topical maps nor Banach's theorem applies.
 
 ## References
 

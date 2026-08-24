@@ -90,7 +90,11 @@ section for mixed slopes; the sub-fixed-point theory of that case remains what
 ## TODO
 
 Eigenvectors of the vertex operator outside the translation regime, where additive homogeneity
-fails and the Perron--Frobenius theory of topical maps no longer applies verbatim.
+fails and the Perron--Frobenius theory of topical maps no longer applies verbatim.  Two pieces
+of that regime are settled in `DirectedTransport.MaxAffine.Contraction`: slopes below unit
+modulus, where the operator is a sup-norm contraction and every real number is an eigenvalue
+with exactly one eigenvector, and negative slopes, where a strongly connected two-vertex
+labelling has no eigenvector at all.  What is left is the nonnegative slopes straddling one.
 
 ## References
 

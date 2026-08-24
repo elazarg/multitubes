@@ -42,6 +42,7 @@ public import DirectedTransport.FiniteInequality.Sparse
 public import DirectedTransport.Additive.Circuits
 public import DirectedTransport.Additive.CirculationDecomposition
 public import DirectedTransport.Additive.Condensation
+public import DirectedTransport.Additive.CriticalGraph
 public import DirectedTransport.Additive.CycleMean
 public import DirectedTransport.Additive.Cycles
 public import DirectedTransport.Additive.Eigenvector
@@ -54,6 +55,7 @@ public import DirectedTransport.Additive.ShortCycles
 public import DirectedTransport.MaxAffine.Additive
 public import DirectedTransport.MaxAffine.Arithmetic
 public import DirectedTransport.MaxAffine.Basic
+public import DirectedTransport.MaxAffine.Contraction
 public import DirectedTransport.MaxAffine.CycleSlack
 public import DirectedTransport.MaxAffine.Duality
 public import DirectedTransport.MaxAffine.Farkas
