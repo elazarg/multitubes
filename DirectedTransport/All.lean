@@ -44,6 +44,7 @@ public import DirectedTransport.Additive.CirculationDecomposition
 public import DirectedTransport.Additive.Condensation
 public import DirectedTransport.Additive.CycleMean
 public import DirectedTransport.Additive.Cycles
+public import DirectedTransport.Additive.Eigenvector
 public import DirectedTransport.Additive.Exact
 public import DirectedTransport.Additive.Potentials
 public import DirectedTransport.Additive.Quantitative
