@@ -1,7 +1,8 @@
 # Upstream plan
 
-Proposal, 2026-08-24. Revised 2026-08-24 after `LinearAlgebra/Duality.lean` and Gordan's
-transposition theorem landed. Scoping note only — no migration is proposed as done.
+Proposal, 2026-08-24. Revised after `LinearAlgebra/Duality.lean` and Gordan's transposition
+theorem landed, and again after the scalar split of `StandardForm.lean` landed (`c139fba`).
+Scoping note only — no migration to mathlib is proposed as done.
 
 Method copied from `kraft`'s `UpstreamPlan.md`, whose evidence base is a real mathlib PR review
 ([#34108](https://github.com/leanprover-community/mathlib4/pull/34108)) of this author's own
@@ -39,14 +40,18 @@ The candidate is ~1500 lines of general LP content across four scalar-stratified
 | Item | First draft | Now |
 |---|---|---|
 | Gordan | PR 2, ~80 lines to write | **Written and compiling** as `exists_rowEval_pos_iff_not_hasBalancedCertificate`, with `HasBalancedCertificate` **[V]**. Statement-based name, docstringed "**Gordan's transposition theorem**" — the collision in §5(h) was handled correctly. |
-| LP duality | Absent; noted only as mathlib's TODO | **`Duality.lean`, 513 lines** **[V]**, over `𝕜`. Two more TODO bullets answered. |
-| Mining 1.3 (general-`𝕜` route) | Inspection-only **[B]**, flagged as the plan's main retreat risk | **Build-tested for the duality half** **[V]**. The risk is materially reduced. |
-| `FourierMotzkin.lean` | 622 lines | 685 lines (Gordan) **[V]** |
-| Total candidate | ~1350 lines | ~1920 lines **[V]** |
+| LP duality | Absent; noted only as mathlib's TODO | **`Duality.lean`, 499 lines** **[V]**, over `𝕜` with no `ℝ` at all. Two more TODO bullets answered. |
+| Mining 1.3 (general-`𝕜` route) | Inspection-only **[B]**, flagged as the plan's main retreat risk | **Done and build-tested throughout** **[V]**. Risk retired — see §5(c). |
+| The scalar split of `StandardForm.lean` | Specified as the largest remaining technical risk | **Landed in `c139fba`** **[V]**. Only two declarations still need `ℝ`. |
+| Extreme points ⇔ basic feasible solutions over `𝕜` | **[B]**, "may have to stay over `ℝ`" | **[V]** — generalized, and it went through |
+| `IsStandardFeasible` / `standardFeasibleSet` duplication | Identified as the strongest available objection to the series | **Gone.** `IsStandardFeasible` deleted **[V]** |
+| `FourierMotzkin.lean` | 622 lines | 690 lines (Gordan) **[V]** |
+| Total candidate | ~1350 lines | ~1933 lines **[V]** |
 
-Nothing in the old plan turned out *wrong*. Two things are now weaker than stated, and both are
-recorded honestly below: §5(b)'s worry about the algebraic/topological split has changed shape
-rather than gone away (§5(c)), and the six-PR sequence undercounted the work.
+Nothing in either earlier draft turned out *wrong*. The one place the plan was too pessimistic is
+now corrected: §5(c)'s `[B]`-graded worry that the extreme-point block might be stuck over `ℝ` did
+not materialize. The one place it was too optimistic stands uncorrected: the PR sequence has grown
+from six to eight, and the total roughly doubled.
 
 ## 1. What exactly ships
 
@@ -68,14 +73,15 @@ Stated over `{𝕜} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]`,
 Stiemke, Ville and Motzkin's transposition theorem remain unattempted (`Mining.md` 3.2, SKETCH,
 **[B]**) — same shape via block right-hand sides `(1, 0)`. List as follow-ups; do not promise.
 
-### Ships — `Duality.lean` (513 lines), arbitrary linearly ordered field
+### Ships — `Duality.lean` (499 lines), arbitrary linearly ordered field
 
-The new material, and the most immediately *wanted* file in the candidate. Also `𝕜`-general
-throughout, with only the last two corollaries over `ℝ` **[V]**.
+The most immediately *wanted* file in the candidate. `𝕜`-general throughout **[V]** — and now
+uniformly so: since `standardFeasibleSet` generalized, the `ℝ`-only transfer section and its
+`Iff.rfl` bridge are gone, and primal feasibility is spelled `z ∈ standardFeasibleSet A rhs`
+everywhere **[V]**.
 
 | Declaration | What it states |
 |---|---|
-| `IsStandardFeasible` | `0 ≤ z ∧ A *ᵥ z = rhs` over `𝕜`. **See §5(c) — this must not ship alongside `standardFeasibleSet`** |
 | `IsDualFeasible` | `Aᵀ *ᵥ y ≥ c`, no sign constraint on `y` |
 | `sum_dual_eq_of_isStandardFeasible` | the objective expanded through the equality constraint |
 | **`objective_le_of_isDualFeasible`** | **weak duality** |
@@ -85,7 +91,7 @@ throughout, with only the last two corollaries over `ℝ` **[V]**.
 | `ComplementarySlackness`, `complementarySlackness_iff_forall_ne_zero` | the relation, and its support form |
 | **`complementarySlackness_iff_objective_eq`** | complementary slackness ⇔ zero duality gap |
 | `forall_le_of_complementarySlackness`, `exists_isDualFeasible_complementarySlackness_of_forall_le` | complementary slackness is exactly a certificate of optimality |
-| `mem_standardFeasibleSet_iff_isStandardFeasible`, `isStandardOptimal_of_complementarySlackness`, `exists_isDualFeasible_complementarySlackness_of_standardOptimal` | the `ℝ` transfer |
+| `isStandardOptimal_of_complementarySlackness`, `exists_isDualFeasible_complementarySlackness_of_standardOptimal` | optimality in the sense of `IsStandardOptimal`: complementary slackness certifies it, and every optimum carries such a certificate. Over `𝕜` **[V]** |
 
 Two design choices are worth defending explicitly in the PR description, because both are
 unusual and both are *right*:
@@ -101,28 +107,38 @@ unusual and both are *right*:
   primal attains none **[V, the file says so]**. Pre-empt this; it looks like a wart until
   explained.
 
-### Ships — `StandardForm.lean` (597 lines), split by scalar regime
+### Ships — `StandardForm.lean` (619 lines), already split by scalar regime
 
-*Algebraic — should be generalized to `𝕜` before shipping (§5(c)):* `standardFeasibleSet` and its
-unfolding lemmas, `convex_standardFeasibleSet`, `IsStandardCertificate`,
+The split is no longer a proposal. It is a fact about the file **[V, read against `c139fba`]**,
+and the algebraic side turned out **larger** than the first draft scoped: the entire extreme-point
+theory generalized, which the plan had graded **[B]** and flagged as the one block that might be
+stuck over `ℝ`.
+
+*Over `𝕜` — `[Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]`, `[Fintype Col]` **[V]**:*
+`standardFeasibleSet` and its unfolding lemmas (`mem_`, `nonneg_of_mem_`,
+`mulVec_apply_of_mem_`), `convex_standardFeasibleSet`, `IsStandardCertificate`,
 `not_isStandardCertificate_of_mem_standardFeasibleSet`,
 **`exists_isStandardCertificate_of_not_nonempty`** (Farkas in standard form, hard direction —
-reduces to `theorem_of_alternative` plus a division by the positive mass `t`, nothing topological
-**[V]**), `not_nonempty_standardFeasibleSet_iff`, `nonempty_standardFeasibleSet_iff`,
-`IsStandardOptimal`.
-
-*Genuinely real:* `isClosed_standardFeasibleSet` (topology **[V]**),
-`finiteDotContinuousLinearMap` (+`_apply`), and
-**`exists_extreme_standardOptimal_of_standardOptimal`** — every attained linear optimum is
-attained at an extreme point, *with no boundedness hypothesis*, via the exposed optimal face,
-minimum total mass, and Krein–Milman **[V]**.
-
-*In between — order-algebraic argument, generality of mathlib's convexity API over `𝕜` still
-unchecked **[B]**:* `mulVec_eq_sum_supportColumns`, `eq_zero_of_extreme_standardFeasible`,
+reduces to `theorem_of_alternative` plus a division by the positive mass `t`, nothing topological),
+`not_nonempty_standardFeasibleSet_iff`, `nonempty_standardFeasibleSet_iff`, `IsStandardOptimal`,
+**and the whole basic-feasible-solution block**: `mulVec_eq_sum_supportColumns`,
+`eq_zero_of_extreme_standardFeasible`,
 `linearIndependent_supportColumns_of_extreme_standardFeasible`,
 `mem_extremePoints_standardFeasibleSet_of_linearIndependent`,
-**`mem_extremePoints_standardFeasibleSet_iff`** (extreme points *are* basic feasible solutions)
-and **`card_support_le_of_extreme_standardFeasible`** (support bounded by `Fintype.card Row`).
+**`mem_extremePoints_standardFeasibleSet_iff`** (extreme points *are* basic feasible solutions, now
+`(standardFeasibleSet A rhs).extremePoints 𝕜 ↔ … LinearIndependent 𝕜 …`) and
+**`card_support_le_of_extreme_standardFeasible`** (support bounded by `Fintype.card Row`, via
+`fintype_card_le_finrank` over `𝕜`).
+
+*Genuinely real — exactly two theorems plus one definition **[V]**:*
+`isClosed_standardFeasibleSet` (topology), `finiteDotContinuousLinearMap` (+`_apply`, which is
+continuous-linear-map API and real by construction), and
+**`exists_extreme_standardOptimal_of_standardOptimal`** — every attained linear optimum is
+attained at an extreme point, *with no boundedness hypothesis*, via the exposed optimal face,
+minimum total mass, and Krein–Milman.
+
+That two-declaration residue is the cleanest possible outcome for the upstream split: the
+`ℝ`-and-topology file is small enough that it plausibly reviews in a single sitting.
 
 ### Does not ship
 
@@ -146,11 +162,21 @@ NormalizedFarkas.lean  -> StandardForm only
 **Nothing reaches back into directed-transport.** In Lean a file cannot use what it does not
 import, so the import list is proof. No blocker.
 
-One note for §5(c): `Duality.lean` takes a **public** import of `StandardForm.lean`, and
-`StandardForm.lean` is where the topology (`KreinMilman`, `ContinuousLinearMap.PiProd`,
-`FiniteDimensional.Lemmas`) enters **[V]**. So the `𝕜`-general duality theory currently sits
-downstream of Krein–Milman by import even though it uses none of it. That is exactly the import
-shape `dupuisf` objected to in #34108, and it is a second, independent reason to do the split.
+**Re-verified after `c139fba`: the import shape is unchanged, and the note still stands.**
+`Duality.lean` still takes a **public** import of `StandardForm.lean`, and `StandardForm.lean`
+still imports `Mathlib.Analysis.Convex.KreinMilman`,
+`Mathlib.Topology.Algebra.Module.ContinuousLinearMap.PiProd`, `Mathlib.Data.Real.Basic` and
+`Mathlib.LinearAlgebra.FiniteDimensional.Lemmas` **[V]**. So `𝕜`-general duality still sits
+downstream of Krein–Milman by import while using none of it — exactly the shape `dupuisf`
+objected to in #34108.
+
+**But the fix has changed character, and is now trivial.** Before the merge this needed the
+generalization work; now the scalar boundary runs *inside* `StandardForm.lean` as a section
+boundary, with only two theorems and one definition on the real side (§1). So the remaining step
+is a pure file split at upstream time — no proof changes — after which PR 4 (duality) imports the
+algebraic file only and its import closure contains no topology at all. This is now bookkeeping in
+the sequencing (§6), not a technical risk. It is worth stating in the PR description that the
+algebraic file has no topological dependency, because that is the kind of claim `dupuisf` checks.
 
 ## 3. What mathlib already has
 
@@ -219,7 +245,8 @@ Root namespace `DirectedTransport.LinearAlgebra` is dropped.
 | Gordan (later Stiemke/Ville/Motzkin) | `Mathlib/LinearAlgebra/Matrix/Farkas/Transposition.lean` | `Matrix` |
 | Standard-form fiber + Farkas in standard form, over `𝕜` | `Mathlib/LinearAlgebra/Matrix/Farkas/StandardForm.lean` | `Matrix` |
 | Weak/strong duality, dual attainment, complementary slackness, over `𝕜` | `Mathlib/LinearAlgebra/Matrix/LinearProgramming/Duality.lean` | `Matrix` |
-| Closedness, extreme points = BFS, sparsity, attainment, over `ℝ` | `Mathlib/Analysis/Convex/Polyhedron/StandardForm.lean` | `Matrix` |
+| Extreme points = BFS, sparsity, over `𝕜` | `Mathlib/LinearAlgebra/Matrix/Farkas/BasicFeasible.lean` | `Matrix` |
+| Closedness and Krein–Milman attainment, over `ℝ` | `Mathlib/Analysis/Convex/Polyhedron/StandardForm.lean` | `Matrix` |
 
 `Matrix` follows the convention `Matrix.IsTotallyUnimodular` establishes: predicates on a matrix
 live in `Matrix`, used with dot notation — `A.standardFeasibleSet rhs`,
@@ -247,37 +274,49 @@ reasoning applies to columns. Small (a re-indexing wrapper), and now *required* 
 merely desirable: `StandardForm` and `Duality` are both stated over an abstract `Col` **[V]**,
 so without this the two halves of the candidate do not meet.
 
-**(c) The scalar split — VERDICT: still necessary, but cheaper, better motivated, and no longer
-the plan's main risk.** The team lead's reading was that `Duality.lean` living in its own
-general-field file may make the `StandardForm.lean` split unnecessary. Having read the files: it
-does not, and it has in fact created a new reason to do it. Plainly:
+**(c) The scalar split — DONE (`c139fba`). Risk retired.** This item was the plan's largest
+remaining technical risk across two drafts. It has landed, and it landed better than the plan
+predicted. Recording the reasoning as well as the outcome, because a mathlib reviewer reading this
+plan should see *why* it had to happen — the argument is the same one they would have made.
 
-1. **The generality claim is now verified where it matters.** `Duality.lean` proves weak duality,
-   strong duality, dual attainment and complementary slackness over `𝕜` and *compiles* **[V]**.
-   `Mining.md` 1.3 was inspection-only; the duality half is now build-tested. The retreat risk
-   in the first draft was overstated and should be downgraded.
-2. **But `Duality.lean` bought that generality by defining a second feasibility predicate.** It
-   introduces `IsStandardFeasible A rhs z : Prop` over `𝕜` **[V]**, whose relation to the existing
-   `standardFeasibleSet A rhs : Set (Col → ℝ)` is `mem_standardFeasibleSet_iff_isStandardFeasible
-   := Iff.rfl` **[V]**. Two names for one notion, definitionally equal, differing only in scalars
-   and in `Set` versus `Prop`. **This is precisely the "why do we need both" objection #34108
-   raised** **[V, from `kraft`'s record]**, and shipping both would invite it in the strongest
-   possible form — the `Iff.rfl` is itself the evidence that they are the same thing.
-3. **So the split is not avoided; it has been deferred into a duplication.** The upstream fix is
-   the one the first draft proposed, and it is now a *smaller* job than it was: generalize
-   `standardFeasibleSet` and `IsStandardOptimal` to `𝕜` in place — their definitions need only
-   `[Fintype Col]` and the ordered field **[V]** — let the genuinely real theorems keep `ℝ`, and
-   then **delete `IsStandardFeasible` entirely**, because `z ∈ A.standardFeasibleSet rhs` already
-   says it. `Duality.lean`'s `Iff.rfl` bridge is proof that this substitution is sound.
-4. **Independently, the import shape forces it anyway.** §2: `Duality.lean` publicly imports
-   `StandardForm.lean`, so `𝕜`-general duality currently sits downstream of Krein–Milman by
-   import while using none of it **[V]**.
+*Why it had to happen.* `Duality.lean` originally bought its `𝕜`-generality by defining a second
+feasibility predicate, `IsStandardFeasible A rhs z : Prop` over `𝕜`, whose relation to the
+existing `standardFeasibleSet A rhs : Set (Col → ℝ)` was
+`mem_standardFeasibleSet_iff_isStandardFeasible := Iff.rfl`. Two names for one notion,
+definitionally equal, differing only in scalars and in `Set` versus `Prop`. That is precisely the
+"why do we need both" objection #34108 raised **[V, from `kraft`'s record]**, and it would have
+arrived in its strongest possible form, since the `Iff.rfl` is itself the proof that the two are
+the same thing. The fix was not to justify the pair but to remove the need for it: generalize the
+`Set` and let the `Prop` go.
 
-Net: this item moves from "the plan's biggest technical risk" to "a known, bounded refactor with a
-worked precedent." That is a real improvement, and the credit belongs to `Duality.lean`. The one
-piece still genuinely unverified **[B]** is whether the extreme-point ⇔ BFS block generalizes —
-it leans on mathlib's convexity API at a generality nobody has checked. That block, and only that
-block, may have to stay over `ℝ`.
+*What landed **[V, verified against the merged files]**:*
+
+1. `standardFeasibleSet`, `IsStandardOptimal`, `IsStandardCertificate`, the unfolding lemmas,
+   `convex_standardFeasibleSet` and both directions of standard-form Farkas are over `𝕜`, needing
+   only `[Fintype Col]` and `[Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]`.
+2. **The extreme-point ⇔ basic-feasible-solution block generalized too** — the item this plan
+   graded **[B]** and named as the one place it might have to retreat to `ℝ`.
+   `mem_extremePoints_standardFeasibleSet_iff`,
+   `linearIndependent_supportColumns_of_extreme_standardFeasible`,
+   `eq_zero_of_extreme_standardFeasible`, `mulVec_eq_sum_supportColumns` and
+   `card_support_le_of_extreme_standardFeasible` are all over `𝕜`. mathlib's convexity API was
+   general enough after all; `card_support_le_…` now goes through `fintype_card_le_finrank` at
+   `(R := 𝕜) (M := Row → 𝕜)`. **Upgrade to [V].**
+3. Only `isClosed_standardFeasibleSet` and `exists_extreme_standardOptimal_of_standardOptimal`
+   still require `ℝ`, plus `finiteDotContinuousLinearMap` and its `_apply`, which are
+   continuous-linear-map API.
+4. `IsStandardFeasible` is deleted, its 19 uses in `Duality.lean` replaced by
+   `z ∈ standardFeasibleSet A rhs`, and the `Iff.rfl` bridge is gone with it. `Duality.lean` now
+   contains no `ℝ` at all **[V]**.
+5. Nothing outside `DirectedTransport/LinearAlgebra/` needed touching.
+
+*What this buys upstream.* The strongest available objection to the series is gone rather than
+answered. The `ℝ`-and-topology residue is two theorems, which makes the real-scalar PR small
+enough to review in one sitting (§6, PR 6/8). And the dependency order improved: PR 7 no longer
+needs PR 6 (§6). The only thing left is the file split itself, which is now bookkeeping — see §2.
+
+Net: this item moves from "the plan's biggest technical risk" to "done, verified, and no longer a
+line item." Nothing in (c) remains **[B]**.
 
 **(d) Add the bridge to mathlib's existing cone API — do this, do not skip it.** Direct transfer
 of `kraft`'s most valuable review lesson: the `klFin`/`klDiv` compatibility lemma turned "here is
@@ -294,8 +333,9 @@ where sums and cardinality are needed. `standardFeasibleSet : Set (Col → ℝ)`
 **[V]**. Two fixes: `card_support_le_of_extreme_standardFeasible` is stated as
 `Fintype.card {j : Col // z j ≠ 0} ≤ Fintype.card Row` **[V]** where mathlib would use
 `Function.support z` with `Set.ncard` (or a `Finset` under `DecidableEq`) — probably offer both.
-And per (c), prefer the `Set` membership `z ∈ A.standardFeasibleSet rhs` over the `Prop`-valued
-`IsStandardFeasible` at the public boundary.
+The second — preferring the `Set` membership `z ∈ standardFeasibleSet A rhs` over a `Prop`-valued
+feasibility predicate at the public boundary — is **done** as part of (c) **[V]**, and is the
+shape `dupuisf` asked for.
 
 **(f) Naming.** `theorem_of_alternative` is not a mathlib name — it describes the theorem instead
 of stating it. Mathlib would want `Matrix.not_isFeasible_iff_hasCertificate` (or
@@ -333,9 +373,22 @@ Whoever runs the PRs should read this table before naming anything.
 
 ## 6. Sequencing and size
 
-Line estimates are *post-rework* (after (a)–(c)). #34108 took a month of back-and-forth for ~400
-lines **[V, from `kraft`'s record]** — that is the calibration. The first draft's six-PR sequence
-undercounted; this is seven, and the total roughly doubled.
+Line estimates are *post-rework* (after (a) and (b); (c) is done, so its share is now real line
+counts rather than estimates). #34108 took a month of back-and-forth for ~400 lines **[V, from
+`kraft`'s record]** — that is the calibration.
+
+Two things changed here with `c139fba`. PR 3 no longer carries the generalization as prerequisite
+work — it ships the file as it stands. And **the dependency order genuinely improved**: PR 7
+(basic feasible solutions) no longer needs PR 6 (closedness), because it no longer needs `ℝ` at
+all. That converts the sequence from one long chain into two tracks that fork after PR 3, with
+only the final PR needing both.
+
+```
+PR 1 -> PR 2
+  \--> PR 3 --> PR 4 --> PR 5          (algebraic track, all over 𝕜)
+        |  \--> PR 7 -------\
+        \----> PR 6 ---------> PR 8    (real track, topology only)
+```
 
 **PR 1 — FM elimination and the theorem of the alternative.** ~450 lines, no prerequisites.
 The primal/certificate definitions, `feas_cert_disjoint`, the reduced system, both
@@ -349,10 +402,13 @@ already** **[V]** — this is now a packaging job, not a proof job. Cheap, class
 independently notable, and it demonstrates that PR 1's statement is the usable form. Add the
 disclaiming docstring line per §5(h) before opening.
 
-**PR 3 — Farkas in standard form, over `𝕜`.** ~230 lines. Needs PR 1 and (b). `standardFeasibleSet`
-generalized to `𝕜`, its unfolding lemmas, convexity, `IsStandardCertificate`, both directions,
-both `iff` forms. Self-contained narrative ("the other classical statement of Farkas"), and the
-point at which §5(d)'s bridge lemma should be attempted if at all.
+**PR 3 — Farkas in standard form, over `𝕜`.** ~200 lines. Needs PR 1 and (b). `standardFeasibleSet`,
+its unfolding lemmas, convexity, `IsStandardCertificate`, both directions, both `iff` forms, and
+`IsStandardOptimal`. **Already over `𝕜` [V]** — the generalization that was this PR's prerequisite
+is done, so this is now an extraction, not a rewrite. Self-contained narrative ("the other
+classical statement of Farkas"), and the point at which §5(d)'s bridge lemma should be attempted
+if at all. This PR is the fork point of the sequence: PRs 4 and 6/7 all descend from it and are
+independent of each other.
 
 **PR 4 — LP duality: weak, strong, dual attainment.** ~330 lines. Needs PR 3. `IsDualFeasible`,
 `sum_dual_eq_of_isStandardFeasible`, weak duality, `exists_scaledDual_of_not_exists_objective_ge`,
@@ -360,20 +416,23 @@ both strong-duality forms, dual attainment. **This is the PR to lead the series'
 — it answers two of mathlib's four TODO bullets by name, and "mathlib has no LP duality at all" is
 a one-sentence justification no reviewer will dispute. The two design choices flagged in §1
 (threshold form; the feasibility conjunct) belong in the PR description, not discovered in review.
-Note it depends on PR 3 only through `standardFeasibleSet`; if (c) is done properly there is no
-topology anywhere in its import closure **[V, after the refactor]**.
+It depends on PR 3 only through `standardFeasibleSet`, and after the file split of §2 there is no
+topology anywhere in its import closure — the file itself now contains no `ℝ` at all **[V]**.
 
 **PR 5 — complementary slackness.** ~180 lines. Needs PR 4. The relation, its support form,
-`complementarySlackness_iff_objective_eq`, and the two directions making it a certificate of
-optimality. Separable from PR 4 with a clean narrative of its own, and small enough to review
-fast. Split it out rather than shipping a 510-line duality PR.
+`complementarySlackness_iff_objective_eq`, the two directions making it a certificate of
+optimality, and the two `IsStandardOptimal` corollaries (over `𝕜` now, not `ℝ` **[V]**). Separable
+from PR 4 with a clean narrative of its own, and small enough to review fast. Split it out rather
+than shipping a ~500-line duality PR.
 
-**PR 6 — the standard-form fiber is a closed convex set.** ~90 lines. Needs PR 3. First `ℝ`-only
-PR, first to import topology. Tiny, and worth keeping separate precisely so that it, not PR 3 or
-PR 4, carries the topology imports.
+**PR 6 — the standard-form fiber is closed.** ~60 lines. Needs PR 3. `isClosed_standardFeasibleSet`
+and `finiteDotContinuousLinearMap` (+`_apply`). First and only real-scalar infrastructure PR, and
+smaller than the first draft estimated, since convexity went with PR 3. Worth keeping separate
+precisely so that it, and nothing earlier, carries the topology imports.
 
-**PR 7 — basic feasible solutions are the extreme points.** ~230 lines. Needs PR 3 (and PR 6 if
-(c) retreats to `ℝ` here — the one place it might, §5(c)). Both directions, the `iff`, and the
+**PR 7 — basic feasible solutions are the extreme points.** ~230 lines. Needs **PR 3 only** — the
+dependency on PR 6 is gone, since the whole block generalized to `𝕜` **[V, §5(c)]**. Both
+directions, the `iff`, and the
 sparsity corollary. Coherent as one concept; resist splitting, fallback seam is the `iff` versus
 the sparsity corollary.
 
@@ -386,15 +445,18 @@ exposed-face / minimum-mass construction carefully; budget more than the line co
 |---|---|---|---|---|
 | 1 | FM elimination + theorem of the alternative | ~450 | — | `𝕜` |
 | 2 | Gordan (written) | ~80 | 1 | `𝕜` |
-| 3 | Farkas, standard form | ~230 | 1 | `𝕜` |
-| 4 | Weak + strong duality, dual attainment | ~330 | 3 | `𝕜` |
+| 3 | Farkas, standard form | ~200 | 1 | `𝕜` |
+| 4 | Weak + strong duality, dual attainment | ~320 | 3 | `𝕜` |
 | 5 | Complementary slackness | ~180 | 4 | `𝕜` |
-| 6 | Standard fiber is closed | ~90 | 3 | `ℝ` |
-| 7 | Extreme points = basic feasible solutions, sparsity | ~230 | 3 (6) | `𝕜`? |
+| 6 | Standard fiber is closed | ~60 | 3 | `ℝ` |
+| 7 | Extreme points = basic feasible solutions, sparsity | ~230 | **3** | **`𝕜`** |
 | 8 | Optimum attained at an extreme point | ~120 | 6, 7 | `ℝ` |
 
-PRs 6-8 form an independent `ℝ`/topology track that can run in parallel with PRs 4-5 under a
-different reviewer, once PR 3 lands. Not proposed: `NormalizedFarkas.lean` (§1), and §7.
+Once PR 3 lands, three things can run in parallel under different reviewers: PRs 4-5 (duality),
+PR 7 (basic feasible solutions), and PR 6. Only PR 8 needs two inputs. Six of the eight PRs are
+now entirely over `𝕜` and free of topology — worth saying out loud in the series description,
+since import weight is what `dupuisf` reviewed on. Not proposed: `NormalizedFarkas.lean` (§1),
+and §7.
 
 ## 7. Secondary candidates
 
@@ -446,21 +508,22 @@ The remaining prerequisite-layer files (`Circulation`, `TransferSummary`, `Charg
 
 ## Summary
 
-- **Is there a PR?** Yes, and a stronger one than the first draft assessed. The candidate is now
-  ~1920 lines covering the theorem of the alternative, Gordan, standard-form Farkas, full LP
-  duality with complementary slackness, and extreme-point theory — the first four over an
-  arbitrary linearly ordered field.
+- **Is there a PR?** Yes, and a stronger one than either earlier draft assessed. The candidate is
+  ~1933 lines covering the theorem of the alternative, Gordan, standard-form Farkas, full LP
+  duality with complementary slackness, and extreme-point theory — **all of it over an arbitrary
+  linearly ordered field except two theorems** (`isClosed_standardFeasibleSet` and the
+  Krein–Milman attainment result) **[V]**.
 - **Strongest argument.** mathlib's `ProperCone` TODO asks for primal/dual cone programs, weak
   duality, strong duality, and linear programs with LP duality. This library answers the last
   three for LP. And mathlib's only "Farkas' lemma" is a Hahn–Banach separation statement over `ℝ`
   that cannot give the finite matrix theorem over `𝕜`. Sharpest single fact: **complementary
   slackness does not occur anywhere in mathlib, in any spelling.**
-- **Biggest blocker.** Not dependencies — the boundary is clean. It is the pre-submission rework:
-  restating `FourierMotzkin.lean` in `Matrix`/`mulVec`, generalizing the column index, and
-  generalizing `standardFeasibleSet`/`IsStandardOptimal` to `𝕜` so `IsStandardFeasible` can be
-  deleted rather than shipped beside them. Behind that sits the strategic risk that a reviewer
-  asks for integration with `PointedCone`/`DualFG` rather than a parallel development — §5(d)
-  proposes pre-empting it.
+- **Biggest blocker.** Smaller than it was. Not dependencies — the boundary is clean; and no
+  longer the scalar split, which has landed (§5(c)). What remains is the pre-submission rework of
+  `FourierMotzkin.lean`: restating it in `Matrix`/`mulVec` (§5(a)) and generalizing the column
+  index off `Fin n` (§5(b)). Both are mechanical and confined to one file. Behind that sits the
+  one strategic risk left: a reviewer asking for integration with `PointedCone`/`DualFG` rather
+  than a parallel development — §5(d) proposes pre-empting it.
 - **First PR.** PR 1: Fourier–Motzkin elimination and the theorem of the alternative, ~450 lines,
   `Mathlib/LinearAlgebra/Matrix/Farkas/FourierMotzkin.lean`. PR 4 (duality) is the one to lead the
   series' *publicity* with, but it cannot go first.
