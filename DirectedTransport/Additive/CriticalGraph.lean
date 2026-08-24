@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import DirectedTransport.Additive.Eigenvector
+public import DirectedTransport.SCC
 
 import Mathlib.Tactic.Linarith
 
@@ -51,6 +52,9 @@ each critical column is itself an eigenvector.
 * `DirectedTransport.MaxPlusPotential.IsGraphEigenvector`: the max-plus eigenvalue equation on a
   weighted digraph, namely the subeigenvector inequality together with an incoming tight edge at
   every vertex.
+* `DirectedTransport.MaxPlusPotential.CriticalClass`,
+  `DirectedTransport.MaxPlusPotential.toCriticalClass`: the critical classes, that is the strongly
+  connected components of the critical graph, and the class of a vertex.
 
 ## Main results
 
@@ -72,6 +76,14 @@ each critical column is itself an eigenvector.
   coefficients; with finitely many vertices and edges and no further hypothesis.
 * `DirectedTransport.MaxPlusPotential.isGreatest_criticalColumns_matrix`: the same for a max-plus
   matrix, where the reachability side conditions are automatic.
+* `DirectedTransport.MaxPlusPotential.isCriticalVertex_of_toCriticalClass_eq`: criticality is a
+  property of a whole critical class.
+* `DirectedTransport.MaxPlusPotential.maxRootedWeight_eq_add_of_toCriticalClass_eq`: **two
+  Kleene-star columns rooted in the same critical class differ by a constant**, namely by
+  `DirectedTransport.MaxPlusPotential.maxRootedWeight_add_maxRootedWeight_eq_zero`, the Kleene-star
+  entry between the two roots.
+* `DirectedTransport.MaxPlusPotential.isGreatest_criticalClassColumns`: **one column per critical
+  class suffices** to express every eigenvector.
 
 ## Implementation notes
 
@@ -92,6 +104,23 @@ the side condition `Nonempty (G.Walk base vertex)` attached to a Kleene-star ent
 keeps `DirectedTransport.MaxPlusPotential.maxRootedWeight` away from its junk value; the critical
 vertex produced by the backward tight walk always satisfies it, so the description is a genuine
 `IsGreatest` and not a conditional one.
+
+`DirectedTransport.MaxPlusPotential.CriticalClass` is `DirectedTransport.SCC` of the critical
+graph, so the reachability order on classes and the acyclicity of their condensation come with it
+and mutual reachability inside the critical graph is not redefined here.
+
+The generating family indexed by the critical classes is proved *sufficient*: a set of critical
+vertices meeting every critical class already expresses every eigenvector.  Minimality of that
+family, meaning that no smaller one generates, is a different statement and is not proved.  Its
+usual proof exhibits, for each class, the column rooted there as an eigenvector that the other
+columns do not dominate; the first half of that already fails at this generality, since
+`DirectedTransport.MaxPlusPotential.isGraphEigenvector_maxRootedWeight` needs every vertex to be
+reachable from the root, which without irreducibility no critical vertex need satisfy.
+
+## TODO
+
+Minimality of the generating family indexed by the critical classes, which needs a hypothesis
+making the critical roots reach the whole graph.
 
 ## References
 
@@ -562,6 +591,164 @@ theorem isGreatest_criticalColumns [Fintype V] [Finite E] {weight : E → 𝕜} 
     linarith
   · rintro r ⟨root, -, hroot, rfl⟩
     exact add_maxRootedWeight_le hφ hroot
+
+/-! ### The critical classes -/
+
+section CriticalClass
+
+variable [Finite E]
+
+/-- The **critical classes**: the strongly connected components of the critical graph.  This is
+`DirectedTransport.SCC` of `DirectedTransport.MaxPlusPotential.criticalGraph`, so it carries the
+reachability partial order of the components and the acyclicity of their condensation. -/
+def CriticalClass (G : EdgeGraph V E) (weight : E → 𝕜) (lam : 𝕜) : Type uV :=
+  SCC (criticalGraph G weight lam)
+
+instance CriticalClass.instPartialOrder {weight : E → 𝕜} {lam : 𝕜} :
+    PartialOrder (CriticalClass G weight lam) :=
+  inferInstanceAs (PartialOrder (SCC (criticalGraph G weight lam)))
+
+/-- The critical class of a vertex. -/
+def toCriticalClass (G : EdgeGraph V E) (weight : E → 𝕜) (lam : 𝕜) (vertex : V) :
+    CriticalClass G weight lam :=
+  toSCC (criticalGraph G weight lam) vertex
+
+omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] [Finite E] in
+/-- Two vertices lie in the same critical class exactly when each is reachable from the other by
+a walk of the critical graph. -/
+theorem toCriticalClass_eq_iff {weight : E → 𝕜} {lam : 𝕜} {base base' : V} :
+    toCriticalClass G weight lam base = toCriticalClass G weight lam base' ↔
+      LinkedTo (criticalGraph G weight lam) base base' :=
+  toSCC_eq_toSCC_iff_linkedTo
+
+/-- Criticality is a property of the whole class: a vertex in the class of a critical vertex is
+itself critical, since joining the two connecting walks of the critical graph produces a nonempty
+closed walk of the critical graph, whose mean is exactly `lam`. -/
+theorem isCriticalVertex_of_toCriticalClass_eq {weight : E → 𝕜} {lam : 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      walkWeight weight cycle ≤ cycle.length * lam)
+    {base base' : V} (hbase : IsCriticalVertex G weight lam base)
+    (hclass : toCriticalClass G weight lam base = toCriticalClass G weight lam base') :
+    IsCriticalVertex G weight lam base' := by
+  obtain ⟨⟨forward⟩, ⟨backward⟩⟩ := toCriticalClass_eq_iff.1 hclass
+  rcases Nat.eq_zero_or_pos (backward.append forward).length with hlen | hlen
+  · rw [EdgeGraph.Walk.length_append] at hlen
+    obtain rfl : base' = base := backward.eq_of_length_eq_zero (by omega)
+    exact hbase
+  · exact isCriticalVertex_of_criticalGraph_closedWalk hcyc (backward.append forward) hlen
+
+/-- **The two Kleene-star entries between vertices of one critical class are opposite.**  A walk
+of the critical graph from one to the other and back is a closed walk of the critical graph, so its
+shifted weight is zero; that bounds the sum of the two entries from below, while the triangle
+inequality and the vanishing diagonal bound it from above. -/
+theorem maxRootedWeight_add_maxRootedWeight_eq_zero {weight : E → 𝕜} {lam : 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      walkWeight weight cycle ≤ cycle.length * lam)
+    {base base' : V}
+    (hclass : toCriticalClass G weight lam base = toCriticalClass G weight lam base') :
+    maxRootedWeight G (fun e => weight e - lam) base base'
+      + maxRootedWeight G (fun e => weight e - lam) base' base = 0 := by
+  have hshift : ∀ (v : V) (c : G.Walk v v), walkWeight (fun e => weight e - lam) c ≤ 0 := by
+    intro v c
+    rw [walkWeight_sub_const]
+    linarith [hcyc v c]
+  obtain ⟨⟨forward⟩, ⟨backward⟩⟩ := toCriticalClass_eq_iff.1 hclass
+  set first := liftCriticalWalk forward with hfirst
+  set second := liftCriticalWalk backward with hsecond
+  have hedges : (liftCriticalWalk (forward.append backward)).edges
+      = first.edges ++ second.edges := by
+    rw [hfirst, hsecond, edges_liftCriticalWalk, edges_liftCriticalWalk, edges_liftCriticalWalk,
+      EdgeGraph.Walk.edges_append, List.map_append]
+  have hsplit : walkWeight (fun e => weight e - lam) (liftCriticalWalk (forward.append backward))
+      = walkWeight (fun e => weight e - lam) first
+        + walkWeight (fun e => weight e - lam) second := by
+    simp [walkWeight, hedges]
+  have hzero : walkWeight (fun e => weight e - lam) (liftCriticalWalk (forward.append backward))
+      = 0 := by
+    rw [walkWeight_sub_const, walkWeight_liftCriticalWalk, length_liftCriticalWalk,
+      walkWeight_criticalGraph_eq hcyc (forward.append backward), sub_self]
+  have hle := add_maxRootedWeight_le_maxRootedWeight hshift (G := G)
+    (weight := fun e => weight e - lam) ⟨first⟩ ⟨second⟩
+  rw [maxRootedWeight_self hshift] at hle
+  have hfirstLe := walkWeight_le_maxRootedWeight hshift (weight := fun e => weight e - lam) first
+  have hsecondLe := walkWeight_le_maxRootedWeight hshift (weight := fun e => weight e - lam) second
+  linarith [hsplit ▸ hzero]
+
+/-- **Two Kleene-star columns rooted in the same critical class differ by a constant.**  The
+constant is the Kleene-star entry between the two roots, and it does not depend on the vertex at
+which the columns are compared.  Only the reachability actually used appears: the vertex has to be
+reachable from one of the roots, and the critical graph carries the roots to one another. -/
+theorem maxRootedWeight_eq_add_of_toCriticalClass_eq {weight : E → 𝕜} {lam : 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      walkWeight weight cycle ≤ cycle.length * lam)
+    {base base' vertex : V}
+    (hclass : toCriticalClass G weight lam base = toCriticalClass G weight lam base')
+    (hreach : Nonempty (G.Walk base vertex)) :
+    maxRootedWeight G (fun e => weight e - lam) base' vertex
+      = maxRootedWeight G (fun e => weight e - lam) base' base
+        + maxRootedWeight G (fun e => weight e - lam) base vertex := by
+  have hshift : ∀ (v : V) (c : G.Walk v v), walkWeight (fun e => weight e - lam) c ≤ 0 := by
+    intro v c
+    rw [walkWeight_sub_const]
+    linarith [hcyc v c]
+  obtain ⟨⟨forward⟩, ⟨backward⟩⟩ := toCriticalClass_eq_iff.1 hclass
+  have hforward : Nonempty (G.Walk base base') := ⟨liftCriticalWalk forward⟩
+  have hbackward : Nonempty (G.Walk base' base) := ⟨liftCriticalWalk backward⟩
+  have hreach' : Nonempty (G.Walk base' vertex) :=
+    ⟨hbackward.some.append hreach.some⟩
+  have hlower := add_maxRootedWeight_le_maxRootedWeight hshift
+    (weight := fun e => weight e - lam) hbackward hreach
+  have hupper := add_maxRootedWeight_le_maxRootedWeight hshift
+    (weight := fun e => weight e - lam) hforward hreach'
+  linarith [maxRootedWeight_add_maxRootedWeight_eq_zero hcyc hclass]
+
+/-- Within one critical class the value of an eigenvector at a vertex is recovered exactly from
+its value at any other vertex of the class: the inequality of
+`DirectedTransport.MaxPlusPotential.add_maxRootedWeight_le` holds in both directions, because the
+two Kleene-star entries between the roots are opposite. -/
+theorem add_maxRootedWeight_eq_of_toCriticalClass_eq {weight : E → 𝕜} {lam : 𝕜} {φ : V → 𝕜}
+    (hφ : IsGraphEigenvector G weight lam φ) {base base' : V}
+    (hclass : toCriticalClass G weight lam base = toCriticalClass G weight lam base') :
+    φ base' + maxRootedWeight G (fun e => weight e - lam) base' base = φ base := by
+  have hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      walkWeight weight cycle ≤ cycle.length * lam := by
+    intro v c
+    have := hφ.closedWalk_nonpos v c
+    rw [walkWeight_sub_const] at this
+    linarith
+  obtain ⟨⟨forward⟩, ⟨backward⟩⟩ := toCriticalClass_eq_iff.1 hclass
+  have hfrom := add_maxRootedWeight_le hφ (weight := weight) ⟨liftCriticalWalk backward⟩
+  have hto := add_maxRootedWeight_le hφ (weight := weight) ⟨liftCriticalWalk forward⟩
+  linarith [maxRootedWeight_add_maxRootedWeight_eq_zero hcyc hclass]
+
+/-- **One Kleene-star column per critical class suffices to generate the eigenspace.**  If `reps`
+is a set of critical vertices meeting every critical class that contains a critical vertex, then
+every eigenvector is already, at every vertex, the max-plus combination of the columns rooted at
+`reps`, with its own values as coefficients, and the maximum is attained.  This is sufficiency of
+the family; minimality of it is a separate statement and is not proved here. -/
+theorem isGreatest_criticalClassColumns [Fintype V] {weight : E → 𝕜} {lam : 𝕜} {φ : V → 𝕜}
+    (hφ : IsGraphEigenvector G weight lam φ) {reps : Set V}
+    (hreps : ∀ base : V, IsCriticalVertex G weight lam base →
+      ∃ root ∈ reps, toCriticalClass G weight lam base = toCriticalClass G weight lam root)
+    (vertex : V) :
+    IsGreatest {r : 𝕜 | ∃ root ∈ reps, Nonempty (G.Walk root vertex) ∧
+        r = φ root + maxRootedWeight G (fun e => weight e - lam) root vertex} (φ vertex) := by
+  have hcyc : ∀ (v : V) (cycle : G.Walk v v), walkWeight weight cycle ≤ cycle.length * lam := by
+    intro v c
+    have := hφ.closedWalk_nonpos v c
+    rw [walkWeight_sub_const] at this
+    linarith
+  obtain ⟨⟨base, hbase, hreachBase, hvalue⟩, -⟩ := isGreatest_criticalColumns hφ vertex
+  obtain ⟨root, hmem, hclass⟩ := hreps base hbase
+  obtain ⟨-, ⟨backward⟩⟩ := toCriticalClass_eq_iff.1 hclass
+  refine ⟨⟨root, hmem, ⟨(liftCriticalWalk backward).append hreachBase.some⟩, ?_⟩, ?_⟩
+  · rw [maxRootedWeight_eq_add_of_toCriticalClass_eq hcyc hclass hreachBase, hvalue,
+      ← add_maxRootedWeight_eq_of_toCriticalClass_eq hφ hclass]
+    ring
+  · rintro r ⟨root', -, hroot', rfl⟩
+    exact add_maxRootedWeight_le hφ hroot'
+
+end CriticalClass
 
 /-! ### The max-plus matrix reading -/
 

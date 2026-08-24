@@ -108,10 +108,12 @@ The critical graph as a subgraph in its own right, the description of the whole
 eigenspace, and the Kleene-star (all-pairs longest-walk) operator, of which
 `maxIncomingWeight` is one row by
 `DirectedTransport.MaxPlusPotential.isGreatest_range_maxRootedWeight`, are
-`DirectedTransport.Additive.CriticalGraph`.  Not developed anywhere yet: the
-strongly connected components of the critical graph and the resulting count of a
-minimal generating family of the eigenspace.  The natural common setting for
-those is the fixed-point theory of topical maps.
+`DirectedTransport.Additive.CriticalGraph`, as are the strongly connected
+components of the critical graph and the sufficiency of one Kleene-star column
+per component.  Not developed anywhere yet: *minimality* of that generating
+family, which needs a hypothesis making the critical roots reach the whole
+graph.  The natural common setting for that is the fixed-point theory of topical
+maps.
 
 ## References
 

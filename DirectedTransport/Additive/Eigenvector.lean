@@ -96,9 +96,11 @@ vertices, are `DirectedTransport.Additive.CriticalGraph`.
 
 ## TODO
 
-The critical *classes*: the strongly connected components of the critical graph, the fact that two
-Kleene-star columns rooted in the same critical class differ by a constant, and the resulting
-count of a minimal generating family of the eigenspace.
+The critical *classes* - the strongly connected components of the critical graph, the fact that
+two Kleene-star columns rooted in the same critical class differ by a constant, and the resulting
+sufficiency of one column per class - are
+`DirectedTransport.Additive.CriticalGraph`.  Not developed: *minimality* of that family, which
+needs a hypothesis making the critical roots reach the whole graph.
 
 ## References
 
