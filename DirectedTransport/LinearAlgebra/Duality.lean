@@ -40,16 +40,13 @@ certificate of primal infeasibility when `lam = 0`.
 
 Everything here is proved over an arbitrary linearly ordered field, directly from
 `DirectedTransport.LinearAlgebra.theorem_of_alternative`; no topology and no completeness is
-involved. Only the two corollaries phrased through
-`DirectedTransport.LinearAlgebra.standardFeasibleSet` and
-`DirectedTransport.LinearAlgebra.IsStandardOptimal` are stated over `ℝ`, because those two
-notions are defined over `ℝ` in `DirectedTransport.LinearAlgebra.StandardForm`.
+involved. Primal feasibility is membership in the standard-form fiber
+`DirectedTransport.LinearAlgebra.standardFeasibleSet` of
+`DirectedTransport.LinearAlgebra.StandardForm`, which is itself defined over an arbitrary
+linearly ordered field.
 
 ## Main definitions
 
-* `DirectedTransport.LinearAlgebra.IsStandardFeasible`: primal feasibility of `0 ≤ z`,
-  `A *ᵥ z = rhs`, over an arbitrary linearly ordered field. Over `ℝ` it is membership in
-  `DirectedTransport.LinearAlgebra.standardFeasibleSet`.
 * `DirectedTransport.LinearAlgebra.IsDualFeasible`: dual feasibility of `Aᵀ *ᵥ y ≥ c`.
 * `DirectedTransport.LinearAlgebra.ComplementarySlackness`: the complementary slackness
   relation between a primal and a dual vector.
@@ -70,10 +67,10 @@ notions are defined over `ℝ` in `DirectedTransport.LinearAlgebra.StandardForm`
 * `DirectedTransport.LinearAlgebra.forall_le_of_complementarySlackness`,
   `DirectedTransport.LinearAlgebra.exists_isDualFeasible_complementarySlackness_of_forall_le`:
   complementary slackness is exactly a certificate of optimality.
-* `DirectedTransport.LinearAlgebra.mem_standardFeasibleSet_iff_isStandardFeasible`,
-  `DirectedTransport.LinearAlgebra.isStandardOptimal_of_complementarySlackness`,
+* `DirectedTransport.LinearAlgebra.isStandardOptimal_of_complementarySlackness`,
   `DirectedTransport.LinearAlgebra.exists_isDualFeasible_complementarySlackness_of_standardOptimal`:
-  the transfer of all of this to the real standard-form program.
+  the transfer of all of this to
+  `DirectedTransport.LinearAlgebra.IsStandardOptimal`.
 
 ## Tags
 
@@ -90,22 +87,7 @@ namespace LinearAlgebra
 
 variable {𝕜 : Type*} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
 
-/-! ### Primal and dual feasibility -/
-
-/-- Primal feasibility in standard form over an arbitrary linearly ordered field: `z` is
-nonnegative in every coordinate and `A *ᵥ z = rhs`.
-
-Over `ℝ` this is membership in `DirectedTransport.LinearAlgebra.standardFeasibleSet`; see
-`DirectedTransport.LinearAlgebra.mem_standardFeasibleSet_iff_isStandardFeasible`. -/
-def IsStandardFeasible {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (z : Col → 𝕜) : Prop :=
-  (∀ j, 0 ≤ z j) ∧ A *ᵥ z = rhs
-
-/-- Over `ℝ`, primal feasibility is membership in the standard-form fiber. -/
-theorem mem_standardFeasibleSet_iff_isStandardFeasible
-    {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ) (z : Col → ℝ) :
-    z ∈ standardFeasibleSet A rhs ↔ IsStandardFeasible A rhs z := Iff.rfl
+/-! ### Dual feasibility -/
 
 /-- Dual feasibility for the standard-form program with objective `c`: the row vector `y`
 satisfies `Aᵀ *ᵥ y ≥ c`, written out column by column. There is no sign constraint on `y`,
@@ -117,10 +99,10 @@ def IsDualFeasible {Row Col : Type*} [Fintype Row]
 omit [IsStrictOrderedRing 𝕜] in
 /-- Expanding the primal objective through the constraint `A *ᵥ z = rhs`: the dual objective at
 any `y` is the pairing of `z` with the dual slacks plus the primal objective. -/
-theorem sum_dual_eq_of_isStandardFeasible
+theorem sum_dual_eq_of_mem_standardFeasibleSet
     {Row Col : Type*} [Fintype Row] [Fintype Col]
     {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {z : Col → 𝕜}
-    (hz : IsStandardFeasible A rhs z) (y : Row → 𝕜) :
+    (hz : z ∈ standardFeasibleSet A rhs) (y : Row → 𝕜) :
     ∑ i, y i * rhs i = ∑ j, (∑ i, y i * A i j) * z j := by
   have hr (i : Row) : rhs i = ∑ j, A i j * z j := by
     rw [← congrFun hz.2 i]
@@ -133,9 +115,9 @@ at any dual feasible point. -/
 theorem objective_le_of_isDualFeasible
     {Row Col : Type*} [Fintype Row] [Fintype Col]
     {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {c : Col → 𝕜} {z : Col → 𝕜} {y : Row → 𝕜}
-    (hz : IsStandardFeasible A rhs z) (hy : IsDualFeasible A c y) :
+    (hz : z ∈ standardFeasibleSet A rhs) (hy : IsDualFeasible A c y) :
     ∑ j, c j * z j ≤ ∑ i, y i * rhs i := by
-  rw [sum_dual_eq_of_isStandardFeasible hz y]
+  rw [sum_dual_eq_of_mem_standardFeasibleSet hz y]
   exact Finset.sum_le_sum fun j _ => mul_le_mul_of_nonneg_right (hy j) (hz.1 j)
 
 /-! ### The scaled dual behind strong duality
@@ -155,7 +137,7 @@ theorem of the alternative allows when the fiber itself is empty. -/
 theorem exists_scaledDual_of_not_exists_objective_ge
     {Row Col : Type*} [Fintype Row] [Fintype Col]
     (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (c : Col → 𝕜) (t : 𝕜)
-    (h : ¬ ∃ z, IsStandardFeasible A rhs z ∧ t ≤ ∑ j, c j * z j) :
+    (h : ¬ ∃ z, z ∈ standardFeasibleSet A rhs ∧ t ≤ ∑ j, c j * z j) :
     ∃ (y : Row → 𝕜) (lam : 𝕜), 0 ≤ lam ∧ (∀ j, lam * c j ≤ ∑ i, y i * A i j) ∧
       ∑ i, y i * rhs i < lam * t := by
   classical
@@ -255,8 +237,8 @@ holds vacuously at every level, while no primal point exists at all. -/
 theorem exists_objective_ge_iff_feasible_and_forall_isDualFeasible
     {Row Col : Type*} [Fintype Row] [Fintype Col]
     (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (c : Col → 𝕜) (t : 𝕜) :
-    (∃ z, IsStandardFeasible A rhs z ∧ t ≤ ∑ j, c j * z j) ↔
-      (∃ z, IsStandardFeasible A rhs z) ∧
+    (∃ z, z ∈ standardFeasibleSet A rhs ∧ t ≤ ∑ j, c j * z j) ↔
+      (∃ z, z ∈ standardFeasibleSet A rhs) ∧
         ∀ y, IsDualFeasible A c y → t ≤ ∑ i, y i * rhs i := by
   constructor
   · rintro ⟨z, hz, ht⟩
@@ -290,7 +272,7 @@ theorem exists_objective_ge_iff_feasible_and_forall_isDualFeasible
         have := hcol j
         rw [← hzero] at this
         linarith
-      have := sum_dual_eq_of_isStandardFeasible hz y
+      have := sum_dual_eq_of_mem_standardFeasibleSet hz y
       have hnonneg : 0 ≤ ∑ j, (∑ i, y i * A i j) * z j :=
         Finset.sum_nonneg fun j _ => mul_nonneg (hcol' j) (hz.1 j)
       rw [← hzero] at hlt
@@ -302,8 +284,8 @@ exists exactly when every dual feasible vector has objective at least `t`. -/
 theorem exists_objective_ge_iff_forall_isDualFeasible
     {Row Col : Type*} [Fintype Row] [Fintype Col]
     (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (c : Col → 𝕜) (t : 𝕜)
-    (hfeas : ∃ z, IsStandardFeasible A rhs z) :
-    (∃ z, IsStandardFeasible A rhs z ∧ t ≤ ∑ j, c j * z j) ↔
+    (hfeas : ∃ z, z ∈ standardFeasibleSet A rhs) :
+    (∃ z, z ∈ standardFeasibleSet A rhs ∧ t ≤ ∑ j, c j * z j) ↔
       ∀ y, IsDualFeasible A c y → t ≤ ∑ i, y i * rhs i := by
   rw [exists_objective_ge_iff_feasible_and_forall_isDualFeasible]
   exact and_iff_right hfeas
@@ -324,8 +306,8 @@ dual objective at `y` to the primal optimum exactly. -/
 theorem exists_isDualFeasible_objective_le_of_forall_le
     {Row Col : Type*} [Fintype Row] [Fintype Col]
     (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (c : Col → 𝕜) {z : Col → 𝕜}
-    (hz : IsStandardFeasible A rhs z)
-    (hopt : ∀ w, IsStandardFeasible A rhs w → ∑ j, c j * w j ≤ ∑ j, c j * z j) :
+    (hz : z ∈ standardFeasibleSet A rhs)
+    (hopt : ∀ w, w ∈ standardFeasibleSet A rhs → ∑ j, c j * w j ≤ ∑ j, c j * z j) :
     ∃ y, IsDualFeasible A c y ∧ ∑ i, y i * rhs i ≤ ∑ j, c j * z j := by
   classical
   set v : 𝕜 := ∑ j, c j * z j with hv
@@ -377,7 +359,7 @@ theorem exists_isDualFeasible_objective_le_of_forall_le
     rcases hmu_nn.lt_or_eq with hpos | hzero
     · -- Rescaling by `mu` gives a feasible point with a strictly larger objective.
       have hinv : 0 < mu⁻¹ := inv_pos.mpr hpos
-      have hfeas : IsStandardFeasible A rhs fun j => mu⁻¹ * w (Sum.inl j) := by
+      have hfeas : (fun j => mu⁻¹ * w (Sum.inl j)) ∈ standardFeasibleSet A rhs := by
         refine ⟨fun j => mul_nonneg hinv.le (hw_nn _), ?_⟩
         funext i
         have hsmul : (fun j => mu⁻¹ * w (Sum.inl j)) = mu⁻¹ • fun j => w (Sum.inl j) := rfl
@@ -394,7 +376,7 @@ theorem exists_isDualFeasible_objective_le_of_forall_le
       linarith
     · -- A recession direction: `z + w` is feasible and strictly better.
       have hzero' : mu = 0 := hzero.symm
-      have hfeas : IsStandardFeasible A rhs fun j => z j + w (Sum.inl j) := by
+      have hfeas : (fun j => z j + w (Sum.inl j)) ∈ standardFeasibleSet A rhs := by
         refine ⟨fun j => add_nonneg (hz.1 j) (hw_nn _), ?_⟩
         funext i
         have hadd : (fun j => z j + w (Sum.inl j)) = z + fun j => w (Sum.inl j) := rfl
@@ -440,11 +422,11 @@ vector with the nonnegative dual slacks, so it vanishes exactly termwise. -/
 theorem complementarySlackness_iff_objective_eq
     {Row Col : Type*} [Fintype Row] [Fintype Col]
     {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {c : Col → 𝕜} {z : Col → 𝕜} {y : Row → 𝕜}
-    (hz : IsStandardFeasible A rhs z) (hy : IsDualFeasible A c y) :
+    (hz : z ∈ standardFeasibleSet A rhs) (hy : IsDualFeasible A c y) :
     ComplementarySlackness A c z y ↔ ∑ j, c j * z j = ∑ i, y i * rhs i := by
   have hgap : (∑ i, y i * rhs i) - ∑ j, c j * z j
       = ∑ j, z j * ((∑ i, y i * A i j) - c j) := by
-    rw [sum_dual_eq_of_isStandardFeasible hz y, ← Finset.sum_sub_distrib]
+    rw [sum_dual_eq_of_mem_standardFeasibleSet hz y, ← Finset.sum_sub_distrib]
     exact Finset.sum_congr rfl fun j _ => by ring
   constructor
   · intro hcs
@@ -466,9 +448,9 @@ complementary to some dual feasible vector maximizes the objective. -/
 theorem forall_le_of_complementarySlackness
     {Row Col : Type*} [Fintype Row] [Fintype Col]
     {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {c : Col → 𝕜} {z : Col → 𝕜} {y : Row → 𝕜}
-    (hz : IsStandardFeasible A rhs z) (hy : IsDualFeasible A c y)
+    (hz : z ∈ standardFeasibleSet A rhs) (hy : IsDualFeasible A c y)
     (hcs : ComplementarySlackness A c z y) :
-    ∀ w, IsStandardFeasible A rhs w → ∑ j, c j * w j ≤ ∑ j, c j * z j := by
+    ∀ w, w ∈ standardFeasibleSet A rhs → ∑ j, c j * w j ≤ ∑ j, c j * z j := by
   intro w hw
   rw [(complementarySlackness_iff_objective_eq hz hy).mp hcs]
   exact objective_le_of_isDualFeasible hw hy
@@ -479,37 +461,36 @@ namely the dual optimum attained by
 theorem exists_isDualFeasible_complementarySlackness_of_forall_le
     {Row Col : Type*} [Fintype Row] [Fintype Col]
     (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (c : Col → 𝕜) {z : Col → 𝕜}
-    (hz : IsStandardFeasible A rhs z)
-    (hopt : ∀ w, IsStandardFeasible A rhs w → ∑ j, c j * w j ≤ ∑ j, c j * z j) :
+    (hz : z ∈ standardFeasibleSet A rhs)
+    (hopt : ∀ w, w ∈ standardFeasibleSet A rhs → ∑ j, c j * w j ≤ ∑ j, c j * z j) :
     ∃ y, IsDualFeasible A c y ∧ ComplementarySlackness A c z y := by
   obtain ⟨y, hy, hle⟩ :=
     exists_isDualFeasible_objective_le_of_forall_le A rhs c hz hopt
   refine ⟨y, hy, (complementarySlackness_iff_objective_eq hz hy).mpr ?_⟩
   exact le_antisymm (objective_le_of_isDualFeasible hz hy) hle
 
-/-! ### The real standard-form program
+/-! ### Optimality in the sense of `IsStandardOptimal`
 
-Over `ℝ` the results above transfer verbatim to
-`DirectedTransport.LinearAlgebra.standardFeasibleSet` and
-`DirectedTransport.LinearAlgebra.IsStandardOptimal`, and combine with the extreme-point theory
-of `DirectedTransport.LinearAlgebra.StandardForm`: an optimum attained at an extreme point is
-still certified by the same dual vector. -/
+The results above repackage into
+`DirectedTransport.LinearAlgebra.IsStandardOptimal`, and so combine with the extreme-point
+theory of `DirectedTransport.LinearAlgebra.StandardForm`: an optimum attained at an extreme
+point is still certified by the same dual vector. -/
 
-/-- Over `ℝ`, complementary slackness with a dual feasible vector certifies optimality of a
-feasible point in the sense of `DirectedTransport.LinearAlgebra.IsStandardOptimal`. -/
+/-- Complementary slackness with a dual feasible vector certifies optimality of a feasible
+point in the sense of `DirectedTransport.LinearAlgebra.IsStandardOptimal`. -/
 theorem isStandardOptimal_of_complementarySlackness
     {Row Col : Type*} [Fintype Row] [Fintype Col]
-    {A : Matrix Row Col ℝ} {rhs : Row → ℝ} {c : Col → ℝ} {z : Col → ℝ} {y : Row → ℝ}
+    {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {c : Col → 𝕜} {z : Col → 𝕜} {y : Row → 𝕜}
     (hz : z ∈ standardFeasibleSet A rhs) (hy : IsDualFeasible A c y)
     (hcs : ComplementarySlackness A c z y) :
     IsStandardOptimal A rhs c z :=
   ⟨hz, fun w hw => forall_le_of_complementarySlackness hz hy hcs w hw⟩
 
-/-- Over `ℝ`, every standard-form optimum is complementary to some dual feasible vector, which
-therefore attains the dual optimum. -/
+/-- Every standard-form optimum is complementary to some dual feasible vector, which therefore
+attains the dual optimum. -/
 theorem exists_isDualFeasible_complementarySlackness_of_standardOptimal
     {Row Col : Type*} [Fintype Row] [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ) (c : Col → ℝ) {z : Col → ℝ}
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (c : Col → 𝕜) {z : Col → 𝕜}
     (hz : IsStandardOptimal A rhs c z) :
     ∃ y, IsDualFeasible A c y ∧ ComplementarySlackness A c z y :=
   exists_isDualFeasible_complementarySlackness_of_forall_le A rhs c hz.1 hz.2

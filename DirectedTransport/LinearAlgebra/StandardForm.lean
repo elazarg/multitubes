@@ -23,8 +23,17 @@ import Mathlib.Tactic.Ring
 # Standard-form linear programs
 
 A *standard-form* polyhedron is the nonnegative affine fiber
-`standardFeasibleSet A rhs = {z | 0 ≤ z ∧ A *ᵥ z = rhs}` of a real matrix `A`. This file
-develops the basic theory of such polyhedra and of linear optimization over them, over `ℝ`.
+`standardFeasibleSet A rhs = {z | 0 ≤ z ∧ A *ᵥ z = rhs}` of a matrix `A` over a linearly
+ordered field. This file develops the basic theory of such polyhedra and of linear
+optimization over them.
+
+Almost everything here — the fiber itself, its convexity, Farkas' lemma, and the identification
+of the extreme points with the basic feasible solutions — is proved over an arbitrary linearly
+ordered field `𝕜`, with the certificate direction of Farkas coming from the theorem of the
+alternative in `DirectedTransport.LinearAlgebra.FourierMotzkin`. Only the three results that
+genuinely use topology are stated over `ℝ`: closedness of the fiber, the continuous functional
+`finiteDotContinuousLinearMap`, and attainment of an optimum at an extreme point, which goes
+through Krein–Milman.
 
 Three things are proved.
 
@@ -91,40 +100,45 @@ open Finset Matrix Set
 namespace DirectedTransport
 namespace LinearAlgebra
 
+variable {𝕜 : Type*} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
+
 /-! ### The standard-form feasible set -/
 
 /-- A standard-form nonnegative affine fiber: the vectors that are nonnegative in every
 coordinate and are mapped to `rhs` by `A`. -/
 def standardFeasibleSet
     {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ) : Set (Col → ℝ) :=
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) : Set (Col → 𝕜) :=
   {z | (∀ j, 0 ≤ z j) ∧ A *ᵥ z = rhs}
 
+omit [IsStrictOrderedRing 𝕜] in
 /-- Membership in a standard-form fiber unfolds to nonnegativity together with the affine
 equation. -/
 @[simp] theorem mem_standardFeasibleSet
     {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ) (z : Col → ℝ) :
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (z : Col → 𝕜) :
     z ∈ standardFeasibleSet A rhs ↔ (∀ j, 0 ≤ z j) ∧ A *ᵥ z = rhs := Iff.rfl
 
+omit [IsStrictOrderedRing 𝕜] in
 /-- Every point of a standard-form fiber is nonnegative. -/
 theorem nonneg_of_mem_standardFeasibleSet
     {Row Col : Type*} [Fintype Col]
-    {A : Matrix Row Col ℝ} {rhs : Row → ℝ} {z : Col → ℝ}
+    {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {z : Col → 𝕜}
     (hz : z ∈ standardFeasibleSet A rhs) (j : Col) : 0 ≤ z j := hz.1 j
 
+omit [IsStrictOrderedRing 𝕜] in
 /-- Every point of a standard-form fiber satisfies the affine equation, row by row. -/
 theorem mulVec_apply_of_mem_standardFeasibleSet
     {Row Col : Type*} [Fintype Col]
-    {A : Matrix Row Col ℝ} {rhs : Row → ℝ} {z : Col → ℝ}
+    {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {z : Col → 𝕜}
     (hz : z ∈ standardFeasibleSet A rhs) (i : Row) : (A *ᵥ z) i = rhs i :=
   congrFun hz.2 i
 
 /-- A standard-form fiber is convex: it is cut out by linear equations and inequalities. -/
 theorem convex_standardFeasibleSet
     {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ) :
-    Convex ℝ (standardFeasibleSet A rhs) := by
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) :
+    Convex 𝕜 (standardFeasibleSet A rhs) := by
   intro x hx y hy a b ha hb hab
   refine ⟨fun j => ?_, ?_⟩
   · have := hx.1 j
@@ -173,14 +187,14 @@ a row vector that is nonnegative against every column of `A` but pairs negativel
 right-hand side. -/
 def IsStandardCertificate
     {Row Col : Type*} [Fintype Row]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ) (y : Row → ℝ) : Prop :=
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (y : Row → 𝕜) : Prop :=
   (∀ j, 0 ≤ ∑ i, y i * A i j) ∧ ∑ i, y i * rhs i < 0
 
 /-- A standard-form fiber and a dual certificate cannot both exist: evaluating the certificate
 on a feasible point gives `0 ≤ ⟪y, rhs⟫ < 0`. -/
 theorem not_isStandardCertificate_of_mem_standardFeasibleSet
     {Row Col : Type*} [Fintype Row] [Fintype Col]
-    {A : Matrix Row Col ℝ} {rhs : Row → ℝ} {z : Col → ℝ} {y : Row → ℝ}
+    {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {z : Col → 𝕜} {y : Row → 𝕜}
     (hz : z ∈ standardFeasibleSet A rhs) : ¬ IsStandardCertificate A rhs y := by
   rintro ⟨hy, hneg⟩
   have hr (i : Row) : rhs i = ∑ j, A i j * z j := by
@@ -202,17 +216,17 @@ is a nonnegative vector on `Col ⊕ Unit` whose `Col` part solves `A *ᵥ z = t 
 `0 < t`; dividing by `t` produces a point of the fiber. -/
 theorem exists_isStandardCertificate_of_not_nonempty
     {Row Col : Type*} [Fintype Row] [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ)
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜)
     (hempty : ¬ (standardFeasibleSet A rhs).Nonempty) :
-    ∃ y : Row → ℝ, IsStandardCertificate A rhs y := by
+    ∃ y : Row → 𝕜, IsStandardCertificate A rhs y := by
   classical
   by_contra hnocert
   push Not at hnocert
   -- The dual system, transported to the variable index `Fin (card Row)`.
   set e : Row ≃ Fin (Fintype.card Row) := Fintype.equivFin Row with he
-  set M : (Col ⊕ Unit) → Fin (Fintype.card Row) → ℝ :=
+  set M : (Col ⊕ Unit) → Fin (Fintype.card Row) → 𝕜 :=
     Sum.elim (fun j k => A (e.symm k) j) (fun _ k => -rhs (e.symm k)) with hM
-  set bvec : (Col ⊕ Unit) → ℝ := Sum.elim (fun _ => 0) (fun _ => 1) with hb
+  set bvec : (Col ⊕ Unit) → 𝕜 := Sum.elim (fun _ => 0) (fun _ => 1) with hb
   -- It is infeasible, since a solution would be a dual certificate.
   have hinfeasible : ¬ IsFeasible M bvec := by
     rintro ⟨x, hx⟩
@@ -232,7 +246,7 @@ theorem exists_isStandardCertificate_of_not_nonempty
       linarith
   -- So it has a Farkas certificate, whose `Col` part is a scaled point of the fiber.
   obtain ⟨u, hu_nonneg, hu_zero, hu_pos⟩ := (theorem_of_alternative M bvec).mp hinfeasible
-  set t : ℝ := u (Sum.inr ()) with ht
+  set t : 𝕜 := u (Sum.inr ()) with ht
   have htpos : 0 < t := by
     have hval : ∑ i, u i * bvec i = t := by
       rw [Fintype.sum_sum_type, hb, ht]
@@ -263,8 +277,8 @@ is empty exactly when a dual certificate `y` exists, with `Aᵀ *ᵥ y` nonnegat
 `⟪y, rhs⟫` negative. -/
 theorem not_nonempty_standardFeasibleSet_iff
     {Row Col : Type*} [Fintype Row] [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ) :
-    ¬ (standardFeasibleSet A rhs).Nonempty ↔ ∃ y : Row → ℝ, IsStandardCertificate A rhs y :=
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) :
+    ¬ (standardFeasibleSet A rhs).Nonempty ↔ ∃ y : Row → 𝕜, IsStandardCertificate A rhs y :=
   ⟨exists_isStandardCertificate_of_not_nonempty A rhs, by
     rintro ⟨y, hy⟩ ⟨z, hz⟩
     exact not_isStandardCertificate_of_mem_standardFeasibleSet hz hy⟩
@@ -273,8 +287,8 @@ theorem not_nonempty_standardFeasibleSet_iff
 dual certificate exists. -/
 theorem nonempty_standardFeasibleSet_iff
     {Row Col : Type*} [Fintype Row] [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ) :
-    (standardFeasibleSet A rhs).Nonempty ↔ ¬ ∃ y : Row → ℝ, IsStandardCertificate A rhs y := by
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) :
+    (standardFeasibleSet A rhs).Nonempty ↔ ¬ ∃ y : Row → 𝕜, IsStandardCertificate A rhs y := by
   rw [← not_nonempty_standardFeasibleSet_iff, not_not]
 
 /-! ### Linear objectives and standard-form optima -/
@@ -295,8 +309,8 @@ noncomputable def finiteDotContinuousLinearMap
 /-- A feasible vector of a standard-form fiber that maximizes a linear objective over it. -/
 def IsStandardOptimal
     {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ)
-    (objective : Col → ℝ) (z : Col → ℝ) : Prop :=
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜)
+    (objective : Col → 𝕜) (z : Col → 𝕜) : Prop :=
   z ∈ standardFeasibleSet A rhs ∧
     ∀ w ∈ standardFeasibleSet A rhs,
       (∑ j, objective j * w j) ≤ ∑ j, objective j * z j
@@ -392,16 +406,17 @@ A feasible point is *basic* when the columns carrying its positive support are l
 independent. Basic feasible solutions are exactly the extreme points of the fiber, and being
 supported on an independent family of columns of `A` immediately bounds their sparsity. -/
 
+omit [IsStrictOrderedRing 𝕜] in
 /-- Splitting a vector supported on the positive coordinates of `z` into its support columns:
 `A *ᵥ d` is the combination of the support columns of `A` with the coefficients of `d`. -/
 theorem mulVec_eq_sum_supportColumns
     {Row Col : Type*} [Fintype Col] [DecidableEq Col]
-    (A : Matrix Row Col ℝ) {z d : Col → ℝ} (hd_supp : ∀ j, z j = 0 → d j = 0) :
+    (A : Matrix Row Col 𝕜) {z d : Col → 𝕜} (hd_supp : ∀ j, z j = 0 → d j = 0) :
     A *ᵥ d = ∑ k : {k : Col // z k ≠ 0}, d k.1 • A.col k.1 := by
   classical
-  have hcol (k : Col) : A *ᵥ (Pi.single k (1 : ℝ)) = A.col k :=
+  have hcol (k : Col) : A *ᵥ (Pi.single k (1 : 𝕜)) = A.col k :=
     Matrix.mulVec_single_one A k
-  have hsplit : d = ∑ k : {k : Col // z k ≠ 0}, d k.1 • Pi.single k.1 (1 : ℝ) := by
+  have hsplit : d = ∑ k : {k : Col // z k ≠ 0}, d k.1 • Pi.single k.1 (1 : 𝕜) := by
     funext j
     simp only [Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.single_apply]
     by_cases hj : z j = 0
@@ -417,8 +432,8 @@ theorem mulVec_eq_sum_supportColumns
         simp
       · simp
   calc
-    A *ᵥ d = A *ᵥ ∑ k : {k : Col // z k ≠ 0}, d k.1 • Pi.single k.1 (1 : ℝ) := by rw [← hsplit]
-    _ = ∑ k : {k : Col // z k ≠ 0}, d k.1 • (A *ᵥ Pi.single k.1 (1 : ℝ)) := by
+    A *ᵥ d = A *ᵥ ∑ k : {k : Col // z k ≠ 0}, d k.1 • Pi.single k.1 (1 : 𝕜) := by rw [← hsplit]
+    _ = ∑ k : {k : Col // z k ≠ 0}, d k.1 • (A *ᵥ Pi.single k.1 (1 : 𝕜)) := by
         change A.mulVecLin _ = _
         simp
     _ = ∑ k : {k : Col // z k ≠ 0}, d k.1 • A.col k.1 :=
@@ -429,9 +444,9 @@ direction supported on its positive coordinates: such a direction could be added
 without leaving the fiber, exhibiting the point as an interior point of a segment. -/
 theorem eq_zero_of_extreme_standardFeasible
     {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ)
-    {z d : Col → ℝ}
-    (hz : z ∈ (standardFeasibleSet A rhs).extremePoints ℝ)
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜)
+    {z d : Col → 𝕜}
+    (hz : z ∈ (standardFeasibleSet A rhs).extremePoints 𝕜)
     (hd_supp : ∀ j, z j = 0 → d j = 0)
     (hd_kernel : A *ᵥ d = 0) :
     d = 0 := by
@@ -442,31 +457,31 @@ theorem eq_zero_of_extreme_standardFeasible
     have : IsEmpty Col := not_nonempty_iff.mp h
     exact hd_ne (Subsingleton.elim d 0)
   obtain ⟨hz_nonnegative, hz_equation⟩ := extremePoints_subset hz
-  have hbound_pos (j : Col) : (0 : ℝ) < if z j = 0 then 1 else z j / (|d j| + 1) := by
+  have hbound_pos (j : Col) : (0 : 𝕜) < if z j = 0 then 1 else z j / (|d j| + 1) := by
     split_ifs with hj
     · norm_num
     · have hzj_pos : 0 < z j := lt_of_le_of_ne (hz_nonnegative j) (Ne.symm hj)
       positivity
-  set ε : ℝ := Finset.univ.inf' Finset.univ_nonempty
-    (fun j : Col => if z j = 0 then (1 : ℝ) else z j / (|d j| + 1)) with hε
+  set ε : 𝕜 := Finset.univ.inf' Finset.univ_nonempty
+    (fun j : Col => if z j = 0 then (1 : 𝕜) else z j / (|d j| + 1)) with hε
   have hε_pos : 0 < ε := (Finset.lt_inf'_iff Finset.univ_nonempty).mpr fun j _ => hbound_pos j
   have hcoordinate_bound (j : Col) : ε * |d j| ≤ z j := by
-    have hbound : ε ≤ if z j = 0 then (1 : ℝ) else z j / (|d j| + 1) :=
+    have hbound : ε ≤ if z j = 0 then (1 : 𝕜) else z j / (|d j| + 1) :=
       Finset.inf'_le _ (Finset.mem_univ j)
     by_cases hzj : z j = 0
     · rw [hzj, hd_supp j hzj]
       simp
     · simp only [hzj, if_false] at hbound
-      have hdenom_pos : (0 : ℝ) < |d j| + 1 := by positivity
+      have hdenom_pos : (0 : 𝕜) < |d j| + 1 := by positivity
       have hfull : ε * (|d j| + 1) ≤ z j := (le_div_iff₀ hdenom_pos).mp hbound
       nlinarith
-  have habs (j : Col) (σ : ℝ) (hσ : σ = 1 ∨ σ = -1) : |σ * (ε * d j)| ≤ z j := by
+  have habs (j : Col) (σ : 𝕜) (hσ : σ = 1 ∨ σ = -1) : |σ * (ε * d j)| ≤ z j := by
     have hσ_abs : |σ| = 1 := by rcases hσ with rfl | rfl <;> norm_num
     calc
       |σ * (ε * d j)| = ε * |d j| := by
         rw [abs_mul, abs_mul, hσ_abs, one_mul, abs_of_pos hε_pos]
       _ ≤ z j := hcoordinate_bound j
-  have hmem (σ : ℝ) (hσ : σ = 1 ∨ σ = -1) :
+  have hmem (σ : 𝕜) (hσ : σ = 1 ∨ σ = -1) :
       (fun j => z j + σ * (ε * d j)) ∈ standardFeasibleSet A rhs := by
     refine ⟨fun j => by linarith [(abs_le.mp (habs j σ hσ)).1], ?_⟩
     have hvector : (fun j => z j + σ * (ε * d j)) = z + (σ * ε) • d := by
@@ -478,7 +493,7 @@ theorem eq_zero_of_extreme_standardFeasible
   have hplus := hmem 1 (Or.inl rfl)
   have hminus := hmem (-1) (Or.inr rfl)
   simp only [one_mul] at hplus
-  have hsegment : z ∈ openSegment ℝ (fun j => z j + ε * d j)
+  have hsegment : z ∈ openSegment 𝕜 (fun j => z j + ε * d j)
       (fun j => z j + (-1) * (ε * d j)) := by
     refine ⟨1 / 2, 1 / 2, by norm_num, by norm_num, by norm_num, ?_⟩
     funext j
@@ -495,13 +510,13 @@ theorem eq_zero_of_extreme_standardFeasible
 linearly independent. -/
 theorem linearIndependent_supportColumns_of_extreme_standardFeasible
     {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ)
-    {z : Col → ℝ}
-    (hz : z ∈ (standardFeasibleSet A rhs).extremePoints ℝ) :
-    LinearIndependent ℝ (fun j : {j : Col // z j ≠ 0} => A.col j.1) := by
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜)
+    {z : Col → 𝕜}
+    (hz : z ∈ (standardFeasibleSet A rhs).extremePoints 𝕜) :
+    LinearIndependent 𝕜 (fun j : {j : Col // z j ≠ 0} => A.col j.1) := by
   classical
   refine Fintype.linearIndependent_iffₛ.mpr fun f g hfg j => ?_
-  set d : Col → ℝ := ∑ k : {k : Col // z k ≠ 0}, (f k - g k) • Pi.single k.1 1 with hd
+  set d : Col → 𝕜 := ∑ k : {k : Col // z k ≠ 0}, (f k - g k) • Pi.single k.1 1 with hd
   have hd_supp (k : Col) (hk : z k = 0) : d k = 0 := by
     simp only [hd, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.single_apply]
     refine Finset.sum_eq_zero fun i _ => ?_
@@ -533,10 +548,10 @@ point: a segment through it inside the fiber has both endpoints supported on the
 coordinates, so their difference is a kernel relation among independent columns. -/
 theorem mem_extremePoints_standardFeasibleSet_of_linearIndependent
     {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ)
-    {z : Col → ℝ} (hz : z ∈ standardFeasibleSet A rhs)
-    (hindep : LinearIndependent ℝ (fun j : {j : Col // z j ≠ 0} => A.col j.1)) :
-    z ∈ (standardFeasibleSet A rhs).extremePoints ℝ := by
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜)
+    {z : Col → 𝕜} (hz : z ∈ standardFeasibleSet A rhs)
+    (hindep : LinearIndependent 𝕜 (fun j : {j : Col // z j ≠ 0} => A.col j.1)) :
+    z ∈ (standardFeasibleSet A rhs).extremePoints 𝕜 := by
   classical
   refine ⟨hz, fun x hx y hy hseg => ?_⟩
   obtain ⟨a, b, ha, hb, hab, hcomb⟩ := hseg
@@ -554,7 +569,7 @@ theorem mem_extremePoints_standardFeasibleSet_of_linearIndependent
   have hd_supp (j : Col) (hj : z j = 0) : (x - y) j = 0 := by
     simp [Pi.sub_apply, (hvanish j hj).1, (hvanish j hj).2]
   have hd_kernel : A *ᵥ (x - y) = 0 := by
-    rw [show x - y = x + (-1 : ℝ) • y by funext j; simp [Pi.sub_apply]; ring,
+    rw [show x - y = x + (-1 : 𝕜) • y by funext j; simp [Pi.sub_apply]; ring,
       Matrix.mulVec_add, Matrix.mulVec_smul, hx.2, hy.2]
     simp
   have hxy : x = y := by
@@ -579,10 +594,10 @@ theorem mem_extremePoints_standardFeasibleSet_of_linearIndependent
 /-- **Basic feasible solutions are exactly the extreme points** of a standard-form fiber. -/
 theorem mem_extremePoints_standardFeasibleSet_iff
     {Row Col : Type*} [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ) (z : Col → ℝ) :
-    z ∈ (standardFeasibleSet A rhs).extremePoints ℝ ↔
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (z : Col → 𝕜) :
+    z ∈ (standardFeasibleSet A rhs).extremePoints 𝕜 ↔
       z ∈ standardFeasibleSet A rhs ∧
-        LinearIndependent ℝ (fun j : {j : Col // z j ≠ 0} => A.col j.1) :=
+        LinearIndependent 𝕜 (fun j : {j : Col // z j ≠ 0} => A.col j.1) :=
   ⟨fun hz => ⟨extremePoints_subset hz,
       linearIndependent_supportColumns_of_extreme_standardFeasible A rhs hz⟩,
     fun hz => mem_extremePoints_standardFeasibleSet_of_linearIndependent A rhs hz.1 hz.2⟩
@@ -592,12 +607,12 @@ most `Fintype.card Row` coordinates, because its support columns are linearly in
 the `Fintype.card Row`-dimensional space `Row → ℝ`. -/
 theorem card_support_le_of_extreme_standardFeasible
     {Row Col : Type*} [Fintype Row] [Fintype Col]
-    (A : Matrix Row Col ℝ) (rhs : Row → ℝ)
-    {z : Col → ℝ} (hz : z ∈ (standardFeasibleSet A rhs).extremePoints ℝ) :
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜)
+    {z : Col → 𝕜} (hz : z ∈ (standardFeasibleSet A rhs).extremePoints 𝕜) :
     Fintype.card {j : Col // z j ≠ 0} ≤ Fintype.card Row := by
   classical
   have hindep := linearIndependent_supportColumns_of_extreme_standardFeasible A rhs hz
-  have := hindep.fintype_card_le_finrank (R := ℝ) (M := Row → ℝ)
+  have := hindep.fintype_card_le_finrank (R := 𝕜) (M := Row → 𝕜)
   simpa [Module.finrank_fintype_fun_eq_card] using this
 
 end LinearAlgebra
