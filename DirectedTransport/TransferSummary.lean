@@ -102,11 +102,17 @@ need only the field, and every consumer of the extension already depends on both
 
 ## TODO
 
-* The stationary theory of the Lindley recursion under stationary inputs (Loynes) and the
-  two-sided reflection.
-* Iteration of a *single* affine summary: its fixed point `d / (1 - c)`, the closed form of
-  its orbit and the limiting behaviour. This file has the composition law and no fixed-point
-  theory for the affine class.
+* The two-sided reflection, which keeps the state inside a band rather than above a single
+  floor. The reflection at zero of this file is the one-sided case.
+
+The stationary theory of the Lindley recursion under a stationary ergodic input (Loynes) is out
+of scope, not merely unwritten. Its content -- almost-sure finiteness of the monotone limit
+under negative drift, and uniqueness of the stationary solution -- is measure-theoretic and
+ergodic, while this file is finite and order-theoretic and uses no measure theory. The
+deterministic part of Loynes' argument, which does belong here, is the pathwise monotone
+convergence of the finite-horizon suprema for one fixed input sequence:
+`DirectedTransport.TransferSummary.tendsto_loynes_ciSup`. That statement is strictly weaker than
+Loynes' theorem and is not a substitute for it.
 
 ## References
 

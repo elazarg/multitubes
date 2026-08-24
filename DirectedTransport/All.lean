@@ -21,6 +21,8 @@ public import DirectedTransport.LinearAlgebra.NormalizedFarkas
 public import DirectedTransport.LinearAlgebra.StandardForm
 
 -- Core structural theory
+public import DirectedTransport.AffineFixedPoint
+public import DirectedTransport.LoynesConstruction
 public import DirectedTransport.Basic
 public import DirectedTransport.CategoricalRetractAdapter
 public import DirectedTransport.CategoricalRetracts
