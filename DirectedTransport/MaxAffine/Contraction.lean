@@ -49,6 +49,14 @@ graph on which the eigenvalue equation has no solution for any `lam`: the two ti
 equations are forced, being the only incoming edges, and they contradict each other.  So the
 nonnegativity of the slopes is not a convenience in the eigenvector theory; it is load-bearing.
 
+Once the slopes are nonnegative an eigenvector does exist, on any finite strongly connected
+graph and with floors allowed: that is
+`DirectedTransport.MaxAffineTransport.exists_isEigenvector_of_slope_nonneg`, proved in
+`DirectedTransport.MaxAffine.Eigenproblem` by Brouwer's theorem in exponential coordinates,
+neither mechanism of this file being available there -- a slope above one makes the operator
+expansive, and a slope below one destroys additive homogeneity.  Existence is all that argument
+gives; the eigenvalue itself is open there, and the open problem is recorded in that file.
+
 ## Main definitions
 
 * `DirectedTransport.MaxAffineTransport.flipGraph`,
@@ -86,21 +94,6 @@ many edges always admit.
 The contraction argument is indifferent to whether a vertex has an incoming edge, because the
 junk value `0` of `DirectedTransport.MaxAffineTransport.vertexOperator` is constant in the
 argument and therefore Lipschitz with any constant.  No nonemptiness hypothesis appears.
-
-## TODO
-
-Quantitative refinements of the nonnegative-slope regime.  Existence there is settled: a finite
-strongly connected graph whose slopes are all nonnegative always carries an eigenvector, by
-`DirectedTransport.MaxAffineTransport.exists_isEigenvector_of_slope_nonneg`, proved in exponential
-coordinates by Brouwer's theorem rather than by either mechanism of this file -- a slope above one
-makes the operator expansive, and a slope below one destroys additive homogeneity.  What that
-argument does not supply is uniqueness of the eigenvalue, uniqueness of the eigenvector up to the
-appropriate equivalence, or a formula for the eigenvalue in terms of the labels, all of which are
-available in the two regimes settled here and in `DirectedTransport.MaxAffine.FixedPoint`.
-
-`DirectedTransport.MaxAffineTransport.not_exists_isEigenvector_flipLabel` shows that the sign
-condition cannot be dropped, so what separates the settled cases from the open ones is no longer
-the sign of the slopes but the finer structure of the eigenvalue.
 
 ## References
 

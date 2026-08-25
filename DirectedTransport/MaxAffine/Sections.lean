@@ -43,6 +43,22 @@ theory a floor is a release date, and the usual device is an anchor or
 slack vertex pinned to zero and joined to every floored edge; adding a constant
 achieves the same reduction without enlarging the graph.
 
+**What is settled elsewhere.**  Mixed slopes are not addressed here.
+`DirectedTransport.MaxAffine.Farkas` settles them by a linear rather than a
+cyclewise test, and shows the cyclewise test of this file is not sufficient once
+slopes straddle one.  The fixed-point reading of a lax section, and the
+eigenvalue problem in the topical regime of unit-slope floorless labels, are
+settled in `DirectedTransport.MaxAffine.FixedPoint`.  Mixed slopes below unit
+modulus are settled metrically in `DirectedTransport.MaxAffine.Contraction`,
+which also exhibits a strongly connected labelling with a negative slope and no
+eigenvector.  Nonnegative slopes straddling one, where the vertex operator is
+monotone but neither additively homogeneous nor contracting, so that neither the
+Perron--Frobenius theory of topical maps nor Banach's theorem applies, are
+settled topologically in `DirectedTransport.MaxAffine.Eigenproblem`: an
+exponential change of coordinates carries the operator to a continuous self-map
+of the standard simplex, and Brouwer's theorem produces an eigenvector.  What is
+settled there is existence; the eigenvalue there is not.
+
 ## Main results
 
 * `DirectedTransport.MaxAffineTransport.Label.apply_const_le` -- the edgewise subunit-slope
@@ -56,25 +72,6 @@ achieves the same reduction without enlarging the graph.
 * `DirectedTransport.MaxAffineTransport.exists_isLaxSection_iff_forall_cycle_exists_prefixed`
   -- the same criterion read through the composite label of each closed walk,
   matching `DirectedTransport.MaxAffineTransport.Label.exists_apply_le_self_iff`.
-
-## TODO
-
-Mixed slopes are not addressed here.  `DirectedTransport.MaxAffine.Farkas`
-settles them by a linear rather than a cyclewise test, and shows the cyclewise
-test of this file is not sufficient once slopes straddle one.  The fixed-point
-reading of a lax section, and the eigenvalue problem in the topical regime of
-unit-slope floorless labels, are settled in
-`DirectedTransport.MaxAffine.FixedPoint`.  Mixed slopes below unit modulus are
-settled metrically in `DirectedTransport.MaxAffine.Contraction`, which also
-exhibits a strongly connected labelling with a negative slope and no
-eigenvector.  Nonnegative slopes straddling one, where the vertex operator is
-monotone but neither additively homogeneous nor contracting, so that neither the
-Perron--Frobenius theory of topical maps nor Banach's theorem applies, are
-settled topologically in `DirectedTransport.MaxAffine.Eigenproblem`: an
-exponential change of coordinates carries the operator to a continuous self-map
-of the standard simplex, and Brouwer's theorem produces an eigenvector.  What
-remains open there is the eigenvalue itself, no analogue of the maximum cycle
-mean being known.
 
 ## References
 

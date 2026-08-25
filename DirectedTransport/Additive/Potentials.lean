@@ -48,6 +48,19 @@ duality, and Farkas' lemma in the (max, +) semiring.  The supremum of the cycle
 means is the max cycle mean, the tropical spectral radius, or the max-plus Perron
 root.
 
+What this file develops is the potential (subeigenvector) side of max-plus
+spectral theory.  The equality side is `DirectedTransport.Additive.Eigenvector`,
+and the attained cycle-mean characterization is
+`DirectedTransport.Additive.CycleMean`.  The critical graph as a subgraph in its
+own right, the description of the whole eigenspace, and the Kleene-star
+(all-pairs longest-walk) operator, of which `maxIncomingWeight` is one row by
+`DirectedTransport.MaxPlusPotential.isGreatest_range_maxRootedWeight`, are
+`DirectedTransport.Additive.CriticalGraph`, as are the strongly connected
+components of the critical graph and the sufficiency of one Kleene-star column
+per component; *minimality* of that generating family, whose natural common
+setting is the fixed-point theory of topical maps, is the open question recorded
+there.
+
 ## Main definitions
 
 - `DirectedTransport.MaxPlusPotential.walkWeight` - total weight of a finite typed walk
@@ -97,23 +110,6 @@ leaves only finitely many.  Over `ℝ` this maximum is the supremum of the weigh
 of *all* arriving walks (`maxIncomingWeight_eq_sSup`), which is the shape the
 conditionally complete lattice literature states; that identification is the only
 place where completeness is used, and it is a corollary rather than a step.
-
-## TODO
-
-This file develops the potential (subeigenvector) side of max-plus spectral
-theory.  The equality side is `DirectedTransport.Additive.Eigenvector`, and the
-attained cycle-mean characterization is `DirectedTransport.Additive.CycleMean`.
-
-The critical graph as a subgraph in its own right, the description of the whole
-eigenspace, and the Kleene-star (all-pairs longest-walk) operator, of which
-`maxIncomingWeight` is one row by
-`DirectedTransport.MaxPlusPotential.isGreatest_range_maxRootedWeight`, are
-`DirectedTransport.Additive.CriticalGraph`, as are the strongly connected
-components of the critical graph and the sufficiency of one Kleene-star column
-per component.  Not developed anywhere yet: *minimality* of that generating
-family, which needs a hypothesis making the critical roots reach the whole
-graph.  The natural common setting for that is the fixed-point theory of topical
-maps.
 
 ## References
 

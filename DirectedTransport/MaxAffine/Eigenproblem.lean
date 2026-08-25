@@ -97,6 +97,21 @@ the vertex operator is constantly `0`, so `lam = 0` and `x = 0` solve the equati
 split off and the remaining work is
 `DirectedTransport.MaxAffineTransport.exists_isEigenvector_of_slope_nonneg_of_incoming`.
 
+## TODO
+
+Quantitative refinements of the nonnegative-slope regime.  Existence there is settled by
+`DirectedTransport.MaxAffineTransport.exists_isEigenvector_of_slope_nonneg`, and
+`DirectedTransport.MaxAffineTransport.not_exists_isEigenvector_flipLabel` shows that the sign
+condition cannot be dropped, so the settled cases and the open ones are no longer separated by
+the sign of the slopes but by the finer structure of the eigenvalue.
+
+What the Brouwer argument does not supply is uniqueness of the eigenvalue, uniqueness of the
+eigenvector up to the appropriate equivalence, or a formula for the eigenvalue in terms of the
+labels.  All three are available in the two regimes settled elsewhere, below unit slope modulus
+in `DirectedTransport.MaxAffine.Contraction` and in the translation regime of
+`DirectedTransport.MaxAffine.FixedPoint`, where the eigenvalue is the maximum cycle mean.  At
+nonnegative slopes straddling one no analogue of the maximum cycle mean is known.
+
 ## References
 
 * S. Gaubert and J. Gunawardena, *The Perron--Frobenius theorem for homogeneous, monotone

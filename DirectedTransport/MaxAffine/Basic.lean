@@ -62,6 +62,17 @@ The affine part of a composite label is represented by the transfer matrices of
 `DirectedTransport.InverseCoordinate.affineTransferMatrix` through
 `toTransferMatrix`.
 
+Eigenvalue problems for the vertex operator are outside this file.  The vertex
+operator itself, the identification of a lax section with one of its sub-fixed
+points, and its eigenvectors in the topical regime are the subject of
+`DirectedTransport.MaxAffine.FixedPoint`; its eigenvectors below unit slope
+modulus, where the operator contracts, the subject of
+`DirectedTransport.MaxAffine.Contraction`; and its eigenvectors at nonnegative
+slopes straddling one, where neither mechanism is available and an exponential
+change of coordinates makes Brouwer's theorem applicable instead, the subject of
+`DirectedTransport.MaxAffine.Eigenproblem`.  What is settled there is existence
+and not the value of the eigenvalue, which remains open.
+
 ## Main definitions
 
 * `DirectedTransport.MaxAffineTransport.Label`, its `apply`, `comp`, `id`, the `Monoid`
@@ -112,20 +123,6 @@ quantitative obstruction.  `DirectedTransport.MaxAffine.Sections` proves section
 existence in the subunit-slope and slope-one regimes;
 `DirectedTransport.MaxAffine.Farkas` gives the finite linear-system alternative for
 general labels.
-
-## TODO
-
-Eigenvalue problems for the vertex operator remain outside this file.  The
-vertex operator itself, the identification of a lax section with one of its
-sub-fixed points, and its eigenvectors in the topical regime are the subject of
-`DirectedTransport.MaxAffine.FixedPoint`; its eigenvectors below unit slope
-modulus, where the operator contracts, the subject of
-`DirectedTransport.MaxAffine.Contraction`; and its eigenvectors at nonnegative
-slopes straddling one, where neither mechanism is available and an exponential
-change of coordinates makes Brouwer's theorem applicable instead, the subject of
-`DirectedTransport.MaxAffine.Eigenproblem`.  What remains open there is not
-existence but the value of the eigenvalue, for which no analogue of the maximum
-cycle mean is known.
 
 ## References
 

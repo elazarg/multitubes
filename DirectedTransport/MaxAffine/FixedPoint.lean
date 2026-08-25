@@ -46,6 +46,16 @@ The graph-level hypotheses are the ones the proof uses: every vertex reachable f
 mean-maximizing closed walk, and no irreducibility beyond that.  Over the reals the maximizing
 walk need not be assumed either.
 
+Outside the translation regime additive homogeneity fails and the Perron--Frobenius theory of
+topical maps no longer applies verbatim, but eigenvectors are still available.  Below unit slope
+modulus `DirectedTransport.MaxAffine.Contraction` pins one down uniquely, for every real
+eigenvalue, and at nonnegative slopes straddling one
+`DirectedTransport.MaxAffine.Eigenproblem` produces one by Brouwer's theorem in exponential
+coordinates, floors included, with
+`DirectedTransport.MaxAffineTransport.not_exists_isEigenvector_flipLabel` showing the sign
+condition sharp.  Existence is what those arguments settle; the eigenvalue at nonnegative slopes
+straddling one is not settled anywhere.
+
 ## Main definitions
 
 * `DirectedTransport.MaxAffineTransport.incoming`: the edges arriving at a vertex.
@@ -86,19 +96,6 @@ stated in both forms, and only the `WithBot` form is free of nonemptiness hypoth
 Fixed points are obtained only in the topical regime.  Nothing here upgrades a lax section to a
 section for mixed slopes; the sub-fixed-point theory of that case remains what
 `DirectedTransport.MaxAffine.Farkas` and `DirectedTransport.MaxAffine.Slopes` provide.
-
-## TODO
-
-Quantitative eigenvalue theory outside the translation regime, where additive homogeneity fails
-and the Perron--Frobenius theory of topical maps no longer applies verbatim.  Existence is not
-what is missing: `DirectedTransport.MaxAffineTransport.exists_isEigenvector_of_slope_nonneg`
-produces an eigenvector at every nonnegative choice of slopes, floors included, by Brouwer's
-theorem in exponential coordinates, and
-`DirectedTransport.MaxAffineTransport.not_exists_isEigenvector_flipLabel` shows the sign
-condition there is sharp.  Below unit modulus
-`DirectedTransport.MaxAffine.Contraction` moreover pins the eigenvector down uniquely, for every
-real eigenvalue.  What no argument in the library supplies at nonnegative slopes straddling one
-is the eigenvalue itself: no analogue of the maximum cycle mean is known there.
 
 ## References
 

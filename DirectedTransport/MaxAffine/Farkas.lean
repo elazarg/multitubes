@@ -77,9 +77,8 @@ the edge slopes, and the weights of the floor rows are the slack absorbed by the
 floors.  A positive-weight cycle is the special case whose support is one closed
 walk, with the slopes multiplying along it.
 
-## TODO
-
-Nothing here computes a certificate or bounds its size.
+The duality is existential on both sides: nothing here computes a certificate or
+bounds its size.
 
 ## References
 
