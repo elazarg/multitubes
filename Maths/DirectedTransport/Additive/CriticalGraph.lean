@@ -885,7 +885,7 @@ The reachability hypothesis is what makes the column rooted at `base` an eigenve
 `Maths.MaxPlusPotential.isGraphEigenvector_maxRootedWeight`, and it is the only
 hypothesis beyond finiteness and the bound on the cycle means; neither strong connectivity nor
 attainment of the maximum cycle mean is used. -/
-theorem exists_mem_toCriticalClass_eq_of_generatesEigenspace [Fintype V] {weight : E → 𝕜}
+theorem exists_mem_toCriticalClass_eq_of_generatesEigenspace {weight : E → 𝕜}
     {lam : 𝕜}
     (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
       walkWeight weight cycle ≤ cycle.length * lam)

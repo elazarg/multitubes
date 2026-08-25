@@ -414,10 +414,11 @@ theorem eigenvalues_loopLabel : eigenvalues loopGraph loopLabel = Set.Ici 5 := b
     rw [max_eq_right (by linarith : (10 : ℝ) ≤ 2 * lam)]
     ring
 
-/-- **Above the threshold the two-loop labelling has exactly two eigenvectors per eigenvalue**,
-one on each branch of the maximum: the doubling is tight at `lam` and the reset at `10 - lam`.  At
-the threshold the two coincide. -/
-theorem isEigenvector_loopLabel_iff_of_lt {lam : ℝ} (hlam : 5 < lam) (x : Unit → ℝ) :
+/-- **At every eigenvalue the two-loop labelling has exactly two eigenvectors**, one on each
+branch of the maximum: the doubling is tight at `lam` and the reset at `10 - lam`.  At the
+threshold `lam = 5` the two coincide, which is why the statement holds there as well and the
+eigenvector set of that labelling is described with no gap. -/
+theorem isEigenvector_loopLabel_iff_of_le {lam : ℝ} (hlam : 5 ≤ lam) (x : Unit → ℝ) :
     IsEigenvector loopGraph loopLabel lam x ↔ x () = lam ∨ x () = 10 - lam := by
   rw [isEigenvector_loopLabel_iff]
   constructor
@@ -442,8 +443,8 @@ theorem exists_pair_ne_isEigenvector_loopLabel {lam : ℝ} (hlam : 5 < lam) :
     ∃ x y : Unit → ℝ, IsEigenvector loopGraph loopLabel lam x ∧
       IsEigenvector loopGraph loopLabel lam y ∧ x ≠ y := by
   refine ⟨fun _ => lam, fun _ => 10 - lam,
-    (isEigenvector_loopLabel_iff_of_lt hlam _).2 (Or.inl rfl),
-    (isEigenvector_loopLabel_iff_of_lt hlam _).2 (Or.inr rfl), fun hcon => ?_⟩
+    (isEigenvector_loopLabel_iff_of_le hlam.le _).2 (Or.inl rfl),
+    (isEigenvector_loopLabel_iff_of_le hlam.le _).2 (Or.inr rfl), fun hcon => ?_⟩
   have hvalue : lam = 10 - lam := congrFun hcon ()
   linarith
 

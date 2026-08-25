@@ -472,11 +472,12 @@ theorem exp_walkWeight_log_eq_walkSlopeProduct {start finish : V}
       rw [MaxPlusPotential.walkWeight_concat, walkSlopeProduct_concat,
         Real.exp_add, ih, Real.exp_log edge.2]
 
-/-- **Positive gauge theorem.**  On a finite graph with nonnegative slopes,
-all directed cycle products are at most one exactly when a positive vertex
-gauge makes every normalized edge slope at most one. -/
+/-- **Positive gauge theorem.**  With finitely many edges and nonnegative
+slopes, all directed cycle products are at most one exactly when a positive
+vertex gauge makes every normalized edge slope at most one.  The vertex type is
+arbitrary, as in the additive duality this rests on. -/
 theorem exists_nonexpansiveGauge_iff_cycleProduct_le_one
-    [Fintype V] [Finite E] (hnonneg : ∀ edge, 0 ≤ slope edge) :
+    [Finite E] (hnonneg : ∀ edge, 0 ≤ slope edge) :
     (∃ gauge : V → ℝ, IsNonexpansiveGauge (G := G) slope gauge) ↔
       ∀ (base : V) (cycle : G.Walk base base),
         walkSlopeProduct slope cycle ≤ 1 := by
@@ -620,11 +621,12 @@ theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_expansiveGauge
       walkSlopeProduct_mul_gauge_eq_of_forall_mem slope cycle hcritical
     nlinarith [hgauge.1 base]
 
-/-- **Dual positive gauge theorem.**  For positive slopes on a finite graph,
-all directed cycle products are at least one exactly when a positive vertex
-gauge makes every normalized edge slope at least one. -/
+/-- **Dual positive gauge theorem.**  For positive slopes and finitely many
+edges, all directed cycle products are at least one exactly when a positive
+vertex gauge makes every normalized edge slope at least one.  The vertex type is
+arbitrary. -/
 theorem exists_expansiveGauge_iff_one_le_cycleProduct
-    [Fintype V] [Finite E] (hpos : ∀ edge, 0 < slope edge) :
+    [Finite E] (hpos : ∀ edge, 0 < slope edge) :
     (∃ gauge : V → ℝ, IsExpansiveGauge (G := G) slope gauge) ↔
       ∀ (base : V) (cycle : G.Walk base base),
         1 ≤ walkSlopeProduct slope cycle := by

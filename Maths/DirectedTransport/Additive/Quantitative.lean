@@ -150,7 +150,7 @@ def SymmetricResidualAtMost (G : EdgeGraph V E) (weight : E → ℝ)
 /-- Symmetric signed-row feasibility is exactly the doubled finite row
 system. -/
 theorem symmetricResidualAtMost_iff_finiteInequality
-    [Fintype V] [DecidableEq V] [Fintype E]
+    [Fintype V] [DecidableEq V]
     (G : EdgeGraph V E) (weight : E → ℝ) (level : ℝ) :
     SymmetricResidualAtMost G weight level ↔
       FiniteInequality.WorstResidualAtMost (signedDelta G)

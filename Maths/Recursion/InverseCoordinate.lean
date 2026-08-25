@@ -407,9 +407,10 @@ theorem affineFixedPoint_neg_self {a : ℝ} (ha : a ≠ 1) :
 theorem hazardCeiling_pos {a : ℝ} (ha : 1 < a) : 0 < hazardCeiling a :=
   div_pos (by linarith) (by linarith)
 
-/-- The hazard ceiling is below `1`. -/
-theorem hazardCeiling_lt_one {a : ℝ} (ha : 1 < a) : hazardCeiling a < 1 := by
-  rw [hazardCeiling, div_lt_one (by linarith)]
+/-- The hazard ceiling is below `1`.  Positivity of the gain is all that is used; the
+ceiling is below `1` already for `0 < a`, and negative only for `a < 1`. -/
+theorem hazardCeiling_lt_one {a : ℝ} (ha : 0 < a) : hazardCeiling a < 1 := by
+  rw [hazardCeiling, div_lt_one ha]
   linarith
 
 /-- The hazard ceiling is the reciprocal of the affine fixed point. -/

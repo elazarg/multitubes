@@ -268,7 +268,7 @@ private theorem signedDelta_true_eq_neg [DecidableEq V]
 /-- Projecting a normalized doubled-graph circulation gives a balanced signed
 circulation of `l1` mass at most one. -/
 theorem isUnitSignedCirculation_signedProjection
-    [Fintype V] [DecidableEq V] [Fintype E]
+    [DecidableEq V] [Fintype E]
     (G : EdgeGraph V E) (coefficient : SignedEdge E → ℝ)
     (hcoefficient :
       FiniteInequality.IsNormalizedCertificate (signedDelta G) coefficient) :
@@ -329,7 +329,7 @@ def signedCirculationLift [Fintype E] [DecidableEq E]
 /-- The canonical lift realizes every explicitly balanced signed circulation
 when an edge is available to carry canceled padding mass. -/
 theorem signedCirculationLift_isNormalizedCertificate
-    [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E]
+    [DecidableEq V] [Fintype E] [DecidableEq E]
     (G : EdgeGraph V E) (chosen : E) (circulation : E → ℝ)
     (hcirculation : IsUnitSignedCirculation G circulation) :
     FiniteInequality.IsNormalizedCertificate (signedDelta G)

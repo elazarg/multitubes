@@ -167,7 +167,7 @@ private theorem sum_edgeMultiplicity_mul_signedDelta_eq_zero
 /-- Every nonempty directed circuit in the doubled graph is a normalized
 signed-circulation certificate. -/
 theorem circuitCoefficient_isNormalizedCertificate
-    [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E]
+    [DecidableEq V] [Fintype E] [DecidableEq E]
     (G : EdgeGraph V E) {base : V}
     (cycle : (signedGraph G).Walk base base) (hne : 0 < cycle.length) :
     FiniteInequality.IsNormalizedCertificate (signedDelta G)
@@ -279,7 +279,7 @@ theorem symmetricResidualAtMost_iff_signedGraph
 /-- **Exact symmetric circuit threshold.**  Symmetric residual feasibility is
 equivalent to the mean bound on every circuit in the doubled graph. -/
 theorem symmetricResidualAtMost_iff_signedClosedWalk_le
-    [Fintype V] [Finite E] (G : EdgeGraph V E) (weight : E → ℝ)
+    [Finite E] (G : EdgeGraph V E) (weight : E → ℝ)
     (level : ℝ) :
     SymmetricResidualAtMost G weight level ↔
       ∀ (base : V) (cycle : (signedGraph G).Walk base base),

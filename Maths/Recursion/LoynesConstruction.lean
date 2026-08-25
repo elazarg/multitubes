@@ -118,8 +118,9 @@ the stage `n - (k + 1)` steps into the past. -/
 def reversed (n : ℕ) (u : ℕ → ℝ) : ℕ → ℝ := fun k => u (n - (k + 1))
 
 /-- The forward transport of a reversed input over the window `[k + 1, n)` is the age-indexed
-transport over the last `n - (k + 1)` stages. -/
-theorem transport_reversed {k n : ℕ} (hk : k < n) :
+transport over the last `n - (k + 1)` stages.  No relation between `k` and `n` is needed: past
+the horizon both index sets are empty and the identity reads `1 = 1`. -/
+theorem transport_reversed (k n : ℕ) :
     transport (reversed n a) (k + 1) n = pastTransport a (n - (k + 1)) := by
   refine Finset.prod_nbij' (fun i => n - (i + 1)) (fun p => n - (p + 1)) ?_ ?_ ?_ ?_ ?_
   · intro i hi
@@ -140,8 +141,9 @@ theorem transport_reversed {k n : ℕ} (hk : k < n) :
     rfl
 
 /-- The forward service of a reversed input over the window `[m, n)` is the age-indexed service
-over the last `n - m` stages: it depends on the window only through its length. -/
-theorem service_reversed {m n : ℕ} (hmn : m ≤ n) :
+over the last `n - m` stages: it depends on the window only through its length.  As for the
+transport, no relation between `m` and `n` is needed. -/
+theorem service_reversed (m n : ℕ) :
     service (reversed n a) (reversed n g) m n = pastService a g (n - m) := by
   refine Finset.sum_nbij' (fun k => n - (k + 1)) (fun p => n - (p + 1)) ?_ ?_ ?_ ?_ ?_
   · intro k hk
@@ -160,7 +162,7 @@ theorem service_reversed {m n : ℕ} (hmn : m ≤ n) :
     omega
   · intro k hk
     rw [Finset.mem_Ico] at hk
-    rw [transport_reversed a hk.2]
+    rw [transport_reversed a k n]
     rfl
 
 /-! ## The finite-horizon Loynes values -/
@@ -209,13 +211,12 @@ theorem reflectedIter_reversed (ha : ∀ k, 0 ≤ a k) (n : ℕ) :
   refine le_antisymm
     (Finset.sup'_le _ (fun m => lindleyTerm (reversed n a) (reversed n g) 0 m n) fun m hm => ?_)
     (Finset.sup'_le _ (fun j => -pastService a g j) fun j hj => ?_)
-  · have hmn : m ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
-    rw [lindleyTerm_zero_state, service_reversed a g hmn]
+  · rw [lindleyTerm_zero_state, service_reversed a g m n]
     exact neg_pastService_le_loynes a g (Nat.sub_le n m)
   · have hjn : j ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
     have hsub : n - (n - j) = j := by omega
     have hterm : lindleyTerm (reversed n a) (reversed n g) 0 (n - j) n = -pastService a g j := by
-      rw [lindleyTerm_zero_state, service_reversed a g (Nat.sub_le n j), hsub]
+      rw [lindleyTerm_zero_state, service_reversed a g (n - j) n, hsub]
     rw [← hterm]
     exact Finset.le_sup' (fun m => lindleyTerm (reversed n a) (reversed n g) 0 m n)
       (Finset.mem_range.mpr (Nat.lt_succ_of_le (Nat.sub_le n j)))
