@@ -16,7 +16,7 @@ import Mathlib.Data.List.Perm.Basic
 # Directed multigraphs with edge identities and their typed walks
 
 A directed multigraph is represented by a vertex type, an edge type, and source and target
-maps. Edges are data rather than mere related vertex pairs, so parallel edges retain their
+maps. Edges are data, not mere related vertex pairs, so parallel edges retain their
 identities.
 
 `EdgeGraph.Walk G start finish` is an endpoint-indexed finite walk. It stores the edge
@@ -151,7 +151,7 @@ theorem mem_visited_of_mem_edges (walk : G.Walk start finish)
 
 /-- A walk whose visited vertices are pairwise distinct traverses pairwise
 distinct edges: a repeated edge would revisit its target vertex.  This lets
-walk bounds count edges instead of vertices. -/
+walk bounds count edges, not vertices. -/
 theorem edges_nodup_of_visited_nodup (walk : G.Walk start finish)
     (hnd : walk.visited.Nodup) : walk.edges.Nodup := by
   induction walk with

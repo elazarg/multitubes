@@ -16,7 +16,7 @@ absence of a closed walk of positive weight, and needs finitely many edges: the 
 maximum over the walks that repeat no edge, and without an edge bound there is no such maximum.
 `Maths.Graph.ChargedRelation` proves a duality of a different shape for nonnegative charges -
 a *bounded* potential exists exactly when the path charges are bounded above - and needs no
-finiteness at all, because its witness is a supremum rather than a maximum.
+finiteness at all: its witness is a supremum, not a maximum.
 
 This file is the bridge.  A digraph with a nonnegative weighting is a charged relation whose
 source and target are exchanged, and with that orientation the two potential inequalities are

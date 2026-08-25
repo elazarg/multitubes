@@ -113,7 +113,7 @@ The reflection of this file is one-sided: the state is kept above a single floor
 instead to a band `[lo, hi]` is the two-sided reflection
 `Maths.TransferSummary.bandIter`, developed separately because it needs a
 four-coefficient summary class in place of the three-coefficient max-affine one, and because its
-Lindley representation is an infimum of suprema rather than a supremum. The reflection at zero is
+Lindley representation is an infimum of suprema, not a supremum. The reflection at zero is
 its case of an inactive upper clamp.
 
 ## References

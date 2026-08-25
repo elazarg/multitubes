@@ -35,7 +35,7 @@ positive-coefficient row with every negative-coefficient row, giving a reduced s
 both directions and Farkas certificates lift back along the reduction, so an induction on the
 number of columns proves the alternative.
 
-The row index is kept an abstract `Fintype` rather than a `Fin m` precisely because the
+The row index is kept an abstract `Fintype`, not a `Fin m`, precisely because the
 reduced index is a sum of a subtype and a product of subtypes; a user instantiates `I := Fin m`
 at the application boundary.
 

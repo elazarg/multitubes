@@ -137,7 +137,7 @@ rooted there an eigenvector, by
 eigenvector attached to a class there is nothing a generating family could fail to express.
 Nothing further is assumed - in particular the generating set is not required to consist of
 critical vertices, and the walks from its members back to the class are read off the generating
-hypothesis itself rather than assumed.
+hypothesis itself, not assumed.
 
 ## References
 

@@ -96,7 +96,7 @@ The increment orientation `φ (source e) + weight e ≤ φ (target e)` is used
 throughout.  The opposite decrement orientation
 `φ (target e) + weight e ≤ φ (source e)` is the same notion applied to the
 reversed graph, and is the convention of `Maths.ChargedPathBudget`, which studies
-nonnegative charges and the *oscillation* of a bounded potential rather than
+nonnegative charges and the *oscillation* of a bounded potential, not
 signed weights and cycles.
 
 The weights live in a linearly ordered field `𝕜`, matching the generality of
@@ -108,7 +108,7 @@ the walks arriving at a vertex without repeating an edge, of which `[Finite E]`
 leaves only finitely many.  Over `ℝ` this maximum is the supremum of the weights
 of *all* arriving walks (`maxIncomingWeight_eq_sSup`), which is the shape the
 conditionally complete lattice literature states; that identification is the only
-place where completeness is used, and it is a corollary rather than a step.
+place where completeness is used, and it is a corollary, not a step.
 
 ## References
 
@@ -339,9 +339,8 @@ without repeating an edge.  With no closed walk of positive weight this is also
 the greatest weight of *any* walk arriving there (`isGreatest_incomingWeights`),
 so it is the value function of the Bellman--Ford longest-walk recursion; in
 max-plus notation it is the largest entry of the row of the Kleene star of the
-weight matrix indexed by that vertex.  Taking a maximum over a finite family
-rather than a supremum is what keeps the duality free of any completeness
-assumption on the weights. -/
+weight matrix indexed by that vertex.  Taking a maximum over a finite family, not a
+supremum, is what keeps the duality free of any completeness assumption on the weights. -/
 def maxIncomingWeight (G : EdgeGraph V E) (weight : E → 𝕜) (vertex : V) : 𝕜 :=
   Finset.max' (Set.Finite.toFinset (finite_nodupIncomingWeights (G := G) weight vertex))
     ((Set.Finite.toFinset_nonempty (finite_nodupIncomingWeights (G := G) weight vertex)).2
@@ -421,8 +420,8 @@ theorem isGreatest_incomingWeights {weight : E → 𝕜}
 
 /-- Over the reals the canonical potential is the supremum of the weights of the
 walks arriving at a vertex.  This is the only statement of the file that uses
-completeness of `ℝ`, and it is a corollary of `isGreatest_incomingWeights`
-rather than a step towards the duality. -/
+completeness of `ℝ`, and it is a corollary of `isGreatest_incomingWeights`,
+not a step towards the duality. -/
 theorem maxIncomingWeight_eq_sSup {weight : E → ℝ}
     (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)
     (vertex : V) :

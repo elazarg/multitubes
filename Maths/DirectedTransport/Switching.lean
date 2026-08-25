@@ -31,7 +31,7 @@ Switching corrects walk labels at their endpoints only
 `Maths.HasTrivialCycleLabels` - is a switching invariant.
 `Maths.switch_switch` and `Maths.switch_one` make switching an
 action of the group of unit-valued vertex functions on gains; it is stated as rewriting
-lemmas rather than as a `MulAction` instance because the action depends on the edge graph,
+lemmas, not as a `MulAction` instance, because the action depends on the edge graph,
 not only on the types involved.
 
 The main result says that when every edge endpoint is linked to a base vertex balance is

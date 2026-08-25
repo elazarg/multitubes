@@ -37,8 +37,8 @@ threshold is attainable, which is precisely the unbounded-below case.
 
 * `Maths.FiniteInequality.worstResidualAtMost_iff_normalizedDual_le`: the exact
   threshold duality - a worst-residual threshold is attainable exactly when every normalized
-  certificate has objective at most that threshold.  It is stated level by level rather than
-  through an extended-real infimum, which is what keeps the certificate-free case meaningful.
+  certificate has objective at most that threshold.  It is stated level by level, not
+  through an extended-real infimum, which keeps the certificate-free case meaningful.
 * `Maths.FiniteInequality.certificateValue_le_of_worstResidualAtMost`: the easy
   direction, usable on its own.
 * `Maths.FiniteInequality.Recession.coefficient_eq_zero_of_not_critical`: every

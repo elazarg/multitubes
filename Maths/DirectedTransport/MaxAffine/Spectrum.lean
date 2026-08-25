@@ -20,7 +20,7 @@ set
 
 `Maths.MaxAffineTransport.eigenvalues G label = {lam | ∃ x, F x = lam + x}`
 
-rather than a single eigenvalue, and settles that the eigenvalue is **not** determined by the
+not a single eigenvalue, and settles that the eigenvalue is **not** determined by the
 labelling once a slope differs from one.
 
 The comparison object is the set of **relaxation levels**
@@ -66,9 +66,9 @@ That the eigenvalue is not an invariant is not new at a single common slope: tra
 eigenvector of a floorless labelling of common slope `s` moves the eigenvalue by `-(1 - s) * c`
 (`Maths.MaxAffineTransport.isEigenvector_add_const_of_slope_eq`), which combined with
 existence at nonnegative slopes gives **every** real number as an eigenvalue when `s ≠ 1`.  The
-same computation shows the translation freedom of the eigenvector is spent rather than lost: at
+same computation shows the translation freedom of the eigenvector is spent, not lost: at
 `s ≠ 1` two eigenvectors of the *same* eigenvalue never differ by a nonzero constant, so the
-equivalence under which the topical eigenvector is unique degenerates instead of failing.
+equivalence under which the topical eigenvector is unique degenerates; it does not fail.
 
 ## Main definitions
 
@@ -108,7 +108,7 @@ equivalence under which the topical eigenvector is unique degenerates instead of
 ## Implementation notes
 
 `Maths.MaxAffineTransport.relaxationLevels` is defined through
-`Maths.MaxAffineTransport.Label.relax` rather than by an inequality on the vertex
+`Maths.MaxAffineTransport.Label.relax`, not by an inequality on the vertex
 operator, so that it needs no finiteness of the edge type and no hypothesis that a vertex has an
 incoming edge, and so that the criteria of `Maths.DirectedTransport.MaxAffine.Slopes` apply to it
 verbatim.  `Maths.MaxAffineTransport.mem_relaxationLevels_iff` is the elementary

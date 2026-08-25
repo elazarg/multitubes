@@ -25,7 +25,7 @@ complementary slackness for that pair.
 
 Following the pattern of `Maths.DirectedTransport.MaxAffine.Duality` and
 `Maths.FiniteInequality.worstResidualAtMost_iff_normalizedDual_le`, strong duality
-is stated as an exact *threshold* equivalence rather than an equality of optima: for every
+is stated as an exact *threshold* equivalence, not an equality of optima: for every
 level `t`, the primal attains at least `t` exactly when the dual is bounded below by `t` (and
 the primal is feasible). This sidesteps extended reals and attainment, and stays meaningful
 when a side is unbounded or empty.

@@ -44,9 +44,9 @@ slack vertex pinned to zero and joined to every floored edge; adding a constant
 achieves the same reduction without enlarging the graph.
 
 **What is settled elsewhere.**  Mixed slopes are not addressed here.
-`Maths.DirectedTransport.MaxAffine.Farkas` settles them by a linear rather than a
-cyclewise test, and shows the cyclewise test of this file is not sufficient once
-slopes straddle one.  The fixed-point reading of a lax section, and the
+`Maths.DirectedTransport.MaxAffine.Farkas` settles them by a linear test, not a cyclewise
+one, and shows the cyclewise test of this file is not sufficient once slopes straddle one.
+The fixed-point reading of a lax section, and the
 eigenvalue problem in the topical regime of unit-slope floorless labels, are
 settled in `Maths.DirectedTransport.MaxAffine.FixedPoint`.  Mixed slopes below unit
 modulus are settled metrically in `Maths.DirectedTransport.MaxAffine.Contraction`,

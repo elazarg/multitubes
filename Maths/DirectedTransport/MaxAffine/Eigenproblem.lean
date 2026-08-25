@@ -24,8 +24,8 @@ additive homogeneity, so `F` is not topical.  The argument below uses neither pr
 
 The device is an **exponential change of coordinates**.  A label acts by
 `z ↦ max floor (shift + slope * z)`; conjugating by the exponential turns that into
-`y ↦ max (exp floor) (exp shift * y ^ slope)` on the positive half-line, a *monomial* rather than
-an affine expression.  This is `Maths.MaxAffineTransport.coneTerm`, and taking the
+`y ↦ max (exp floor) (exp shift * y ^ slope)` on the positive half-line, a *monomial*, not an
+affine expression.  This is `Maths.MaxAffineTransport.coneTerm`, and taking the
 best incoming demand at each vertex gives the **cone operator**
 `Maths.MaxAffineTransport.coneOperator`, which satisfies
 `exp (F x v) = Φ (exp ∘ x) v`
@@ -106,7 +106,7 @@ doubling of slope `2`: its eigenvalues are exactly the reals from `5` upwards
 (`Maths.MaxAffineTransport.eigenvalues_loopLabel`), each of them above `5` carried by two distinct
 eigenvectors (`Maths.MaxAffineTransport.exists_pair_ne_isEigenvector_loopLabel`).  So no formula
 determines the eigenvalue at nonnegative slopes straddling one, and the question is which real
-numbers are eigenvalues rather than which one is.
+numbers are eigenvalues, not which one is.
 
 The **least** eigenvalue is not open, and needs none of this file: every eigenvalue is a level at
 which the inequality `F x ≤ lam + x` is solvable, and by

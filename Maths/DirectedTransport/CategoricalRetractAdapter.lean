@@ -21,7 +21,7 @@ retract theories: one-base flatness of a transport (`Maths.DirectedTransport.Exa
 coincides with flatness of its path functor, and across that dictionary the
 concrete compression theorem is definitionally an instance of the categorical
 one, so the path-functor translation of `Maths.DirectedTransport.Category` carries an
-actual theorem rather than only data.
+actual theorem, not only data.
 
 ## Main definitions
 

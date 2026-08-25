@@ -34,7 +34,7 @@ convention `max ∅ = -∞`, so every real threshold is feasible.
 
 * `Maths.AdditiveTransport.worstDirectedResidualAtMost_iff_closedWalk_le`: a
   one-sided residual threshold is attainable exactly when every closed walk has mean at most
-  that threshold.  It is stated by multiplication rather than division, which keeps empty
+  that threshold.  It is stated by multiplication, not division, which keeps empty
   walks safe and leaves the statement meaningful on acyclic graphs.
 * `Maths.AdditiveTransport.symmetricResidualAtMost_iff_finiteInequality`: symmetric
   signed-row feasibility is exactly the doubled finite row system, the bridge to

@@ -97,7 +97,7 @@ eigenvalue (`Maths.MaxAffineTransport.eigenvalues_eq_univ_of_slope_eq`).
 
 ## Implementation notes
 
-The branch system is the one of `Maths.DirectedTransport.MaxAffine.Duality` rather than a fresh
+The branch system is the one of `Maths.DirectedTransport.MaxAffine.Duality` not a fresh
 copy, so that threshold strong duality applies verbatim.  What this file adds to it is the geometry
 of a branch: `Maths.MaxAffineTransport.branchEdge` and `Maths.MaxAffineTransport.branchSlope` name
 the edge and the gain that `Maths.MaxAffineTransport.branchDelta` encodes implicitly, and

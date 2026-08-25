@@ -68,12 +68,12 @@ is assumed literally: every vertex has an incoming edge, `∀ vertex, ∃ e, G.t
 That is exactly what makes a walk of every prescribed length arrive at every vertex, so that
 each `stepValue` is a maximum over a nonempty set, and it is implied by strong connectivity
 on at least two vertices.  Connectivity is used nowhere else: the value table here starts
-from the zero vector rather than from a source, so no vertex needs to be reachable from any
+from the zero vector, not from a source, so no vertex needs to be reachable from any
 other.
 
 `Maths.MaxPlusPotential.stepValue` is total, taking the junk value `0` when no
 walk of the given length arrives, which the incoming-edge hypothesis rules out.  This keeps
-it a plain function rather than one depending on a proof.
+it a plain function, not one depending on a proof.
 
 Karp's formula is stated with `Finset.sup'` over the vertices and `Finset.inf'` over
 `Finset.range n`; both index sets are nonempty exactly because the vertex type is, which is

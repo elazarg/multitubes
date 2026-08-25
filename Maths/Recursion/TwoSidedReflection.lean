@@ -14,7 +14,7 @@ import Mathlib.Tactic.Ring
 /-!
 # The two-sided reflection
 
-The *two-sided reflection* keeps the state inside a band `[lo, hi]` rather than above a single
+The *two-sided reflection* keeps the state inside a band `[lo, hi]`, not above a single
 floor: one stage of the recursion is `x ↦ min hi (max lo (a * x - g))`, the Skorokhod problem on
 an interval. In queueing terms the band is a finite buffer, the lower clamp forbidding a negative
 backlog and the upper clamp discarding what the buffer cannot hold; the reflection at a single
@@ -90,7 +90,7 @@ floor is the infinite-buffer case, recovered exactly where the upper clamp does 
 
 ## Implementation notes
 
-The upper clamp is what makes the representation an infimum of suprema rather than a supremum.
+The upper clamp is what makes the representation an infimum of suprema, not a supremum.
 Pushing the affine stages to the right past the clamps turns a word into an alternating
 composite of `max lo` and `min hi`, and no rearrangement collapses that to a single supremum:
 the terms of the one-sided representation are not merely truncated at `hi`. What does survive is
@@ -98,12 +98,12 @@ the reading of the upper clamp as a restart. Hitting the top of the band forgets
 as hitting the floor does, so the state at time `n` is the *smallest*, over all times `m ≤ n` at
 which the band's top may have been reached, of the one-sided state obtained by restarting from
 `hi` at `m`; those one-sided states are themselves suprema, by the representation above a general
-floor. This is why the inner supremum is packaged as `bandRestart` rather than as a supremum over
+floor. This is why the inner supremum is packaged as `bandRestart`, not as a supremum over
 a two-index family: a restart time `m` bounds its own inner range, and indexing through the
 shifted input keeps every supremum over a nonempty range.
 
 As in the one-sided theory, the stationary regime under a stationary ergodic input is out of
-scope rather than unwritten: nothing here identifies the pathwise limits of the backward
+scope, not unwritten: nothing here identifies the pathwise limits of the backward
 construction as a stationary solution, which is a statement about the law of the input under the
 shift and needs measure theory that this file does not use.
 
@@ -132,8 +132,8 @@ namespace Maths.TransferSummary
 /-! ## Clamped affine summaries -/
 
 /-- Coefficients of a clamped affine self-map of the line: the map
-`x ↦ min hi (max lo (shift + slope * x))`, which confines the state to the band `[lo, hi]`
-instead of to the half-line above a single floor. -/
+`x ↦ min hi (max lo (shift + slope * x))`, which confines the state to the band `[lo, hi]`,
+not to the half-line above a single floor. -/
 @[ext] structure ClampedAffineSummary where
   /-- The bottom of the band, the value the map never falls below. -/
   lo : ℝ

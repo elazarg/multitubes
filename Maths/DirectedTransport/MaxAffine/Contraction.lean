@@ -15,7 +15,7 @@ import Mathlib.Topology.MetricSpace.Pseudo.Pi
 
 `Maths.DirectedTransport.MaxAffine.FixedPoint` solves the eigenvalue equation `F x = lam + x` for
 the vertex operator `F` in the topical regime, where every slope is one and every floor is absent.
-This file solves it in a disjoint regime, by a metric rather than an order argument: when every
+This file solves it in a disjoint regime, by a metric argument, not an order one: when every
 slope is bounded in absolute value by a constant below one, `F` is a contraction of `V → ℝ` in the
 sup-norm, and Banach's theorem supplies a fixed point that is moreover unique.
 
