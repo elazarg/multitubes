@@ -852,23 +852,14 @@ projective action exactly when it is a root of `projectiveFixedPolynomial`. -/
 theorem projectiveStep_eq_self_iff {M : Matrix (Fin 2) (Fin 2) ℝ} {x : ℝ}
     (hden : M 1 0 * x + M 1 1 ≠ 0) :
     projectiveStep M x = x ↔ projectiveFixedPolynomial M x = 0 := by
-  rw [projectiveStep, div_eq_iff hden, projectiveFixedPolynomial]
-  constructor
-  · intro h
-    linear_combination -h
-  · intro h
-    linear_combination -h
+  grind [projectiveStep, projectiveFixedPolynomial]
 
 /-- **A root of the quadratic avoids the pole.** For a nonsingular matrix the fixed-point
 quadratic does not vanish at the pole, so no root is lost by the denominator hypothesis of
 `projectiveStep_eq_self_iff`. -/
 theorem den_ne_zero_of_projectiveFixedPolynomial_eq_zero {M : Matrix (Fin 2) (Fin 2) ℝ} {x : ℝ}
     (hM : M.det ≠ 0) (h : projectiveFixedPolynomial M x = 0) : M 1 0 * x + M 1 1 ≠ 0 := by
-  intro hden
-  refine hM ?_
-  rw [projectiveFixedPolynomial] at h
-  rw [Matrix.det_fin_two]
-  linear_combination (M 0 0 - M 1 0 * x) * hden + M 1 0 * h
+  grind [projectiveFixedPolynomial, Matrix.det_fin_two]
 
 /-- **Why the discriminant classifies.** `projectiveDiscriminant` is the discriminant of the
 fixed-point quadratic: `(d - a) ^ 2 + 4 * b * c = trace ^ 2 - 4 * det`. -/
@@ -1109,9 +1100,7 @@ theorem exists_isProjectiveElliptic :
 /-- The projective action of the quarter turn is `x ↦ -x⁻¹`. -/
 theorem projectiveStep_quarterTurnMatrix (x : ℝ) :
     projectiveStep quarterTurnMatrix x = -x⁻¹ := by
-  rw [projectiveStep, quarterTurnMatrix]
-  norm_num
-  rw [neg_div, one_div]
+  simp [projectiveStep, quarterTurnMatrix, neg_div, one_div]
 
 /-- The fixed-point quadratic of the quarter turn is `x ^ 2 + 1`, which has no real root. -/
 theorem projectiveFixedPolynomial_quarterTurnMatrix (x : ℝ) :

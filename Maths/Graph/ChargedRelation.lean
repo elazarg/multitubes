@@ -269,8 +269,6 @@ def edge (e : Edge) {s t : State} (hs : R.src e = s) (ht : R.tgt e = t) : R.Path
 
 @[simp] theorem chargeSum_edge (e : Edge) {s t : State} (hs : R.src e = s)
     (ht : R.tgt e = t) : (Path.edge e hs ht).chargeSum = R.charge e := by
-  subst hs
-  subst ht
   simp [edge]
 
 /-- Concatenate `n` copies of a closed path. -/

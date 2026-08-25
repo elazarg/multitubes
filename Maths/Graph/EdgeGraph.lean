@@ -298,9 +298,7 @@ theorem edgeMultiplicity_eq_count [DecidableEq E]
 theorem edgeMultiplicity_eq_one_iff_mem_edges [DecidableEq E]
     (walk : G.Walk start finish) (hnodup : walk.edges.Nodup) (edge : E) :
     walk.edgeMultiplicity edge = 1 ↔ edge ∈ walk.edges := by
-  rw [walk.edgeMultiplicity_eq_count]
-  exact ⟨fun h => List.count_pos_iff.mp (by omega),
-    fun h => List.count_eq_one_of_mem hnodup h⟩
+  grind [walk.edgeMultiplicity_eq_count]
 
 theorem edgeMultiplicity_le_one [DecidableEq E]
     (walk : G.Walk start finish) (hnodup : walk.edges.Nodup) (edge : E) :

@@ -201,13 +201,9 @@ theorem exists_scaledDual_of_not_exists_objective_ge
     have hsub : ∑ i, (u (Sum.inr (Sum.inr (Sum.inl i))) - u (Sum.inr (Sum.inl i))) * A i j
         = (∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * A i j)
           - ∑ i, u (Sum.inr (Sum.inl i)) * A i j := by
-      rw [← Finset.sum_sub_distrib]
-      exact Finset.sum_congr rfl fun i _ => by ring
-    have hneg : ∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * -A i j
-        = -∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * A i j := by
-      rw [← Finset.sum_neg_distrib]
-      exact Finset.sum_congr rfl fun i _ => by ring
-    rw [hneg] at hk
+      simp [sub_mul, Finset.sum_sub_distrib]
+    rw [show ∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * -A i j
+        = -∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * A i j by simp [mul_neg]] at hk
     rw [hsub]
     have hu := hnn (Sum.inl j)
     linarith
@@ -217,13 +213,9 @@ theorem exists_scaledDual_of_not_exists_objective_ge
     have hsub : ∑ i, (u (Sum.inr (Sum.inr (Sum.inl i))) - u (Sum.inr (Sum.inl i))) * rhs i
         = (∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * rhs i)
           - ∑ i, u (Sum.inr (Sum.inl i)) * rhs i := by
-      rw [← Finset.sum_sub_distrib]
-      exact Finset.sum_congr rfl fun i _ => by ring
-    have hneg : ∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * -rhs i
-        = -∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * rhs i := by
-      rw [← Finset.sum_neg_distrib]
-      exact Finset.sum_congr rfl fun i _ => by ring
-    rw [hneg] at hpos
+      simp [sub_mul, Finset.sum_sub_distrib]
+    rw [show ∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * -rhs i
+        = -∑ i, u (Sum.inr (Sum.inr (Sum.inl i))) * rhs i by simp [mul_neg]] at hpos
     rw [hsub]
     linarith
 

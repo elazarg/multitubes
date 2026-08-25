@@ -267,10 +267,7 @@ omit [Fintype E] in
 /-- **A relaxation level is exactly an attainable uniform branch-residual threshold.** -/
 theorem mem_relaxationLevels_iff_worstResidualAtMost (lam : ℝ) :
     lam ∈ relaxationLevels G label ↔ WorstResidualAtMost (G := G) (label := label) lam := by
-  rw [mem_relaxationLevels_iff, worstResidualAtMost_iff_exists_edge_defect_le]
-  refine exists_congr fun x => forall_congr' fun e => ?_
-  rw [defect]
-  constructor <;> intro h <;> linarith
+  simp [mem_relaxationLevels_iff, worstResidualAtMost_iff_exists_edge_defect_le, defect]
 
 /-- **The relaxation levels are the upper bounds of the normalized gain-flow objective.**  This is
 threshold strong duality read at the relaxation levels, and it needs no hypothesis on the slopes:

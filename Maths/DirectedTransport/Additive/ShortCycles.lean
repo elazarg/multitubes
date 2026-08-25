@@ -169,9 +169,7 @@ theorem exists_short_closedWalk_of_not_worstDirectedResidualAtMost
     ∃ (vertex : V) (cycle : G.Walk vertex vertex),
       0 < cycle.length ∧ cycle.length ≤ Fintype.card V ∧
         cycle.length * level < walkWeight weight cycle := by
-  rw [worstDirectedResidualAtMost_iff_shortClosedWalk_le] at hfailure
-  push Not at hfailure
-  exact hfailure
+  grind [worstDirectedResidualAtMost_iff_shortClosedWalk_le]
 
 /-! ## Attainment of the maximum cycle mean -/
 

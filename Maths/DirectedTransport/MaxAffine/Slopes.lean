@@ -625,6 +625,18 @@ theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_expansiveGauge
       walkSlopeProduct_mul_gauge_eq_of_forall_mem slope cycle hcritical
     nlinarith [hgauge.1 base]
 
+/-- Exponentiating the log-weight of a walk recovers its slope product, when every slope of the
+ambient graph is positive. -/
+theorem exp_walkWeight_log_eq_walkSlopeProduct_of_pos (hpos : ∀ edge, 0 < slope edge)
+    {start finish : V} (walk : G.Walk start finish) :
+    Real.exp (MaxPlusPotential.walkWeight (fun edge => Real.log (slope edge)) walk) =
+      walkSlopeProduct slope walk := by
+  induction walk with
+  | nil => simp [MaxPlusPotential.walkWeight, walkSlopeProduct]
+  | concat walk edge legal ih =>
+      rw [MaxPlusPotential.walkWeight_concat, walkSlopeProduct_concat,
+        Real.exp_add, ih, Real.exp_log (hpos edge)]
+
 /-- **Dual positive gauge theorem.**  For positive slopes and finitely many
 edges, all directed cycle products are at least one exactly when a positive
 vertex gauge makes every normalized edge slope at least one.  The vertex type is
@@ -644,34 +656,9 @@ theorem exists_expansiveGauge_iff_one_le_cycleProduct
       have hlogNonneg : 0 ≤ MaxPlusPotential.walkWeight
           (fun edge => Real.log (slope edge)) cycle := by
         apply Real.exp_le_exp.mp
-        have hexp {start finish : V} (walk : G.Walk start finish) :
-            Real.exp (MaxPlusPotential.walkWeight
-              (fun edge => Real.log (slope edge)) walk) =
-                walkSlopeProduct slope walk := by
-          induction walk with
-          | nil => simp [MaxPlusPotential.walkWeight, walkSlopeProduct]
-          | concat walk edge legal ih =>
-              rw [MaxPlusPotential.walkWeight_concat, walkSlopeProduct_concat,
-                Real.exp_add, ih, Real.exp_log (hpos edge)]
-        rw [Real.exp_zero, hexp cycle]
+        rw [Real.exp_zero, exp_walkWeight_log_eq_walkSlopeProduct_of_pos slope hpos cycle]
         exact hcycle base cycle
-      have hneg : MaxPlusPotential.walkWeight
-          (fun edge => -Real.log (slope edge)) cycle =
-            -MaxPlusPotential.walkWeight
-              (fun edge => Real.log (slope edge)) cycle := by
-        have hnegGeneral {start finish : V} (walk : G.Walk start finish) :
-            MaxPlusPotential.walkWeight
-                (fun edge => -Real.log (slope edge)) walk =
-              -MaxPlusPotential.walkWeight
-                (fun edge => Real.log (slope edge)) walk := by
-          induction walk with
-          | nil => simp [MaxPlusPotential.walkWeight]
-          | concat walk edge legal ih =>
-              rw [MaxPlusPotential.walkWeight_concat,
-                MaxPlusPotential.walkWeight_concat, ih]
-              ring
-        exact hnegGeneral cycle
-      rw [hneg]
+      rw [MaxPlusPotential.walkWeight_neg]
       linarith
     obtain ⟨potential, hpotential⟩ :=
       (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos

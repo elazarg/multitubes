@@ -128,17 +128,13 @@ theorem dotProduct_signedDelta_false [Fintype V] [DecidableEq V]
     (G : EdgeGraph V E) (edge : E) (potential : V → ℝ) :
     dotProduct (signedDelta G (edge, false)) potential =
       potential (G.target edge) - potential (G.source edge) := by
-  simp only [dotProduct, signedDelta, sub_mul, ite_mul, one_mul, zero_mul,
-    Finset.sum_sub_distrib]
-  simp
+  simp [dotProduct, signedDelta, sub_mul, ite_mul, one_mul, zero_mul, Finset.sum_sub_distrib]
 
 theorem dotProduct_signedDelta_true [Fintype V] [DecidableEq V]
     (G : EdgeGraph V E) (edge : E) (potential : V → ℝ) :
     dotProduct (signedDelta G (edge, true)) potential =
       potential (G.source edge) - potential (G.target edge) := by
-  simp only [dotProduct, signedDelta, sub_mul, ite_mul, one_mul, zero_mul,
-    Finset.sum_sub_distrib]
-  simp
+  simp [dotProduct, signedDelta, sub_mul, ite_mul, one_mul, zero_mul, Finset.sum_sub_distrib]
 
 /-- A potential whose two signed residual rows at every edge are at most
 `level`.  When edges are nonempty this is the usual sup-norm condition. -/

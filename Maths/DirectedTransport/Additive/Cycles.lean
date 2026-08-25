@@ -133,25 +133,14 @@ theorem exists_simpleCycle_cycleMeanDominates (weight : E → ℝ)
     exact (not_lt_of_ge hdominates) hcandidateLt
   have hminimal {length} (hgood : Good length) : minimum ≤ length :=
     Nat.find_min' hexists hgood
+  have hminimum : candidate.length = minimum := hlength
+  have hafter : 0 < (before.append after).length := by simpa [remainder] using hremainder'
   rcases hcomponent with hinnerDominates | hremainderDominates
-  · have hgood : Good inner.length :=
-      ⟨vertex, inner, hinner, rfl, hinnerDominates⟩
-    have hle := hminimal hgood
-    have hlength' : candidate.length = minimum := hlength
-    have hle' : candidate.length ≤ inner.length := hlength'.trans_le hle
-    have hremainder'' : 0 < (before.append after).length := by
-      simpa [remainder] using hremainder'
-    have hlt : inner.length < candidate.length := by omega
-    exact (not_lt_of_ge hle') hlt
-  · have hgood : Good remainder.length :=
+  · have := hminimal ⟨vertex, inner, hinner, rfl, hinnerDominates⟩
+    omega
+  · have := hminimal (length := (before.append after).length)
       ⟨candidateBase, remainder, hremainder', rfl, hremainderDominates⟩
-    have hle := hminimal hgood
-    have hlength' : candidate.length = minimum := hlength
-    have hle' : candidate.length ≤ remainder.length := hlength'.trans_le hle
-    have hlt : remainder.length < candidate.length := by
-      dsimp [remainder]
-      omega
-    exact (not_lt_of_ge hle') hlt
+    omega
 
 /-- A strict violation of a cycle-mean threshold has a simple-cycle witness. -/
 theorem exists_simpleCycle_mean_gt_of_closedWalk

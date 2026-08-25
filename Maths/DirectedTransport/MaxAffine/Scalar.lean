@@ -108,17 +108,13 @@ theorem affinePart_le_self_iff_of_one_lt_slope (f : Label) (hslope : 1 < f.slope
 theorem affinePart_eq_self_iff_of_slope_lt_one (f : Label) (hslope : f.slope < 1)
     (x : ℝ) :
     f.affinePart x = x ↔ x = f.shift / (1 - f.slope) := by
-  rw [eq_div_iff (sub_pos.mpr hslope).ne']
-  simp only [affinePart]
-  constructor <;> intro h <;> linarith
+  grind [affinePart]
 
 /-- Above unit slope the affine part has exactly one fixed point. -/
 theorem affinePart_eq_self_iff_of_one_lt_slope (f : Label) (hslope : 1 < f.slope)
     (x : ℝ) :
     f.affinePart x = x ↔ x = -f.shift / (f.slope - 1) := by
-  rw [eq_div_iff (sub_pos.mpr hslope).ne']
-  simp only [affinePart]
-  constructor <;> intro h <;> linarith
+  grind [affinePart]
 
 /-! ## Complete pre-fixed-set classification -/
 
@@ -137,13 +133,7 @@ nonpositive, with the floor imposing the only bound on the point. -/
 theorem apply_le_self_iff_of_slope_eq_one (f : Label) (hslope : f.slope = 1)
     (x : ℝ) :
     f.apply x ≤ x ↔ f.floor ≤ (x : WithBot ℝ) ∧ f.shift ≤ 0 := by
-  rw [f.apply_le_iff]
-  simp only [affinePart, hslope, one_mul]
-  constructor
-  · rintro ⟨hfloor, hshift⟩
-    exact ⟨hfloor, by linarith⟩
-  · rintro ⟨hfloor, hshift⟩
-    exact ⟨hfloor, by linarith⟩
+  simp [f.apply_le_iff, affinePart, hslope, one_mul]
 
 /-- In the expansive regime, pre-fixed points form the interval between the
 floor (if present) and the affine fixed point. -/

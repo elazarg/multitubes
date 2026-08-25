@@ -165,6 +165,15 @@ omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
   simp [walkWeight]
 
 omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+/-- Negating a weighting negates every walk weight. -/
+@[simp] theorem walkWeight_neg (weight : E → 𝕜) {start finish : V}
+    (walk : G.Walk start finish) :
+    walkWeight (fun edge => -weight edge) walk = -walkWeight weight walk := by
+  induction walk with
+  | nil => simp
+  | concat walk edge legal ih => simp [ih]; ring
+
+omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
 @[simp] theorem walkWeight_castFinish (weight : E → 𝕜) {start finish finish' : V}
     (walk : G.Walk start finish) (hfinish : finish = finish') :
     walkWeight weight (walk.castFinish hfinish) = walkWeight weight walk := by

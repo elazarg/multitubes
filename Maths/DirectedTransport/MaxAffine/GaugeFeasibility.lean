@@ -571,15 +571,7 @@ theorem forall_gaugeCriticalCycles_nonpos_iff_holonomy_prefixed
           holonomyApply
               (fun edge => translationLabel
                 (gaugeCriticalShift label gauge edge)) cycle point ≤ point := by
-  constructor
-  · intro hnonpos base cycle
-    refine ⟨0, ?_⟩
-    rw [holonomyApply_translationLabel]
-    simpa using hnonpos base cycle
-  · intro hprefixed base cycle
-    obtain ⟨point, hpoint⟩ := hprefixed base cycle
-    rw [holonomyApply_translationLabel] at hpoint
-    linarith
+  simp [holonomyApply_translationLabel]
 
 /-- **Nonexpansive gauge feasibility.**  Floors and strictly contracting rows
 cannot obstruct existence; the exact obstruction is a positive-shift cycle in
