@@ -36,6 +36,11 @@ At a raw residual level, the exact critical-cycle bound is `T_C / S_C`, where
 
 ## Main results
 
+* `Maths.MaxAffineTransport.defect_gaugeConjugate`: **gauge conjugation** - dividing a
+  candidate by the gauge carries the raw affine residual of a critical edge, less the level, to
+  the additive defect of the rescaled critical graph over the gauge at the target.  Every
+  identification below of critical affine inequalities with additive ones is this one identity
+  read at some level.
 * `MaxAffineTransport.worstResidualAtMost_iff_criticalAffineResidualAtMost_of_nonexpansiveGauge`:
   at every raw residual threshold, a nonexpansive gauge deletes exactly the noncritical branch rows
   - floors and strictly contracting rows never bind.
@@ -154,6 +159,46 @@ def gaugeCriticalCycleRatio (label : E → Label) (gauge : V → ℝ)
     MaxPlusPotential.walkWeight (gaugeCriticalMass gauge) cycle
 
 omit [Fintype V] [DecidableEq V] [Fintype E] in
+/-- Relaxing by nothing is the plain gauge-normalized shift. -/
+@[simp] theorem gaugeCriticalRelaxedShift_zero (label : E → Label) (gauge : V → ℝ) :
+    gaugeCriticalRelaxedShift (G := G) label gauge 0 = gaugeCriticalShift label gauge := by
+  funext edge
+  simp [gaugeCriticalRelaxedShift, gaugeCriticalShift]
+
+omit [Fintype V] [DecidableEq V] [Fintype E] in
+/-- Dividing by a positive gauge and multiplying by it again is the identity. -/
+theorem gaugeConjugate_mul_div (gauge : V → ℝ) (hgauge : ∀ vertex, 0 < gauge vertex)
+    (scaled : V → ℝ) :
+    (fun vertex => gauge vertex * scaled vertex / gauge vertex) = scaled := by
+  funext vertex
+  exact mul_div_cancel_left₀ _ (hgauge vertex).ne'
+
+omit [Fintype V] [DecidableEq V] [Fintype E] in
+/-- **Gauge conjugation.**  Dividing a candidate by a positive gauge turns the raw affine
+residual of a gauge-critical edge, less the level, into the additive defect of the rescaled
+critical graph, divided by the gauge at the target.  On a critical edge the slope is the ratio
+of the gauge across the edge, which is exactly what makes the source term rescale correctly.
+Every identification of critical affine inequalities with additive ones in this file is this
+identity read at some level. -/
+theorem defect_gaugeConjugate (label : E → Label) (gauge : V → ℝ)
+    (hgauge : ∀ vertex, 0 < gauge vertex) (level : ℝ) (potential : V → ℝ)
+    (edge : GaugeCriticalEdge (G := G) label gauge) :
+    MaxPlusPotential.defect (gaugeCriticalGraph (G := G) label gauge)
+        (gaugeCriticalRelaxedShift label gauge level)
+        (fun vertex => potential vertex / gauge vertex) edge =
+      ((label edge.1).shift + (label edge.1).slope * potential (G.source edge.1) -
+        potential (G.target edge.1) - level) / gauge (G.target edge.1) := by
+  have hsource : gauge (G.source edge.1) ≠ 0 := (hgauge (G.source edge.1)).ne'
+  have htarget : gauge (G.target edge.1) ≠ 0 := (hgauge (G.target edge.1)).ne'
+  have hslope : (label edge.1).slope =
+      gauge (G.target edge.1) / gauge (G.source edge.1) :=
+    ((div_eq_iff hsource).2 edge.2.symm).symm
+  simp only [MaxPlusPotential.defect, gaugeCriticalRelaxedShift]
+  rw [hslope]
+  field_simp
+  ring
+
+omit [Fintype V] [DecidableEq V] [Fintype E] in
 /-- Rescaling vertex coordinates identifies critical affine residuals with
 ordinary additive residuals on the gauge-critical graph. -/
 theorem criticalAffineGaugeResidualAtMost_iff_gaugeCriticalResidualAtMost
@@ -163,53 +208,19 @@ theorem criticalAffineGaugeResidualAtMost_iff_gaugeCriticalResidualAtMost
       GaugeCriticalResidualAtMost (G := G) label gauge level := by
   constructor
   · rintro ⟨potential, hpotential⟩
-    let scaled : V → ℝ := fun vertex => potential vertex / gauge vertex
-    refine ⟨scaled, fun edge => ?_⟩
-    have hrow := hpotential edge.1 edge.2
-    have hsource : gauge (G.source edge.1) ≠ 0 :=
-      (hgauge (G.source edge.1)).ne'
-    have htarget : gauge (G.target edge.1) ≠ 0 :=
-      (hgauge (G.target edge.1)).ne'
-    have hslope : (label edge.1).slope =
-        gauge (G.target edge.1) / gauge (G.source edge.1) :=
-      ((div_eq_iff hsource).2 edge.2.symm).symm
-    have hid :
-        MaxPlusPotential.defect
-            (gaugeCriticalGraph (G := G) label gauge)
-            (gaugeCriticalShift label gauge) scaled edge =
-          ((label edge.1).shift +
-              (label edge.1).slope * potential (G.source edge.1) -
-            potential (G.target edge.1)) / gauge (G.target edge.1) := by
-      simp only [MaxPlusPotential.defect, gaugeCriticalShift, scaled]
-      rw [hslope]
-      (field_simp; ring)
-    rw [hid]
-    exact hrow
+    refine ⟨fun vertex => potential vertex / gauge vertex, fun edge => ?_⟩
+    have hkey := defect_gaugeConjugate (G := G) label gauge hgauge 0 potential edge
+    rw [gaugeCriticalRelaxedShift_zero, sub_zero] at hkey
+    rw [hkey]
+    exact hpotential edge.1 edge.2
   · rintro ⟨scaled, hscaled⟩
-    let potential : V → ℝ := fun vertex => gauge vertex * scaled vertex
-    refine ⟨potential, fun edge hcritical => ?_⟩
-    let critical : GaugeCriticalEdge (G := G) label gauge :=
-      ⟨edge, hcritical⟩
-    have hrow := hscaled critical
-    have hsource : gauge (G.source edge) ≠ 0 :=
-      (hgauge (G.source edge)).ne'
-    have htarget : gauge (G.target edge) ≠ 0 :=
-      (hgauge (G.target edge)).ne'
-    have hslope : (label edge).slope =
-        gauge (G.target edge) / gauge (G.source edge) :=
-      ((div_eq_iff hsource).2 hcritical.symm).symm
-    have hid :
-        ((label edge).shift +
-              (label edge).slope * potential (G.source edge) -
-            potential (G.target edge)) / gauge (G.target edge) =
-          MaxPlusPotential.defect
-            (gaugeCriticalGraph (G := G) label gauge)
-            (gaugeCriticalShift label gauge) scaled critical := by
-      dsimp [MaxPlusPotential.defect, gaugeCriticalShift, potential, critical]
-      rw [hslope]
-      (field_simp; ring)
-    rw [hid]
-    exact hrow
+    refine ⟨fun vertex => gauge vertex * scaled vertex, fun edge hcritical => ?_⟩
+    have hkey := defect_gaugeConjugate (G := G) label gauge hgauge 0
+      (fun vertex => gauge vertex * scaled vertex) ⟨edge, hcritical⟩
+    rw [gaugeConjugate_mul_div gauge hgauge, gaugeCriticalRelaxedShift_zero,
+      sub_zero] at hkey
+    rw [← hkey]
+    exact hscaled ⟨edge, hcritical⟩
 
 omit [Fintype V] [DecidableEq V] in
 /-- **Quantitative gauge-critical cycle-mean theorem.**  A normalized
@@ -253,64 +264,20 @@ private theorem criticalAffineResidualAtMost_iff_isPotential
         MaxPlusPotential.IsPotential
           (gaugeCriticalGraph (G := G) label gauge)
           (gaugeCriticalRelaxedShift label gauge level) scaled := by
+  simp only [MaxPlusPotential.isPotential_iff_forall_defect_nonpos]
   constructor
   · rintro ⟨potential, hpotential⟩
-    let scaled : V → ℝ := fun vertex => potential vertex / gauge vertex
-    refine ⟨scaled, fun edge => ?_⟩
-    have hrow := hpotential edge.1 edge.2
-    have hsource : gauge (G.source edge.1) ≠ 0 :=
-      (hgauge (G.source edge.1)).ne'
-    have htarget : gauge (G.target edge.1) ≠ 0 :=
-      (hgauge (G.target edge.1)).ne'
-    have hslope : (label edge.1).slope =
-        gauge (G.target edge.1) / gauge (G.source edge.1) :=
-      ((div_eq_iff hsource).2 edge.2.symm).symm
-    have hleft : gauge (G.target edge.1) *
-          (scaled (G.source edge.1) +
-            gaugeCriticalRelaxedShift label gauge level edge) =
-        (label edge.1).slope * potential (G.source edge.1) +
-          (label edge.1).shift - level := by
-      dsimp [scaled, gaugeCriticalRelaxedShift]
-      rw [hslope]
-      field_simp [hsource, htarget]
-      all_goals ring
-    have hright : gauge (G.target edge.1) * scaled (G.target edge.1) =
-        potential (G.target edge.1) := by
-      dsimp [scaled]
-      field_simp [htarget]
-    apply le_of_mul_le_mul_left _ (hgauge (G.target edge.1))
-    change gauge (G.target edge.1) *
-        (scaled (G.source edge.1) +
-          gaugeCriticalRelaxedShift label gauge level edge) ≤
-      gauge (G.target edge.1) * scaled (G.target edge.1)
-    rw [hleft, hright]
-    linarith
+    refine ⟨fun vertex => potential vertex / gauge vertex, fun edge => ?_⟩
+    rw [defect_gaugeConjugate (G := G) label gauge hgauge level potential edge,
+      div_le_iff₀ (hgauge (G.target edge.1)), zero_mul, sub_nonpos]
+    exact hpotential edge.1 edge.2
   · rintro ⟨scaled, hscaled⟩
-    let potential : V → ℝ := fun vertex => gauge vertex * scaled vertex
-    refine ⟨potential, fun edge hcritical => ?_⟩
-    let critical : GaugeCriticalEdge (G := G) label gauge :=
-      ⟨edge, hcritical⟩
-    have hrow := hscaled critical
-    have htarget : gauge (G.target edge) ≠ 0 :=
-      (hgauge (G.target edge)).ne'
-    have hscaledRow : gauge (G.target edge) * scaled (G.source edge) +
-          (label edge).shift - level ≤
-        gauge (G.target edge) * scaled (G.target edge) := by
-      have hmul := mul_le_mul_of_nonneg_left hrow (hgauge (G.target edge)).le
-      dsimp [gaugeCriticalRelaxedShift, critical] at hmul
-      rw [mul_add, mul_div_cancel₀ _ htarget] at hmul
-      linarith
-    dsimp [potential]
-    calc
-      (label edge).shift +
-            (label edge).slope * (gauge (G.source edge) * scaled (G.source edge)) -
-          gauge (G.target edge) * scaled (G.target edge) =
-        (gauge (G.target edge) * scaled (G.source edge) +
-            (label edge).shift) -
-          gauge (G.target edge) * scaled (G.target edge) := by
-            rw [← mul_assoc, hcritical]
-            ring
-      _ ≤ level := by linarith
+    refine ⟨fun vertex => gauge vertex * scaled vertex, fun edge hcritical => ?_⟩
+    have hkey := hscaled ⟨edge, hcritical⟩
+    rw [← gaugeConjugate_mul_div gauge hgauge scaled,
+      defect_gaugeConjugate (G := G) label gauge hgauge level _ ⟨edge, hcritical⟩,
+      div_le_iff₀ (hgauge (G.target edge)), zero_mul, sub_nonpos] at hkey
+    exact hkey
 
 omit [Fintype V] [DecidableEq V] [Fintype E] in
 private theorem walkWeight_gaugeCriticalRelaxedShift
@@ -583,66 +550,12 @@ theorem exists_criticalAffinePotential_iff_gaugeCriticalCycles_nonpos
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
         MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤ 0 := by
-  rw [← MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos]
-  constructor
-  · rintro ⟨potential, hpotential⟩
-    let scaled : V → ℝ := fun vertex => potential vertex / gauge vertex
-    refine ⟨scaled, fun edge => ?_⟩
-    have hrow := hpotential edge.1 edge.2
-    have hsource : gauge (G.source edge.1) ≠ 0 :=
-      (hgauge (G.source edge.1)).ne'
-    have htarget : gauge (G.target edge.1) ≠ 0 :=
-      (hgauge (G.target edge.1)).ne'
-    have hratio : gauge (G.target edge.1) / gauge (G.source edge.1) =
-        (label edge.1).slope :=
-      (div_eq_iff hsource).mpr edge.2.symm
-    have hleft : gauge (G.target edge.1) *
-          (scaled (G.source edge.1) + gaugeCriticalShift label gauge edge) =
-        (label edge.1).slope * potential (G.source edge.1) +
-          (label edge.1).shift := by
-      dsimp [scaled, gaugeCriticalShift]
-      rw [mul_add, mul_div_cancel₀ _ htarget]
-      calc
-        gauge (G.target edge.1) *
-              (potential (G.source edge.1) / gauge (G.source edge.1)) +
-            (label edge.1).shift =
-            (gauge (G.target edge.1) / gauge (G.source edge.1)) *
-                potential (G.source edge.1) + (label edge.1).shift := by
-          field_simp [hsource]
-        _ = _ := by rw [hratio]
-    have hright : gauge (G.target edge.1) *
-          scaled (G.target edge.1) = potential (G.target edge.1) := by
-      dsimp [scaled]
-      field_simp [htarget]
-    apply le_of_mul_le_mul_left _ (hgauge (G.target edge.1))
-    change gauge (G.target edge.1) *
-        (scaled (G.source edge.1) + gaugeCriticalShift label gauge edge) ≤
-      gauge (G.target edge.1) * scaled (G.target edge.1)
-    rw [hleft, hright]
-    linarith
-  · rintro ⟨scaled, hscaled⟩
-    let potential : V → ℝ := fun vertex => gauge vertex * scaled vertex
-    refine ⟨potential, fun edge hcritical => ?_⟩
-    have hrow := hscaled
-      (⟨edge, hcritical⟩ : GaugeCriticalEdge (G := G) label gauge)
-    have htarget : gauge (G.target edge) ≠ 0 :=
-      (hgauge (G.target edge)).ne'
-    have hscaledRow : gauge (G.target edge) * scaled (G.source edge) +
-          (label edge).shift ≤
-        gauge (G.target edge) * scaled (G.target edge) := by
-      have hmul := mul_le_mul_of_nonneg_left hrow (hgauge (G.target edge)).le
-      dsimp [gaugeCriticalShift] at hmul
-      rw [mul_add, mul_div_cancel₀ _ htarget] at hmul
-      exact hmul
-    dsimp [potential]
-    calc
-      (label edge).shift +
-          (label edge).slope * (gauge (G.source edge) * scaled (G.source edge)) =
-          gauge (G.target edge) * scaled (G.source edge) +
-            (label edge).shift := by
-        rw [← mul_assoc, hcritical]
-        ring
-      _ ≤ gauge (G.target edge) * scaled (G.target edge) := hscaledRow
+  have hzero := criticalAffineResidualAtMost_iff_isPotential
+    (G := G) (label := label) gauge hgauge 0
+  rw [gaugeCriticalRelaxedShift_zero] at hzero
+  rw [← MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos, ← hzero]
+  exact exists_congr fun _ =>
+    forall_congr' fun _ => imp_congr_right fun _ => sub_nonpos.symm
 
 omit [Fintype V] [DecidableEq V] [Fintype E] in
 /-- Nonpositive critical-cycle weight is equivalent to every normalized
