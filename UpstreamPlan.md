@@ -1,6 +1,6 @@
 # Upstream plan
 
-Proposal, 2026-08-24. Revised after `LinearAlgebra/Duality.lean` and Gordan's transposition
+Proposal, 2026-08-24. Revised after `LinearProgramming/Duality.lean` and Gordan's transposition
 theorem landed, and again after the scalar split of `StandardForm.lean` landed (`c139fba`).
 Scoping note only - no migration to mathlib is proposed as done.
 
@@ -15,7 +15,7 @@ a build, **[B]** believed but not mechanically checked.
 ## Headline judgement
 
 **There is a real PR here, it is a good one, and it got materially stronger since the first
-draft.** `DirectedTransport/LinearAlgebra/` now contains the finite matrix theorem of the
+draft.** `Maths/LinearProgramming/` now contains the finite matrix theorem of the
 alternative, Gordan's transposition theorem, standard-form Farkas, extreme points as basic
 feasible solutions, **and** the full duality package - weak duality, strong duality, dual
 attainment, complementary slackness - all over an arbitrary linearly ordered field. mathlib has
@@ -237,7 +237,7 @@ that file first.
 
 ## 4. Where it would live
 
-Root namespace `DirectedTransport.LinearAlgebra` is dropped.
+Root namespace `Maths.LinearProgramming` is dropped.
 
 | Content | File | Namespace |
 |---|---|---|
@@ -308,7 +308,7 @@ the same thing. The fix was not to justify the pair but to remove the need for i
 4. `IsStandardFeasible` is deleted, its 19 uses in `Duality.lean` replaced by
    `z ∈ standardFeasibleSet A rhs`, and the `Iff.rfl` bridge is gone with it. `Duality.lean` now
    contains no `ℝ` at all **[V]**.
-5. Nothing outside `DirectedTransport/LinearAlgebra/` needed touching.
+5. Nothing outside `Maths/LinearProgramming/` needed touching.
 
 *What this buys upstream.* The strongest available objection to the series is gone rather than
 answered. The `ℝ`-and-topology residue is two theorems, which makes the real-scalar PR small
@@ -460,7 +460,7 @@ and §7.
 
 ## 7. Secondary candidates
 
-**Still only `LinearAlgebra/`.** Three files were re-examined this pass; all three are no, for
+**Still only `LinearProgramming/`.** Three files were re-examined this pass; all three are no, for
 different reasons, and the reasons are worth recording.
 
 **`Switching.lean` (164 lines) - a real gap in mathlib, but not shippable from here.** Zaslavsky
@@ -474,7 +474,8 @@ uniqueness measure **[V]**. Assessed properly, since it is the most plausible no
   no gain graphs, no voltage graphs, no switching. Genuine gap, with a proper citation already in
   the file (Zaslavsky, *Biased graphs. I*, JCTB 47 (1989) §5) **[V]**.
 - *So why not?* **It is blocked behind an infrastructure decision this plan recommends against.**
-  `Switching.lean` imports `DirectedTransport.Basic` and `DirectedTransport.Exact`, and `Basic`
+  `Switching.lean` imports `Maths.DirectedTransport.Basic` and
+  `Maths.DirectedTransport.Exact`, and `Basic`
   imports `EdgeGraph` **[V]**. It is built on `EdgeGraph`, `Walk`, `walkLabel` and
   `HasTrivialCycleLabels` - none of which ship (see below). Upstreaming it means upstreaming
   `EdgeGraph` first, which would be rejected.
@@ -498,7 +499,8 @@ difference, narrow, and proposing it means proposing a second path type alongsid
 the "why do we need both" objection again. Recommend against.
 
 **`Additive/Condensation.lean` (234 lines) - no.** SCC decomposition of lax feasibility. Imports
-`DirectedTransport.Additive.Potentials` and `DirectedTransport.SCC` **[V]**, i.e. it sits deep
+`Maths.DirectedTransport.Additive.Potentials` and `Maths.DirectedTransport.SCC` **[V]**, i.e.
+it sits deep
 inside the library's own theory rather than at its edge. It is a specialization of this library's
 structure, exactly as `README.md` describes **[V]**. Not general-purpose material.
 

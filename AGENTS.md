@@ -4,14 +4,30 @@ Project guidance for `directed-transport`.
 
 ## What this is
 
-A standalone, mathlib-idiomatic Lean library for the theory of **directed transport**:
-operator-labelled transition graphs, their walks, holonomy, sections and lax sections, and
-the exact, additive, finite-inequality, join-semidirect, and max-affine specializations.
+A standalone, mathlib-idiomatic Lean library under a `Maths` umbrella. Its subject is
+**directed transport**: operator-labelled transition graphs, their walks, holonomy, sections
+and lax sections, and the exact, additive, finite-inequality, join-semidirect, and max-affine
+specializations. Four groups sit under the umbrella:
+
+  ```
+  Maths/Graph/             typed walks, circulations, Eulerian trails, infinite walks,
+                           zero-charge lassos, charged relations
+  Maths/Recursion/         affine and max-affine transfer summaries, fixed points,
+                           the Loynes and two-sided reflections
+  Maths/LinearProgramming/ Fourier-Motzkin elimination and standard-form LP duality
+  Maths/Algebra/           the join-semidirect label algebra
+  Maths/DirectedTransport/ the theory the other four serve
+  ```
+
+The first four depend on mathlib alone and not on each other. Keep it that way: a new import
+from `Maths/DirectedTransport/` into any of them inverts the layering.
 
 ## Conventions
 
 - Toolchain: `leanprover/lean4:v4.33.1`, mathlib pinned to `v4.33.1`.
-- Root namespace is `DirectedTransport`.
+- Root namespace is `Maths`, and namespaces stay shallow: the directory path carries the
+  taxonomy, so `Maths/Graph/EdgeGraph.lean` declares `Maths.EdgeGraph`, not
+  `Maths.Graph.EdgeGraph`. Only `Maths.LinearProgramming` repeats its directory.
 - License is Apache 2.0. Every file starts with the mathlib copyright header, verbatim:
 
   ```
@@ -50,17 +66,22 @@ through; fix the code instead.
 
 ## Invariants
 
-Four properties are checked and must hold before anything is committed. They are what the
-project's claims rest on, so treat a regression in any of them as a build failure:
+`scripts/check.sh` runs all of the following, and is the thing to run before committing.
+They are what the project's claims rest on, so treat a regression in any of them as a build
+failure:
 
 1. **A rebuild from clean** ends at zero errors and zero
    warnings. An incremental build is not evidence; nor is a build that does not reach the file
-   you changed - a new file absent from `DirectedTransport/All.lean` is not compiled at all.
-2. **Zero docstring drift**: every declaration named in a `## Main ...` section resolves against
-   the compiled environment.
+   you changed - a new file absent from `Maths.lean` is not compiled at all.
+2. **Zero docstring drift**: every name a `## Main ...` section promises resolves against the
+   compiled environment, and every other backticked `Maths.…` in a docstring resolves as a
+   declaration, a namespace, or a module. Nothing in the build reads docstrings, so this is
+   the only thing that catches a reference to something that has moved or been renamed.
 3. **Zero declarations depend on `sorryAx`**, checked at the kernel by `Lean.collectAxioms`. The
    only axioms used anywhere are `propext`, `Classical.choice` and `Quot.sound`.
 4. **No line exceeds 100 characters**, and no `set_option` survives in a committed file.
+5. **The layering holds**: the linear-programming group imports nothing else from the
+   project, and `FixedPointTheorems` is imported by `MaxAffine/Eigenproblem` alone.
 
 ## Working rules
 

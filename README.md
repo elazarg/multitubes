@@ -1,14 +1,15 @@
 # directed-transport
 
-A Lean 4 library for **directed transport** on operator-labelled transition graphs.
+A Lean 4 library for **directed transport** on operator-labelled transition graphs. The
+library it builds is called `Maths`; this repository is where it lives.
 
 ## What this is
 
 A directed multigraph supplies a control-flow skeleton: a vertex type, an edge type, and
 `source`/`target` maps, with edges as data so parallel edges keep their identities
-(`DirectedTransport.EdgeGraph`). Each vertex carries a state space - its **fiber** - and each edge
+(`Maths.EdgeGraph`). Each vertex carries a state space - its **fiber** - and each edge
 carries a map from the fiber over its source to the fiber over its target
-(`DirectedTransport.Transport`).
+(`Maths.Transport`).
 
 A **walk** is an endpoint-indexed finite list of edges, so endpoint compatibility is part of the
 type. A walk denotes the chronological composite of its edge maps (`Transport.walkMap`), and
@@ -20,7 +21,7 @@ The same structure reads several ways, and the library states results in whichev
 sharpest for the argument:
 
 - as a representation of the free path category of a quiver - spelled out in
-  `DirectedTransport.Category`, where walks are morphisms and append is composition;
+  `Maths.DirectedTransport.Category`, where walks are morphisms and append is composition;
 - as a discrete connection, with `walkMap` as parallel transport and holonomy as monodromy;
 - as the action carried by a gain or voltage graph, in the sense of Zaslavsky, once labels are
   group-valued - though general monoid labels are one-directional and need not invert under edge
@@ -54,25 +55,23 @@ what they deliberately do not develop.
 
 ## Layout
 
-Everything lives under `DirectedTransport/`.
+The library is `Maths`, under which four groups depend on mathlib alone and on nothing else
+here, and a fifth consumes all four. `scripts/check-layering.py` checks the boundary rather
+than leaving it to this table.
 
-**Prerequisite layer** - self-contained material the theory consumes, each usable on its own:
-
-| File | Contents |
+| Directory | Contents |
 | --- | --- |
-| `EdgeGraph.lean` | directed multigraphs and the finite-walk calculus |
-| `Circulation.lean` | walk multiplicities as flows; conservation and integer charge |
-| `TransferSummary.lean` | affine, max-affine, and reflected (Lindley) transfer summaries |
-| `ChargedRelation.lean` | bounded path budgets are exactly bounded potentials |
-| `CyclicMaxAffine.lean` | a cyclic max-affine system and its survival-weighted bound |
-| `InverseCoordinate.lean` | linearizing rational recurrences in the reciprocal coordinate |
-| `LinearAlgebra/` | Fourier–Motzkin elimination, the theorem of the alternative, standard-form LP, and LP duality |
+| `Maths/Graph/` | directed multigraphs and the finite-walk calculus; walk multiplicities as flows, with conservation and integer charge; Eulerian trails, infinite walks, zero-charge lassos; and charged relations, where bounded path budgets are exactly bounded potentials |
+| `Maths/Recursion/` | affine, max-affine, and reflected (Lindley) transfer summaries and their fixed points; the Loynes and two-sided reflections; a cyclic max-affine system with its survival-weighted bound; and rational recurrences linearized in the reciprocal coordinate |
+| `Maths/LinearProgramming/` | Fourier–Motzkin elimination, the theorem of the alternative, standard-form LP, and LP duality |
+| `Maths/Algebra/` | the join-semidirect label algebra |
+| `Maths/DirectedTransport/` | the theory proper: `Basic.lean` and the other root files for the generic layer and its exact specialization, then `Additive/`, `FiniteInequality/`, and `MaxAffine/` |
 
-**Theory proper** - `Basic.lean` and the other root files for the generic layer and its exact
-specialization, then `Additive/`, `FiniteInequality/`, and `MaxAffine/`.
-
-`DirectedTransport/All.lean` is the umbrella importing every module, and the root
-`DirectedTransport.lean` re-exports it, so a bare `lake build` compiles the whole library.
+Namespaces stay shallow: the path carries the taxonomy, so `Maths/Graph/EdgeGraph.lean`
+declares `Maths.EdgeGraph`. `Maths.lean` is the umbrella importing every module, so a bare
+`lake build` compiles the whole library. Each group is also a Lake target of its own -
+`MathsGraph`, `MathsRecursion`, `MathsLinearProgramming`, `MathsAlgebra`,
+`MathsDirectedTransport` - so a group can be built without the rest.
 
 ## Building
 
@@ -80,23 +79,23 @@ Requires Lean `v4.33.1` (see `lean-toolchain`) and mathlib pinned to the matchin
 `elan` will fetch the toolchain automatically. The only other dependency is
 [`fixed-point-theorems`](https://github.com/elazarg/fixed-point-theorems-lean4), which supplies
 Brouwer's theorem for the max-affine eigenproblem; nothing else in the library uses it, and the
-linear-algebra layer in particular depends on mathlib alone.
+linear-programming layer in particular depends on mathlib alone.
 
 ```sh
 lake exe cache get   # fetch prebuilt mathlib oleans; without this the first build takes hours
 lake build
 ```
 
-**Status.** The extraction is complete. A rebuild from scratch (with `.lake/build` removed)
-compiles all 46 modules with zero errors and zero warnings. A kernel-level audit of the 1592
-library declarations reports none depending on `sorryAx`, and the only axioms used across the
-library are `propext`, `Classical.choice`, and `Quot.sound` - the same three mathlib itself
-rests on.
+**Status.** A rebuild from scratch (with `.lake/build` removed) compiles all 63 modules with
+zero errors and zero warnings. A kernel-level audit of the 2307 library declarations reports
+none depending on `sorryAx`, and the only axioms used across the library are `propext`,
+`Classical.choice`, and `Quot.sound` - the same three mathlib itself rests on. Every one of the
+732 names promised by a `## Main ...` docstring section resolves against the compiled
+environment. `scripts/check.sh` runs all of this.
 
-Complete here means ported, building, and sorry-free; it does not mean finished as a mathlib
-contribution. Imports have not been pruned to a strict minimal set, the `public import`
-classification has been spot-checked rather than audited, and no judgement has been made about
-which parts are upstream candidates.
+Complete here means building and sorry-free; it does not mean finished as a mathlib
+contribution. `UpstreamPlan.md` scopes the linear-programming layer for upstreaming and
+sequences it; the rest has had no such judgement made about it.
 
 ## Style
 
