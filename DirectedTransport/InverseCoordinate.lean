@@ -5,10 +5,14 @@ Authors: Elazar Gershuni
 -/
 module
 
+public import Mathlib.Algebra.QuadraticDiscriminant
 public import Mathlib.Analysis.SpecificLimits.Normed
 public import Mathlib.Data.Real.Basic
+public import Mathlib.Analysis.Real.Sqrt
+public import Mathlib.LinearAlgebra.Matrix.Charpoly.Disc
 public import Mathlib.LinearAlgebra.Matrix.Notation
 public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Defs
+public import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.FinTwo
 public import Mathlib.Topology.Compactification.OnePoint.ProjectiveLine
 
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
@@ -53,6 +57,11 @@ and the affine recurrence has the closed form `g t = c ^ t * (g 0 - p) + p` arou
   transfer matrices is again affine, with slope `affineCycleSlope` and shift `affineCycleShift`,
   so its discriminant is the square `(affineCycleSlope l - 1) ^ 2`: an affine cycle is never
   elliptic, and is hyperbolic exactly when its slope product differs from `1`.
+* `projectiveFixedPolynomial`, the quadratic `c * x ^ 2 + (d - a) * x - b` whose roots are the
+  fixed points of the projective action of `!![a, b; c, d]`. Its discriminant is
+  `projectiveDiscriminant`, which is why that sign classifies: a nonsingular matrix with `c ≠ 0`
+  fixes two points of `OnePoint ℝ` when hyperbolic, one when parabolic, and none when elliptic.
+  The elliptic case is attained, by `quarterTurnMatrix`.
 
 The linear-fractional map is also called a Möbius transformation, a homographic map, or a
 fractional linear transformation. The closed form of the affine recurrence is the
@@ -86,6 +95,12 @@ The coordinate change used here is the exact reciprocal `h ↦ h⁻¹`, not the 
   `DirectedTransport.InverseCoordinate.IsProjectiveHyperbolic`,
   `DirectedTransport.InverseCoordinate.IsProjectiveParabolic`,
   `DirectedTransport.InverseCoordinate.IsProjectiveElliptic`: the classification.
+* `DirectedTransport.InverseCoordinate.projectiveStep`,
+  `DirectedTransport.InverseCoordinate.projectiveFixedPolynomial`,
+  `DirectedTransport.InverseCoordinate.projectiveFixedPoint`,
+  `DirectedTransport.InverseCoordinate.projectiveGL`: the projective action of a `2 × 2` matrix
+  and its fixed points.
+* `DirectedTransport.InverseCoordinate.quarterTurnMatrix`: the elliptic witness.
 
 ## Main results
 
@@ -112,6 +127,17 @@ The coordinate change used here is the exact reciprocal `h ↦ h⁻¹`, not the 
 * `DirectedTransport.InverseCoordinate.affineCycleStep_eq_self_iff_of_slope_ne_one`,
   `DirectedTransport.InverseCoordinate.affineCycleStep_eq_self_iff_of_slope_one`: the periodic
   seeds of a cycle in each case.
+* `DirectedTransport.InverseCoordinate.discrim_projectiveFixedPolynomial`: the discriminant of the
+  fixed-point quadratic is `projectiveDiscriminant`.
+* `DirectedTransport.InverseCoordinate.projectiveGL_smul_coe_eq_self_iff`: the fixed points of the
+  projective action on the affine chart are the roots of the quadratic.
+* `DirectedTransport.InverseCoordinate.projectiveGL_smul_eq_self_iff_of_isProjectiveHyperbolic`,
+  `DirectedTransport.InverseCoordinate.projectiveGL_smul_eq_self_iff_of_isProjectiveParabolic`,
+  `DirectedTransport.InverseCoordinate.projectiveGL_smul_ne_self_of_isProjectiveElliptic`: two
+  fixed points, one, and none.
+* `DirectedTransport.InverseCoordinate.exists_isProjectiveElliptic`: the elliptic case is
+  attained, so `not_isProjectiveElliptic_affineCycleMatrix` is a property of affine cycles and not
+  of the classification.
 
 ## Implementation notes
 
@@ -123,13 +149,13 @@ A coefficient cycle is a `List (ℝ × ℝ)` of slope-shift pairs, with the head
 `affineCycleMatrix` is the plain product of the transfer matrices in list order. The shift
 accumulates by Horner's rule, matching the coefficient law of `affineTransferMatrix_mul`.
 
-## TODO
-
-* The classification is stated for the discriminant of a `2 × 2` matrix and computed for products
-  of affine transfer matrices, where the elliptic case is vacuous. The elliptic case itself, which
-  needs matrices of negative determinant such as `inversionMatrix`, and the identification of the
-  fixed points of a hyperbolic action as the roots of the associated quadratic, are not developed
-  here.
+The fixed points of a projective action are characterized through the action on `OnePoint ℝ` and
+through `projectiveFixedPolynomial`, not through `projectiveStep`. On the affine chart
+`projectiveStep M` takes the junk value `0` at the pole `c * x + d = 0`, so it has spurious fixed
+points there: for `M = !![2, 1; -1, 0]`, which is parabolic with the single fixed point `-1`, the
+pole `0` also satisfies `projectiveStep M 0 = 0`. Every statement about `projectiveStep` therefore
+carries the hypothesis `c * x + d ≠ 0`, which by
+`den_ne_zero_of_projectiveFixedPolynomial_eq_zero` costs nothing at a genuine root.
 
 ## References
 
@@ -146,7 +172,7 @@ projective line
 
 noncomputable section
 
-open Filter Matrix Topology
+open Filter Matrix OnePoint Topology
 
 namespace DirectedTransport.InverseCoordinate
 
@@ -797,6 +823,327 @@ theorem affineCycleStep_iterate_affineFixedPoint {l : List (ℝ × ℝ)}
     (affineCycleStep l)^[t] (affineFixedPoint (affineCycleSlope l) (affineCycleShift l)) =
       affineFixedPoint (affineCycleSlope l) (affineCycleShift l) :=
   Function.iterate_fixed ((affineCycleStep_eq_self_iff_of_slope_ne_one hs _).2 rfl) t
+
+/-! ### Fixed points of a projective action -/
+
+/-- The linear-fractional map `x ↦ (a * x + b) / (c * x + d)` of a matrix `M = !![a, b; c, d]`:
+its projective action read on the affine chart of the line. -/
+def projectiveStep (M : Matrix (Fin 2) (Fin 2) ℝ) (x : ℝ) : ℝ :=
+  (M 0 0 * x + M 0 1) / (M 1 0 * x + M 1 1)
+
+/-- The quadratic `c * x ^ 2 + (d - a) * x - b` of a matrix `M = !![a, b; c, d]`, whose real roots
+are the fixed points of its projective action on the affine chart. -/
+def projectiveFixedPolynomial (M : Matrix (Fin 2) (Fin 2) ℝ) (x : ℝ) : ℝ :=
+  M 1 0 * x ^ 2 + (M 1 1 - M 0 0) * x - M 0 1
+
+/-- On the affine chart the affine transfer matrix acts by its affine step. -/
+theorem projectiveStep_affineTransferMatrix (c d x : ℝ) :
+    projectiveStep (affineTransferMatrix c d) x = affineStep c d x := by
+  simp [projectiveStep, affineTransferMatrix, affineStep]
+
+/-- On the affine chart the linear-fractional transfer matrix acts by its linear-fractional
+step. -/
+theorem projectiveStep_linearFractionalTransferMatrix (c d x : ℝ) :
+    projectiveStep (linearFractionalTransferMatrix c d) x = linearFractionalStep c d x := by
+  simp [projectiveStep, linearFractionalTransferMatrix, linearFractionalStep, add_comm]
+
+/-- **The fixed-point equation on the affine chart.** Away from the pole, a point is fixed by the
+projective action exactly when it is a root of `projectiveFixedPolynomial`. -/
+theorem projectiveStep_eq_self_iff {M : Matrix (Fin 2) (Fin 2) ℝ} {x : ℝ}
+    (hden : M 1 0 * x + M 1 1 ≠ 0) :
+    projectiveStep M x = x ↔ projectiveFixedPolynomial M x = 0 := by
+  rw [projectiveStep, div_eq_iff hden, projectiveFixedPolynomial]
+  constructor
+  · intro h
+    linear_combination -h
+  · intro h
+    linear_combination -h
+
+/-- **A root of the quadratic avoids the pole.** For a nonsingular matrix the fixed-point
+quadratic does not vanish at the pole, so no root is lost by the denominator hypothesis of
+`projectiveStep_eq_self_iff`. -/
+theorem den_ne_zero_of_projectiveFixedPolynomial_eq_zero {M : Matrix (Fin 2) (Fin 2) ℝ} {x : ℝ}
+    (hM : M.det ≠ 0) (h : projectiveFixedPolynomial M x = 0) : M 1 0 * x + M 1 1 ≠ 0 := by
+  intro hden
+  refine hM ?_
+  rw [projectiveFixedPolynomial] at h
+  rw [Matrix.det_fin_two]
+  linear_combination (M 0 0 - M 1 0 * x) * hden + M 1 0 * h
+
+/-- **Why the discriminant classifies.** `projectiveDiscriminant` is the discriminant of the
+fixed-point quadratic: `(d - a) ^ 2 + 4 * b * c = trace ^ 2 - 4 * det`. -/
+theorem discrim_projectiveFixedPolynomial (M : Matrix (Fin 2) (Fin 2) ℝ) :
+    discrim (M 1 0) (M 1 1 - M 0 0) (-M 0 1) = projectiveDiscriminant M := by
+  simp only [discrim, projectiveDiscriminant, Matrix.trace_fin_two, Matrix.det_fin_two]
+  ring
+
+/-- `projectiveDiscriminant` is the discriminant of the characteristic polynomial. -/
+theorem projectiveDiscriminant_eq_discr (M : Matrix (Fin 2) (Fin 2) ℝ) :
+    projectiveDiscriminant M = M.discr :=
+  (Matrix.discr_fin_two M).symm
+
+/-- The hyperbolic case is `Matrix.IsHyperbolic`. -/
+theorem isProjectiveHyperbolic_iff_isHyperbolic (M : Matrix (Fin 2) (Fin 2) ℝ) :
+    IsProjectiveHyperbolic M ↔ M.IsHyperbolic := by
+  rw [IsProjectiveHyperbolic, Matrix.IsHyperbolic, projectiveDiscriminant_eq_discr]
+
+/-- The elliptic case is `Matrix.IsElliptic`. -/
+theorem isProjectiveElliptic_iff_isElliptic (M : Matrix (Fin 2) (Fin 2) ℝ) :
+    IsProjectiveElliptic M ↔ M.IsElliptic := by
+  rw [IsProjectiveElliptic, Matrix.IsElliptic, projectiveDiscriminant_eq_discr]
+
+/-- A nonsingular `2 × 2` matrix as an element of `GL (Fin 2) ℝ`, acting on `OnePoint ℝ` by
+`OnePoint.instGLAction`. -/
+def projectiveGL (M : Matrix (Fin 2) (Fin 2) ℝ) (hM : M.det ≠ 0) : GL (Fin 2) ℝ :=
+  Matrix.GeneralLinearGroup.mk'' M hM.isUnit
+
+/-- `projectiveGL` has the expected underlying matrix. -/
+@[simp] theorem coe_projectiveGL (M : Matrix (Fin 2) (Fin 2) ℝ) (hM : M.det ≠ 0) :
+    (projectiveGL M hM : Matrix (Fin 2) (Fin 2) ℝ) = M := rfl
+
+/-- `projectiveGL` has the expected entries. -/
+@[simp] theorem projectiveGL_apply (M : Matrix (Fin 2) (Fin 2) ℝ) (hM : M.det ≠ 0) (i j : Fin 2) :
+    projectiveGL M hM i j = M i j := rfl
+
+/-- **The projective action on the affine chart.** Away from the pole the Möbius action of a
+nonsingular matrix is `projectiveStep`. -/
+theorem projectiveGL_smul_coe {M : Matrix (Fin 2) (Fin 2) ℝ} {x : ℝ} (hM : M.det ≠ 0)
+    (hden : M 1 0 * x + M 1 1 ≠ 0) :
+    projectiveGL M hM • (x : OnePoint ℝ) = ((projectiveStep M x : ℝ) : OnePoint ℝ) := by
+  rw [OnePoint.smul_some_eq_ite, projectiveStep]
+  simp [projectiveGL_apply, hden]
+
+/-- **The fixed points of the projective action on the affine chart are the roots of the
+quadratic**, with no hypothesis at the pole: a nonsingular matrix moves its pole to infinity. -/
+theorem projectiveGL_smul_coe_eq_self_iff {M : Matrix (Fin 2) (Fin 2) ℝ} (hM : M.det ≠ 0)
+    (x : ℝ) :
+    projectiveGL M hM • (x : OnePoint ℝ) = (x : OnePoint ℝ) ↔
+      projectiveFixedPolynomial M x = 0 := by
+  by_cases hden : M 1 0 * x + M 1 1 = 0
+  · have hsmul : projectiveGL M hM • (x : OnePoint ℝ) = ∞ := by
+      rw [OnePoint.smul_some_eq_ite]
+      simp [projectiveGL_apply, hden]
+    rw [hsmul]
+    constructor
+    · intro h
+      exact absurd h (OnePoint.infty_ne_coe x)
+    · intro h
+      exact absurd hden (den_ne_zero_of_projectiveFixedPolynomial_eq_zero hM h)
+  · rw [projectiveGL_smul_coe hM hden, OnePoint.coe_eq_coe, projectiveStep_eq_self_iff hden]
+
+/-- **Infinity is fixed exactly by the affine actions**, that is exactly when the lower-left entry
+vanishes. -/
+theorem projectiveGL_smul_infty_eq_self_iff {M : Matrix (Fin 2) (Fin 2) ℝ} (hM : M.det ≠ 0) :
+    projectiveGL M hM • (∞ : OnePoint ℝ) = ∞ ↔ M 1 0 = 0 := by
+  rw [OnePoint.smul_infty_eq_self_iff, projectiveGL_apply]
+
+/-- The roots of `projectiveFixedPolynomial`, at `ε = 1` and `ε = -1`: the candidate fixed points
+of the projective action of `M` on the affine chart. -/
+def projectiveFixedPoint (M : Matrix (Fin 2) (Fin 2) ℝ) (ε : ℝ) : ℝ :=
+  (M 0 0 - M 1 1 + ε * Real.sqrt (projectiveDiscriminant M)) / (2 * M 1 0)
+
+/-- **The roots of the fixed-point quadratic in the hyperbolic case.** -/
+theorem projectiveFixedPolynomial_eq_zero_iff_of_isProjectiveHyperbolic
+    {M : Matrix (Fin 2) (Fin 2) ℝ} (hc : M 1 0 ≠ 0) (h : IsProjectiveHyperbolic M) (x : ℝ) :
+    projectiveFixedPolynomial M x = 0 ↔
+      x = projectiveFixedPoint M 1 ∨ x = projectiveFixedPoint M (-1) := by
+  have hs : discrim (M 1 0) (M 1 1 - M 0 0) (-M 0 1) =
+      Real.sqrt (projectiveDiscriminant M) * Real.sqrt (projectiveDiscriminant M) := by
+    rw [discrim_projectiveFixedPolynomial, Real.mul_self_sqrt h.le]
+  have hquad : projectiveFixedPolynomial M x =
+      M 1 0 * (x * x) + (M 1 1 - M 0 0) * x + -M 0 1 := by
+    rw [projectiveFixedPolynomial]
+    ring
+  rw [hquad, quadratic_eq_zero_iff hc hs x, projectiveFixedPoint, projectiveFixedPoint]
+  ring_nf
+
+/-- **The two fixed points of a hyperbolic action are distinct.** -/
+theorem projectiveFixedPoint_ne_of_isProjectiveHyperbolic {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (hc : M 1 0 ≠ 0) (h : IsProjectiveHyperbolic M) :
+    projectiveFixedPoint M 1 ≠ projectiveFixedPoint M (-1) := by
+  have hsq : 0 < Real.sqrt (projectiveDiscriminant M) := Real.sqrt_pos.2 h
+  have h2 : (2 : ℝ) * M 1 0 ≠ 0 := mul_ne_zero two_ne_zero hc
+  intro heq
+  rw [projectiveFixedPoint, projectiveFixedPoint, div_eq_div_iff h2 h2] at heq
+  have hcancel := mul_right_cancel₀ h2 heq
+  linarith
+
+/-- **The fixed points of a hyperbolic projective action.** When the lower-left entry is nonzero
+the action of a nonsingular hyperbolic matrix fixes exactly the two roots of its fixed-point
+quadratic, and infinity is not fixed. -/
+theorem projectiveGL_smul_eq_self_iff_of_isProjectiveHyperbolic {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (hM : M.det ≠ 0) (hc : M 1 0 ≠ 0) (h : IsProjectiveHyperbolic M) (z : OnePoint ℝ) :
+    projectiveGL M hM • z = z ↔
+      z = ((projectiveFixedPoint M 1 : ℝ) : OnePoint ℝ) ∨
+        z = ((projectiveFixedPoint M (-1) : ℝ) : OnePoint ℝ) := by
+  cases z with
+  | infty =>
+      rw [projectiveGL_smul_infty_eq_self_iff hM]
+      simp [hc, OnePoint.infty_ne_coe]
+  | coe x =>
+      rw [projectiveGL_smul_coe_eq_self_iff hM,
+        projectiveFixedPolynomial_eq_zero_iff_of_isProjectiveHyperbolic hc h, OnePoint.coe_eq_coe,
+        OnePoint.coe_eq_coe]
+
+/-- **Two fixed points in the hyperbolic case.** A nonsingular hyperbolic matrix with nonzero
+lower-left entry has two distinct fixed points on the projective line, both on the affine chart. -/
+theorem exists_pair_projectiveGL_smul_eq_self_of_isProjectiveHyperbolic
+    {M : Matrix (Fin 2) (Fin 2) ℝ} (hM : M.det ≠ 0) (hc : M 1 0 ≠ 0)
+    (h : IsProjectiveHyperbolic M) :
+    ∃ x y : ℝ, x ≠ y ∧ projectiveGL M hM • (x : OnePoint ℝ) = (x : OnePoint ℝ) ∧
+      projectiveGL M hM • (y : OnePoint ℝ) = (y : OnePoint ℝ) := by
+  refine ⟨projectiveFixedPoint M 1, projectiveFixedPoint M (-1),
+    projectiveFixedPoint_ne_of_isProjectiveHyperbolic hc h, ?_, ?_⟩
+  · exact (projectiveGL_smul_eq_self_iff_of_isProjectiveHyperbolic hM hc h _).2 (Or.inl rfl)
+  · exact (projectiveGL_smul_eq_self_iff_of_isProjectiveHyperbolic hM hc h _).2 (Or.inr rfl)
+
+/-- **The fixed point of a parabolic projective action.** When the lower-left entry is nonzero the
+action of a nonsingular parabolic matrix fixes exactly one point of the projective line, the
+double root `(a - d) / (2 * c)`. -/
+theorem projectiveGL_smul_eq_self_iff_of_isProjectiveParabolic {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (hM : M.det ≠ 0) (hc : M 1 0 ≠ 0) (h : IsProjectiveParabolic M) (z : OnePoint ℝ) :
+    projectiveGL M hM • z = z ↔ z = (((M 0 0 - M 1 1) / (2 * M 1 0) : ℝ) : OnePoint ℝ) := by
+  have hs : discrim (M 1 0) (M 1 1 - M 0 0) (-M 0 1) = 0 := by
+    rw [discrim_projectiveFixedPolynomial]
+    exact h
+  cases z with
+  | infty =>
+      rw [projectiveGL_smul_infty_eq_self_iff hM]
+      simp [hc, OnePoint.infty_ne_coe]
+  | coe x =>
+      have hquad : projectiveFixedPolynomial M x =
+          M 1 0 * (x * x) + (M 1 1 - M 0 0) * x + -M 0 1 := by
+        rw [projectiveFixedPolynomial]
+        ring
+      rw [projectiveGL_smul_coe_eq_self_iff hM, hquad,
+        quadratic_eq_zero_iff_of_discrim_eq_zero hc hs x, OnePoint.coe_eq_coe, neg_sub]
+
+/-- An elliptic matrix has positive determinant, so it is nonsingular. -/
+theorem IsProjectiveElliptic.det_pos {M : Matrix (Fin 2) (Fin 2) ℝ} (h : IsProjectiveElliptic M) :
+    0 < M.det := by
+  rw [IsProjectiveElliptic, projectiveDiscriminant] at h
+  nlinarith [sq_nonneg M.trace]
+
+/-- An elliptic matrix is nonsingular. -/
+theorem IsProjectiveElliptic.det_ne_zero {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (h : IsProjectiveElliptic M) : M.det ≠ 0 := h.det_pos.ne'
+
+/-- An elliptic matrix has nonzero lower-left entry: an affine action is never elliptic. -/
+theorem IsProjectiveElliptic.entry_ne_zero {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (h : IsProjectiveElliptic M) : M 1 0 ≠ 0 := by
+  intro hc
+  rw [IsProjectiveElliptic, projectiveDiscriminant, Matrix.trace_fin_two, Matrix.det_fin_two,
+    hc] at h
+  nlinarith [sq_nonneg (M 0 0 - M 1 1)]
+
+/-- **An elliptic action has no fixed point on the affine chart**: its fixed-point quadratic has
+negative discriminant, hence no real root. -/
+theorem IsProjectiveElliptic.projectiveFixedPolynomial_ne_zero {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (h : IsProjectiveElliptic M) (x : ℝ) : projectiveFixedPolynomial M x ≠ 0 := by
+  have hquad : projectiveFixedPolynomial M x =
+      M 1 0 * (x * x) + (M 1 1 - M 0 0) * x + -M 0 1 := by
+    rw [projectiveFixedPolynomial]
+    ring
+  rw [hquad]
+  refine quadratic_ne_zero_of_discrim_ne_sq (fun s hs => ?_) x
+  rw [discrim_projectiveFixedPolynomial] at hs
+  exact absurd (hs ▸ h) (not_lt.2 (sq_nonneg s))
+
+/-- **An elliptic action has no fixed point at all**, infinity included. -/
+theorem projectiveGL_smul_ne_self_of_isProjectiveElliptic {M : Matrix (Fin 2) (Fin 2) ℝ}
+    (h : IsProjectiveElliptic M) (z : OnePoint ℝ) :
+    projectiveGL M h.det_ne_zero • z ≠ z := by
+  cases z with
+  | infty =>
+      rw [Ne, projectiveGL_smul_infty_eq_self_iff h.det_ne_zero]
+      exact h.entry_ne_zero
+  | coe x =>
+      rw [Ne, projectiveGL_smul_coe_eq_self_iff h.det_ne_zero]
+      exact h.projectiveFixedPolynomial_ne_zero x
+
+/-! ### An elliptic witness -/
+
+/-- The quarter turn `!![0, -1; 1, 0]`, whose projective action is `x ↦ -x⁻¹`. -/
+def quarterTurnMatrix : Matrix (Fin 2) (Fin 2) ℝ := !![0, -1; 1, 0]
+
+/-- The quarter turn factors through matrices of negative determinant: it is the sign change
+`x ↦ -x` followed by the inversion `x ↦ x⁻¹`. -/
+theorem quarterTurnMatrix_eq_inversionMatrix_mul :
+    quarterTurnMatrix = inversionMatrix * !![1, 0; 0, -1] := by
+  unfold quarterTurnMatrix inversionMatrix
+  rw [Matrix.mul_fin_two]
+  norm_num
+
+/-- The quarter turn is a rotation: its determinant is `1`. -/
+theorem det_quarterTurnMatrix : quarterTurnMatrix.det = 1 := by
+  rw [quarterTurnMatrix, Matrix.det_fin_two_of]
+  norm_num
+
+/-- The quarter turn is nonsingular. -/
+theorem det_quarterTurnMatrix_ne_zero : quarterTurnMatrix.det ≠ 0 := by
+  rw [det_quarterTurnMatrix]
+  norm_num
+
+/-- The quarter turn is traceless. -/
+theorem trace_quarterTurnMatrix : quarterTurnMatrix.trace = 0 := by
+  rw [quarterTurnMatrix, Matrix.trace_fin_two_of]
+  norm_num
+
+/-- The discriminant of the quarter turn is `-4`. -/
+theorem projectiveDiscriminant_quarterTurnMatrix :
+    projectiveDiscriminant quarterTurnMatrix = -4 := by
+  rw [projectiveDiscriminant, trace_quarterTurnMatrix, det_quarterTurnMatrix]
+  norm_num
+
+/-- **The elliptic case is attained.** The quarter turn is elliptic. -/
+theorem isProjectiveElliptic_quarterTurnMatrix : IsProjectiveElliptic quarterTurnMatrix := by
+  rw [IsProjectiveElliptic, projectiveDiscriminant_quarterTurnMatrix]
+  norm_num
+
+/-- **The elliptic case is not vacuous.** Contrast `not_isProjectiveElliptic_affineCycleMatrix`:
+no product of affine transfer matrices is elliptic, but some `2 × 2` matrix is. -/
+theorem exists_isProjectiveElliptic :
+    ∃ M : Matrix (Fin 2) (Fin 2) ℝ, IsProjectiveElliptic M :=
+  ⟨quarterTurnMatrix, isProjectiveElliptic_quarterTurnMatrix⟩
+
+/-- The projective action of the quarter turn is `x ↦ -x⁻¹`. -/
+theorem projectiveStep_quarterTurnMatrix (x : ℝ) :
+    projectiveStep quarterTurnMatrix x = -x⁻¹ := by
+  rw [projectiveStep, quarterTurnMatrix]
+  norm_num
+  rw [neg_div, one_div]
+
+/-- The fixed-point quadratic of the quarter turn is `x ^ 2 + 1`, which has no real root. -/
+theorem projectiveFixedPolynomial_quarterTurnMatrix (x : ℝ) :
+    projectiveFixedPolynomial quarterTurnMatrix x = x ^ 2 + 1 := by
+  rw [projectiveFixedPolynomial, quarterTurnMatrix]
+  norm_num
+
+/-- **A concrete fixed-point-free projective action.** The quarter turn moves every point of the
+projective line. -/
+theorem quarterTurnMatrix_smul_ne_self (z : OnePoint ℝ) :
+    projectiveGL quarterTurnMatrix det_quarterTurnMatrix_ne_zero • z ≠ z :=
+  projectiveGL_smul_ne_self_of_isProjectiveElliptic isProjectiveElliptic_quarterTurnMatrix z
+
+/-- The discriminant of the inversion is `4`. -/
+theorem projectiveDiscriminant_inversionMatrix : projectiveDiscriminant inversionMatrix = 4 := by
+  rw [projectiveDiscriminant, inversionMatrix, Matrix.trace_fin_two_of, Matrix.det_fin_two_of]
+  norm_num
+
+/-- The inversion is hyperbolic. -/
+theorem isProjectiveHyperbolic_inversionMatrix : IsProjectiveHyperbolic inversionMatrix := by
+  rw [IsProjectiveHyperbolic, projectiveDiscriminant_inversionMatrix]
+  norm_num
+
+/-- The roots of the fixed-point quadratic of the inversion are the signs themselves: the fixed
+points of `x ↦ x⁻¹` are `1` and `-1`. -/
+theorem projectiveFixedPoint_inversionMatrix (ε : ℝ) :
+    projectiveFixedPoint inversionMatrix ε = ε := by
+  have hsqrt : Real.sqrt (projectiveDiscriminant inversionMatrix) = 2 := by
+    rw [projectiveDiscriminant_inversionMatrix, show (4 : ℝ) = 2 ^ 2 by norm_num,
+      Real.sqrt_sq (by norm_num)]
+  rw [projectiveFixedPoint, hsqrt, inversionMatrix]
+  norm_num
 
 end DirectedTransport.InverseCoordinate
 
