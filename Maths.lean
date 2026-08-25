@@ -49,6 +49,7 @@ public import Maths.DirectedTransport.FiniteInequality.Quantitative
 public import Maths.DirectedTransport.FiniteInequality.Sparse
 
 -- Directed transport: additive specialization and max-plus spectra
+public import Maths.DirectedTransport.Additive.Budget
 public import Maths.DirectedTransport.Additive.Circuits
 public import Maths.DirectedTransport.Additive.CirculationDecomposition
 public import Maths.DirectedTransport.Additive.Condensation
