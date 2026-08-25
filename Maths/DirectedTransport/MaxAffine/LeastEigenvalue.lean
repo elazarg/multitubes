@@ -48,11 +48,14 @@ vertex, and since each edge bounds the next iterate below by an increasing affin
 previous one, the sequence is bounded below at every coordinate.  A finite maximum of affine maps
 is continuous, so the pointwise limit is an eigenvector at the least relaxation level.
 
-The hypothesis that a least relaxation level exists is what excludes the contraction regime.
-Summing the balance conditions over the vertices gives `∑ p_b = ∑ alpha_b * p_b`, so with every
-slope below one the polytope is empty, the levels are unbounded below, and indeed every real
-number is an eigenvalue there
-(`Maths.MaxAffineTransport.eigenvalues_eq_univ_of_slope_eq`).
+The hypothesis that a least relaxation level exists is what excludes the contraction regime, and
+that regime is settled by the same duality.  Summing the balance conditions over the vertices
+gives `∑ p_b = ∑ alpha_b * p_b`, so with every slope below one the polytope is empty
+(`Maths.MaxAffineTransport.not_isNormalizedBranchCertificate_of_slope_lt_one`), every real
+number is a relaxation level, and there is no least one.  That argument sees only the balance
+conditions, so it asks nothing of the graph, of the floors, or of the sign of the slopes.  At a
+common nonnegative slope other than one, expansive slopes included, every real number is even an
+eigenvalue (`Maths.MaxAffineTransport.eigenvalues_eq_univ_of_slope_eq`).
 
 ## Main definitions
 
@@ -79,8 +82,16 @@ number is an eigenvalue there
   relaxation level is the least eigenvalue.**
 * `Maths.MaxAffineTransport.exists_isLeast_eigenvalues_of_translation`: at floorless
   unit slopes the value is the maximum cycle mean.
+* `Maths.MaxAffineTransport.sum_branchDelta`: a branch row sums to one minus its gain,
+  the whole geometric content of the contraction regime.
+* `Maths.MaxAffineTransport.not_isNormalizedBranchCertificate_of_slope_lt_one` and
+  `Maths.MaxAffineTransport.relaxationLevels_eq_univ_of_slope_lt_one`: **with every slope
+  below one the gain-flow polytope is empty**, so every real number is a relaxation level.
+* `Maths.MaxAffineTransport.not_isLeast_relaxationLevels_of_slope_lt_one`: hence no least
+  relaxation level, on an arbitrary graph with arbitrary floors.
 * `Maths.MaxAffineTransport.not_isLeast_relaxationLevels_of_slope_eq`: at a common
-  nonnegative slope other than one there is no least relaxation level.
+  nonnegative slope other than one there is no least relaxation level; this also covers the
+  expansive common slopes, which the polytope argument does not.
 * `Maths.MaxAffineTransport.isLeast_eigenvalues_loopLabel`: for the two-loop labelling
   the value is `5`.
 
@@ -200,6 +211,13 @@ theorem branchDelta_apply (G : EdgeGraph V E) (label : E → Label) (branch : Br
       · simp only [branchDelta, rowDelta, hc, WithBot.recBotCoe_coe, branchEdge, branchSlope,
           Sum.elim_inr, id_eq, zero_mul, sub_zero]
         rfl
+
+/-- **A branch row sums to one minus its gain.**  The row carries a unit at its target and its
+gain, negated, at its source, so pairing it with the all-ones direction leaves `1 - alpha_b`.
+This is the only fact about the geometry of the polytope that the contraction regime needs. -/
+theorem sum_branchDelta (branch : Branch label) :
+    ∑ v : V, branchDelta G label branch v = 1 - branchSlope label branch := by
+  simp [branchDelta_apply]
 
 /-- The row of a genuine branch, paired with a candidate potential. -/
 theorem dotProduct_branchDelta (G : EdgeGraph V E) (label : E → Label) (branch : Branch label)
@@ -686,11 +704,75 @@ theorem exists_isLeast_eigenvalues_of_translation [Fintype V] [DecidableEq V] [F
     isLeast_eigenvalues_of_isLeast_relaxationLevels (fun e => (hslope e) ▸ zero_le_one) hin
       hconn hleast⟩
 
+/-- **With every slope below one the gain-flow polytope is empty.**  Summing the balance
+conditions over the vertices turns them into `∑ p_b = ∑ alpha_b * p_b`, by
+`Maths.MaxAffineTransport.sum_branchDelta`.  A nonnegative family with every gain below one
+therefore has `∑ p_b * (1 - alpha_b) = 0` with every summand nonnegative, so the family vanishes
+and cannot have total mass one.  Nothing is assumed of the graph, of the floors, or of the sign
+of the slopes. -/
+theorem not_isNormalizedBranchCertificate_of_slope_lt_one [Fintype V] [DecidableEq V] [Fintype E]
+    {G : EdgeGraph V E} {label : E → Label} (hslope : ∀ e : E, (label e).slope < 1)
+    (coefficient : Branch label → ℝ) :
+    ¬IsNormalizedBranchCertificate (G := G) (label := label) coefficient := by
+  rintro ⟨hnonneg, hmass, hbalance⟩
+  have hgain : ∀ branch : Branch label, branchSlope label branch < 1 := by
+    rintro ⟨action, hgenuine⟩
+    cases action with
+    | inl e => exact hslope e
+    | inr e => exact zero_lt_one
+  have hzero : ∑ branch : Branch label,
+      coefficient branch * (1 - branchSlope label branch) = 0 := by
+    have hswap : ∑ v : V, ∑ branch : Branch label,
+        coefficient branch * branchDelta G label branch v = 0 := by
+      simp [hbalance]
+    rw [Finset.sum_comm] at hswap
+    calc ∑ branch : Branch label, coefficient branch * (1 - branchSlope label branch)
+        = ∑ branch : Branch label, ∑ v : V,
+            coefficient branch * branchDelta G label branch v := by
+          refine Finset.sum_congr rfl fun branch _ => ?_
+          rw [← Finset.mul_sum, sum_branchDelta]
+      _ = 0 := hswap
+  have hall : ∀ branch ∈ Finset.univ,
+      coefficient branch * (1 - branchSlope label branch) = 0 :=
+    (Finset.sum_eq_zero_iff_of_nonneg fun branch _ =>
+      mul_nonneg (hnonneg branch) (by linarith [hgain branch])).mp hzero
+  have hcoeff : ∀ branch : Branch label, coefficient branch = 0 := by
+    intro branch
+    rcases mul_eq_zero.mp (hall branch (Finset.mem_univ branch)) with h | h
+    · exact h
+    · linarith [hgain branch]
+  simp [hcoeff] at hmass
+
+/-- **In the contraction regime every real number is a relaxation level.**  The relaxation levels
+are the upper bounds of the gain-flow objective, and with every slope below one there is nothing
+to bound. -/
+theorem relaxationLevels_eq_univ_of_slope_lt_one [Fintype V] [DecidableEq V] [Fintype E]
+    {G : EdgeGraph V E} {label : E → Label} (hslope : ∀ e : E, (label e).slope < 1) :
+    relaxationLevels G label = Set.univ := by
+  refine Set.eq_univ_of_forall fun lam => ?_
+  rw [mem_relaxationLevels_iff_forall_branchCertificateValue_le]
+  intro coefficient hcoefficient
+  exact absurd hcoefficient (not_isNormalizedBranchCertificate_of_slope_lt_one hslope _)
+
+/-- **Strictly subunit slopes admit no least relaxation level.**  This is the dual reading of the
+contraction regime, and it needs neither a common slope, nor floorlessness, nor connectivity, nor
+an incoming edge at every vertex: emptiness of the polytope is visible from the balance
+conditions alone. -/
+theorem not_isLeast_relaxationLevels_of_slope_lt_one [Fintype V] [DecidableEq V] [Fintype E]
+    {G : EdgeGraph V E} {label : E → Label} (hslope : ∀ e : E, (label e).slope < 1) (lam : ℝ) :
+    ¬IsLeast (relaxationLevels G label) lam := by
+  rintro ⟨-, hlower⟩
+  have hmem : lam - 1 ∈ relaxationLevels G label := by
+    rw [relaxationLevels_eq_univ_of_slope_lt_one hslope]; trivial
+  linarith [hlower hmem]
+
 /-- **Below unit slope there is no least relaxation level.**  At a common nonnegative slope other
 than one every real number is an eigenvalue, hence a relaxation level, and a set containing every
 real number has no least element.  So the hypothesis of
 `Maths.MaxAffineTransport.isLeast_eigenvalues_of_isLeast_relaxationLevels` is exactly
-what rules out the contraction regime, where the gain-flow polytope is empty. -/
+what rules out the contraction regime, where the gain-flow polytope is empty.  Unlike
+`Maths.MaxAffineTransport.not_isLeast_relaxationLevels_of_slope_lt_one` this covers the
+expansive common slopes as well, at the cost of the hypotheses that carry an eigenvector. -/
 theorem not_isLeast_relaxationLevels_of_slope_eq [Fintype V] [DecidableEq V] [Fintype E]
     [Nonempty V] (G : EdgeGraph V E) (label : E → Label) {s : ℝ} (hs0 : 0 ≤ s) (hs1 : s ≠ 1)
     (hslope : ∀ e : E, (label e).slope = s) (hfloor : ∀ e : E, (label e).floor = ⊥)
