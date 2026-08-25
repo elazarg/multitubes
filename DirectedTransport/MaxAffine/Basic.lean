@@ -118,12 +118,14 @@ general labels.
 Eigenvalue problems for the vertex operator remain outside this file.  The
 vertex operator itself, the identification of a lax section with one of its
 sub-fixed points, and its eigenvectors in the topical regime are the subject of
-`DirectedTransport.MaxAffine.FixedPoint`, and its eigenvectors below unit slope
+`DirectedTransport.MaxAffine.FixedPoint`; its eigenvectors below unit slope
 modulus, where the operator contracts, the subject of
-`DirectedTransport.MaxAffine.Contraction`.  What remains open is the eigenvalue
-problem at nonnegative slopes straddling one, where additive homogeneity fails,
-the Perron--Frobenius theory of topical maps no longer applies, and the operator
-is not a contraction either.
+`DirectedTransport.MaxAffine.Contraction`; and its eigenvectors at nonnegative
+slopes straddling one, where neither mechanism is available and an exponential
+change of coordinates makes Brouwer's theorem applicable instead, the subject of
+`DirectedTransport.MaxAffine.Eigenproblem`.  What remains open there is not
+existence but the value of the eigenvalue, for which no analogue of the maximum
+cycle mean is known.
 
 ## References
 

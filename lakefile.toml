@@ -46,5 +46,10 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.33.1"
 
+[[require]]
+name = "fixed-point-theorems"
+git = "https://github.com/elazarg/fixed-point-theorems-lean4"
+rev = "main"
+
 [[lean_lib]]
 name = "DirectedTransport"

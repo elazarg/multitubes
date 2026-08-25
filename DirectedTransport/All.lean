@@ -60,6 +60,7 @@ public import DirectedTransport.MaxAffine.Basic
 public import DirectedTransport.MaxAffine.Contraction
 public import DirectedTransport.MaxAffine.CycleSlack
 public import DirectedTransport.MaxAffine.Duality
+public import DirectedTransport.MaxAffine.Eigenproblem
 public import DirectedTransport.MaxAffine.Farkas
 public import DirectedTransport.MaxAffine.FixedPoint
 public import DirectedTransport.MaxAffine.GaugeFeasibility

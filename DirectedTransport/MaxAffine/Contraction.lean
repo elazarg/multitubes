@@ -89,22 +89,18 @@ argument and therefore Lipschitz with any constant.  No nonemptiness hypothesis 
 
 ## TODO
 
-The regime of nonnegative slopes straddling one is untouched.  There the vertex operator is
-monotone, but a slope above one makes it expansive, so the metric argument of this file fails,
-and a slope below one destroys additive homogeneity, so the Perron--Frobenius argument of
-`DirectedTransport.MaxAffine.FixedPoint` fails as well.  Neither obstruction already in the
-library decides the question.  A labelling can fail to have a lax section and still have an
-eigenvector, so the certificate of `DirectedTransport.MaxAffine.Farkas` does not obstruct one;
-and `DirectedTransport.MaxAffineTransport.not_exists_isEigenvector_flipLabel` uses a negative
-slope, so it is a failure of monotonicity rather than of homogeneity.  The sharpened question
-is whether a finite strongly connected graph whose slopes are all nonnegative always carries an
-eigenvector of its vertex operator.
+Quantitative refinements of the nonnegative-slope regime.  Existence there is settled: a finite
+strongly connected graph whose slopes are all nonnegative always carries an eigenvector, by
+`DirectedTransport.MaxAffineTransport.exists_isEigenvector_of_slope_nonneg`, proved in exponential
+coordinates by Brouwer's theorem rather than by either mechanism of this file -- a slope above one
+makes the operator expansive, and a slope below one destroys additive homogeneity.  What that
+argument does not supply is uniqueness of the eigenvalue, uniqueness of the eigenvector up to the
+appropriate equivalence, or a formula for the eigenvalue in terms of the labels, all of which are
+available in the two regimes settled here and in `DirectedTransport.MaxAffine.FixedPoint`.
 
-Two reductions narrow that question.  A finite floor on an edge into a vertex contributes the
-same demand as an extra floorless edge into that vertex of slope `0` and shift the floor, so
-floors may be assumed absent.  And when every vertex has exactly one incoming edge no supremum
-is taken at all and the equations are triangular along each cycle, so a counterexample needs a
-vertex of in-degree at least two, where the supremum is genuine.
+`DirectedTransport.MaxAffineTransport.not_exists_isEigenvector_flipLabel` shows that the sign
+condition cannot be dropped, so what separates the settled cases from the open ones is no longer
+the sign of the slopes but the finer structure of the eigenvalue.
 
 ## References
 

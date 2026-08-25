@@ -77,7 +77,10 @@ specialization, then `Additive/`, `FiniteInequality/`, and `MaxAffine/`.
 ## Building
 
 Requires Lean `v4.33.1` (see `lean-toolchain`) and mathlib pinned to the matching `v4.33.1` tag;
-`elan` will fetch the toolchain automatically.
+`elan` will fetch the toolchain automatically. The only other dependency is
+[`fixed-point-theorems`](https://github.com/elazarg/fixed-point-theorems-lean4), which supplies
+Brouwer's theorem for the max-affine eigenproblem; nothing else in the library uses it, and the
+linear-algebra layer in particular depends on mathlib alone.
 
 ```sh
 lake exe cache get   # fetch prebuilt mathlib oleans; without this the first build takes hours
