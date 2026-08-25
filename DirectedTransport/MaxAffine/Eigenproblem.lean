@@ -99,18 +99,27 @@ split off and the remaining work is
 
 ## TODO
 
-Quantitative refinements of the nonnegative-slope regime.  Existence there is settled by
-`DirectedTransport.MaxAffineTransport.exists_isEigenvector_of_slope_nonneg`, and
-`DirectedTransport.MaxAffineTransport.not_exists_isEigenvector_flipLabel` shows that the sign
-condition cannot be dropped, so the settled cases and the open ones are no longer separated by
-the sign of the slopes but by the finer structure of the eigenvalue.
+The eigenvalue produced here is not unique and neither is the eigenvector, so what the Brouwer
+argument leaves open is narrower than it first appears.  Both failures are settled in
+`DirectedTransport.MaxAffine.Spectrum` on one vertex carrying a reset of slope `0` and a doubling
+of slope `2`: its eigenvalues are exactly the reals from `5` upwards
+(`DirectedTransport.MaxAffineTransport.eigenvalues_loopLabel`), each of them above `5` carried by
+two distinct eigenvectors
+(`DirectedTransport.MaxAffineTransport.exists_pair_ne_isEigenvector_loopLabel`).  So no formula
+determines the eigenvalue at nonnegative slopes straddling one, and the question is which real
+numbers are eigenvalues rather than which one is.
 
-What the Brouwer argument does not supply is uniqueness of the eigenvalue, uniqueness of the
-eigenvector up to the appropriate equivalence, or a formula for the eigenvalue in terms of the
-labels.  All three are available in the two regimes settled elsewhere, below unit slope modulus
-in `DirectedTransport.MaxAffine.Contraction` and in the translation regime of
-`DirectedTransport.MaxAffine.FixedPoint`, where the eigenvalue is the maximum cycle mean.  At
-nonnegative slopes straddling one no analogue of the maximum cycle mean is known.
+What remains open is the **least** eigenvalue.  Every eigenvalue is a level at which the
+inequality `F x ≤ lam + x` is solvable, and those levels form an up-set whose infimum is therefore
+a lower bound for the whole set of eigenvalues; whether that infimum is itself an eigenvalue is
+not known.  It is one in every settled case: for the two-loop labelling above, in the translation
+regime of `DirectedTransport.MaxAffine.FixedPoint`, where both are the maximum cycle mean of the
+shifts, and vacuously below unit slope modulus in `DirectedTransport.MaxAffine.Contraction`, where
+neither is bounded below.  A proof in general would supply the missing formula, the infimum being
+the optimum of an explicit finite linear program.  The cyclewise description of that optimum
+available in the comparable regimes -- the maximum cycle mean of the unit-slope subgraph -- does
+not extend to mixed slopes, by
+`DirectedTransport.MaxAffineTransport.not_forall_mem_relaxationLevels_iff_unitSlopeCycles_le`.
 
 ## References
 
@@ -459,7 +468,9 @@ argument has nothing to act on, while at every nonnegative slope it extends cont
 
 Neither of the two earlier regimes covers this.  The operator need not be a contraction, since a
 slope above one is allowed, and it need not be additively homogeneous, since a slope below one is
-allowed; correspondingly neither the eigenvalue nor the eigenvector is claimed to be unique. -/
+allowed; correspondingly neither the eigenvalue nor the eigenvector is unique, by
+`DirectedTransport.MaxAffineTransport.eigenvalues_loopLabel` and
+`DirectedTransport.MaxAffineTransport.exists_pair_ne_isEigenvector_loopLabel`. -/
 theorem exists_isEigenvector_of_slope_nonneg [Nonempty V] (G : EdgeGraph V E) (label : E → Label)
     (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (hconn : ∀ start finish : V, Nonempty (G.Walk start finish)) :

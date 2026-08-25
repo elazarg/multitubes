@@ -55,7 +55,9 @@ graph and with floors allowed: that is
 `DirectedTransport.MaxAffine.Eigenproblem` by Brouwer's theorem in exponential coordinates,
 neither mechanism of this file being available there -- a slope above one makes the operator
 expansive, and a slope below one destroys additive homogeneity.  Existence is all that argument
-gives; the eigenvalue itself is open there, and the open problem is recorded in that file.
+gives, and no more is available: at nonnegative slopes straddling one the eigenvalue and the
+eigenvector are both non-unique, by `DirectedTransport.MaxAffine.Spectrum`, where the residual
+question of the least eigenvalue is recorded.
 
 ## Main definitions
 

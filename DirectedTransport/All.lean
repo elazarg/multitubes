@@ -75,6 +75,7 @@ public import DirectedTransport.MaxAffine.Relaxation
 public import DirectedTransport.MaxAffine.Scalar
 public import DirectedTransport.MaxAffine.Sections
 public import DirectedTransport.MaxAffine.Slopes
+public import DirectedTransport.MaxAffine.Spectrum
 public import DirectedTransport.MaxAffine.Sparse
 
 /-!

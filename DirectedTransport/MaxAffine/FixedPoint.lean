@@ -53,8 +53,9 @@ eigenvalue, and at nonnegative slopes straddling one
 `DirectedTransport.MaxAffine.Eigenproblem` produces one by Brouwer's theorem in exponential
 coordinates, floors included, with
 `DirectedTransport.MaxAffineTransport.not_exists_isEigenvector_flipLabel` showing the sign
-condition sharp.  Existence is what those arguments settle; the eigenvalue at nonnegative slopes
-straddling one is not settled anywhere.
+condition sharp.  Existence is what those arguments settle; at nonnegative slopes straddling one
+the eigenvalue is not determined by the labelling at all, and what can be said about the set of
+eigenvalues is in `DirectedTransport.MaxAffine.Spectrum`.
 
 ## Main definitions
 
