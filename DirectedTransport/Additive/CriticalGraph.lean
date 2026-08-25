@@ -36,6 +36,12 @@ Kleene-star entry, recovers its value at the original vertex.  Every eigenvector
 max-plus combination of the critical Kleene-star columns with its own values as coefficients, and
 each critical column is itself an eigenvector.
 
+Columns rooted in one strongly connected component of the critical graph differ by a constant, so
+one column per component already generates.  That family is also **minimal**: evaluating a
+supposed expression of the column rooted at a vertex first at that vertex, where the column
+vanishes, and then at the root attaining the maximum forces the two Kleene-star entries between
+the two roots to be opposite, which happens only inside a single component.
+
 ## Main definitions
 
 * `DirectedTransport.EdgeGraph.restrictEdges`: the subgraph on a set of edges, the edge-indexed
@@ -55,6 +61,8 @@ each critical column is itself an eigenvector.
 * `DirectedTransport.MaxPlusPotential.CriticalClass`,
   `DirectedTransport.MaxPlusPotential.toCriticalClass`: the critical classes, that is the strongly
   connected components of the critical graph, and the class of a vertex.
+* `DirectedTransport.MaxPlusPotential.GeneratesEigenspace`: a set of vertices whose Kleene-star
+  columns express every eigenvector.
 
 ## Main results
 
@@ -83,7 +91,19 @@ each critical column is itself an eigenvector.
   `DirectedTransport.MaxPlusPotential.maxRootedWeight_add_maxRootedWeight_eq_zero`, the Kleene-star
   entry between the two roots.
 * `DirectedTransport.MaxPlusPotential.isGreatest_criticalClassColumns`: **one column per critical
-  class suffices** to express every eigenvector.
+  class suffices** to express every eigenvector, restated as
+  `DirectedTransport.MaxPlusPotential.generatesEigenspace_of_forall_exists_mem`.
+* `DirectedTransport.MaxPlusPotential.toCriticalClass_eq_of_maxRootedWeight_add_eq_zero`:
+  conversely, two mutually reachable vertices whose Kleene-star entries are opposite lie in one
+  critical class.
+* `DirectedTransport.MaxPlusPotential.not_isGreatest_criticalColumns_of_forall_toCriticalClass_ne`:
+  **a column is not the max-plus combination of the columns rooted in other critical classes**,
+  whatever coefficients are used.
+* `DirectedTransport.MaxPlusPotential.exists_mem_toCriticalClass_eq_of_generatesEigenspace`:
+  **minimality**, every generating set meets the critical class of every critical vertex reaching
+  the whole graph; with
+  `DirectedTransport.MaxPlusPotential.generatesEigenspace_iff` identifying the generating sets, in
+  that situation, with the transversals of the critical classes.
 
 ## Implementation notes
 
@@ -109,18 +129,15 @@ vertex produced by the backward tight walk always satisfies it, so the descripti
 graph, so the reachability order on classes and the acyclicity of their condensation come with it
 and mutual reachability inside the critical graph is not redefined here.
 
-The generating family indexed by the critical classes is proved *sufficient*: a set of critical
-vertices meeting every critical class already expresses every eigenvector.  Minimality of that
-family, meaning that no smaller one generates, is a different statement and is not proved.  Its
-usual proof exhibits, for each class, the column rooted there as an eigenvector that the other
-columns do not dominate; the first half of that already fails at this generality, since
-`DirectedTransport.MaxPlusPotential.isGraphEigenvector_maxRootedWeight` needs every vertex to be
-reachable from the root, which without irreducibility no critical vertex need satisfy.
-
-## TODO
-
-Minimality of the generating family indexed by the critical classes, which needs a hypothesis
-making the critical roots reach the whole graph.
+The family indexed by the critical classes is *sufficient* and *minimal*.  Sufficiency asks for
+nothing beyond finiteness.  Minimality asks, for the class being recovered, that one of its
+vertices reach every vertex of the graph: that reachability is exactly what makes the column
+rooted there an eigenvector, by
+`DirectedTransport.MaxPlusPotential.isGraphEigenvector_maxRootedWeight`, and without an
+eigenvector attached to a class there is nothing a generating family could fail to express.
+Nothing further is assumed - in particular the generating set is not required to consist of
+critical vertices, and the walks from its members back to the class are read off the generating
+hypothesis itself rather than assumed.
 
 ## References
 
@@ -199,6 +216,18 @@ edges and nothing else. -/
         simp
       rw [hunfold]
       exact hstep.trans htail
+
+/-- The converse reading: a walk of the ambient graph all of whose edges belong to the set is a
+walk of the edge subgraph.  It is stated as an existence because the walk of the subgraph carries
+the membership proofs, which the ambient walk does not determine. -/
+theorem nonempty_restrictEdges_of_forall_mem {S : Set E} {start finish : V}
+    (walk : G.Walk start finish) (hmem : ∀ e ∈ walk.edges, e ∈ S) :
+    Nonempty ((G.restrictEdges S).Walk start finish) := by
+  induction walk with
+  | nil => exact ⟨.nil⟩
+  | concat walkSoFar edge legal ih =>
+      obtain ⟨before⟩ := ih fun e he => hmem e (by simp [he])
+      exact ⟨before.concat ⟨edge, hmem edge (by simp)⟩ legal⟩
 
 /-- Reading a walk of an edge subgraph in the ambient graph preserves its length. -/
 @[simp] theorem length_ofRestrictEdges {S : Set E} {start finish : V}
@@ -674,6 +703,47 @@ theorem maxRootedWeight_add_maxRootedWeight_eq_zero {weight : E → 𝕜} {lam :
   have hsecondLe := walkWeight_le_maxRootedWeight hshift (weight := fun e => weight e - lam) second
   linarith [hsplit ▸ hzero]
 
+/-- **Opposite Kleene-star entries detect the critical class.**  This is the converse of
+`DirectedTransport.MaxPlusPotential.maxRootedWeight_add_maxRootedWeight_eq_zero`: if the two
+entries between two mutually reachable vertices sum to zero, then greatest walks realizing them
+concatenate to a closed walk of shifted weight zero, hence of mean exactly `lam`; every edge of
+that closed walk is critical, so each of the two walks is a walk of the critical graph and the
+vertices lie in one critical class. -/
+theorem toCriticalClass_eq_of_maxRootedWeight_add_eq_zero {weight : E → 𝕜}
+    {lam : 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      walkWeight weight cycle ≤ cycle.length * lam)
+    {base base' : V} (hforward : Nonempty (G.Walk base base'))
+    (hbackward : Nonempty (G.Walk base' base))
+    (hzero : maxRootedWeight G (fun e => weight e - lam) base base'
+      + maxRootedWeight G (fun e => weight e - lam) base' base = 0) :
+    toCriticalClass G weight lam base = toCriticalClass G weight lam base' := by
+  have hshift : ∀ (v : V) (c : G.Walk v v), walkWeight (fun e => weight e - lam) c ≤ 0 := by
+    intro v c
+    rw [walkWeight_sub_const]
+    linarith [hcyc v c]
+  obtain ⟨first, -, hfirst⟩ := maxRootedWeight_mem hshift hforward
+  obtain ⟨second, -, hsecond⟩ := maxRootedWeight_mem hshift hbackward
+  have hcycle : walkWeight (fun e => weight e - lam) (first.append second) = 0 := by
+    rw [walkWeight_append, hfirst, hsecond]
+    exact hzero
+  have hmean : walkWeight weight (first.append second)
+      = (first.append second).length * lam := by
+    rw [walkWeight_sub_const] at hcycle
+    linarith
+  rcases Nat.eq_zero_or_pos (first.append second).length with hlen | hpos
+  · rw [EdgeGraph.Walk.length_append] at hlen
+    obtain rfl : base = base' := first.eq_of_length_eq_zero (by omega)
+    rfl
+  · have hcrit : ∀ e ∈ (first.append second).edges, e ∈ criticalEdges G weight lam :=
+      fun e he => isCriticalEdge_of_mem_edges (first.append second) hpos hmean he
+    rw [EdgeGraph.Walk.edges_append] at hcrit
+    exact toCriticalClass_eq_iff.2
+      ⟨EdgeGraph.Walk.nonempty_restrictEdges_of_forall_mem first
+        fun e he => hcrit e (List.mem_append_left _ he),
+       EdgeGraph.Walk.nonempty_restrictEdges_of_forall_mem second
+        fun e he => hcrit e (List.mem_append_right _ he)⟩
+
 /-- **Two Kleene-star columns rooted in the same critical class differ by a constant.**  The
 constant is the Kleene-star entry between the two roots, and it does not depend on the vertex at
 which the columns are compared.  Only the reachability actually used appears: the vertex has to be
@@ -725,7 +795,8 @@ theorem add_maxRootedWeight_eq_of_toCriticalClass_eq {weight : E → 𝕜} {lam 
 is a set of critical vertices meeting every critical class that contains a critical vertex, then
 every eigenvector is already, at every vertex, the max-plus combination of the columns rooted at
 `reps`, with its own values as coefficients, and the maximum is attained.  This is sufficiency of
-the family; minimality of it is a separate statement and is not proved here. -/
+the family; its minimality is
+`DirectedTransport.MaxPlusPotential.exists_mem_toCriticalClass_eq_of_generatesEigenspace`. -/
 theorem isGreatest_criticalClassColumns [Fintype V] {weight : E → 𝕜} {lam : 𝕜} {φ : V → 𝕜}
     (hφ : IsGraphEigenvector G weight lam φ) {reps : Set V}
     (hreps : ∀ base : V, IsCriticalVertex G weight lam base →
@@ -747,6 +818,103 @@ theorem isGreatest_criticalClassColumns [Fintype V] {weight : E → 𝕜} {lam :
     ring
   · rintro r ⟨root', -, hroot', rfl⟩
     exact add_maxRootedWeight_le hφ hroot'
+
+/-! ### Generating families and their minimality -/
+
+/-- A set of vertices **generates the eigenspace** for `lam` when every eigenvector is, at every
+vertex, the max-plus combination of the Kleene-star columns of `weight - lam` rooted at that set,
+with the eigenvector's own values as coefficients, the maximum being attained. -/
+def GeneratesEigenspace (G : EdgeGraph V E) (weight : E → 𝕜) (lam : 𝕜) (reps : Set V) : Prop :=
+  ∀ φ : V → 𝕜, IsGraphEigenvector G weight lam φ → ∀ vertex : V,
+    IsGreatest {r : 𝕜 | ∃ root ∈ reps, Nonempty (G.Walk root vertex) ∧
+      r = φ root + maxRootedWeight G (fun e => weight e - lam) root vertex} (φ vertex)
+
+/-- **Sufficiency.**  A set of vertices meeting every critical class generates the eigenspace.
+This is `DirectedTransport.MaxPlusPotential.isGreatest_criticalClassColumns` read through
+`DirectedTransport.MaxPlusPotential.GeneratesEigenspace`. -/
+theorem generatesEigenspace_of_forall_exists_mem [Fintype V] {weight : E → 𝕜} {lam : 𝕜}
+    {reps : Set V}
+    (hreps : ∀ base : V, IsCriticalVertex G weight lam base →
+      ∃ root ∈ reps, toCriticalClass G weight lam base = toCriticalClass G weight lam root) :
+    GeneratesEigenspace G weight lam reps :=
+  fun _ hφ vertex => isGreatest_criticalClassColumns hφ hreps vertex
+
+/-- **A Kleene-star column is not dominated by the columns rooted outside its own critical
+class.**  Whatever coefficients are used, the column rooted at `base` is not the max-plus
+combination of the columns rooted at vertices of other critical classes, provided `base` reaches
+those vertices.  Evaluating the combination at `base` itself makes some coefficient the negative of
+the Kleene-star entry from that root to `base`; evaluating it at the root then forces the two
+entries between the root and `base` to be opposite, which puts the root in the critical class of
+`base`.
+
+This is the separation the minimality of the family indexed by the critical classes rests on; no
+criticality of `base` is used. -/
+theorem not_isGreatest_criticalColumns_of_forall_toCriticalClass_ne {weight : E → 𝕜} {lam : 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      walkWeight weight cycle ≤ cycle.length * lam)
+    {base : V} {reps : Set V} (c : V → 𝕜)
+    (hreach : ∀ root ∈ reps, Nonempty (G.Walk base root))
+    (hne : ∀ root ∈ reps,
+      toCriticalClass G weight lam root ≠ toCriticalClass G weight lam base) :
+    ¬ ∀ vertex : V, IsGreatest {r : 𝕜 | ∃ root ∈ reps, Nonempty (G.Walk root vertex) ∧
+        r = c root + maxRootedWeight G (fun e => weight e - lam) root vertex}
+      (maxRootedWeight G (fun e => weight e - lam) base vertex) := by
+  intro hgen
+  have hshift : ∀ (v : V) (cycle : G.Walk v v), walkWeight (fun e => weight e - lam) cycle ≤ 0 := by
+    intro v cycle
+    rw [walkWeight_sub_const]
+    linarith [hcyc v cycle]
+  obtain ⟨⟨root, hmem, hrootBase, hvalue⟩, -⟩ := hgen base
+  rw [maxRootedWeight_self hshift] at hvalue
+  have hupper := (hgen root).2 ⟨root, hmem, ⟨.nil⟩, rfl⟩
+  rw [maxRootedWeight_self hshift] at hupper
+  have htriangle := add_maxRootedWeight_le_maxRootedWeight hshift
+    (weight := fun e => weight e - lam) hrootBase (hreach root hmem)
+  rw [maxRootedWeight_self hshift] at htriangle
+  exact hne root hmem <| toCriticalClass_eq_of_maxRootedWeight_add_eq_zero hcyc
+    hrootBase (hreach root hmem) (by linarith)
+
+/-- **Minimality of the family indexed by the critical classes.**  Every generating set contains a
+vertex of the critical class of `base`, for every critical vertex `base` that reaches the whole
+graph.  Together with
+`DirectedTransport.MaxPlusPotential.generatesEigenspace_of_forall_exists_mem` this says that no
+proper subfamily of the one-column-per-critical-class family generates: dropping the class of
+`base` costs the eigenvector rooted at `base`.
+
+The reachability hypothesis is what makes the column rooted at `base` an eigenvector at all, by
+`DirectedTransport.MaxPlusPotential.isGraphEigenvector_maxRootedWeight`, and it is the only
+hypothesis beyond finiteness and the bound on the cycle means; neither strong connectivity nor
+attainment of the maximum cycle mean is used. -/
+theorem exists_mem_toCriticalClass_eq_of_generatesEigenspace [Fintype V] {weight : E → 𝕜}
+    {lam : 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      walkWeight weight cycle ≤ cycle.length * lam)
+    {reps : Set V} (hreps : GeneratesEigenspace G weight lam reps) {base : V}
+    (hbase : IsCriticalVertex G weight lam base)
+    (hreach : ∀ vertex : V, Nonempty (G.Walk base vertex)) :
+    ∃ root ∈ reps, toCriticalClass G weight lam base = toCriticalClass G weight lam root := by
+  by_contra hcon
+  push Not at hcon
+  exact not_isGreatest_criticalColumns_of_forall_toCriticalClass_ne hcyc
+    (maxRootedWeight G (fun e => weight e - lam) base) (fun root _ => hreach root)
+    (fun root hmem hclass => hcon root hmem hclass.symm)
+    (hreps _ (isGraphEigenvector_maxRootedWeight hcyc hbase hreach))
+
+/-- **The generating sets are exactly the transversals of the critical classes**, once every
+critical vertex reaches every vertex.  Sufficiency needs no such hypothesis; minimality does, and
+uses it only through the critical vertex whose class is being recovered. -/
+theorem generatesEigenspace_iff [Fintype V] {weight : E → 𝕜} {lam : 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      walkWeight weight cycle ≤ cycle.length * lam)
+    (hreach : ∀ base : V, IsCriticalVertex G weight lam base →
+      ∀ vertex : V, Nonempty (G.Walk base vertex))
+    (reps : Set V) :
+    GeneratesEigenspace G weight lam reps ↔
+      ∀ base : V, IsCriticalVertex G weight lam base →
+        ∃ root ∈ reps, toCriticalClass G weight lam base = toCriticalClass G weight lam root :=
+  ⟨fun hreps base hbase =>
+    exists_mem_toCriticalClass_eq_of_generatesEigenspace hcyc hreps hbase (hreach base hbase),
+   generatesEigenspace_of_forall_exists_mem⟩
 
 end CriticalClass
 

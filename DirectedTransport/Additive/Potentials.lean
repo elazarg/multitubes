@@ -56,10 +56,9 @@ own right, the description of the whole eigenspace, and the Kleene-star
 (all-pairs longest-walk) operator, of which `maxIncomingWeight` is one row by
 `DirectedTransport.MaxPlusPotential.isGreatest_range_maxRootedWeight`, are
 `DirectedTransport.Additive.CriticalGraph`, as are the strongly connected
-components of the critical graph and the sufficiency of one Kleene-star column
-per component; *minimality* of that generating family, whose natural common
-setting is the fixed-point theory of topical maps, is the open question recorded
-there.
+components of the critical graph and both the sufficiency and the *minimality*
+of one Kleene-star column per component, the latter once a vertex of the
+component in question reaches the whole graph.
 
 ## Main definitions
 
