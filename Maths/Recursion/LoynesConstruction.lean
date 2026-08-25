@@ -122,23 +122,9 @@ transport over the last `n - (k + 1)` stages.  No relation between `k` and `n` i
 the horizon both index sets are empty and the identity reads `1 = 1`. -/
 theorem transport_reversed (k n : ℕ) :
     transport (reversed n a) (k + 1) n = pastTransport a (n - (k + 1)) := by
-  refine Finset.prod_nbij' (fun i => n - (i + 1)) (fun p => n - (p + 1)) ?_ ?_ ?_ ?_ ?_
-  · intro i hi
-    rw [Finset.mem_Ico] at hi
-    rw [Finset.mem_range]
-    omega
-  · intro p hp
-    rw [Finset.mem_range] at hp
-    rw [Finset.mem_Ico]
-    omega
-  · intro i hi
-    rw [Finset.mem_Ico] at hi
-    omega
-  · intro p hp
-    rw [Finset.mem_range] at hp
-    omega
-  · intro i _
-    rfl
+  refine Finset.prod_nbij' (fun i => n - (i + 1)) (fun p => n - (p + 1)) ?_ ?_ ?_ ?_
+    fun i _ => rfl <;>
+    intro i hi <;> simp only [Finset.mem_Ico, Finset.mem_range] at * <;> omega
 
 /-- The forward service of a reversed input over the window `[m, n)` is the age-indexed service
 over the last `n - m` stages: it depends on the window only through its length.  As for the
@@ -146,24 +132,11 @@ transport, no relation between `m` and `n` is needed. -/
 theorem service_reversed (m n : ℕ) :
     service (reversed n a) (reversed n g) m n = pastService a g (n - m) := by
   refine Finset.sum_nbij' (fun k => n - (k + 1)) (fun p => n - (p + 1)) ?_ ?_ ?_ ?_ ?_
-  · intro k hk
-    rw [Finset.mem_Ico] at hk
-    rw [Finset.mem_range]
-    omega
-  · intro p hp
-    rw [Finset.mem_range] at hp
-    rw [Finset.mem_Ico]
-    omega
-  · intro k hk
-    rw [Finset.mem_Ico] at hk
-    omega
-  · intro p hp
-    rw [Finset.mem_range] at hp
-    omega
-  · intro k hk
-    rw [Finset.mem_Ico] at hk
-    rw [transport_reversed a k n]
-    rfl
+  · intro k hk; simp only [Finset.mem_Ico, Finset.mem_range] at *; omega
+  · intro p hp; simp only [Finset.mem_Ico, Finset.mem_range] at *; omega
+  · intro k hk; simp only [Finset.mem_Ico] at hk; omega
+  · intro p hp; simp only [Finset.mem_range] at hp; omega
+  · intro k _; rw [transport_reversed a k n]; rfl
 
 /-! ## The finite-horizon Loynes values -/
 

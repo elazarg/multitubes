@@ -308,20 +308,13 @@ theorem hasCyclicSlack_iff_of_floorless {labels : List Label}
       pathSlope labels ≠ 1 ∨
         pathShift labels / pathRelaxationMass labels ≤ level := by
   rcases lt_trichotomy (pathSlope labels) 1 with hproduct | hproduct | hproduct
-  · constructor
-    · intro _
-      exact Or.inl (ne_of_lt hproduct)
-    · intro _
-      exact hasCyclicSlack_of_pathSlope_lt_one hslope hproduct level
+  · exact ⟨fun _ => Or.inl (ne_of_lt hproduct),
+      fun _ => hasCyclicSlack_of_pathSlope_lt_one hslope hproduct level⟩
   · simpa [hproduct] using
       (hasCyclicSlack_iff_cycleMean_le_of_pathSlope_eq_one
         hne hslope hproduct level)
-  · constructor
-    · intro _
-      exact Or.inl (ne_of_gt hproduct)
-    · intro _
-      exact hasCyclicSlack_of_one_lt_pathSlope_of_floorless
-        hslope hfloor hproduct level
+  · exact ⟨fun _ => Or.inl (ne_of_gt hproduct),
+      fun _ => hasCyclicSlack_of_one_lt_pathSlope_of_floorless hslope hfloor hproduct level⟩
 
 /-! ## Exact finite-floor threshold in the expansive regime -/
 

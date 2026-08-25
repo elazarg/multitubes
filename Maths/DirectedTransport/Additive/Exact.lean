@@ -400,11 +400,8 @@ section.  No connectivity hypothesis is needed. -/
 theorem isCoboundary_iff_exists_isSection (G : EdgeGraph V E) (w : E → A) :
     IsCoboundary G w ↔
       ∃ φ : V → A, (translationTransport G w).IsSection φ := by
-  constructor
-  · rintro ⟨φ, hφ⟩
-    exact ⟨φ, (isSection_translationTransport_iff (G := G) w φ).2 hφ⟩
-  · rintro ⟨φ, hφ⟩
-    exact ⟨φ, (isSection_translationTransport_iff (G := G) w φ).1 hφ⟩
+  exact ⟨fun ⟨φ, hφ⟩ => ⟨φ, (isSection_translationTransport_iff (G := G) w φ).2 hφ⟩,
+    fun ⟨φ, hφ⟩ => ⟨φ, (isSection_translationTransport_iff (G := G) w φ).1 hφ⟩⟩
 
 /-- Vanishing cycle sums are exactly trivial holonomy of translation
 transport. -/

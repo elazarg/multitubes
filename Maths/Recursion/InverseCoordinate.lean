@@ -915,11 +915,8 @@ theorem projectiveGL_smul_coe_eq_self_iff {M : Matrix (Fin 2) (Fin 2) ℝ} (hM :
       rw [OnePoint.smul_some_eq_ite]
       simp [projectiveGL_apply, hden]
     rw [hsmul]
-    constructor
-    · intro h
-      exact absurd h (OnePoint.infty_ne_coe x)
-    · intro h
-      exact absurd hden (den_ne_zero_of_projectiveFixedPolynomial_eq_zero hM h)
+    exact ⟨fun h => absurd h (OnePoint.infty_ne_coe x),
+      fun h => absurd hden (den_ne_zero_of_projectiveFixedPolynomial_eq_zero hM h)⟩
   · rw [projectiveGL_smul_coe hM hden, OnePoint.coe_eq_coe, projectiveStep_eq_self_iff hden]
 
 /-- **Infinity is fixed exactly by the affine actions**, that is exactly when the lower-left entry

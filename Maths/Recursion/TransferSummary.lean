@@ -472,40 +472,19 @@ theorem service_succ_right {m n : ℕ} (hmn : m ≤ n) :
 onwards over `[i, j)` is the transport of the original data over `[m + i, m + j)`. -/
 theorem transport_shift (m i j : ℕ) :
     transport (fun k => a (m + k)) i j = transport a (m + i) (m + j) := by
-  refine Finset.prod_nbij' (fun p => m + p) (fun k => k - m) ?_ ?_ ?_ ?_ ?_
-  · intro p hp
-    rw [Finset.mem_Ico] at hp ⊢
-    omega
-  · intro k hk
-    rw [Finset.mem_Ico] at hk ⊢
-    omega
-  · intro p _
-    omega
-  · intro k hk
-    rw [Finset.mem_Ico] at hk
-    omega
-  · intro p _
-    rfl
+  refine Finset.prod_nbij' (fun p => m + p) (fun k => k - m) ?_ ?_ ?_ ?_ fun p _ => rfl <;>
+    intro p hp <;> simp only [Finset.mem_Ico] at * <;> omega
 
 /-- Time-shifting the input shifts the window: the retention-weighted service of the data read
 from time `m` onwards over `[i, j)` is that of the original data over `[m + i, m + j)`. -/
 theorem service_shift (m i j : ℕ) :
     service (fun k => a (m + k)) (fun k => g (m + k)) i j = service a g (m + i) (m + j) := by
   refine Finset.sum_nbij' (fun p => m + p) (fun k => k - m) ?_ ?_ ?_ ?_ ?_
-  · intro p hp
-    rw [Finset.mem_Ico] at hp ⊢
-    omega
-  · intro k hk
-    rw [Finset.mem_Ico] at hk ⊢
-    omega
-  · intro p _
-    omega
-  · intro k hk
-    rw [Finset.mem_Ico] at hk
-    omega
-  · intro p _
-    rw [transport_shift a m (p + 1) j]
-    rfl
+  · intro p hp; simp only [Finset.mem_Ico] at *; omega
+  · intro k hk; simp only [Finset.mem_Ico] at *; omega
+  · intro p _; omega
+  · intro k hk; simp only [Finset.mem_Ico] at hk; omega
+  · intro p _; rw [transport_shift a m (p + 1) j]; rfl
 
 /-- The state the Lindley representation transports from a restart time: the initial state at
 time `0`, and the reflection floor `0` at every later time. -/

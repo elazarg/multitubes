@@ -545,10 +545,7 @@ theorem value_le_of_isSupersolution {Ψ : State → ℝ}
 the pointwise order. -/
 theorem isLeast_value (h : R.HasFiniteBudget) :
     IsLeast {Ψ : State → ℝ | R.IsSupersolution Ψ} R.value := by
-  constructor
-  · exact R.value_isSupersolution h
-  · intro Ψ hΨ s
-    exact R.value_le_of_isSupersolution hΨ s
+  exact ⟨R.value_isSupersolution h, fun Ψ hΨ s => R.value_le_of_isSupersolution hΨ s⟩
 
 /-- The local Bellman inequality, in elimination form: `value s` is the least number that is
 nonnegative and dominates `charge e + value (tgt e)` for every edge `e` leaving `s`. -/

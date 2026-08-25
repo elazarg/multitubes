@@ -155,10 +155,8 @@ theorem worstDirectedResidualAtMost_iff_shortClosedWalk_le
         0 < cycle.length → cycle.length ≤ Fintype.card V →
           walkWeight weight cycle ≤ cycle.length * level := by
   rw [worstDirectedResidualAtMost_iff_closedWalk_le]
-  constructor
-  · intro hall vertex cycle _ _
-    exact hall vertex cycle
-  · exact closedWalk_le_length_mul_of_short weight level
+  exact ⟨fun hall vertex cycle _ _ => hall vertex cycle,
+    closedWalk_le_length_mul_of_short weight level⟩
 
 /-- Failure of a residual threshold has a short positive shifted cycle
 witness. -/

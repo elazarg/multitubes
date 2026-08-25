@@ -94,10 +94,8 @@ theorem hasTrivialCycleLabels_iff_exists_unitPotential {base : V}
         label edge =
           (potential (G.target edge) *
             (potential (G.source edge))⁻¹ : Mˣ) := by
-  constructor
-  · exact exists_unitPotential_of_trivialCycleLabels hlinked
-  · rintro ⟨potential, hpotential⟩
-    exact hasTrivialCycleLabels_of_unitPotential potential hpotential
+  exact ⟨exists_unitPotential_of_trivialCycleLabels hlinked,
+    fun ⟨potential, hpotential⟩ => hasTrivialCycleLabels_of_unitPotential potential hpotential⟩
 
 /-- Every recurrent edge label is a unit under global flatness. -/
 theorem isUnit_edge_of_trivialCycleLabels {base : V}
