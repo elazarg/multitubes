@@ -107,8 +107,8 @@ induction, and `Maths.DirectedTransport.CategoricalRetracts` proves it categoric
 The two developments meet along `Maths.Transport.toPathFunctor`:
 one-base flatness of a transport is flatness of its path functor, and under
 that dictionary the concrete compression theorem is definitionally an instance
-of the categorical one.  The lemmas below state the bridge, so the dictionary
-is exact rather than decorative. -/
+of the categorical one.  The lemmas below prove the bridge, so the dictionary
+is itself a theorem. -/
 
 section ConcreteBridge
 

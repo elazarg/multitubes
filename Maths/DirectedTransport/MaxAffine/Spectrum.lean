@@ -40,8 +40,8 @@ when every closed walk of the unit-slope subgraph has nonpositive shift sum, by 
 criteria of `Maths.DirectedTransport.MaxAffine.Slopes`.  Those two are one criterion read along
 the constant recession directions `1` and `-1`, by
 `MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction`;
-the pairs of statements below inherit that duplication rather than adding to it, and are kept
-apart only because relaxation moves the branch index to that of the relaxed labelling.
+the pairs of statements below inherit that duplication, and are kept apart because relaxation
+moves the branch index to that of the relaxed labelling.
 Relaxing by `lam` subtracts `lam` from
 every shift, so the criterion becomes a **cycle-mean bound**: `lam` is a relaxation level exactly
 when no closed walk of the unit-slope subgraph has mean shift above `lam`.  Consequently every

@@ -87,8 +87,8 @@ public import Maths.DirectedTransport.MaxAffine.Spectrum
 /-!
 # Maths
 
-This umbrella imports the whole library.  Four groups sit under it, the first three depending on
-mathlib alone and on nothing else here, the fourth consuming all three.
+This umbrella imports the whole library.  Five groups sit under it.  The first four depend on
+mathlib alone and on nothing else here; the fifth consumes all four.
 
 `Maths.Graph` is the combinatorics of directed multigraphs with edge identities: typed walks,
 flow conservation for walk edge multiplicities, Eulerian trails, infinite walks, zero-charge
@@ -99,12 +99,12 @@ alternative by Fourier-Motzkin elimination together with standard-form linear pr
 feasibility, optimality, extreme-point sparsity, and duality.  `Maths.Algebra` carries the
 join-semidirect label algebra.
 
-`Maths.DirectedTransport` is the theory the other three serve: operator-labelled transition
+`Maths.DirectedTransport` is the theory the other four serve: operator-labelled transition
 graphs, their walks, holonomy, sections and lax sections, with categorical and strongly connected
 normal forms, complete-lattice closure, gain-graph switching and balance, additive cycle and
 circulation duality with its max-plus spectral theory, finite inequality certificates, and
 max-affine transport.
 
-Import `Maths.DirectedTransport.Basic` instead of this file when only the structural walk
-semantics -- the computational graph, walks, holonomy, and sections -- are required.
+Import `Maths.DirectedTransport.Basic` when only the structural walk semantics -- the
+computational graph, walks, holonomy, and sections -- are required.
 -/

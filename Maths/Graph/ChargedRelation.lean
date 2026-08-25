@@ -262,9 +262,8 @@ def castSrc {s t w : State} (h : s = t) (p : R.Path s w) : R.Path t w := h ▸ p
   subst h
   rfl
 
-/-- A one-edge path between explicitly named endpoints. Using this instead of `Path.single`
-keeps the endpoint indices syntactically fixed, which makes the charge lemmas rewrite cleanly
-in concrete instances. -/
+/-- A one-edge path between explicitly named endpoints. The endpoint indices stay syntactically
+fixed, so the charge lemmas rewrite cleanly in concrete instances; `Path.single` infers them. -/
 def edge (e : Edge) {s t : State} (hs : R.src e = s) (ht : R.tgt e = t) : R.Path s t :=
   ((Path.single e).castTgt ht).castSrc hs
 

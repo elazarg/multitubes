@@ -141,9 +141,8 @@ The coordinate change used here is the exact reciprocal `h ↦ h⁻¹`, not the 
 
 ## Implementation notes
 
-`affineStep_comp` is proved directly from the coefficient formula rather than through a bundled
-composition law, so this file is independent of
-`Maths.TransferSummary`.
+`affineStep_comp` is proved directly from the coefficient formula, which keeps this file
+independent of `Maths.TransferSummary`.
 
 A coefficient cycle is a `List (ℝ × ℝ)` of slope-shift pairs, with the head applied last, so that
 `affineCycleMatrix` is the plain product of the transfer matrices in list order. The shift

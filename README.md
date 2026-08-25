@@ -56,8 +56,7 @@ what they deliberately do not develop.
 ## Layout
 
 The library is `Maths`, under which four groups depend on mathlib alone and on nothing else
-here, and a fifth consumes all four. `scripts/check-layering.py` checks the boundary rather
-than leaving it to this table.
+here, and a fifth consumes all four. `scripts/check-layering.py` checks that boundary.
 
 | Directory | Contents |
 | --- | --- |
