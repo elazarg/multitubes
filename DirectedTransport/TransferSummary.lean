@@ -109,10 +109,12 @@ convergence of the finite-horizon suprema for one fixed input sequence:
 `DirectedTransport.TransferSummary.tendsto_loynes_ciSup`. That statement is strictly weaker than
 Loynes' theorem and is not a substitute for it.
 
-## TODO
-
-* The two-sided reflection, which keeps the state inside a band rather than above a single
-  floor. The reflection at zero of this file is the one-sided case.
+The reflection of this file is one-sided: the state is kept above a single floor. Confining it
+instead to a band `[lo, hi]` is the two-sided reflection
+`DirectedTransport.TransferSummary.bandIter`, developed separately because it needs a
+four-coefficient summary class in place of the three-coefficient max-affine one, and because its
+Lindley representation is an infimum of suprema rather than a supremum. The reflection at zero is
+its case of an inactive upper clamp.
 
 ## References
 
@@ -465,6 +467,45 @@ theorem service_succ_right {m n : ℕ} (hmn : m ≤ n) :
   have hk' : k + 1 ≤ n := (Finset.mem_Ico.mp hk).2
   rw [transport_succ_right a hk']
   ring
+
+/-- Time-shifting the input shifts the window: the transport of the data read from time `m`
+onwards over `[i, j)` is the transport of the original data over `[m + i, m + j)`. -/
+theorem transport_shift (m i j : ℕ) :
+    transport (fun k => a (m + k)) i j = transport a (m + i) (m + j) := by
+  refine Finset.prod_nbij' (fun p => m + p) (fun k => k - m) ?_ ?_ ?_ ?_ ?_
+  · intro p hp
+    rw [Finset.mem_Ico] at hp ⊢
+    omega
+  · intro k hk
+    rw [Finset.mem_Ico] at hk ⊢
+    omega
+  · intro p _
+    omega
+  · intro k hk
+    rw [Finset.mem_Ico] at hk
+    omega
+  · intro p _
+    rfl
+
+/-- Time-shifting the input shifts the window: the retention-weighted service of the data read
+from time `m` onwards over `[i, j)` is that of the original data over `[m + i, m + j)`. -/
+theorem service_shift (m i j : ℕ) :
+    service (fun k => a (m + k)) (fun k => g (m + k)) i j = service a g (m + i) (m + j) := by
+  refine Finset.sum_nbij' (fun p => m + p) (fun k => k - m) ?_ ?_ ?_ ?_ ?_
+  · intro p hp
+    rw [Finset.mem_Ico] at hp ⊢
+    omega
+  · intro k hk
+    rw [Finset.mem_Ico] at hk ⊢
+    omega
+  · intro p _
+    omega
+  · intro k hk
+    rw [Finset.mem_Ico] at hk
+    omega
+  · intro p _
+    rw [transport_shift a m (p + 1) j]
+    rfl
 
 /-- The state the Lindley representation transports from a restart time: the initial state at
 time `0`, and the reflection floor `0` at every later time. -/

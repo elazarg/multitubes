@@ -10,6 +10,7 @@ public import DirectedTransport.JoinSemidirect
 public import DirectedTransport.EdgeGraph
 public import DirectedTransport.Circulation
 public import DirectedTransport.TransferSummary
+public import DirectedTransport.TwoSidedReflection
 public import DirectedTransport.ChargedRelation
 public import DirectedTransport.CyclicMaxAffine
 public import DirectedTransport.InverseCoordinate
