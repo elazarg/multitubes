@@ -1,1 +1,6 @@
 /.lake
+
+# audit dumps written by scripts/audit.lean
+scripts/.decls
+scripts/.axioms
+scripts/.sorries

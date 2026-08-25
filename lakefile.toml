@@ -1,7 +1,7 @@
-name = "directedTransport"
+name = "maths"
 version = "0.1.0"
 keywords = ["math"]
-defaultTargets = ["DirectedTransport"]
+defaultTargets = ["Maths"]
 
 # Mathlib's own style linters, enabled project-wide. These are the canonical
 # implementations shipped in `Mathlib.Tactic.Linter.*`; enabling them here is
@@ -51,5 +51,30 @@ name = "fixed-point-theorems"
 git = "https://github.com/elazarg/fixed-point-theorems-lean4"
 rev = "main"
 
+# The four groups, each buildable alone. The first three depend on mathlib and on
+# nothing else in this package, which `scripts/check-layering.py` checks for the
+# linear-programming group; giving them separate targets makes the rest of that
+# boundary something the build enforces rather than something the README asserts.
 [[lean_lib]]
-name = "DirectedTransport"
+name = "MathsGraph"
+globs = ["Maths.Graph.+"]
+
+[[lean_lib]]
+name = "MathsRecursion"
+globs = ["Maths.Recursion.+"]
+
+[[lean_lib]]
+name = "MathsLinearProgramming"
+globs = ["Maths.LinearProgramming.+"]
+
+[[lean_lib]]
+name = "MathsAlgebra"
+globs = ["Maths.Algebra.+"]
+
+[[lean_lib]]
+name = "MathsDirectedTransport"
+globs = ["Maths.DirectedTransport.+"]
+
+# The umbrella, importing all of the above.
+[[lean_lib]]
+name = "Maths"

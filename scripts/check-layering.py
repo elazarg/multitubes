@@ -36,7 +36,9 @@ def project_root_name(files):
 
 def main():
     files = sorted(
-        p for p in ROOT.rglob("*.lean") if ".lake" not in p.parts and p.is_file()
+        p
+        for p in ROOT.rglob("*.lean")
+        if ".lake" not in p.parts and "scripts" not in p.parts and p.is_file()
     )
     if not files:
         sys.exit("no .lean files found")
