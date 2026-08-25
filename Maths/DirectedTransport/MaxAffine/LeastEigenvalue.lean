@@ -77,9 +77,17 @@ eigenvalue (`Maths.MaxAffineTransport.eigenvalues_eq_univ_of_slope_eq`).
 * `Maths.MaxAffineTransport.source_mem_criticalVertices`: the critical set absorbs the
   positive-gain dependencies of the certificate.
 * `Maths.MaxAffineTransport.vertexOperator_eq_of_mem_criticalVertices`: **the critical
-  coordinates are frozen** by the relaxed operator.
+  coordinates are frozen** by one step of the relaxed operator.
+* `Maths.MaxAffineTransport.antitone_of_relaxedStep`: **the relaxed orbit descends** from a
+  sub-fixed point.
+* `Maths.MaxAffineTransport.relaxedStep_eq_of_mem_criticalVertices`: it is frozen on the
+  critical set at every stage, not only the first.
+* `Maths.MaxAffineTransport.exists_lowerBound_of_walk`: a lower bound propagates along a
+  walk, which is how strong connectivity bounds the orbit below at every vertex.
+* `Maths.MaxAffineTransport.isEigenvector_iInf_of_relaxedStep`: **the pointwise infimum of a
+  descending orbit that is bounded below is an eigenvector.**
 * `Maths.MaxAffineTransport.isLeast_eigenvalues_of_isLeast_relaxationLevels`: **a least
-  relaxation level is the least eigenvalue.**
+  relaxation level is the least eigenvalue**, the four steps above composed.
 * `Maths.MaxAffineTransport.exists_isLeast_eigenvalues_of_translation`: at floorless
   unit slopes the value is the maximum cycle mean.
 * `Maths.MaxAffineTransport.sum_branchDelta`: a branch row sums to one minus its gain,
@@ -491,6 +499,58 @@ section Iteration
 variable [Fintype V] [DecidableEq V] [Fintype E] {G : EdgeGraph V E} {label : E → Label}
 
 omit [Fintype V] in
+/-- **The relaxed iteration descends from a sub-fixed point.**  Subtracting the level from the
+vertex operator sends a sub-fixed point weakly below itself, and monotonicity of the operator
+carries that first descent to every later step. -/
+theorem antitone_of_relaxedStep (hslope : ∀ e : E, 0 ≤ (label e).slope) {lam : ℝ}
+    {iterate : ℕ → V → ℝ}
+    (hstepEq : ∀ (n : ℕ) (v : V),
+      iterate (n + 1) v = vertexOperator G label (iterate n) v - lam)
+    (hsub : ∀ v : V, vertexOperator G label (iterate 0) v ≤ lam + iterate 0 v) :
+    Antitone iterate := by
+  refine antitone_nat_of_succ_le fun n => ?_
+  induction n with
+  | zero =>
+      rw [Pi.le_def]
+      intro v
+      rw [hstepEq 0 v]
+      linarith [hsub v]
+  | succ n ih =>
+      rw [Pi.le_def]
+      intro v
+      rw [hstepEq (n + 1) v, hstepEq n v]
+      have hmono := monotone_vertexOperator G hslope ih v
+      linarith
+
+/-- **The critical coordinates are frozen along the whole orbit.**  One step of the relaxed
+iteration returns an optimal potential on the vertices its certificate charges, by
+`Maths.MaxAffineTransport.vertexOperator_eq_of_mem_criticalVertices`; since the orbit descends,
+that step applies at every stage, and induction carries the equality along it. -/
+theorem relaxedStep_eq_of_mem_criticalVertices (hslope : ∀ e : E, 0 ≤ (label e).slope)
+    {coefficient : Branch label → ℝ}
+    (hcoefficient : IsNormalizedBranchCertificate (G := G) (label := label) coefficient)
+    {lam : ℝ} (hvalue : branchCertificateValue coefficient = lam) {xstar : V → ℝ}
+    (hres : ∀ branch : Branch label, branchResidual G label xstar branch ≤ lam)
+    (hsub : ∀ v : V, vertexOperator G label xstar v ≤ lam + xstar v)
+    {iterate : ℕ → V → ℝ} (hzero : iterate 0 = xstar)
+    (hstepEq : ∀ (n : ℕ) (v : V),
+      iterate (n + 1) v = vertexOperator G label (iterate n) v - lam)
+    (hantitone : Antitone iterate) (n : ℕ) :
+    ∀ v ∈ criticalVertices G label coefficient, iterate n v = xstar v := by
+  induction n with
+  | zero =>
+      intro v _
+      rw [hzero]
+  | succ n ih =>
+      intro v hv
+      have hle : iterate n ≤ xstar := by
+        have hmono := hantitone (Nat.zero_le n)
+        rwa [hzero] at hmono
+      rw [hstepEq n v, vertexOperator_eq_of_mem_criticalVertices hslope hcoefficient hvalue
+        hres hsub hle ih hv]
+      ring
+
+omit [Fintype V] in
 /-- **The vertex operator is continuous** at a vertex with an incoming edge: it is a finite
 maximum of continuous functions of one coordinate. -/
 theorem continuous_vertexOperator (G : EdgeGraph V E) (label : E → Label) {v : V}
@@ -545,6 +605,39 @@ variable [Fintype V] [DecidableEq V] [Fintype E] {G : EdgeGraph V E} {label : E 
 
 open Filter Topology
 
+omit [Fintype V] in
+/-- **The limit of the relaxed iteration is an eigenvector.**  An antitone orbit that is bounded
+below at every vertex converges pointwise to its infimum.  The vertex operator is continuous at a
+vertex with an incoming edge, so the step equation passes to the limit: the operator applied to
+the limit is the limit of the operator along the orbit, which is the limit of the next iterate
+raised by the level.  Uniqueness of limits turns that into the eigenvalue equation. -/
+theorem isEigenvector_iInf_of_relaxedStep (hin : ∀ vertex : V, (incoming G vertex).Nonempty)
+    {lam : ℝ} {iterate : ℕ → V → ℝ}
+    (hstepEq : ∀ (n : ℕ) (v : V),
+      iterate (n + 1) v = vertexOperator G label (iterate n) v - lam)
+    (hantitone : Antitone iterate)
+    (hbdd : ∀ v : V, BddBelow (Set.range fun n : ℕ => iterate n v)) :
+    IsEigenvector G label lam fun v => ⨅ n : ℕ, iterate n v := by
+  have htend : ∀ v : V, Tendsto (fun n : ℕ => iterate n v) atTop (𝓝 (⨅ n : ℕ, iterate n v)) :=
+    fun v => tendsto_atTop_ciInf (fun m n hmn => Pi.le_def.mp (hantitone hmn) v) (hbdd v)
+  intro v
+  have hcont : Tendsto (fun n : ℕ => vertexOperator G label (iterate n) v) atTop
+      (𝓝 (vertexOperator G label (fun v => ⨅ n : ℕ, iterate n v) v)) :=
+    ((continuous_vertexOperator G label (hin v)).tendsto _).comp (tendsto_pi_nhds.2 htend)
+  have hshift : Tendsto (fun n : ℕ => vertexOperator G label (iterate n) v) atTop
+      (𝓝 (lam + ⨅ n : ℕ, iterate n v)) := by
+    have hadd : Tendsto (fun n : ℕ => iterate (n + 1) v + lam) atTop
+        (𝓝 ((⨅ n : ℕ, iterate n v) + lam)) :=
+      ((htend v).comp (tendsto_add_atTop_nat 1)).add tendsto_const_nhds
+    have heq : (fun n : ℕ => vertexOperator G label (iterate n) v)
+        = fun n : ℕ => iterate (n + 1) v + lam := by
+      funext n
+      rw [hstepEq n v]
+      ring
+    rw [heq, add_comm lam]
+    exact hadd
+  exact tendsto_nhds_unique hcont hshift
+
 /-- **The least relaxation level is the least eigenvalue.**  With
 `Maths.MaxAffineTransport.eigenvalues_subset_relaxationLevels` this identifies the
 least eigenvalue of the vertex operator with the optimum of an explicit finite linear program in
@@ -580,78 +673,27 @@ theorem isLeast_eigenvalues_of_isLeast_relaxationLevels
     have hedge := hxstar e
     rw [mem_incoming.1 he] at hedge
     exact hedge
-  obtain ⟨iterate, hzero, hsucc⟩ : ∃ f : ℕ → V → ℝ, f 0 = xstar ∧
-      ∀ n : ℕ, f (n + 1) = fun v => vertexOperator G label (f n) v - lam :=
+  obtain ⟨iterate, hzero, hstepEq⟩ : ∃ f : ℕ → V → ℝ, f 0 = xstar ∧
+      ∀ (n : ℕ) (v : V), f (n + 1) v = vertexOperator G label (f n) v - lam :=
     ⟨fun n => (fun x v => vertexOperator G label x v - lam)^[n] xstar, rfl,
-      fun n => Function.iterate_succ_apply' _ n xstar⟩
-  have hstepEq : ∀ (n : ℕ) (v : V),
-      iterate (n + 1) v = vertexOperator G label (iterate n) v - lam := fun n v => by
-    rw [hsucc n]
-  have hantitone : Antitone iterate := by
-    refine antitone_nat_of_succ_le fun n => ?_
-    induction n with
-    | zero =>
-        rw [Pi.le_def]
-        intro v
-        rw [hstepEq 0 v, hzero]
-        linarith [hsub v]
-    | succ n ih =>
-        rw [Pi.le_def]
-        intro v
-        rw [hstepEq (n + 1) v, hstepEq n v]
-        have hmono := monotone_vertexOperator G hslope ih v
-        linarith
-  have hfrozen : ∀ n : ℕ, ∀ v ∈ criticalVertices G label coefficient, iterate n v = xstar v := by
-    intro n
-    induction n with
-    | zero =>
-        intro v _
-        rw [hzero]
-    | succ n ih =>
-        intro v hv
-        have hle : iterate n ≤ xstar := by
-          have hmono := hantitone (Nat.zero_le n)
-          rwa [hzero] at hmono
-        rw [hstepEq n v, vertexOperator_eq_of_mem_criticalVertices hslope hcoefficient hvalue
-          hres hsub hle ih hv]
-        ring
+      fun n v => congrFun (Function.iterate_succ_apply' _ n xstar) v⟩
+  -- The orbit descends from the optimal potential and never moves off the critical set.
+  have hantitone : Antitone iterate :=
+    antitone_of_relaxedStep hslope hstepEq (by rw [hzero]; exact hsub)
+  have hfrozen := relaxedStep_eq_of_mem_criticalVertices hslope hcoefficient hvalue hres hsub
+    hzero hstepEq hantitone
+  -- Strong connectivity carries the frozen values from a critical vertex to every vertex.
   obtain ⟨critical, hcritical⟩ := criticalVertices_nonempty hcoefficient
-  have hstepLe : ∀ (n : ℕ) (v : V),
-      vertexOperator G label (iterate n) v - lam ≤ iterate (n + 1) v :=
-    fun n v => le_of_eq (hstepEq n v).symm
   have hbdd : ∀ v : V, BddBelow (Set.range fun n : ℕ => iterate n v) := by
     intro v
     obtain ⟨walk⟩ := hconn critical v
-    obtain ⟨C, hC⟩ := exists_lowerBound_of_walk hslope hstepLe walk
+    obtain ⟨C, hC⟩ := exists_lowerBound_of_walk hslope
+      (fun n v => le_of_eq (hstepEq n v).symm) walk
       (bound := xstar critical) fun n => le_of_eq (hfrozen n critical hcritical).symm
     refine ⟨C, ?_⟩
     rintro _ ⟨n, rfl⟩
     exact le_trans (hC n) (Pi.le_def.mp (hantitone (Nat.le_add_right n walk.length)) v)
-  obtain ⟨limitPoint, hlimitPoint⟩ : ∃ f : V → ℝ, ∀ v : V, f v = ⨅ n : ℕ, iterate n v :=
-    ⟨fun v => ⨅ n : ℕ, iterate n v, fun _ => rfl⟩
-  have htend : ∀ v : V, Tendsto (fun n : ℕ => iterate n v) atTop (𝓝 (limitPoint v)) := by
-    intro v
-    rw [hlimitPoint v]
-    exact tendsto_atTop_ciInf (fun m n hmn => Pi.le_def.mp (hantitone hmn) v) (hbdd v)
-  refine ⟨limitPoint, fun v => ?_⟩
-  have hcont : Tendsto (fun n : ℕ => vertexOperator G label (iterate n) v) atTop
-      (𝓝 (vertexOperator G label limitPoint v)) :=
-    ((continuous_vertexOperator G label (hin v)).tendsto limitPoint).comp
-      (tendsto_pi_nhds.2 htend)
-  have hshift : Tendsto (fun n : ℕ => vertexOperator G label (iterate n) v) atTop
-      (𝓝 (lam + limitPoint v)) := by
-    have hnext : Tendsto (fun n : ℕ => iterate (n + 1) v) atTop (𝓝 (limitPoint v)) :=
-      (htend v).comp (tendsto_add_atTop_nat 1)
-    have hadd : Tendsto (fun n : ℕ => iterate (n + 1) v + lam) atTop (𝓝 (limitPoint v + lam)) :=
-      hnext.add tendsto_const_nhds
-    have heq : (fun n : ℕ => vertexOperator G label (iterate n) v)
-        = fun n : ℕ => iterate (n + 1) v + lam := by
-      funext n
-      rw [hstepEq n v]
-      ring
-    rw [heq, add_comm lam (limitPoint v)]
-    exact hadd
-  exact tendsto_nhds_unique hcont hshift
+  exact ⟨_, isEigenvector_iInf_of_relaxedStep hin hstepEq hantitone hbdd⟩
 
 end Main
 
