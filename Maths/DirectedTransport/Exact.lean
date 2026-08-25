@@ -29,6 +29,8 @@ invertibility is derived on recurrent flat regions.
   `Maths.Transport.retractProjector`: the split retract data attached to
   chosen path families.
 * `Maths.HasTrivialBaseLabels`: closed walks at one base carry trivial labels.
+* `Maths.IsUnitPotential`: the multiplicative coboundary condition on a
+  unit-valued function on vertices.
 * `Maths.unitPotential` and `Maths.addUnitPotential`: the
   unit-valued potentials extracted from flat labels.
 
@@ -395,6 +397,13 @@ theorem walkLabel_eq_of_trivialCycleLabels_of_return
   exact left_inv_eq_right_inv
     (by simpa using hflat finish (back.append first)) hsecond
 
+/-- A **unit potential** for a monoid labelling: a unit-valued function on vertices whose ratio
+across each edge is the label of that edge.  This is the multiplicative coboundary condition, and
+it is the shape of every witness produced below. -/
+def IsUnitPotential (G : EdgeGraph V E) (label : E → M) (potential : V → Mˣ) : Prop :=
+  ∀ edge : E,
+    label edge = (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ)
+
 /-- The unit represented by any chosen root-to-vertex walk. -/
 def unitPotential (hflat : HasTrivialCycleLabels G label) {base : V}
     (paths : ∀ vertex, G.Walk base vertex)
@@ -411,9 +420,7 @@ ever consults linked vertices. -/
 theorem exists_unitPotential_of_trivialCycleLabels {base : V}
     (hlinked : EdgeEndpointsLinkedTo G base)
     (hflat : HasTrivialCycleLabels G label) :
-    ∃ potential : V → Mˣ, ∀ edge : E,
-      label edge =
-        (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ) := by
+    ∃ potential : V → Mˣ, IsUnitPotential G label potential := by
   classical
   let potential : V → Mˣ := fun vertex ↦
     if h : LinkedTo G base vertex then
@@ -466,10 +473,7 @@ theorem exists_unitPotential_of_trivialCycleLabels {base : V}
 
 /-- A unit-valued coboundary has trivial labels on every closed walk. -/
 theorem hasTrivialCycleLabels_of_unitPotential
-    (potential : V → Mˣ)
-    (hedge : ∀ edge : E,
-      label edge =
-        (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ)) :
+    (potential : V → Mˣ) (hedge : IsUnitPotential G label potential) :
     HasTrivialCycleLabels G label := by
   have hwalk {start finish : V} (walk : G.Walk start finish) :
       walkLabel label walk =
@@ -496,9 +500,7 @@ theorem hasTrivialCycleLabels_iff_parallelLabels_and_unitPotential {base : V}
     HasTrivialCycleLabels G label ↔
       (∀ {start finish : V} (first second : G.Walk start finish),
         walkLabel label first = walkLabel label second) ∧
-      (∃ potential : V → Mˣ, ∀ edge : E,
-        label edge =
-          (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ)) := by
+      (∃ potential : V → Mˣ, IsUnitPotential G label potential) := by
   constructor
   · intro hflat
     refine ⟨?_, exists_unitPotential_of_trivialCycleLabels

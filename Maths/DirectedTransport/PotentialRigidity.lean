@@ -25,8 +25,10 @@ even though the ambient labels live in an arbitrary monoid.
   the existence of a unit-valued coboundary potential.
 * `Maths.isUnit_edge_of_trivialCycleLabels`: every edge label is a unit as
   soon as its endpoints are linked to a base vertex.
+* `Maths.unitPotential_ratio_eq_of_rootReaches`: **the ratio of two potentials for
+  the same labelling is constant** on the vertices reachable from the base.
 * `Maths.unitPotential_eq_mul_constant_of_rootReaches`: two potentials for the
-  same labelling differ by one global right factor.
+  same labelling differ by one global right factor, that constant ratio.
 * `Maths.unitPotential_eq_of_rootReaches_of_eq_base`: agreement at the root
   forces agreement everywhere.
 * `Maths.existsUnique_normalizedUnitPotential_of_trivialCycleLabels`: the
@@ -110,12 +112,8 @@ theorem isUnit_edge_of_trivialCycleLabels {base : V}
 
 private theorem unit_ratio_eq_of_edge
     (first second : V → Mˣ)
-    (hfirst : ∀ edge : E,
-      label edge =
-        (first (G.target edge) * (first (G.source edge))⁻¹ : Mˣ))
-    (hsecond : ∀ edge : E,
-      label edge =
-        (second (G.target edge) * (second (G.source edge))⁻¹ : Mˣ))
+    (hfirst : IsUnitPotential G label first)
+    (hsecond : IsUnitPotential G label second)
     (edge : E) :
     (second (G.target edge))⁻¹ * first (G.target edge) =
       (second (G.source edge))⁻¹ * first (G.source edge) := by
@@ -136,43 +134,45 @@ private theorem unit_ratio_eq_of_edge
     _ = (second (G.source edge))⁻¹ * first (G.source edge) := by
       rw [← mul_assoc, inv_mul_cancel, one_mul]
 
+/-- **The ratio of two unit potentials is constant.**  On every vertex reachable from the base
+the pointwise ratio of two potentials for the same labels is the same unit, namely its value at
+the base: each edge of a walk out of the base leaves the ratio unchanged, because both potentials
+cross that edge by the same label. -/
+theorem unitPotential_ratio_eq_of_rootReaches {base : V}
+    (hreaches : Transport.RootReaches G base)
+    (first second : V → Mˣ)
+    (hfirst : IsUnitPotential G label first)
+    (hsecond : IsUnitPotential G label second) (vertex : V) :
+    (second vertex)⁻¹ * first vertex = (second base)⁻¹ * first base := by
+  induction (hreaches vertex).some with
+  | nil => rfl
+  | @concat finish path edge legal ih =>
+      subst legal
+      exact (unit_ratio_eq_of_edge first second hfirst hsecond edge).trans ih
+
 /-- Two potentials for the same labels differ by one global right unit on
-every vertex reachable from the base. -/
+every vertex reachable from the base.  This is the constant ratio of
+`Maths.unitPotential_ratio_eq_of_rootReaches` moved to the other side. -/
 theorem unitPotential_eq_mul_constant_of_rootReaches {base : V}
     (hreaches : Transport.RootReaches G base)
     (first second : V → Mˣ)
-    (hfirst : ∀ edge : E,
-      label edge =
-        (first (G.target edge) * (first (G.source edge))⁻¹ : Mˣ))
-    (hsecond : ∀ edge : E,
-      label edge =
-        (second (G.target edge) * (second (G.source edge))⁻¹ : Mˣ)) :
+    (hfirst : IsUnitPotential G label first)
+    (hsecond : IsUnitPotential G label second) :
     ∀ vertex : V,
       first vertex = second vertex * ((second base)⁻¹ * first base) := by
   intro vertex
-  let path := (hreaches vertex).some
-  have hratio : (second vertex)⁻¹ * first vertex =
-      (second base)⁻¹ * first base := by
-    induction path with
-    | nil => rfl
-    | @concat finish path edge legal ih =>
-        subst legal
-        exact (unit_ratio_eq_of_edge first second hfirst hsecond edge).trans ih
   calc
     first vertex =
         second vertex * ((second vertex)⁻¹ * first vertex) := by simp
-    _ = second vertex * ((second base)⁻¹ * first base) := by rw [hratio]
+    _ = second vertex * ((second base)⁻¹ * first base) := by
+      rw [unitPotential_ratio_eq_of_rootReaches hreaches first second hfirst hsecond vertex]
 
 /-- In particular, base-normalized potentials are unique. -/
 theorem unitPotential_eq_of_rootReaches_of_eq_base {base : V}
     (hreaches : Transport.RootReaches G base)
     (first second : V → Mˣ)
-    (hfirst : ∀ edge : E,
-      label edge =
-        (first (G.target edge) * (first (G.source edge))⁻¹ : Mˣ))
-    (hsecond : ∀ edge : E,
-      label edge =
-        (second (G.target edge) * (second (G.source edge))⁻¹ : Mˣ))
+    (hfirst : IsUnitPotential G label first)
+    (hsecond : IsUnitPotential G label second)
     (hbase : first base = second base) :
     first = second := by
   funext vertex
