@@ -97,8 +97,8 @@ lean_lib Maths                    -- umbrella importing everything
 A target building alone is not by itself proof of isolation - it would also build a stray
 upward import rather than reject it - so `scripts/check-layering.py` carries that claim.
 
-`Maths.LinearProgramming` earns its own target immediately: it is the material `UpstreamPlan.md`
-scopes for mathlib, and a separate target makes "this layer depends on mathlib alone" a fact the
+`Maths.LinearProgramming` earns its own target immediately: it is the layer most nearly ready to
+stand on its own, and a separate target makes "this layer depends on mathlib alone" a fact the
 build checks rather than a claim the README makes.
 
 ## Sequencing
@@ -114,8 +114,6 @@ build checks rather than a claim the README makes.
    of them at a path that no longer existed. The build does not read docstrings and would never
    have complained.
 3. **The targets** were created in the same pass, `globs` being the shape Lake accepts here.
-4. **`UpstreamPlan.md` was re-pointed** by hand: most of its `LinearAlgebra` mentions are
-   mathlib's own paths, which a search-and-replace would have corrupted.
 
 ## Deferred
 

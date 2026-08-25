@@ -94,8 +94,7 @@ none depending on `sorryAx`, and the only axioms used across the library are `pr
 environment. `scripts/check.sh` runs all of this.
 
 Complete here means building and sorry-free; it does not mean finished as a mathlib
-contribution. `UpstreamPlan.md` scopes the linear-programming layer for upstreaming and
-sequences it; the rest has had no such judgement made about it.
+contribution.
 
 ## Style
 
