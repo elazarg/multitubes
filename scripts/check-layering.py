@@ -5,7 +5,7 @@
 2. `FixedPointTheorems` is imported by `MaxAffine/Eigenproblem` alone. `MaxAffine/Spectrum` is
    its only consumer and reaches Brouwer transitively, so the entry point is a single file.
 
-Both are stated as facts in `README.md` and `SplitPlan.md`; this turns them into checks. The
+Both are stated as facts in `README.md` and `CLAUDE.md`; this turns them into checks. The
 script keys on directory and file names rather than on the root namespace, so it gives the same
 answer before and after a move of the tree under a different umbrella.
 """
