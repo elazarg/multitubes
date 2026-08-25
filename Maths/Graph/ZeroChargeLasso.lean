@@ -23,6 +23,13 @@ range over a finite set, so two distinct times carry the same pair; the segment 
 is a nonempty closed walk of zero charge, and the prefix before them is the transient. This
 is the exact repeated-configuration extraction, and it needs no finiteness of the edge type.
 
+The extraction comes with its search bound. There are only
+`Maths.EdgeGraph.InfiniteWalk.configurationCount` many configurations, so the repetition
+occurs among the first that many plus one times and the lasso it yields is no longer than that
+count. A bounded-discrepancy walk therefore certifies itself inside an explicitly bounded search
+space. The bound depends on the walk, through the size of its prefix-charge range, and not on
+the graph alone: charges are unbounded, so no single length serves every walk at once.
+
 Passing through the Eulerian realization of a circulation, the lasso certificate is
 interchangeable with a reachable connected zero-charge integer circulation: the period of a
 lasso is a circulation of edge counts, and the Euler realization of a circulation at its entry
@@ -42,8 +49,11 @@ a causal policy against an adaptive edge chooser.
 
 * `Maths.EdgeGraph.ZeroChargeLasso.exists_eventuallyPeriodic_boundedDiscrepancy`:
   a lasso certificate constructs an eventually periodic walk of bounded discrepancy.
-* `Maths.EdgeGraph.exists_zeroChargeLasso_of_boundedDiscrepancy`: over a finite
-  vertex set, a bounded-discrepancy walk contains a lasso.
+* `Maths.EdgeGraph.exists_zeroChargeLasso_length_le_of_boundedDiscrepancy`: over a
+  finite vertex set, a bounded-discrepancy walk contains a lasso **no longer than its
+  configuration count**, with
+  `Maths.EdgeGraph.exists_zeroChargeLasso_of_boundedDiscrepancy` the bare existence
+  statement.
 * `Maths.EdgeGraph.exists_boundedDiscrepancy_iff_exists_eventuallyPeriodic`:
   bounded discrepancy is achievable exactly when it is achievable eventually periodically.
 * `Maths.EdgeGraph.exists_boundedDiscrepancy_iff_reachableConnectedIntegerCirculation`:
@@ -189,23 +199,29 @@ theorem exists_eventuallyPeriodic_boundedDiscrepancy [Fintype E] [DecidableEq V]
 
 end ReachableConnectedIntegerCirculation
 
-/-- **The exact repeated-configuration extraction.** Finiteness of the vertex type and of the
-prefix-charge range forces two distinct times to have the same vertex and cumulative lattice
-charge; the intervening segment is the desired nonempty zero-charge closed walk. -/
-theorem exists_zeroChargeLasso_of_boundedDiscrepancy [Finite V] {κ : Type uκ}
+/-- **The exact repeated-configuration extraction, with the search bound it comes with.**
+Finiteness of the vertex type and of the prefix-charge range confines a walk to
+`walk.configurationCount edgeCharge` many configurations, so two of the first that many plus one
+times carry the same vertex and the same cumulative lattice charge; the intervening segment is
+the desired nonempty zero-charge closed walk, and the lasso it forms is no longer than that
+count. The certificate is therefore not merely existent but findable: it lives in an explicitly
+bounded search space, one lasso per pair of times. -/
+theorem exists_zeroChargeLasso_length_le_of_boundedDiscrepancy [Finite V] {κ : Type uκ}
     (edgeCharge : E → κ → ℤ) (start : V) (walk : G.InfiniteWalk start)
     (hbounded : walk.HasBoundedDiscrepancy edgeCharge) :
-    Nonempty (G.ZeroChargeLasso edgeCharge start) := by
+    ∃ lasso : G.ZeroChargeLasso edgeCharge start,
+      lasso.initialWalk.length + lasso.period.length ≤
+        walk.configurationCount edgeCharge := by
   classical
+  have _ : Fintype V := Fintype.ofFinite V
   let _ : Fintype (Set.range (walk.prefixCharge edgeCharge)) := hbounded.fintype
-  let state : ℕ → V × Set.range (walk.prefixCharge edgeCharge) := fun n =>
-    (walk.vertex n, ⟨walk.prefixCharge edgeCharge n, ⟨n, rfl⟩⟩)
-  have makeLasso : ∀ {earlier later : ℕ}, earlier < later → state earlier = state later →
-      Nonempty (G.ZeroChargeLasso edgeCharge start) := by
-    intro earlier later hlt hstate
-    have hvertex : walk.vertex earlier = walk.vertex later := congrArg Prod.fst hstate
-    have hcharge : walk.prefixCharge edgeCharge earlier =
-        walk.prefixCharge edgeCharge later := congrArg (fun pair => pair.2.1) hstate
+  set bound := walk.configurationCount edgeCharge with hboundDef
+  have makeLasso : ∀ {earlier later : ℕ}, earlier < later → later ≤ bound →
+      walk.vertex earlier = walk.vertex later →
+      walk.prefixCharge edgeCharge earlier = walk.prefixCharge edgeCharge later →
+      ∃ lasso : G.ZeroChargeLasso edgeCharge start,
+        lasso.initialWalk.length + lasso.period.length ≤ bound := by
+    intro earlier later hlt hle hvertex hcharge
     have hsum : earlier + (later - earlier) = later := by omega
     refine ⟨{
       base := walk.vertex earlier
@@ -214,12 +230,33 @@ theorem exists_zeroChargeLasso_of_boundedDiscrepancy [Finite V] {κ : Type uκ}
       period := walk.segment earlier (later - earlier)
       period_closed := by rw [hsum]; exact hvertex.symm
       period_nonempty := by simpa using Nat.sub_pos_of_lt hlt
-      period_zero := ?_ }⟩
-    rw [walk.segment_charge edgeCharge, hsum, ← hcharge, sub_self]
-  rcases Finite.exists_ne_map_eq_of_infinite state with ⟨earlier, later, hne, heq⟩
-  rcases lt_or_gt_of_ne hne with hlt | hgt
-  · exact makeLasso hlt heq
-  · exact makeLasso hgt heq.symm
+      period_zero := by
+        rw [walk.segment_charge edgeCharge, hsum, ← hcharge, sub_self] }, ?_⟩
+    simp only [InfiniteWalk.take_length, InfiniteWalk.segment_length]
+    omega
+  let state : Fin (bound + 1) → V × Set.range (walk.prefixCharge edgeCharge) := fun time =>
+    (walk.vertex time, ⟨walk.prefixCharge edgeCharge time, ⟨time, rfl⟩⟩)
+  have hcard : Fintype.card (V × Set.range (walk.prefixCharge edgeCharge)) = bound := by
+    simp [hboundDef, InfiniteWalk.configurationCount, Nat.card_eq_fintype_card]
+  obtain ⟨first, second, hne, heq⟩ :=
+    Fintype.exists_ne_map_eq_of_card_lt state (by simp [hcard])
+  have hextract : ∀ {x y : Fin (bound + 1)}, (x : ℕ) < (y : ℕ) → state x = state y →
+      ∃ lasso : G.ZeroChargeLasso edgeCharge start,
+        lasso.initialWalk.length + lasso.period.length ≤ bound := by
+    intro x y hlt hstate
+    exact makeLasso hlt (Nat.lt_succ_iff.mp y.isLt) (congrArg Prod.fst hstate)
+      (congrArg (fun pair => pair.2.1) hstate)
+  rcases lt_or_gt_of_ne (fun hval => hne (Fin.ext hval)) with hlt | hgt
+  · exact hextract hlt heq
+  · exact hextract hgt heq.symm
+
+/-- The lasso certificate itself, forgetting the bound. -/
+theorem exists_zeroChargeLasso_of_boundedDiscrepancy [Finite V] {κ : Type uκ}
+    (edgeCharge : E → κ → ℤ) (start : V) (walk : G.InfiniteWalk start)
+    (hbounded : walk.HasBoundedDiscrepancy edgeCharge) :
+    Nonempty (G.ZeroChargeLasso edgeCharge start) :=
+  (G.exists_zeroChargeLasso_length_le_of_boundedDiscrepancy edgeCharge start walk
+    hbounded).elim fun lasso _ => ⟨lasso⟩
 
 /-- For finite vertices and integer-lattice charges, existence of any bounded-discrepancy walk
 is equivalent to existence of an eventually periodic one. The witness is offline and

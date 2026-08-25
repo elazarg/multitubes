@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Graph.Circulation
+public import Mathlib.Data.Set.Card
 public import Mathlib.Data.Set.Finite.Basic
 
 import Mathlib.Algebra.BigOperators.Fin
@@ -34,6 +35,8 @@ transient, since that only translates and extends the prefix-charge range by fin
 * `Maths.EdgeGraph.InfiniteWalk.prefixCharge`,
   `Maths.EdgeGraph.InfiniteWalk.HasBoundedDiscrepancy`: the cumulative charge and
   the finiteness of its range.
+* `Maths.EdgeGraph.InfiniteWalk.configurationCount`: the number of configurations a
+  walk can occupy, a vertex paired with a value of its prefix charge.
 * `Maths.EdgeGraph.InfiniteWalk.IsEventuallyPeriodic`: edge-level eventual
   periodicity with an explicit transient and positive period.
 * `Maths.EdgeGraph.CyclicWord.toInfiniteWalk`,
@@ -42,6 +45,10 @@ transient, since that only translates and extends the prefix-charge range by fin
 
 ## Main results
 
+* `Maths.range_subset_image_range_of_add_period`: a sequence invariant under a positive
+  shift is spent by its first period - every value it takes is taken before that time - with
+  `Maths.finite_range_of_add_period` and `Maths.ncard_range_le_of_add_period` its
+  qualitative and quantitative corollaries.
 * `Maths.EdgeGraph.CyclicWord.hasBoundedDiscrepancy_of_wordCharge_zero`: repeating
   a nonempty zero-charge cyclic word has bounded discrepancy.
 * `Maths.EdgeGraph.Walk.hasBoundedDiscrepancy_prependInfinite`: a finite legal
@@ -58,11 +65,14 @@ infinite walk, cyclic word, bounded discrepancy, eventual periodicity, prefix ch
 
 namespace Maths
 
-/-- A sequence invariant under a positive shift takes only finitely many values. -/
-private theorem finite_range_of_add_period {α : Type*} (sequence : ℕ → α)
+/-- **A sequence invariant under a positive shift is spent by its first period.**  Every value it
+takes is already taken before time `period`: reduce the time modulo the period by strong
+induction.  This is the quantitative statement; finiteness of the range and the bound `period` on
+the number of values are its corollaries. -/
+theorem range_subset_image_range_of_add_period {α : Type*} (sequence : ℕ → α)
     (period : ℕ) (hperiodPos : 0 < period)
     (hperiod : ∀ n, sequence (n + period) = sequence n) :
-    Set.Finite (Set.range sequence) := by
+    Set.range sequence ⊆ sequence '' (Finset.range period) := by
   have hremainder : ∀ n, ∃ r < period, sequence n = sequence r := by
     intro n
     induction n using Nat.strong_induction_on with
@@ -73,10 +83,31 @@ private theorem finite_range_of_add_period {α : Type*} (sequence : ℕ → α)
           refine ⟨r, hr, ?_⟩
           rw [← show n - period + period = n by omega, hperiod (n - period)]
           exact her
-  refine ((Finset.range period).finite_toSet.image sequence).subset ?_
   rintro value ⟨n, rfl⟩
   obtain ⟨r, hr, heq⟩ := hremainder n
   exact ⟨r, by simpa using hr, heq.symm⟩
+
+/-- A sequence invariant under a positive shift takes only finitely many values. -/
+theorem finite_range_of_add_period {α : Type*} (sequence : ℕ → α)
+    (period : ℕ) (hperiodPos : 0 < period)
+    (hperiod : ∀ n, sequence (n + period) = sequence n) :
+    Set.Finite (Set.range sequence) :=
+  ((Finset.range period).finite_toSet.image sequence).subset
+    (range_subset_image_range_of_add_period sequence period hperiodPos hperiod)
+
+/-- It takes at most `period` values, one for each residue. -/
+theorem ncard_range_le_of_add_period {α : Type*} (sequence : ℕ → α)
+    (period : ℕ) (hperiodPos : 0 < period)
+    (hperiod : ∀ n, sequence (n + period) = sequence n) :
+    (Set.range sequence).ncard ≤ period :=
+  calc (Set.range sequence).ncard
+      ≤ (sequence '' (Finset.range period)).ncard :=
+        Set.ncard_le_ncard
+          (range_subset_image_range_of_add_period sequence period hperiodPos hperiod)
+          ((Finset.range period).finite_toSet.image sequence)
+    _ ≤ ((Finset.range period : Finset ℕ) : Set ℕ).ncard :=
+        Set.ncard_image_le (Finset.range period).finite_toSet
+    _ = period := by rw [Set.ncard_coe_finset, Finset.card_range]
 
 namespace EdgeGraph
 
@@ -227,6 +258,13 @@ equivalent to boundedness in any norm. -/
 def HasBoundedDiscrepancy (walk : G.InfiniteWalk start) {κ : Type uκ}
     (edgeCharge : E → κ → ℤ) : Prop :=
   Set.Finite (Set.range (walk.prefixCharge edgeCharge))
+
+/-- The number of configurations a walk can occupy: a vertex paired with a value of its prefix
+charge. Over a finite vertex set and at bounded discrepancy this is finite, and two times sharing
+a configuration bound a nonempty closed walk of zero charge. -/
+noncomputable def configurationCount (walk : G.InfiniteWalk start) {κ : Type uκ}
+    (edgeCharge : E → κ → ℤ) : ℕ :=
+  Nat.card V * Nat.card (Set.range (walk.prefixCharge edgeCharge))
 
 /-- The first `n` edges as a finite walk. -/
 def take (walk : G.InfiniteWalk start) : (n : ℕ) → G.Walk start (walk.vertex n)
