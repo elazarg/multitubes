@@ -71,7 +71,8 @@ modulus, where the operator contracts, the subject of
 slopes straddling one, where neither mechanism is available and an exponential
 change of coordinates makes Brouwer's theorem applicable instead, the subject of
 `DirectedTransport.MaxAffine.Eigenproblem`.  What is settled there is existence
-and not the value of the eigenvalue, which remains open.
+and not the value of the eigenvalue; the **least** eigenvalue is the optimum
+of a finite linear program, by `DirectedTransport.MaxAffine.LeastEigenvalue`.
 
 ## Main definitions
 

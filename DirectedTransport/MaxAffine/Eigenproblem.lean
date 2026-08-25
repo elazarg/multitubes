@@ -109,17 +109,15 @@ two distinct eigenvectors
 determines the eigenvalue at nonnegative slopes straddling one, and the question is which real
 numbers are eigenvalues rather than which one is.
 
-What remains open is the **least** eigenvalue.  Every eigenvalue is a level at which the
-inequality `F x ≤ lam + x` is solvable, and those levels form an up-set whose infimum is therefore
-a lower bound for the whole set of eigenvalues; whether that infimum is itself an eigenvalue is
-not known.  It is one in every settled case: for the two-loop labelling above, in the translation
-regime of `DirectedTransport.MaxAffine.FixedPoint`, where both are the maximum cycle mean of the
-shifts, and vacuously below unit slope modulus in `DirectedTransport.MaxAffine.Contraction`, where
-neither is bounded below.  A proof in general would supply the missing formula, the infimum being
-the optimum of an explicit finite linear program.  The cyclewise description of that optimum
-available in the comparable regimes -- the maximum cycle mean of the unit-slope subgraph -- does
-not extend to mixed slopes, by
+The **least** eigenvalue is not open, and needs none of this file: every eigenvalue is a level at
+which the inequality `F x ≤ lam + x` is solvable, and by
+`DirectedTransport.MaxAffine.LeastEigenvalue` a least such level is the least eigenvalue whenever
+every vertex has an incoming edge, so the value is the optimum of an explicit finite linear
+program.  The cyclewise description of that optimum available in the comparable regimes -- the
+maximum cycle mean of the unit-slope subgraph -- does not extend to mixed slopes, by
 `DirectedTransport.MaxAffineTransport.not_forall_mem_relaxationLevels_iff_unitSlopeCycles_le`.
+What the Brouwer argument supplies beyond that is the eigenvalues above the least one, which the
+linear program does not describe.
 
 ## References
 

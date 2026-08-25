@@ -70,6 +70,7 @@ public import DirectedTransport.MaxAffine.FixedPoint
 public import DirectedTransport.MaxAffine.GaugeFeasibility
 public import DirectedTransport.MaxAffine.GaugeHolonomy
 public import DirectedTransport.MaxAffine.JoinSemidirect
+public import DirectedTransport.MaxAffine.LeastEigenvalue
 public import DirectedTransport.MaxAffine.Paths
 public import DirectedTransport.MaxAffine.Relaxation
 public import DirectedTransport.MaxAffine.Scalar

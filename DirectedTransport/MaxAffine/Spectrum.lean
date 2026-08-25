@@ -116,11 +116,12 @@ across that identification without any coercion of walks.
 
 ## TODO
 
-Whether the least relaxation level is always an eigenvalue.  It is one for the two-loop labelling
-of `DirectedTransport.MaxAffineTransport.eigenvalues_loopLabel`, for a topical labelling, where
-both are the maximum cycle mean of the shifts, and vacuously below unit slope modulus, where
-neither is bounded below.  A proof in general would give the missing formula, the least relaxation
-level being the optimum of an explicit finite linear program in the pair `(lam, x)`.
+Which levels above the least one are eigenvalues.  The bottom of the up-set is settled: on a
+strongly connected graph with nonnegative slopes and an incoming edge at every vertex, a least
+relaxation level is the least eigenvalue, by `DirectedTransport.MaxAffine.LeastEigenvalue`, so it
+is the optimum of an explicit finite linear program in the pair `(lam, x)`.  The two-loop
+labelling shows that everything above it may be an eigenvalue too, and nothing here says when
+that happens.
 
 ## References
 
