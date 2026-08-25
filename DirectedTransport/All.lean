@@ -9,6 +9,9 @@ module
 public import DirectedTransport.JoinSemidirect
 public import DirectedTransport.EdgeGraph
 public import DirectedTransport.Circulation
+public import DirectedTransport.ZeroChargeLasso
+public import DirectedTransport.InfiniteWalk
+public import DirectedTransport.EulerianTrail
 public import DirectedTransport.TransferSummary
 public import DirectedTransport.TwoSidedReflection
 public import DirectedTransport.ChargedRelation
