@@ -37,7 +37,12 @@ each label.
 In the two regimes where the sub-fixed-point theory is complete the up-set is described by cycles.
 For slopes at most one, and for slopes at least one with floors absent, a lax section exists exactly
 when every closed walk of the unit-slope subgraph has nonpositive shift sum, by the two cycle
-criteria of `Maths.DirectedTransport.MaxAffine.Slopes`.  Relaxing by `lam` subtracts `lam` from
+criteria of `Maths.DirectedTransport.MaxAffine.Slopes`.  Those two are one criterion read along
+the constant recession directions `1` and `-1`, by
+`MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction`;
+the pairs of statements below inherit that duplication rather than adding to it, and are kept
+apart only because relaxation moves the branch index to that of the relaxed labelling.
+Relaxing by `lam` subtracts `lam` from
 every shift, so the criterion becomes a **cycle-mean bound**: `lam` is a relaxation level exactly
 when no closed walk of the unit-slope subgraph has mean shift above `lam`.  Consequently every
 eigenvalue is at least the maximum cycle mean of the unit-slope subgraph, which at unit slopes

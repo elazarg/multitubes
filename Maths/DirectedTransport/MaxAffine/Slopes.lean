@@ -19,6 +19,17 @@ subunit/unit and superunit/unit regimes, including their cycle criteria.  A
 multiplicative slope gauge gives an intrinsic description of the critical
 subsystem.
 
+The two regimes are one statement.  Pairing a branch row with a constant
+direction leaves `constant * (1 - slope)` on an affine row and `constant` on a
+genuine floor row, so along any *nonzero* constant the critical rows are exactly
+the affine rows of unit slope, whatever the constant is.  Only recession depends
+on its sign: a positive constant is receded along by every subunit row and by
+every floor row, a negative one by every superunit row and by no floor row at
+all.  Hence the subunit regime and the floorless superunit regime are
+`Maths.MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction`
+read at `1` and at `-1`, and both are kept below as the corollaries one reaches
+for.
+
 The slope-flat converse requires strong connectivity.  Without it, a DAG can
 satisfy every cycle-product equation vacuously while carrying a zero slope.
 
@@ -35,17 +46,26 @@ satisfy every cycle-product equation vacuously while carrying a zero slope.
 
 ## Main results
 
+* `MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction`:
+  **along any nonzero constant recession direction, feasibility reduces exactly to the affine rows
+  of the unit-slope edges.**  The two slope regimes are its instances at `1` and at `-1`.
 * `MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one`:
   when every slope is at most one, feasibility reduces exactly to the affine rows of the unit-slope
   edges; floors and strictly subunit rows are noncritical.
+* `MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_one_le_slope`:
+  the superunit companion, where floorlessness is what the sign change costs.
+* `MaxAffineTransport.exists_unitSlopePotential_iff_unitSlopeCycles_nonpos`: the additive
+  duality read on the unit-slope subgraph, with no slope regime and an arbitrary vertex type.
+  Composed with either reduction it gives a cycle criterion.
 * `MaxAffineTransport.exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_slope_le_one`:
   the resulting cycle criterion - a lax section exists exactly when every closed walk of the
   unit-slope subgraph has nonpositive shift sum.
 * `MaxAffineTransport.exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_one_le_slope`:
   the same criterion in the superunit regime, which additionally requires every floor absent.
 * `Maths.MaxAffineTransport.exists_nonexpansiveGauge_iff_cycleProduct_le_one`:
-  **positive gauge theorem** - for nonnegative slopes on a finite graph, a nonexpansive gauge
-  exists exactly when every directed cycle product is at most one.
+  **positive gauge theorem** - for nonnegative slopes and finitely many edges, a nonexpansive
+  gauge exists exactly when every directed cycle product is at most one.  The vertex type is
+  arbitrary.
 * `Maths.MaxAffineTransport.exists_expansiveGauge_iff_one_le_cycleProduct`: the
   dual statement, under the stronger hypothesis that every slope is strictly positive.
 * `MaxAffineTransport.cycleProduct_eq_one_iff_exists_slopeGauge_of_stronglyConnected`:
@@ -93,26 +113,25 @@ theorem dotProduct_branchDelta_const (branch : Branch label) (constant : ℝ) :
       · exact (hgenuine hfloor).elim
       · rw [branchDelta, dotProduct_rowDelta_inr_of_floor_coe hfloor]
 
-/-- If every slope is at most one, feasibility reduces exactly to the affine
-rows of unit-slope edges.  All floors and strictly subunit rows are noncritical. -/
-theorem exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one
-    (hslope : ∀ edge : E, (label edge).slope ≤ 1) :
+/-- **Feasibility along a constant recession direction reduces to the unit-slope rows.**  Pairing
+a branch row with a nonzero constant leaves `constant * (1 - slope)` on an affine row and
+`constant` on a genuine floor row, so a row is critical exactly when it is affine of unit slope:
+the constant cancels, and no floor row is ever critical.  Recession is therefore the only thing
+a sign of the constant decides, and both slope regimes below are this statement read at
+`constant = 1` and at `constant = -1`. -/
+theorem exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction
+    (constant : ℝ) (hconstant : constant ≠ 0)
+    (hrecession : ∀ branch : Branch label,
+      0 ≤ dotProduct (branchDelta G label branch) (fun _ : V ↦ constant)) :
     (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
       ∃ potential : V → ℝ, ∀ edge : E,
         (label edge).slope = 1 →
           (label edge).shift + potential (G.source edge) ≤
             potential (G.target edge) := by
   classical
-  let direction : V → ℝ := fun _ ↦ 1
-  have hrecession (branch : Branch label) :
-      0 ≤ dotProduct (branchDelta G label branch) direction := by
-    rw [dotProduct_branchDelta_const]
-    cases branch.1 with
-    | inl edge => simp only [one_mul]; linarith [hslope edge]
-    | inr edge => norm_num
   have hreduction :=
     FiniteInequality.Recession.exists_potential_iff_exists_critical_potential
-    (branchDelta G label) (branchBase label) direction hrecession
+    (branchDelta G label) (branchBase label) (fun _ : V ↦ constant) hrecession
   constructor
   · rintro ⟨potential, hpotential⟩
     refine ⟨potential, fun edge hedge ↦ ?_⟩
@@ -124,7 +143,7 @@ theorem exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one
   · rintro ⟨criticalPotential, hcriticalPotential⟩
     have hcriticalRows (branch : Branch label)
         (hcritical : FiniteInequality.Recession.IsCritical
-          (branchDelta G label) direction branch) :
+          (branchDelta G label) (fun _ : V ↦ constant) branch) :
         branchBase label branch ≤
           dotProduct (branchDelta G label branch) criticalPotential := by
       rw [FiniteInequality.Recession.IsCritical,
@@ -132,21 +151,40 @@ theorem exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one
       rcases branch with ⟨action, hgenuine⟩
       cases action with
       | inl edge =>
-          change 1 * (1 - (label edge).slope) = 0 at hcritical
+          change constant * (1 - (label edge).slope) = 0 at hcritical
           have hedge : (label edge).slope = 1 := by
-            simp only [one_mul] at hcritical
-            linarith
+            rcases mul_eq_zero.mp hcritical with hzero | hzero
+            · exact absurd hzero hconstant
+            · linarith
           have hunit := hcriticalPotential edge hedge
           rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl]
           rw [hedge]
           linarith
       | inr edge =>
-          change (1 : ℝ) = 0 at hcritical
-          norm_num at hcritical
+          change constant = 0 at hcritical
+          exact absurd hcritical hconstant
     obtain ⟨potential, hpotential⟩ := hreduction.mpr
       ⟨criticalPotential, hcriticalRows⟩
     exact ⟨potential,
       (isLaxSection_iff_forall_branch G label potential).mpr hpotential⟩
+
+/-- If every slope is at most one, feasibility reduces exactly to the affine
+rows of unit-slope edges.  All floors and strictly subunit rows are noncritical.
+This is the constant direction `1`, which every floor row and every subunit row
+recedes along. -/
+theorem exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one
+    (hslope : ∀ edge : E, (label edge).slope ≤ 1) :
+    (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
+      ∃ potential : V → ℝ, ∀ edge : E,
+        (label edge).slope = 1 →
+          (label edge).shift + potential (G.source edge) ≤
+            potential (G.target edge) := by
+  refine exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction 1
+    one_ne_zero fun branch ↦ ?_
+  rw [dotProduct_branchDelta_const]
+  cases branch.1 with
+  | inl edge => simp only [one_mul]; linarith [hslope edge]
+  | inr edge => norm_num
 
 /-- Unit-slope edges as a directed subgraph. -/
 abbrev UnitSlopeEdge (label : E → Label) :=
@@ -162,13 +200,19 @@ def unitSlopeGraph (G : EdgeGraph V E) (label : E → Label) :
 def unitSlopeShift (label : E → Label) (edge : UnitSlopeEdge label) : ℝ :=
   (label edge.1).shift
 
-/-- Complete cycle criterion in the mixed subunit/unit regime. -/
-theorem exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_slope_le_one
-    (hslope : ∀ edge : E, (label edge).slope ≤ 1) :
-    (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
+omit [Fintype V] [DecidableEq V] in
+/-- **A unit-slope potential is a max-plus potential of the unit-slope subgraph.**  This is the
+additive duality of `Maths.DirectedTransport.Additive.Potentials` read on that subgraph, and it
+mentions no slope regime: it is the second half of both cycle criteria below.  Only the edges
+need be finite, and the vertex type is arbitrary; the regimes are where the rest of the
+hypotheses come from. -/
+theorem exists_unitSlopePotential_iff_unitSlopeCycles_nonpos :
+    (∃ potential : V → ℝ, ∀ edge : E,
+        (label edge).slope = 1 →
+          (label edge).shift + potential (G.source edge) ≤
+            potential (G.target edge)) ↔
       ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
         MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ 0 := by
-  rw [exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one hslope]
   constructor
   · rintro ⟨potential, hpotential⟩
     apply (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
@@ -184,8 +228,19 @@ theorem exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_slope_le_one
       simpa [unitSlopeGraph, unitSlopeShift, add_comm] using
         hpotential (⟨edge, hedge⟩ : UnitSlopeEdge label)⟩
 
+/-- Complete cycle criterion in the mixed subunit/unit regime. -/
+theorem exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_slope_le_one
+    (hslope : ∀ edge : E, (label edge).slope ≤ 1) :
+    (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
+      ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
+        MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ 0 :=
+  (exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one hslope).trans
+    exists_unitSlopePotential_iff_unitSlopeCycles_nonpos
+
 /-- In a floorless all-superunit/unit system, the direction `-1` reduces
-feasibility to the same unit-slope affine subsystem. -/
+feasibility to the same unit-slope affine subsystem.  Floorlessness is what the
+sign change costs: a genuine floor row pairs with `-1` to `-1`, so it recedes
+along no negative constant. -/
 theorem exists_isLaxSection_iff_exists_unitSlopePotential_of_one_le_slope
     (hslope : ∀ edge : E, 1 ≤ (label edge).slope)
     (hfloor : ∀ edge : E, (label edge).floor = ⊥) :
@@ -194,50 +249,13 @@ theorem exists_isLaxSection_iff_exists_unitSlopePotential_of_one_le_slope
         (label edge).slope = 1 →
           (label edge).shift + potential (G.source edge) ≤
             potential (G.target edge) := by
-  classical
-  let direction : V → ℝ := fun _ ↦ -1
-  have hrecession (branch : Branch label) :
-      0 ≤ dotProduct (branchDelta G label branch) direction := by
-    rw [dotProduct_branchDelta_const]
-    rcases branch with ⟨action, hgenuine⟩
-    cases action with
-    | inl edge => simp only [neg_mul, one_mul]; linarith [hslope edge]
-    | inr edge => exact (hgenuine (hfloor edge)).elim
-  have hreduction :=
-    FiniteInequality.Recession.exists_potential_iff_exists_critical_potential
-    (branchDelta G label) (branchBase label) direction hrecession
-  constructor
-  · rintro ⟨potential, hpotential⟩
-    refine ⟨potential, fun edge hedge ↦ ?_⟩
-    have hrow := (isLaxSection_iff_forall_branch G label potential).mp
-      hpotential ⟨Sum.inl edge, trivial⟩
-    rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl] at hrow
-    rw [hedge] at hrow
-    linarith
-  · rintro ⟨criticalPotential, hcriticalPotential⟩
-    have hcriticalRows (branch : Branch label)
-        (hcritical : FiniteInequality.Recession.IsCritical
-          (branchDelta G label) direction branch) :
-        branchBase label branch ≤
-          dotProduct (branchDelta G label branch) criticalPotential := by
-      rw [FiniteInequality.Recession.IsCritical,
-        dotProduct_branchDelta_const] at hcritical
-      rcases branch with ⟨action, hgenuine⟩
-      cases action with
-      | inl edge =>
-          change -1 * (1 - (label edge).slope) = 0 at hcritical
-          have hedge : (label edge).slope = 1 := by
-            simp only [neg_mul, one_mul] at hcritical
-            linarith
-          have hunit := hcriticalPotential edge hedge
-          rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl]
-          rw [hedge]
-          linarith
-      | inr edge => exact (hgenuine (hfloor edge)).elim
-    obtain ⟨potential, hpotential⟩ := hreduction.mpr
-      ⟨criticalPotential, hcriticalRows⟩
-    exact ⟨potential,
-      (isLaxSection_iff_forall_branch G label potential).mpr hpotential⟩
+  refine exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction (-1)
+    (by norm_num) fun branch ↦ ?_
+  rw [dotProduct_branchDelta_const]
+  rcases branch with ⟨action, hgenuine⟩
+  cases action with
+  | inl edge => simp only [neg_mul, one_mul]; linarith [hslope edge]
+  | inr edge => exact (hgenuine (hfloor edge)).elim
 
 /-- Complete cycle criterion in the floorless mixed superunit/unit regime. -/
 theorem exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_one_le_slope
@@ -245,23 +263,9 @@ theorem exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_one_le_slope
     (hfloor : ∀ edge : E, (label edge).floor = ⊥) :
     (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
       ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
-        MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ 0 := by
-  rw [exists_isLaxSection_iff_exists_unitSlopePotential_of_one_le_slope
-    hslope hfloor]
-  constructor
-  · rintro ⟨potential, hpotential⟩
-    apply (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
-      (G := unitSlopeGraph G label) (unitSlopeShift label)).mp
-    exact ⟨potential, fun edge ↦ by
-      simpa [unitSlopeGraph, unitSlopeShift, add_comm] using
-        hpotential edge.1 edge.2⟩
-  · intro hcycles
-    obtain ⟨potential, hpotential⟩ :=
-      (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
-        (G := unitSlopeGraph G label) (unitSlopeShift label)).mpr hcycles
-    exact ⟨potential, fun edge hedge ↦ by
-      simpa [unitSlopeGraph, unitSlopeShift, add_comm] using
-        hpotential (⟨edge, hedge⟩ : UnitSlopeEdge label)⟩
+        MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ 0 :=
+  (exists_isLaxSection_iff_exists_unitSlopePotential_of_one_le_slope hslope hfloor).trans
+    exists_unitSlopePotential_iff_unitSlopeCycles_nonpos
 
 end RecessionRegimes
 
