@@ -396,6 +396,43 @@ private theorem worstResidualAtMost_iff_shiftedRows (level : ℝ) :
   simp only [branchResidual]
   constructor <;> intro h <;> linarith
 
+/-- Both gauge regimes reduce to the gauge-critical affine rows through one recession argument.
+All that is asked of the direction is that every branch recede along it, that it annihilate an
+affine row exactly at the gauge-critical edges, and that it never annihilate a genuine floor row.
+The nonexpansive regime supplies the gauge itself and the expansive one its negative. -/
+private theorem worstResidualAtMost_iff_criticalAffineResidualAtMost_of_direction
+    (gauge direction : V → ℝ)
+    (hrecession : ∀ branch : Branch label,
+      0 ≤ dotProduct (branchDelta G label branch) direction)
+    (hcritical : ∀ edge : E,
+      dotProduct (branchDelta G label ⟨Sum.inl edge, trivial⟩) direction = 0 ↔
+        (label edge).slope * gauge (G.source edge) = gauge (G.target edge))
+    (hfloor : ∀ (edge : E) (hgenuine : IsGenuineBranch label (Sum.inr edge)),
+      dotProduct (branchDelta G label ⟨Sum.inr edge, hgenuine⟩) direction ≠ 0)
+    (level : ℝ) :
+    WorstResidualAtMost (G := G) (label := label) level ↔
+      CriticalAffineResidualAtMost (G := G) label gauge level := by
+  have hreduction :=
+    FiniteInequality.Recession.exists_potential_iff_exists_critical_potential
+      (branchDelta G label)
+      (fun branch => branchBase label branch - level) direction hrecession
+  rw [worstResidualAtMost_iff_shiftedRows, hreduction]
+  constructor
+  · rintro ⟨potential, hpotential⟩
+    refine ⟨potential, fun edge hedge => ?_⟩
+    have hrow := hpotential ⟨Sum.inl edge, trivial⟩ ((hcritical edge).mpr hedge)
+    rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl] at hrow
+    linarith
+  · rintro ⟨potential, hpotential⟩
+    refine ⟨potential, fun branch hcrit => ?_⟩
+    rcases branch with ⟨action, hgenuine⟩
+    cases action with
+    | inl edge =>
+        have hrow := hpotential edge ((hcritical edge).mp hcrit)
+        rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl]
+        linarith
+    | inr edge => exact (hfloor edge hgenuine hcrit).elim
+
 /-- At every raw residual threshold, a nonexpansive gauge removes exactly the
 noncritical branch rows. -/
 theorem worstResidualAtMost_iff_criticalAffineResidualAtMost_of_nonexpansiveGauge
@@ -405,49 +442,16 @@ theorem worstResidualAtMost_iff_criticalAffineResidualAtMost_of_nonexpansiveGaug
     (level : ℝ) :
     WorstResidualAtMost (G := G) (label := label) level ↔
       CriticalAffineResidualAtMost (G := G) label gauge level := by
-  let direction : V → ℝ := gauge
-  have hrecession (branch : Branch label) :
-      0 ≤ dotProduct (branchDelta G label branch) direction := by
-    rw [dotProduct_branchDelta_direction]
+  refine worstResidualAtMost_iff_criticalAffineResidualAtMost_of_direction gauge gauge
+    (fun branch => ?_) (fun edge => ?_) (fun edge _ => ?_) level
+  · rw [dotProduct_branchDelta_direction]
     cases branch.1 with
     | inl edge => exact sub_nonneg.mpr (hgauge.2 edge)
     | inr edge => exact (hgauge.1 _).le
-  have hreduction :=
-    FiniteInequality.Recession.exists_potential_iff_exists_critical_potential
-      (branchDelta G label)
-      (fun branch => branchBase label branch - level) direction hrecession
-  rw [worstResidualAtMost_iff_shiftedRows]
-  rw [hreduction]
-  constructor
-  · rintro ⟨potential, hpotential⟩
-    refine ⟨potential, fun edge hcritical => ?_⟩
-    let branch : Branch label := ⟨Sum.inl edge, trivial⟩
-    have hbranchCritical : FiniteInequality.Recession.IsCritical
-        (branchDelta G label) direction branch := by
-      rw [FiniteInequality.Recession.IsCritical,
-        dotProduct_branchDelta_direction]
-      dsimp [direction, branch]
-      linarith
-    have hrow := hpotential branch hbranchCritical
-    rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl] at hrow
-    linarith
-  · rintro ⟨potential, hpotential⟩
-    refine ⟨potential, fun branch hcritical => ?_⟩
-    rw [FiniteInequality.Recession.IsCritical,
-      dotProduct_branchDelta_direction] at hcritical
-    rcases branch with ⟨action, hgenuine⟩
-    cases action with
-    | inl edge =>
-        have hedge : (label edge).slope * gauge (G.source edge) =
-            gauge (G.target edge) := by
-          dsimp [direction] at hcritical
-          linarith
-        have hrow := hpotential edge hedge
-        rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl]
-        linarith
-    | inr edge =>
-        dsimp [direction] at hcritical
-        exact (ne_of_gt (hgauge.1 _) hcritical).elim
+  · rw [dotProduct_branchDelta_direction]
+    constructor <;> intro h <;> linarith
+  · rw [dotProduct_branchDelta_direction]
+    exact ne_of_gt (hgauge.1 _)
 
 /-- At every raw residual threshold, an expansive gauge with absent floors
 removes exactly the noncritical affine rows. -/
@@ -459,50 +463,16 @@ theorem worstResidualAtMost_iff_criticalAffineResidualAtMost_of_expansiveGauge
     (level : ℝ) :
     WorstResidualAtMost (G := G) (label := label) level ↔
       CriticalAffineResidualAtMost (G := G) label gauge level := by
-  let direction : V → ℝ := fun vertex => -gauge vertex
-  have hrecession (branch : Branch label) :
-      0 ≤ dotProduct (branchDelta G label branch) direction := by
-    rw [dotProduct_branchDelta_direction]
+  refine worstResidualAtMost_iff_criticalAffineResidualAtMost_of_direction gauge
+    (fun vertex => -gauge vertex) (fun branch => ?_) (fun edge => ?_)
+    (fun edge hgenuine => absurd (hfloor edge) hgenuine) level
+  · rw [dotProduct_branchDelta_direction]
     rcases branch with ⟨action, hgenuine⟩
     cases action with
-    | inl edge =>
-        dsimp [direction]
-        nlinarith [hgauge.2 edge]
+    | inl edge => nlinarith [hgauge.2 edge]
     | inr edge => exact (hgenuine (hfloor edge)).elim
-  have hreduction :=
-    FiniteInequality.Recession.exists_potential_iff_exists_critical_potential
-      (branchDelta G label)
-      (fun branch => branchBase label branch - level) direction hrecession
-  rw [worstResidualAtMost_iff_shiftedRows]
-  rw [hreduction]
-  constructor
-  · rintro ⟨potential, hpotential⟩
-    refine ⟨potential, fun edge hcritical => ?_⟩
-    let branch : Branch label := ⟨Sum.inl edge, trivial⟩
-    have hbranchCritical : FiniteInequality.Recession.IsCritical
-        (branchDelta G label) direction branch := by
-      rw [FiniteInequality.Recession.IsCritical,
-        dotProduct_branchDelta_direction]
-      dsimp [direction, branch]
-      linarith
-    have hrow := hpotential branch hbranchCritical
-    rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl] at hrow
-    linarith
-  · rintro ⟨potential, hpotential⟩
-    refine ⟨potential, fun branch hcritical => ?_⟩
-    rw [FiniteInequality.Recession.IsCritical,
-      dotProduct_branchDelta_direction] at hcritical
-    rcases branch with ⟨action, hgenuine⟩
-    cases action with
-    | inl edge =>
-        have hedge : (label edge).slope * gauge (G.source edge) =
-            gauge (G.target edge) := by
-          dsimp [direction] at hcritical
-          linarith
-        have hrow := hpotential edge hedge
-        rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl]
-        linarith
-    | inr edge => exact (hgenuine (hfloor edge)).elim
+  · rw [dotProduct_branchDelta_direction]
+    constructor <;> intro h <;> linarith
 
 /-- **Quantitative nonexpansive gauge theorem.**  The exact raw worst-residual
 threshold is the supremum of `T_C / S_C` over nonempty critical cycles. -/
@@ -573,6 +543,51 @@ theorem forall_gaugeCriticalCycles_nonpos_iff_holonomy_prefixed
                 (gaugeCriticalShift label gauge edge)) cycle point ≤ point := by
   simp [holonomyApply_translationLabel]
 
+/-- The feasibility companion of the residual reduction above, asking the same three things of
+the recession direction: that every branch recede along it, that it annihilate an affine row
+exactly at the gauge-critical edges, and that it never annihilate a genuine floor row. -/
+private theorem exists_isLaxSection_iff_exists_criticalAffinePotential_of_direction
+    (gauge direction : V → ℝ)
+    (hrecession : ∀ branch : Branch label,
+      0 ≤ dotProduct (branchDelta G label branch) direction)
+    (hcritical : ∀ edge : E,
+      dotProduct (branchDelta G label ⟨Sum.inl edge, trivial⟩) direction = 0 ↔
+        (label edge).slope * gauge (G.source edge) = gauge (G.target edge))
+    (hfloor : ∀ (edge : E) (hgenuine : IsGenuineBranch label (Sum.inr edge)),
+      dotProduct (branchDelta G label ⟨Sum.inr edge, hgenuine⟩) direction ≠ 0) :
+    (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
+      (∃ potential : V → ℝ, ∀ edge : E,
+        (label edge).slope * gauge (G.source edge) = gauge (G.target edge) →
+          (label edge).shift + (label edge).slope * potential (G.source edge) ≤
+            potential (G.target edge)) := by
+  have hreduction :=
+    FiniteInequality.Recession.exists_potential_iff_exists_critical_potential
+    (branchDelta G label) (branchBase label) direction hrecession
+  constructor
+  · rintro ⟨potential, hpotential⟩
+    refine ⟨potential, fun edge _ => ?_⟩
+    have hrow := (isLaxSection_iff_forall_branch G label potential).mp
+      hpotential ⟨Sum.inl edge, trivial⟩
+    rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl] at hrow
+    linarith
+  · rintro ⟨criticalPotential, hcriticalPotential⟩
+    have hcriticalRows (branch : Branch label)
+        (hcrit : FiniteInequality.Recession.IsCritical
+          (branchDelta G label) direction branch) :
+        branchBase label branch ≤
+          dotProduct (branchDelta G label branch) criticalPotential := by
+      rcases branch with ⟨action, hgenuine⟩
+      cases action with
+      | inl edge =>
+          have hrow := hcriticalPotential edge ((hcritical edge).mp hcrit)
+          rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl]
+          linarith
+      | inr edge => exact (hfloor edge hgenuine hcrit).elim
+    obtain ⟨potential, hpotential⟩ := hreduction.mpr
+      ⟨criticalPotential, hcriticalRows⟩
+    exact ⟨potential,
+      (isLaxSection_iff_forall_branch G label potential).mpr hpotential⟩
+
 /-- **Nonexpansive gauge feasibility.**  Floors and strictly contracting rows
 cannot obstruct existence; the exact obstruction is a positive-shift cycle in
 the gauge-critical subgraph. -/
@@ -584,48 +599,17 @@ theorem exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_nonexpansiveGauge
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
         MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤ 0 := by
-  let direction : V → ℝ := gauge
-  have hrecession (branch : Branch label) :
-      0 ≤ dotProduct (branchDelta G label branch) direction := by
-    rw [dotProduct_branchDelta_direction]
+  rw [← exists_criticalAffinePotential_iff_gaugeCriticalCycles_nonpos gauge hgauge.1]
+  refine exists_isLaxSection_iff_exists_criticalAffinePotential_of_direction gauge gauge
+    (fun branch => ?_) (fun edge => ?_) (fun edge _ => ?_)
+  · rw [dotProduct_branchDelta_direction]
     cases branch.1 with
     | inl edge => exact sub_nonneg.mpr (hgauge.2 edge)
     | inr edge => exact (hgauge.1 _).le
-  have hreduction :=
-    FiniteInequality.Recession.exists_potential_iff_exists_critical_potential
-    (branchDelta G label) (branchBase label) direction hrecession
-  rw [← exists_criticalAffinePotential_iff_gaugeCriticalCycles_nonpos
-    gauge hgauge.1]
-  constructor
-  · rintro ⟨potential, hpotential⟩
-    refine ⟨potential, fun edge hcritical => ?_⟩
-    have hrow := (isLaxSection_iff_forall_branch G label potential).mp
-      hpotential ⟨Sum.inl edge, trivial⟩
-    rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl] at hrow
-    linarith
-  · rintro ⟨criticalPotential, hcriticalPotential⟩
-    have hcriticalRows (branch : Branch label)
-        (hcritical : FiniteInequality.Recession.IsCritical
-          (branchDelta G label) direction branch) :
-        branchBase label branch ≤
-          dotProduct (branchDelta G label branch) criticalPotential := by
-      rw [FiniteInequality.Recession.IsCritical,
-        dotProduct_branchDelta_direction] at hcritical
-      rcases branch with ⟨action, hgenuine⟩
-      cases action with
-      | inl edge =>
-          have hedge : (label edge).slope * gauge (G.source edge) =
-              gauge (G.target edge) := by linarith
-          have hrow := hcriticalPotential edge hedge
-          rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl]
-          linarith
-      | inr edge =>
-          have : gauge (G.target edge) = 0 := hcritical
-          exact (ne_of_gt (hgauge.1 _) this).elim
-    obtain ⟨potential, hpotential⟩ := hreduction.mpr
-      ⟨criticalPotential, hcriticalRows⟩
-    exact ⟨potential,
-      (isLaxSection_iff_forall_branch G label potential).mpr hpotential⟩
+  · rw [dotProduct_branchDelta_direction]
+    constructor <;> intro h <;> linarith
+  · rw [dotProduct_branchDelta_direction]
+    exact ne_of_gt (hgauge.1 _)
 
 /-- **Expansive gauge feasibility.**  With floors absent, the negative gauge
 is a recession direction and produces the same critical-cycle criterion. -/
@@ -638,50 +622,17 @@ theorem exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_expansiveGauge
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
         MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤ 0 := by
-  let direction : V → ℝ := fun vertex => -gauge vertex
-  have hrecession (branch : Branch label) :
-      0 ≤ dotProduct (branchDelta G label branch) direction := by
-    rw [dotProduct_branchDelta_direction]
+  rw [← exists_criticalAffinePotential_iff_gaugeCriticalCycles_nonpos gauge hgauge.1]
+  refine exists_isLaxSection_iff_exists_criticalAffinePotential_of_direction gauge
+    (fun vertex => -gauge vertex) (fun branch => ?_) (fun edge => ?_)
+    (fun edge hgenuine => absurd (hfloor edge) hgenuine)
+  · rw [dotProduct_branchDelta_direction]
     rcases branch with ⟨action, hgenuine⟩
     cases action with
-    | inl edge =>
-        dsimp [direction]
-        nlinarith [hgauge.2 edge]
+    | inl edge => nlinarith [hgauge.2 edge]
     | inr edge => exact (hgenuine (hfloor edge)).elim
-  have hreduction :=
-    FiniteInequality.Recession.exists_potential_iff_exists_critical_potential
-    (branchDelta G label) (branchBase label) direction hrecession
-  rw [← exists_criticalAffinePotential_iff_gaugeCriticalCycles_nonpos
-    gauge hgauge.1]
-  constructor
-  · rintro ⟨potential, hpotential⟩
-    refine ⟨potential, fun edge hcritical => ?_⟩
-    have hrow := (isLaxSection_iff_forall_branch G label potential).mp
-      hpotential ⟨Sum.inl edge, trivial⟩
-    rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl] at hrow
-    linarith
-  · rintro ⟨criticalPotential, hcriticalPotential⟩
-    have hcriticalRows (branch : Branch label)
-        (hcritical : FiniteInequality.Recession.IsCritical
-          (branchDelta G label) direction branch) :
-        branchBase label branch ≤
-          dotProduct (branchDelta G label branch) criticalPotential := by
-      rw [FiniteInequality.Recession.IsCritical,
-        dotProduct_branchDelta_direction] at hcritical
-      rcases branch with ⟨action, hgenuine⟩
-      cases action with
-      | inl edge =>
-          dsimp [direction] at hcritical
-          have hedge : (label edge).slope * gauge (G.source edge) =
-              gauge (G.target edge) := by linarith
-          have hrow := hcriticalPotential edge hedge
-          rw [branchBase, branchDelta, rowBase, dotProduct_rowDelta_inl]
-          linarith
-      | inr edge => exact (hgenuine (hfloor edge)).elim
-    obtain ⟨potential, hpotential⟩ := hreduction.mpr
-      ⟨criticalPotential, hcriticalRows⟩
-    exact ⟨potential,
-      (isLaxSection_iff_forall_branch G label potential).mpr hpotential⟩
+  · rw [dotProduct_branchDelta_direction]
+    constructor <;> intro h <;> linarith
 
 /-- Nonexpansive gauge feasibility is equivalently pre-fixedness of every
 normalized critical-cycle holonomy. -/
