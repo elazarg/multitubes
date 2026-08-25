@@ -326,35 +326,26 @@ theorem exists_residualClosedTrailAt_of_sharesEndpoint
   /- In each case pick the vertex of `used` that `unused` meets, then follow a residual
   closed trail there; when `unused` only enters that vertex, balance supplies a residual
   edge leaving it. -/
+  have key : ∀ vertex : V, walk.VertexSplit vertex →
+      (∃ edge ∈ residual, G.source edge = vertex) →
+      ∃ (vertex : V) (_split : walk.VertexSplit vertex) (inserted : G.Walk vertex vertex),
+        inserted.IsTrailWithin residual ∧ 0 < inserted.length := by
+    intro vertex hsplit houtgoing
+    obtain ⟨inserted, hinserted, hpositive⟩ :=
+      Walk.exists_nonempty_closedTrailWithin_of_exists_outgoing
+        (G := G) residual hresidualBalanced vertex houtgoing
+    exact ⟨vertex, hsplit, inserted, hinserted, hpositive⟩
   rcases hshares with hsourceSource | hsourceTarget | htargetSource | htargetTarget
-  · obtain ⟨inserted, hinserted, hpositive⟩ :=
-      Walk.exists_nonempty_closedTrailWithin_of_exists_outgoing
-        (G := G) residual hresidualBalanced (G.source used)
-        ⟨unused, hunusedResidual, hsourceSource.symm⟩
-    exact ⟨G.source used, walk.vertexSplitAtSource used hused, inserted, hinserted, hpositive⟩
-  · obtain ⟨outgoing, houtgoingResidual, hsource⟩ :=
-      IsBalancedEdgeSet.exists_outgoing_of_mem_of_target_eq
-        (G := G) residual hresidualBalanced unused hunusedResidual
-          (G.source used) hsourceTarget.symm
-    obtain ⟨inserted, hinserted, hpositive⟩ :=
-      Walk.exists_nonempty_closedTrailWithin_of_exists_outgoing
-        (G := G) residual hresidualBalanced (G.source used)
-        ⟨outgoing, houtgoingResidual, hsource⟩
-    exact ⟨G.source used, walk.vertexSplitAtSource used hused, inserted, hinserted, hpositive⟩
-  · obtain ⟨inserted, hinserted, hpositive⟩ :=
-      Walk.exists_nonempty_closedTrailWithin_of_exists_outgoing
-        (G := G) residual hresidualBalanced (G.target used)
-        ⟨unused, hunusedResidual, htargetSource.symm⟩
-    exact ⟨G.target used, walk.vertexSplitAtTarget used hused, inserted, hinserted, hpositive⟩
-  · obtain ⟨outgoing, houtgoingResidual, hsource⟩ :=
-      IsBalancedEdgeSet.exists_outgoing_of_mem_of_target_eq
-        (G := G) residual hresidualBalanced unused hunusedResidual
-          (G.target used) htargetTarget.symm
-    obtain ⟨inserted, hinserted, hpositive⟩ :=
-      Walk.exists_nonempty_closedTrailWithin_of_exists_outgoing
-        (G := G) residual hresidualBalanced (G.target used)
-        ⟨outgoing, houtgoingResidual, hsource⟩
-    exact ⟨G.target used, walk.vertexSplitAtTarget used hused, inserted, hinserted, hpositive⟩
+  · exact key (G.source used) (walk.vertexSplitAtSource used hused)
+      ⟨unused, hunusedResidual, hsourceSource.symm⟩
+  · exact key (G.source used) (walk.vertexSplitAtSource used hused)
+      (IsBalancedEdgeSet.exists_outgoing_of_mem_of_target_eq (G := G) residual
+        hresidualBalanced unused hunusedResidual (G.source used) hsourceTarget.symm)
+  · exact key (G.target used) (walk.vertexSplitAtTarget used hused)
+      ⟨unused, hunusedResidual, htargetSource.symm⟩
+  · exact key (G.target used) (walk.vertexSplitAtTarget used hused)
+      (IsBalancedEdgeSet.exists_outgoing_of_mem_of_target_eq (G := G) residual
+        hresidualBalanced unused hunusedResidual (G.target used) htargetTarget.symm)
 
 /-- A longest nonempty closed trail in a walk-connected balanced support uses every allowed
 distinguishable edge. -/

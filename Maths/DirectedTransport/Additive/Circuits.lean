@@ -140,29 +140,17 @@ private theorem sum_edgeMultiplicity_mul_signedDelta_eq_zero
     exact_mod_cast hbalance
   simp_rw [signedDelta_eq_signedGraph_incidence]
   simp only [mul_sub, Finset.sum_sub_distrib, mul_ite, mul_one, mul_zero]
-  have htarget :
-      (∑ edge, if vertex = (signedGraph G).target edge then
-          (cycle.edgeMultiplicity edge : ℝ) else 0) =
-        ∑ edge with (signedGraph G).target edge = vertex,
-          (cycle.edgeMultiplicity edge : ℝ) := by
+  /- Both endpoint maps turn the indicator sum into the corresponding filtered sum. -/
+  have hfilter : ∀ endpoint : SignedEdge E → V,
+      (∑ edge, if vertex = endpoint edge then (cycle.edgeMultiplicity edge : ℝ) else 0) =
+        ∑ edge with endpoint edge = vertex, (cycle.edgeMultiplicity edge : ℝ) := by
+    intro endpoint
     rw [Finset.sum_filter]
-    apply Finset.sum_congr rfl
-    intro edge _
-    by_cases h : vertex = (signedGraph G).target edge
+    refine Finset.sum_congr rfl fun edge _ => ?_
+    by_cases h : vertex = endpoint edge
     · rw [if_pos h, if_pos h.symm]
     · rw [if_neg h, if_neg (Ne.symm h)]
-  have hsource :
-      (∑ edge, if vertex = (signedGraph G).source edge then
-          (cycle.edgeMultiplicity edge : ℝ) else 0) =
-        ∑ edge with (signedGraph G).source edge = vertex,
-          (cycle.edgeMultiplicity edge : ℝ) := by
-    rw [Finset.sum_filter]
-    apply Finset.sum_congr rfl
-    intro edge _
-    by_cases h : vertex = (signedGraph G).source edge
-    · rw [if_pos h, if_pos h.symm]
-    · rw [if_neg h, if_neg (Ne.symm h)]
-  rw [htarget, hsource, hbalanceReal, sub_self]
+  rw [hfilter, hfilter, hbalanceReal, sub_self]
 
 /-- Every nonempty directed circuit in the doubled graph is a normalized
 signed-circulation certificate. -/

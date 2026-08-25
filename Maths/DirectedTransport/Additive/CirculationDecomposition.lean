@@ -434,42 +434,24 @@ theorem signedCircuitVector_eq_zero_of_immediateBacktrack
     (hbacktrack : IsImmediateSignedBacktrack cycle) :
     signedCircuitVector cycle = 0 := by
   funext candidate
+  /- The two orientations of the backtrack run the same argument against their own edge list. -/
   obtain ⟨edge, hedges | hedges⟩ := hbacktrack
-  · have hlength : cycle.length = 2 := by
+  all_goals
+    have hlength : cycle.length = 2 := by
       rw [← cycle.edges_length, hedges]
       simp
     by_cases hc : candidate = edge
     · subst candidate
       simp [signedCircuitVector, signedProjection, circuitCoefficient,
         cycle.edgeMultiplicity_eq_count, hedges, hlength]
-    · have hfalse : cycle.edgeMultiplicity (candidate, false) = 0 := by
-        apply Nat.eq_zero_of_not_pos
-        rw [cycle.edgeMultiplicity_pos_iff_mem_edges, hedges]
-        simp [Prod.ext_iff, hc]
-      have htrue : cycle.edgeMultiplicity (candidate, true) = 0 := by
-        apply Nat.eq_zero_of_not_pos
-        rw [cycle.edgeMultiplicity_pos_iff_mem_edges, hedges]
-        simp [Prod.ext_iff, hc]
-      simp only [signedCircuitVector, signedProjection, circuitCoefficient, hlength]
-      rw [hfalse, htrue]
-      simp
-  · have hlength : cycle.length = 2 := by
-      rw [← cycle.edges_length, hedges]
-      simp
-    by_cases hc : candidate = edge
-    · subst candidate
-      simp [signedCircuitVector, signedProjection, circuitCoefficient,
-        cycle.edgeMultiplicity_eq_count, hedges, hlength]
-    · have hfalse : cycle.edgeMultiplicity (candidate, false) = 0 := by
-        apply Nat.eq_zero_of_not_pos
-        rw [cycle.edgeMultiplicity_pos_iff_mem_edges, hedges]
-        simp [Prod.ext_iff, hc]
-      have htrue : cycle.edgeMultiplicity (candidate, true) = 0 := by
+    · have hzero : ∀ orientation : Bool,
+          cycle.edgeMultiplicity (candidate, orientation) = 0 := by
+        intro orientation
         apply Nat.eq_zero_of_not_pos
         rw [cycle.edgeMultiplicity_pos_iff_mem_edges, hedges]
         simp [Prod.ext_iff, hc]
       simp only [signedCircuitVector, signedProjection, circuitCoefficient, hlength]
-      rw [hfalse, htrue]
+      rw [hzero false, hzero true]
       simp
 
 /-- Every nonempty doubled-graph circuit projects into the concrete signed
