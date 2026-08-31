@@ -17,6 +17,7 @@ import Mathlib.Data.Finite.Prod
 import Mathlib.Data.Fintype.Order
 import Mathlib.Data.Set.Finite.List
 import Mathlib.Order.ConditionallyCompleteLattice.Basic
+import Mathlib.Tactic.Abel
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 
@@ -25,8 +26,8 @@ import Mathlib.Tactic.Ring
 
 A directed multigraph is represented by `Maths.EdgeGraph`, so parallel
 edges keep their identities, and its finite walks are endpoint-indexed typed
-walks.  Here every edge additionally carries a weight in a linearly ordered
-field `𝕜`, and the weight of a walk is the sum of the weights of its edges.
+walks.  Here every edge additionally carries a weight in an ordered additive
+commutative monoid `𝕜`, and the weight of a walk is the sum of its edge weights.
 
 A **potential** is a `𝕜`-valued function on vertices satisfying the edge
 increment inequality `φ (source e) + weight e ≤ φ (target e)`.  The central
@@ -77,8 +78,10 @@ component in question reaches the whole graph.
 ## Main results
 
 - `Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos` - the
-  duality, for finitely many edges, an arbitrary vertex type and arbitrary
-  linearly ordered field of weights
+  duality, for finitely many edges, an arbitrary vertex type and ordered
+  additive commutative monoid with cancellation of weights
+- `Maths.MaxPlusPotential.IsPotential.walkWeight_add_le` - the additive-monoid
+  walk propagation inequality
 - `Maths.MaxPlusPotential.isGreatest_incomingWeights` - with no positive closed
   walk, `maxIncomingWeight` is the greatest weight of a walk arriving at a vertex
 - `Maths.MaxPlusPotential.maxIncomingWeight_eq_sSup` - over `ℝ` it is therefore
@@ -99,16 +102,16 @@ reversed graph, and is the convention of `Maths.ChargedPathBudget`, which studie
 nonnegative charges and the *oscillation* of a bounded potential, not
 signed weights and cycles.
 
-The weights live in a linearly ordered field `𝕜`, matching the generality of
-`Maths.LinearProgramming`.  Multiplication is used only where the
-statements themselves involve it - rescaling an edge weighting by a constant, and
-the cycle *means* of the quantitative and matrix sections; the duality itself is
-purely additive.  The candidate potential is a `Finset.max'` over the weights of
-the walks arriving at a vertex without repeating an edge, of which `[Finite E]`
-leaves only finitely many.  Over `ℝ` this maximum is the supremum of the weights
-of *all* arriving walks (`maxIncomingWeight_eq_sSup`), which is the shape the
-conditionally complete lattice literature states; that identification is the only
-place where completeness is used, and it is a corollary, not a step.
+The weights in the qualitative core live in an ordered additive commutative
+monoid `𝕜`; cancellation is assumed only for the closed-walk duality.
+Multiplication is used only in the cycle *means* of the
+quantitative and matrix sections; the duality itself is purely additive.  The
+candidate potential is a `Finset.max'` over the weights of the walks arriving
+at a vertex without repeating an edge, of which `[Finite E]` leaves only
+finitely many.  Over `ℝ` this maximum is the supremum of the weights of *all*
+arriving walks (`maxIncomingWeight_eq_sSup`), which is the shape the
+conditionally complete lattice literature states; that identification is the
+only place where completeness is used, and it is a corollary, not a step.
 
 ## References
 
@@ -137,7 +140,7 @@ namespace MaxPlusPotential
 
 universe uV uE
 
-variable {𝕜 : Type*} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
+variable {𝕜 : Type*} [AddCommMonoid 𝕜] [LinearOrder 𝕜] [IsOrderedAddMonoid 𝕜]
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 
 /-! ### Weights of walks -/
@@ -147,53 +150,60 @@ edges, counted with multiplicity in chronological order. -/
 def walkWeight (weight : E → 𝕜) {start finish : V} (walk : G.Walk start finish) : 𝕜 :=
   (walk.edges.map weight).sum
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+omit [LinearOrder 𝕜] in
 @[simp] theorem walkWeight_nil (weight : E → 𝕜) (start : V) :
     walkWeight weight (EdgeGraph.Walk.nil : G.Walk start start) = 0 := rfl
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+omit [LinearOrder 𝕜] in
 @[simp] theorem walkWeight_concat (weight : E → 𝕜) {start finish : V}
     (walk : G.Walk start finish) (edge : E) (legal : G.source edge = finish) :
     walkWeight weight (walk.concat edge legal) = walkWeight weight walk + weight edge := by
   simp [walkWeight]
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+omit [LinearOrder 𝕜] in
 @[simp] theorem walkWeight_append (weight : E → 𝕜) {start middle finish : V}
     (first : G.Walk start middle) (second : G.Walk middle finish) :
     walkWeight weight (first.append second)
       = walkWeight weight first + walkWeight weight second := by
   simp [walkWeight]
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+section AddGroup
+
+variable {𝕜g : Type*} [AddCommGroup 𝕜g]
+
 /-- Negating a weighting negates every walk weight. -/
-@[simp] theorem walkWeight_neg (weight : E → 𝕜) {start finish : V}
+@[simp] theorem walkWeight_neg (weight : E → 𝕜g) {start finish : V}
     (walk : G.Walk start finish) :
     walkWeight (fun edge => -weight edge) walk = -walkWeight weight walk := by
   induction walk with
   | nil => simp
-  | concat walk edge legal ih => simp [ih]; ring
+  | concat walk edge legal ih => simp [ih, add_comm]
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+end AddGroup
+
+omit [LinearOrder 𝕜] [IsOrderedAddMonoid 𝕜] in
 @[simp] theorem walkWeight_castFinish (weight : E → 𝕜) {start finish finish' : V}
     (walk : G.Walk start finish) (hfinish : finish = finish') :
     walkWeight weight (walk.castFinish hfinish) = walkWeight weight walk := by
   simp [walkWeight]
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+section AddGroup
+
+variable {𝕜g : Type*} [AddCommGroup 𝕜g]
+
 /-- Shifting every edge weight by a constant shifts the weight of a walk by that
 constant times the length of the walk. -/
-theorem walkWeight_sub_const (weight : E → 𝕜) (lam : 𝕜) {start finish : V}
+theorem walkWeight_sub_const (weight : E → 𝕜g) (lam : 𝕜g) {start finish : V}
     (walk : G.Walk start finish) :
     walkWeight (fun e => weight e - lam) walk
-      = walkWeight weight walk - walk.length * lam := by
+      = walkWeight weight walk - walk.length • lam := by
   induction walk with
   | nil => simp
   | concat walkSoFar edge legal ih =>
-      simp only [walkWeight_concat, ih, EdgeGraph.Walk.length_concat, Nat.cast_add,
-        Nat.cast_one]
-      ring
+      simp only [walkWeight_concat, ih, EdgeGraph.Walk.length_concat, add_nsmul, one_nsmul]
+      abel
 
-/-! ### Potentials and their edge defects -/
+end AddGroup
 
 /-- A potential for an edge weighting: traversing an edge increases it by at
 least the weight of that edge.  Also called a feasible node potential, a feasible
@@ -203,20 +213,26 @@ convention is the same notion on the reversed graph. -/
 def IsPotential (G : EdgeGraph V E) (weight : E → 𝕜) (φ : V → 𝕜) : Prop :=
   ∀ e : E, φ (G.source e) + weight e ≤ φ (G.target e)
 
+/-! ### Potentials and their edge defects -/
+
+section AddGroup
+
+variable {𝕜g : Type*} [AddCommGroup 𝕜g] [LinearOrder 𝕜g] [IsOrderedAddMonoid 𝕜g]
+
 /-- The amount by which a candidate function fails the increment inequality at
 one edge.  Also called the edge slack, the reduced weight, or the residual of the
 edge; a potential is exactly a function whose defects are all nonpositive. -/
-def defect (G : EdgeGraph V E) (weight : E → 𝕜) (φ : V → 𝕜) (e : E) : 𝕜 :=
+def defect (G : EdgeGraph V E) (weight : E → 𝕜g) (φ : V → 𝕜g) (e : E) : 𝕜g :=
   φ (G.source e) + weight e - φ (G.target e)
 
-theorem isPotential_iff_forall_defect_nonpos (G : EdgeGraph V E) (weight : E → 𝕜)
-    (φ : V → 𝕜) : IsPotential G weight φ ↔ ∀ e : E, defect G weight φ e ≤ 0 := by
+theorem isPotential_iff_forall_defect_nonpos (G : EdgeGraph V E) (weight : E → 𝕜g)
+    (φ : V → 𝕜g) : IsPotential G weight φ ↔ ∀ e : E, defect G weight φ e ≤ 0 := by
   simp [IsPotential, defect]
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+omit [LinearOrder 𝕜g] [IsOrderedAddMonoid 𝕜g] in
 /-- Telescoping along a walk: the defects of the traversed edges sum to the
 weight of the walk corrected by the endpoint values. -/
-theorem sum_defect_eq (weight : E → 𝕜) (φ : V → 𝕜) {start finish : V}
+theorem sum_defect_eq (weight : E → 𝕜g) (φ : V → 𝕜g) {start finish : V}
     (walk : G.Walk start finish) :
     (walk.edges.map (defect G weight φ)).sum
       = walkWeight weight walk + φ start - φ finish := by
@@ -227,10 +243,10 @@ theorem sum_defect_eq (weight : E → 𝕜) (φ : V → 𝕜) {start finish : V}
       simp only [EdgeGraph.Walk.edges_concat, List.map_append, List.sum_append,
         List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, ih, defect,
         walkWeight_concat]
-      ring
+      abel
 
 /-- A potential dominates the weight of every walk between its endpoints. -/
-theorem IsPotential.walkWeight_le {weight : E → 𝕜} {φ : V → 𝕜}
+theorem IsPotential.walkWeight_le {weight : E → 𝕜g} {φ : V → 𝕜g}
     (hφ : IsPotential G weight φ) {start finish : V} (walk : G.Walk start finish) :
     walkWeight weight walk ≤ φ finish - φ start := by
   induction walk with
@@ -239,13 +255,52 @@ theorem IsPotential.walkWeight_le {weight : E → 𝕜} {φ : V → 𝕜}
       have hedge := hφ edge
       subst legal
       simp only [walkWeight_concat]
-      linarith
+      rw [le_sub_iff_add_le]
+      calc
+        walkWeight weight walkSoFar + weight edge + φ start ≤
+            (φ (G.source edge) - φ start) + weight edge + φ start :=
+          by
+            have h := add_le_add_right (add_le_add_right ih (weight edge)) (φ start)
+            simpa [add_assoc, add_comm, add_left_comm] using h
+        _ = φ (G.source edge) + weight edge := by abel
+        _ ≤ φ (G.target edge) := by simpa [add_comm] using hedge
 
+end AddGroup
+
+/-- A potential bounds a walk after adding the value at its starting vertex.
+This form only needs an additive monoid, unlike `IsPotential.walkWeight_le`. -/
+theorem IsPotential.walkWeight_add_le {weight : E → 𝕜} {φ : V → 𝕜}
+    (hφ : IsPotential G weight φ) {start finish : V} (walk : G.Walk start finish) :
+    walkWeight weight walk + φ start ≤ φ finish := by
+  induction walk with
+  | nil => simp
+  | concat walkSoFar edge legal ih =>
+      have hedge := hφ edge
+      subst legal
+      calc
+        walkWeight weight (walkSoFar.concat edge rfl) + φ start =
+            weight edge + (walkWeight weight walkSoFar + φ start) := by
+          simp only [walkWeight_concat]
+          ac_rfl
+        _ ≤ weight edge + φ (G.source edge) := by
+          have h := add_le_add_right ih (weight edge)
+          simpa [add_assoc, add_comm, add_left_comm] using h
+        _ ≤ φ (G.target edge) := by simpa [add_comm] using hedge
+
+section CancelOrder
+
+variable [IsOrderedCancelAddMonoid 𝕜]
+
+omit [IsOrderedAddMonoid 𝕜] in
 /-- Weak duality: a potential forbids closed walks of positive weight. -/
 theorem IsPotential.closedWalk_nonpos {weight : E → 𝕜} {φ : V → 𝕜}
     (hφ : IsPotential G weight φ) {vertex : V} (cycle : G.Walk vertex vertex) :
     walkWeight weight cycle ≤ 0 := by
-  simpa using hφ.walkWeight_le cycle
+  have h := hφ.walkWeight_add_le cycle
+  have h' : walkWeight weight cycle + φ vertex ≤ 0 + φ vertex := by simpa using h
+  exact le_of_add_le_add_right h'
+
+end CancelOrder
 
 /-! ### The duality
 
@@ -258,7 +313,7 @@ closed-subwalk extraction `Maths.EdgeGraph.Walk.exists_closedSubwalk_of_not_nodu
 def incomingWeights (G : EdgeGraph V E) (weight : E → 𝕜) (vertex : V) : Set 𝕜 :=
   {r | ∃ (start : V) (walk : G.Walk start vertex), walkWeight weight walk = r}
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+omit [LinearOrder 𝕜] in
 theorem zero_mem_incomingWeights (weight : E → 𝕜) (vertex : V) :
     (0 : 𝕜) ∈ incomingWeights G weight vertex :=
   ⟨vertex, .nil, rfl⟩
@@ -271,18 +326,18 @@ def nodupIncomingWeights (G : EdgeGraph V E) (weight : E → 𝕜) (vertex : V) 
   {r | ∃ (start : V) (walk : G.Walk start vertex),
     walk.edges.Nodup ∧ walkWeight weight walk = r}
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+omit [LinearOrder 𝕜] in
 theorem nodupIncomingWeights_subset (weight : E → 𝕜) (vertex : V) :
     nodupIncomingWeights G weight vertex ⊆ incomingWeights G weight vertex := by
   rintro r ⟨start, walk, -, rfl⟩
   exact ⟨start, walk, rfl⟩
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+omit [LinearOrder 𝕜] in
 theorem zero_mem_nodupIncomingWeights (weight : E → 𝕜) (vertex : V) :
     (0 : 𝕜) ∈ nodupIncomingWeights G weight vertex :=
   ⟨vertex, .nil, by simp, rfl⟩
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+omit [LinearOrder 𝕜] in
 /-- With finitely many edges there are only finitely many weights of walks that
 repeat no edge, since such a walk is determined by a duplicate-free list of
 edges. -/
@@ -327,8 +382,15 @@ theorem exists_nodup_visited_walkWeight_le {weight : E → 𝕜}
         obtain ⟨pruned, hpruned, hle⟩ := ih (before.append after) hshort
         refine ⟨pruned, hpruned, le_trans ?_ hle⟩
         have := hcyc vertex cycle
-        simp only [walkWeight_append]
-        linarith
+        calc
+          walkWeight weight walk = walkWeight weight before + walkWeight weight cycle
+              + walkWeight weight after := hweights
+          _ ≤ walkWeight weight before + walkWeight weight after := by
+            have h := add_le_add_right (add_le_add_right this (walkWeight weight before))
+                (walkWeight weight after)
+            simpa [add_assoc, add_comm, add_left_comm] using h
+          _ ≤ walkWeight weight (before.append after) := by
+            rw [walkWeight_append]
 
 section Finite
 
@@ -346,7 +408,7 @@ def maxIncomingWeight (G : EdgeGraph V E) (weight : E → 𝕜) (vertex : V) : �
     ((Set.Finite.toFinset_nonempty (finite_nodupIncomingWeights (G := G) weight vertex)).2
       ⟨0, zero_mem_nodupIncomingWeights (G := G) weight vertex⟩)
 
-omit [IsStrictOrderedRing 𝕜] in
+omit [IsOrderedAddMonoid 𝕜] in
 /-- The canonical potential is itself the weight of a walk arriving at the
 vertex without repeating an edge. -/
 theorem maxIncomingWeight_mem (weight : E → 𝕜) (vertex : V) :
@@ -354,7 +416,7 @@ theorem maxIncomingWeight_mem (weight : E → 𝕜) (vertex : V) :
   (Set.Finite.mem_toFinset (finite_nodupIncomingWeights (G := G) weight vertex)).1
     (Finset.max'_mem _ _)
 
-omit [IsStrictOrderedRing 𝕜] in
+omit [IsOrderedAddMonoid 𝕜] in
 /-- The canonical potential dominates the weight of every walk arriving at the
 vertex without repeating an edge. -/
 theorem le_maxIncomingWeight {weight : E → 𝕜} {vertex : V} {r : 𝕜}
@@ -371,7 +433,7 @@ theorem exists_bound_walkWeight (weight : E → 𝕜)
       walkWeight weight walk ≤ bound := by
   cases nonempty_fintype E
   obtain ⟨cap, hcap⟩ := Finite.exists_le weight
-  refine ⟨Fintype.card E * max cap 0, ?_⟩
+  refine ⟨Fintype.card E • max cap 0, ?_⟩
   intro start finish walk
   obtain ⟨pruned, hnd, hle⟩ :=
     exists_nodup_visited_walkWeight_le hcyc walk.length walk le_rfl
@@ -379,15 +441,14 @@ theorem exists_bound_walkWeight (weight : E → 𝕜)
   have hlen : pruned.length ≤ Fintype.card E := by
     have hcard := (pruned.edges_nodup_of_visited_nodup hnd).length_le_card
     rwa [EdgeGraph.Walk.edges_length] at hcard
-  have hsum : walkWeight weight pruned ≤ pruned.length * max cap 0 := by
+  have hsum : walkWeight weight pruned ≤ pruned.length • max cap 0 := by
     have hbound (x : 𝕜) (hx : x ∈ pruned.edges.map weight) : x ≤ max cap 0 := by
       rw [List.mem_map] at hx
       obtain ⟨e, _, rfl⟩ := hx
       exact (hcap e).trans (le_max_left _ _)
     have := List.sum_le_card_nsmul (pruned.edges.map weight) (max cap 0) hbound
-    simpa [walkWeight, EdgeGraph.Walk.edges_length, nsmul_eq_mul] using this
-  refine hsum.trans (mul_le_mul_of_nonneg_right ?_ (le_max_right _ _))
-  exact_mod_cast hlen
+    simpa [walkWeight, EdgeGraph.Walk.edges_length] using this
+  refine hsum.trans (nsmul_le_nsmul_left (le_max_right _ _) hlen)
 
 theorem bddAbove_incomingWeights {weight : E → 𝕜}
     (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)
@@ -436,26 +497,37 @@ theorem maxIncomingWeight_isPotential {weight : E → 𝕜}
   have hle := walkWeight_le_maxIncomingWeight hcyc (walk.concat e rfl)
   rwa [walkWeight_concat, hwalk] at hle
 
+section CancelOrder
+
+variable [IsOrderedCancelAddMonoid 𝕜]
+
+omit [IsOrderedAddMonoid 𝕜] in
 /-- **Tropical Farkas duality.**  Over finitely many edges a potential exists
 exactly when no closed walk has strictly positive weight; the vertex type and
-the linearly ordered field of weights are arbitrary.  The witness in the forward
-direction is `maxIncomingWeight`.  This is the Bellman--Ford criterion, and the
-mean-payoff feasibility criterion. -/
+the ordered cancellative additive commutative monoid of weights are arbitrary.
+The witness in the forward direction is `maxIncomingWeight`.  This is the
+Bellman--Ford criterion and the mean-payoff feasibility criterion. -/
 theorem exists_isPotential_iff_forall_closedWalk_nonpos (weight : E → 𝕜) :
     (∃ φ : V → 𝕜, IsPotential G weight φ) ↔
       ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0 :=
   ⟨fun ⟨_, hφ⟩ _ cycle => hφ.closedWalk_nonpos cycle,
     fun hcyc => ⟨maxIncomingWeight G weight, maxIncomingWeight_isPotential hcyc⟩⟩
 
+end CancelOrder
+
 end Finite
 
 /-! ### The quantitative obstruction -/
 
+section Quantitative
+
+variable {𝕜q : Type*} [Field 𝕜q] [LinearOrder 𝕜q] [IsStrictOrderedRing 𝕜q]
+
 /-- **Quantitative infeasibility.**  A closed walk of weight at least `γ` forces
 every candidate function to fail the increment inequality at one of its edges by
 at least `γ` divided by the length of that walk.  No finiteness is needed. -/
-theorem exists_edge_defect_ge {weight : E → 𝕜} (φ : V → 𝕜) {vertex : V}
-    (cycle : G.Walk vertex vertex) (hlen : 0 < cycle.length) {γ : 𝕜}
+theorem exists_edge_defect_ge {weight : E → 𝕜q} (φ : V → 𝕜q) {vertex : V}
+    (cycle : G.Walk vertex vertex) (hlen : 0 < cycle.length) {γ : 𝕜q}
     (hγ : γ ≤ walkWeight weight cycle) :
     ∃ e ∈ cycle.edges, γ / cycle.length ≤ defect G weight φ e := by
   by_contra hcon
@@ -471,18 +543,27 @@ theorem exists_edge_defect_ge {weight : E → 𝕜} (φ : V → 𝕜) {vertex : 
       = cycle.length * (γ / cycle.length) := by
     simp [List.map_const', List.sum_replicate, EdgeGraph.Walk.edges_length,
       nsmul_eq_mul]
-  have hpos : (0 : 𝕜) < cycle.length := by exact_mod_cast hlen
+  have hpos : (0 : 𝕜q) < cycle.length := by exact_mod_cast hlen
   rw [hconst, mul_div_cancel₀ _ hpos.ne'] at hstrict
   rw [sum_defect_eq] at hstrict
   simp only [add_sub_cancel_right] at hstrict
   linarith
 
+end Quantitative
+
+section CancelOrder
+
+variable [IsOrderedCancelAddMonoid 𝕜]
+
+omit [IsOrderedAddMonoid 𝕜] in
 /-- A closed walk of strictly positive weight excludes every potential. -/
 theorem not_exists_isPotential_of_pos_closedWalk {weight : E → 𝕜} {vertex : V}
     (cycle : G.Walk vertex vertex) (hpos : 0 < walkWeight weight cycle) :
     ¬ ∃ φ : V → 𝕜, IsPotential G weight φ := by
   rintro ⟨φ, hφ⟩
   exact absurd (hφ.closedWalk_nonpos cycle) (not_le.mpr hpos)
+
+end CancelOrder
 
 /-! ### The max-plus matrix reading -/
 
@@ -503,9 +584,13 @@ def matrixGraph (ι : Type uι) : EdgeGraph ι (ι × ι) where
 
 @[simp] theorem matrixGraph_target (e : ι × ι) : (matrixGraph ι).target e = e.1 := rfl
 
+section MatrixGroup
+
+variable {𝕜g : Type*} [AddCommGroup 𝕜g] [LinearOrder 𝕜g] [IsOrderedAddMonoid 𝕜g]
+
 /-- The edge weighting of `matrixGraph` induced by a max-plus matrix, that is, by
 a matrix of coefficients in the (max, +) semiring. -/
-def matrixWeight (A : ι → ι → 𝕜) : ι × ι → 𝕜 := fun e => A e.1 e.2
+def matrixWeight (A : ι → ι → 𝕜g) : ι × ι → 𝕜g := fun e => A e.1 e.2
 
 /-- A subeigenvector of a max-plus matrix for the value `lam`: the max-plus
 matrix-vector product `A ⊙ v`, whose `i`-th coordinate is the supremum over `j`
@@ -514,21 +599,35 @@ subinvariant vector, a subharmonic vector, or a super-solution of the max-plus
 eigenvalue equation.  The infimum of the values `lam` for which a subeigenvector
 exists is called the max cycle mean of `A`, the max-plus Perron root, or the
 tropical spectral radius. -/
-def IsSubeigenvector (A : ι → ι → 𝕜) (lam : 𝕜) (v : ι → 𝕜) : Prop :=
+def IsSubeigenvector (A : ι → ι → 𝕜g) (lam : 𝕜g) (v : ι → 𝕜g) : Prop :=
   ∀ i j : ι, A i j + v j ≤ lam + v i
 
-theorem isSubeigenvector_iff_isPotential (A : ι → ι → 𝕜) (lam : 𝕜) (v : ι → 𝕜) :
+theorem isSubeigenvector_iff_isPotential (A : ι → ι → 𝕜g) (lam : 𝕜g) (v : ι → 𝕜g) :
     IsSubeigenvector A lam v ↔
       IsPotential (matrixGraph ι) (fun e => matrixWeight A e - lam) v := by
   constructor
   · intro hv e
     have := hv e.1 e.2
     simp only [matrixGraph_source, matrixGraph_target, matrixWeight]
-    linarith
+    rw [show v e.2 + (A e.1 e.2 - lam) =
+      (A e.1 e.2 + v e.2) - lam by abel]
+    apply (sub_le_iff_le_add).2
+    simpa [add_assoc, add_comm, add_left_comm] using this
   · intro hv i j
     have := hv (i, j)
     simp only [matrixGraph_source, matrixGraph_target, matrixWeight] at this
-    linarith
+    have h' : (A i j + v j) - lam ≤ v i := by
+      calc
+        (A i j + v j) - lam = v j + (A i j - lam) := by abel
+        _ ≤ v i := this
+    have h := (sub_le_iff_le_add.mp h')
+    simpa [add_assoc, add_comm, add_left_comm] using h
+
+end MatrixGroup
+
+section MatrixQuantitative
+
+variable {𝕜q : Type*} [Field 𝕜q] [LinearOrder 𝕜q] [IsStrictOrderedRing 𝕜q]
 
 /-- **Max-plus subeigenvector criterion.**  A subeigenvector for `lam` exists
 exactly when every closed walk has weight at most `lam` times its length, that
@@ -536,14 +635,14 @@ is, when every cycle of the matrix has mean weight at most `lam`.  The set of
 admissible values of `lam` is thereby identified, so its infimum is the max cycle
 mean of `A`. -/
 theorem exists_subeigenvector_iff_forall_closedWalk_le [Finite ι]
-    (A : ι → ι → 𝕜) (lam : 𝕜) :
-    (∃ v : ι → 𝕜, IsSubeigenvector A lam v) ↔
+    (A : ι → ι → 𝕜q) (lam : 𝕜q) :
+    (∃ v : ι → 𝕜q, IsSubeigenvector A lam v) ↔
       ∀ (i : ι) (cycle : (matrixGraph ι).Walk i i),
         walkWeight (matrixWeight A) cycle ≤ cycle.length * lam := by
   have hshift (i : ι) (cycle : (matrixGraph ι).Walk i i) :
-      walkWeight (fun e => matrixWeight A e - lam) cycle
-        = walkWeight (matrixWeight A) cycle - cycle.length * lam :=
-    walkWeight_sub_const (matrixWeight A) lam cycle
+    walkWeight (fun e => matrixWeight A e - lam) cycle
+      = walkWeight (matrixWeight A) cycle - cycle.length * lam :=
+    by simpa [nsmul_eq_mul] using walkWeight_sub_const (matrixWeight A) lam cycle
   constructor
   · rintro ⟨v, hv⟩ i cycle
     have hpot := (isSubeigenvector_iff_isPotential A lam v).1 hv
@@ -561,6 +660,8 @@ theorem exists_subeigenvector_iff_forall_closedWalk_le [Finite ι]
           rw [hshift i cycle]
           linarith)
     exact ⟨v, (isSubeigenvector_iff_isPotential A lam v).2 hv⟩
+
+end MatrixQuantitative
 
 end Matrix
 

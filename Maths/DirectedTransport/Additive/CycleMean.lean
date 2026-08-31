@@ -201,7 +201,7 @@ theorem stepValue_sub_const [Finite E]
   refine le_antisymm ?_ ?_
   · obtain ⟨start, walk, hlen, hwt⟩ :=
       exists_walk_walkWeight_eq_stepValue hin (fun e => weight e - lam) count vertex
-    rw [← hwt, walkWeight_sub_const, hlen]
+    rw [← hwt, walkWeight_sub_const, nsmul_eq_mul, hlen]
     have := le_stepValue (G := G) (weight := weight) (count := count) (vertex := vertex)
       ⟨start, walk, hlen, rfl⟩
     linarith
@@ -209,7 +209,7 @@ theorem stepValue_sub_const [Finite E]
       exists_walk_walkWeight_eq_stepValue hin weight count vertex
     have hmem := le_stepValue (G := G) (weight := fun e => weight e - lam) (count := count)
       (vertex := vertex) ⟨start, walk, hlen, rfl⟩
-    rw [walkWeight_sub_const, hlen, hwt] at hmem
+    rw [walkWeight_sub_const, nsmul_eq_mul, hlen, hwt] at hmem
     linarith
 
 omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
@@ -289,10 +289,10 @@ theorem exists_le_stepValue_sub [Fintype V] [Finite E]
   set shifted : E → 𝕜 := fun e => weight e - lam with hshifted
   have hnonpos : ∀ (v : V) (cycle : G.Walk v v), walkWeight shifted cycle ≤ 0 := by
     intro v cycle
-    rw [hshifted, walkWeight_sub_const]
+    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul]
     linarith [hcyc v cycle]
   have hbestZero : walkWeight shifted best = 0 := by
-    rw [hshifted, walkWeight_sub_const, hattained]
+    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul, hattained]
     ring
   -- the greatest weight of a walk arriving at the base of the attaining cycle
   have hgreatest := isGreatest_incomingWeights (G := G) (weight := shifted) hnonpos base

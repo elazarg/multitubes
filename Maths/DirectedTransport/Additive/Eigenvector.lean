@@ -371,10 +371,10 @@ theorem exists_isEigenvector_of_maximizing_cycle [Fintype ι] [Nonempty ι] (A :
   have hlenPos : (0 : 𝕜) < best.length := by exact_mod_cast hpos
   have hcyc : ∀ (i : ι) (cycle : (matrixGraph ι).Walk i i), walkWeight shifted cycle ≤ 0 := by
     intro i cycle
-    rw [hshifted, walkWeight_sub_const]
+    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul]
     linarith [hbest i cycle]
   have hzero : walkWeight shifted best = 0 := by
-    rw [hshifted, walkWeight_sub_const, hlam]
+    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul, hlam]
     field_simp
     ring
   have hreach := nonempty_walk_matrixGraph (ι := ι) base

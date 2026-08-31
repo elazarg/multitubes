@@ -234,7 +234,8 @@ theorem walkWeight_unitSlopeShift_relax (label : E → Label) (lam : ℝ) (base 
     (cycle : (unitSlopeGraph G label).Walk base base) :
     MaxPlusPotential.walkWeight (unitSlopeShift fun e => Label.relax lam (label e)) cycle
       = MaxPlusPotential.walkWeight (unitSlopeShift label) cycle - cycle.length * lam := by
-  rw [← MaxPlusPotential.walkWeight_sub_const (unitSlopeShift label) lam cycle]
+  rw [← nsmul_eq_mul,
+    ← MaxPlusPotential.walkWeight_sub_const (unitSlopeShift label) lam cycle]
   congr 1
   funext edge
   simp [unitSlopeShift, Label.relax, Label.recenter]

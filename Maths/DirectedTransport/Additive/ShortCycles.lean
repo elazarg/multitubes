@@ -136,12 +136,12 @@ theorem closedWalk_le_length_mul_of_short [Fintype V]
   have hnonpos := closedWalk_nonpos_of_short
     (G := G) (fun edge => weight edge - level) (by
       intro vertex cycle hpos hcard
-      rw [walkWeight_sub_const]
+      rw [walkWeight_sub_const, nsmul_eq_mul]
       have hbound := hshort vertex cycle hpos hcard
       linarith)
   intro vertex cycle
   have hbound := hnonpos vertex cycle
-  rw [walkWeight_sub_const] at hbound
+  rw [walkWeight_sub_const, nsmul_eq_mul] at hbound
   linarith
 
 /-- **Short-cycle exact threshold.**  On a finite graph, every obstruction to

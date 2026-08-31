@@ -359,10 +359,10 @@ theorem isEigenvector_maxRootedWeight_of_maximizing_cycle (G : EdgeGraph V E)
   have hlenPos : (0 : ℝ) < best.length := by exact_mod_cast hpos
   have hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight shifted cycle ≤ 0 := by
     intro vertex cycle
-    rw [hshifted, walkWeight_sub_const]
+    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul]
     linarith [hbest vertex cycle]
   have hzero : walkWeight shifted best = 0 := by
-    rw [hshifted, walkWeight_sub_const, hlam]
+    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul, hlam]
     field_simp
     ring
   have hvalue (e : E) (z : ℝ) : (label e).apply z = weight e + z := by

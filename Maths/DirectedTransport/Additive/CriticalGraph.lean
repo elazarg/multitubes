@@ -378,7 +378,7 @@ theorem defect_eq_zero_of_isCriticalEdge {weight : E → 𝕜} {lam : 𝕜} {φ 
     defect G (fun e => weight e - lam) φ edge = 0 := by
   obtain ⟨vertex, cycle, -, hmean, hmem⟩ := hedge
   have hzero : walkWeight (fun e => weight e - lam) cycle = 0 := by
-    rw [walkWeight_sub_const, hmean, sub_self]
+    rw [walkWeight_sub_const, nsmul_eq_mul, hmean, sub_self]
   have hsum : (cycle.edges.map (defect G (fun e => weight e - lam) φ)).sum = 0 := by
     rw [sum_defect_eq, hzero]
     ring
@@ -415,7 +415,7 @@ theorem walkWeight_criticalGraph_eq [Finite E] {weight : E → 𝕜} {lam : 𝕜
     walkWeight (criticalWeight G weight lam) cycle = cycle.length * lam := by
   have hshift : ∀ (v : V) (c : G.Walk v v), walkWeight (fun e => weight e - lam) c ≤ 0 := by
     intro v c
-    rw [walkWeight_sub_const]
+    rw [walkWeight_sub_const, nsmul_eq_mul]
     linarith [hcyc v c]
   obtain ⟨φ, hφ⟩ :=
     (exists_isPotential_iff_forall_closedWalk_nonpos (G := G) (fun e => weight e - lam)).2 hshift
@@ -427,7 +427,8 @@ theorem walkWeight_criticalGraph_eq [Finite E] {weight : E → 𝕜} {lam : 𝕜
     exact defect_eq_zero_of_isCriticalEdge hφ hcrit
   have hzero : walkWeight (fun e => weight e - lam) (liftCriticalWalk cycle) = 0 := by
     rw [walkWeight_eq_of_forall_defect_eq_zero _ htight, sub_self]
-  rw [walkWeight_sub_const, length_liftCriticalWalk, walkWeight_liftCriticalWalk] at hzero
+  rw [walkWeight_sub_const, nsmul_eq_mul, length_liftCriticalWalk,
+    walkWeight_liftCriticalWalk] at hzero
   linarith
 
 /-- Every vertex carrying a nonempty closed walk of the critical subgraph is a critical vertex of
@@ -524,11 +525,11 @@ theorem isGraphEigenvector_maxRootedWeight [Finite E] {weight : E → 𝕜} {lam
     IsGraphEigenvector G weight lam (maxRootedWeight G (fun e => weight e - lam) base) := by
   have hshift : ∀ (v : V) (c : G.Walk v v), walkWeight (fun e => weight e - lam) c ≤ 0 := by
     intro v c
-    rw [walkWeight_sub_const]
+    rw [walkWeight_sub_const, nsmul_eq_mul]
     linarith [hcyc v c]
   obtain ⟨best, hpos, hmean⟩ := hbase
   have hzero : walkWeight (fun e => weight e - lam) best = 0 := by
-    rw [walkWeight_sub_const, hmean, sub_self]
+    rw [walkWeight_sub_const, nsmul_eq_mul, hmean, sub_self]
   refine ⟨maxRootedWeight_isPotential hshift hreach, fun vertex => ?_⟩
   obtain ⟨e, htarget, htight⟩ :=
     exists_tight_edge_maxRootedWeight hshift hreach best hpos hzero vertex
@@ -582,7 +583,7 @@ theorem exists_isCriticalVertex_walk_tight [Fintype V] {weight : E → 𝕜} {la
     linarith
   refine ⟨base, after, ⟨cycle, hpos, ?_⟩, fun e hmem => hall e (hsub e ?_)⟩
   · have := walkWeight_eq_of_forall_defect_eq_zero cycle htightCycle
-    rw [walkWeight_sub_const, sub_self] at this
+    rw [walkWeight_sub_const, nsmul_eq_mul, sub_self] at this
     linarith
   · exact List.mem_append_right _ hmem
 
@@ -679,7 +680,7 @@ theorem maxRootedWeight_add_maxRootedWeight_eq_zero {weight : E → 𝕜} {lam :
       + maxRootedWeight G (fun e => weight e - lam) base' base = 0 := by
   have hshift : ∀ (v : V) (c : G.Walk v v), walkWeight (fun e => weight e - lam) c ≤ 0 := by
     intro v c
-    rw [walkWeight_sub_const]
+    rw [walkWeight_sub_const, nsmul_eq_mul]
     linarith [hcyc v c]
   obtain ⟨⟨forward⟩, ⟨backward⟩⟩ := toCriticalClass_eq_iff.1 hclass
   set first := liftCriticalWalk forward with hfirst
@@ -694,8 +695,9 @@ theorem maxRootedWeight_add_maxRootedWeight_eq_zero {weight : E → 𝕜} {lam :
     simp [walkWeight, hedges]
   have hzero : walkWeight (fun e => weight e - lam) (liftCriticalWalk (forward.append backward))
       = 0 := by
-    rw [walkWeight_sub_const, walkWeight_liftCriticalWalk, length_liftCriticalWalk,
-      walkWeight_criticalGraph_eq hcyc (forward.append backward), sub_self]
+    rw [walkWeight_sub_const, nsmul_eq_mul, walkWeight_liftCriticalWalk,
+      length_liftCriticalWalk, walkWeight_criticalGraph_eq hcyc (forward.append backward),
+      sub_self]
   have hle := add_maxRootedWeight_le_maxRootedWeight hshift (G := G)
     (weight := fun e => weight e - lam) ⟨first⟩ ⟨second⟩
   rw [maxRootedWeight_self hshift] at hle
@@ -720,7 +722,7 @@ theorem toCriticalClass_eq_of_maxRootedWeight_add_eq_zero {weight : E → 𝕜}
     toCriticalClass G weight lam base = toCriticalClass G weight lam base' := by
   have hshift : ∀ (v : V) (c : G.Walk v v), walkWeight (fun e => weight e - lam) c ≤ 0 := by
     intro v c
-    rw [walkWeight_sub_const]
+    rw [walkWeight_sub_const, nsmul_eq_mul]
     linarith [hcyc v c]
   obtain ⟨first, -, hfirst⟩ := maxRootedWeight_mem hshift hforward
   obtain ⟨second, -, hsecond⟩ := maxRootedWeight_mem hshift hbackward
@@ -729,7 +731,7 @@ theorem toCriticalClass_eq_of_maxRootedWeight_add_eq_zero {weight : E → 𝕜}
     exact hzero
   have hmean : walkWeight weight (first.append second)
       = (first.append second).length * lam := by
-    rw [walkWeight_sub_const] at hcycle
+    rw [walkWeight_sub_const, nsmul_eq_mul] at hcycle
     linarith
   rcases Nat.eq_zero_or_pos (first.append second).length with hlen | hpos
   · rw [EdgeGraph.Walk.length_append] at hlen
@@ -759,7 +761,7 @@ theorem maxRootedWeight_eq_add_of_toCriticalClass_eq {weight : E → 𝕜} {lam 
         + maxRootedWeight G (fun e => weight e - lam) base vertex := by
   have hshift : ∀ (v : V) (c : G.Walk v v), walkWeight (fun e => weight e - lam) c ≤ 0 := by
     intro v c
-    rw [walkWeight_sub_const]
+    rw [walkWeight_sub_const, nsmul_eq_mul]
     linarith [hcyc v c]
   obtain ⟨⟨forward⟩, ⟨backward⟩⟩ := toCriticalClass_eq_iff.1 hclass
   have hforward : Nonempty (G.Walk base base') := ⟨liftCriticalWalk forward⟩
@@ -784,7 +786,7 @@ theorem add_maxRootedWeight_eq_of_toCriticalClass_eq {weight : E → 𝕜} {lam 
       walkWeight weight cycle ≤ cycle.length * lam := by
     intro v c
     have := hφ.closedWalk_nonpos v c
-    rw [walkWeight_sub_const] at this
+    rw [walkWeight_sub_const, nsmul_eq_mul] at this
     linarith
   obtain ⟨⟨forward⟩, ⟨backward⟩⟩ := toCriticalClass_eq_iff.1 hclass
   have hfrom := add_maxRootedWeight_le hφ (weight := weight) ⟨liftCriticalWalk backward⟩
@@ -807,7 +809,7 @@ theorem isGreatest_criticalClassColumns [Fintype V] {weight : E → 𝕜} {lam :
   have hcyc : ∀ (v : V) (cycle : G.Walk v v), walkWeight weight cycle ≤ cycle.length * lam := by
     intro v c
     have := hφ.closedWalk_nonpos v c
-    rw [walkWeight_sub_const] at this
+    rw [walkWeight_sub_const, nsmul_eq_mul] at this
     linarith
   obtain ⟨⟨base, hbase, hreachBase, hvalue⟩, -⟩ := isGreatest_criticalColumns hφ vertex
   obtain ⟨root, hmem, hclass⟩ := hreps base hbase
@@ -862,7 +864,7 @@ theorem not_isGreatest_criticalColumns_of_forall_toCriticalClass_ne {weight : E 
   intro hgen
   have hshift : ∀ (v : V) (cycle : G.Walk v v), walkWeight (fun e => weight e - lam) cycle ≤ 0 := by
     intro v cycle
-    rw [walkWeight_sub_const]
+    rw [walkWeight_sub_const, nsmul_eq_mul]
     linarith [hcyc v cycle]
   obtain ⟨⟨root, hmem, hrootBase, hvalue⟩, -⟩ := hgen base
   rw [maxRootedWeight_self hshift] at hvalue

@@ -102,7 +102,7 @@ theorem worstDirectedResidualAtMost_iff_closedWalk_le
   intro vertex
   apply forall_congr'
   intro cycle
-  rw [MaxPlusPotential.walkWeight_sub_const]
+  rw [MaxPlusPotential.walkWeight_sub_const, nsmul_eq_mul]
   constructor <;> intro h <;> linarith
 
 /-! ## Symmetric signed-circulation threshold -/

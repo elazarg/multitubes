@@ -736,7 +736,7 @@ theorem exists_isLeast_eigenvalues_of_translation [Fintype V] [DecidableEq V] [F
       simp only
       linarith
     have hcycle := hpot.closedWalk_nonpos best
-    rw [walkWeight_sub_const] at hcycle
+    rw [walkWeight_sub_const, nsmul_eq_mul] at hcycle
     rw [div_le_iff₀ hlenPos]
     linarith
   exact ⟨base, best, hpos, hleast,

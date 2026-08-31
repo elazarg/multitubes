@@ -41,10 +41,10 @@ On top of that generic layer the library develops structural extensions and spec
 - **exact** (`Exact.lean`, `SCC.lean`, `NormalForms.lean`, `PotentialRigidity.lean`) - equality of
   forward path maps, without assuming labels form a group; strongly connected and rooted-path
   normal forms, and rigidity of the resulting potentials;
-- **additive** (`Additive/`) - additive potentials over a linearly ordered field, cycle sums and
-  circulation duality, decomposition of feasibility over strongly connected components, and the
-  max-plus spectral theory: Karp's cycle mean formula and existence of an eigenvector whose
-  eigenvalue is the maximum cycle mean;
+- **additive** (`Additive/`) - finite-edge potential feasibility over ordered cancellative
+  additive commutative monoids, cycle sums and circulation duality, decomposition over strongly
+  connected components, and, over ordered fields, the max-plus spectral theory: Karp's cycle
+  mean formula and an eigenvector whose eigenvalue is the maximum cycle mean;
 - **finite-inequality** (`FiniteInequality/`) - Farkas-style certificates for finite systems;
 - **join-semidirect** (`JoinSemidirect.lean`) - labels `(floor, action)` acting by
   `x ↦ floor ⊔ action • x`, composing as a semidirect product;
@@ -92,10 +92,10 @@ lake build
 ```
 
 **Status.** A rebuild from scratch (with `.lake/build` removed) compiles all library modules with
-zero errors and zero warnings. A kernel-level audit of the 2453 library declarations reports
+zero errors and zero warnings. A kernel-level audit of the 2454 library declarations reports
 none depending on `sorryAx`, and the only axioms used across the library are `propext`,
 `Classical.choice`, and `Quot.sound` - the same three mathlib itself rests on. Every one of the
-809 names promised by a `## Main ...` docstring section resolves against the compiled
+810 names promised by a `## Main ...` docstring section resolves against the compiled
 environment. `scripts/check.sh` runs all of this.
 
 Complete here means building and sorry-free; it does not mean finished as a mathlib
