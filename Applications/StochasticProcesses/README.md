@@ -1,16 +1,10 @@
 # Stochastic processes and decision models
 
-This domain studies the contravariant action of deterministic maps and Markov kernels on scalar
-observables:
+This client treats a probability kernel as a contravariant transport of
+nonnegative extended-real observables. Harmonic observables are exact
+sections, while superharmonic and subharmonic observables are lax and oplax
+sections. The one-loop specialization proves the corresponding upper and
+lower bounds for every finite iterate of the kernel.
 
-```text
-K^* f (s) := E[f(Y) | Y is distributed according to K(s)].
-```
-
-Exact transport describes harmonic or martingale-compatible observables. The two inequality
-directions describe supermartingale and submartingale bounds; function-lattice completion also
-raises the question of when finite piecewise-affine representations are preserved by Bellman
-updates.
-
-Probability spaces, measurability, integrability, conditional expectation, policies, and optimality
-remain domain-specific.
+The expectation is an `ℝ≥0∞` weighted sum, so the client does not impose
+unstated finiteness or integrability assumptions.
