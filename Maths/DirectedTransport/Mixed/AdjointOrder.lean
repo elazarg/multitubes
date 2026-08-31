@@ -25,6 +25,10 @@ relation-parametric theorem has a compact ordered form.
   ordered reduction under edgewise Galois connections.
 * `Maths.Transport.monotone_laxification_of_galoisConnection` - monotonicity
   of the transformed transport from the minimal remaining edge hypothesis.
+* `Maths.Transport.not_exists_galoisConnection_left_of_witnesses` - a family
+  of lower witnesses can rule out a left order adjoint.
+* `Maths.Transport.not_exists_galoisConnection_right_of_witnesses` - a family
+  of upper witnesses can rule out a right order adjoint.
 
 ## Tags
 
@@ -35,10 +39,11 @@ directed transport, mixed polarity, adjoint, residual, Galois connection, order
 
 namespace Maths
 
-universe uV uE uF
+universe uV uE uF uα uβ uι
 
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 variable {Fiber : V → Type uF}
+variable {α : Type uα} {β : Type uβ} {ι : Type uι}
 
 namespace Transport
 
@@ -47,6 +52,36 @@ variable {mode : E → EdgeMode}
 variable {residual : ∀ edge : LaxificationReverseEdge mode,
   Fiber (G.target edge.1) → Fiber (G.source edge.1)}
 variable {family : ∀ vertex : V, Fiber vertex}
+
+/-- A family of lower witnesses can obstruct a left order adjoint.  Every
+witness lies in the lower level set of `f` at `b`, while no common lower bound
+of the witnesses lies in that level set. -/
+theorem not_exists_galoisConnection_left_of_witnesses
+    [Preorder α] [Preorder β]
+    (f : α → β) (b : β) (w : ι → α)
+    (hwitness : ∀ i, b ≤ f (w i))
+    (hinfeasible : ∀ x, (∀ i, x ≤ w i) → ¬ b ≤ f x) :
+    ¬ ∃ g : β → α, GaloisConnection g f := by
+  rintro ⟨g, hadjoint⟩
+  apply hinfeasible (g b)
+  · intro i
+    exact (hadjoint b (w i)).mpr (hwitness i)
+  · exact (hadjoint b (g b)).mp le_rfl
+
+/-- A family of upper witnesses can obstruct a right order adjoint.  Every
+witness lies in the upper level set of `f` at `b`, while no common upper bound
+of the witnesses lies in that level set. -/
+theorem not_exists_galoisConnection_right_of_witnesses
+    [Preorder α] [Preorder β]
+    (f : α → β) (b : β) (w : ι → α)
+    (hwitness : ∀ i, f (w i) ≤ b)
+    (hinfeasible : ∀ x, (∀ i, w i ≤ x) → ¬ f x ≤ b) :
+    ¬ ∃ g : β → α, GaloisConnection f g := by
+  rintro ⟨g, hadjoint⟩
+  apply hinfeasible (g b)
+  · intro i
+    exact (hadjoint (w i) b).mp (hwitness i)
+  · exact (hadjoint (g b) b).mpr le_rfl
 
 /-- In preordered fibers, a mixed section becomes a lax section on the
 laxification graph.  This direction does not require antisymmetry. -/

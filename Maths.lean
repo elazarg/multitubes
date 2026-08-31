@@ -21,6 +21,7 @@ public import Maths.Recursion.TransferSummary
 public import Maths.Recursion.AffineFixedPoint
 public import Maths.Recursion.LoynesConstruction
 public import Maths.Recursion.TwoSidedReflection
+public import Maths.Recursion.ClampedAffineFixedPoint
 public import Maths.Recursion.InverseCoordinate
 public import Maths.Recursion.CyclicMaxAffine
 

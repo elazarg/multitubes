@@ -32,6 +32,8 @@ circulations, and application-specific semantics belong in files that import thi
 
 * `Maths.EdgeGraph`: a directed multigraph as vertex and edge types with `source`
   and `target` maps.
+* `Maths.EdgeGraph.reverse`: the graph obtained by reversing every edge while
+  retaining its identity.
 * `Maths.EdgeGraph.Walk`: an endpoint-indexed finite walk.
 * `Maths.EdgeGraph.Walk.edges`, `length`, `visited`, `edgeMultiplicity`: the
   basic measurements of a walk.
@@ -55,6 +57,8 @@ circulations, and application-specific semantics belong in files that import thi
 * `Maths.EdgeGraph.Walk.exists_closedSubwalk_of_not_nodup`: a walk revisiting a
   vertex contains a nonempty closed subwalk.
 * `Maths.EdgeGraph.Walk.VertexSplit.length_splice`: splicing adds lengths.
+* `Maths.EdgeGraph.reverse_reverse`: reversing every edge twice recovers the
+  original graph.
 
 ## Tags
 
@@ -78,6 +82,23 @@ structure EdgeGraph (V : Type uV) (E : Type uE) where
 namespace EdgeGraph
 
 variable {V : Type uV} {E : Type uE} (G : EdgeGraph V E)
+
+/-- Reverse every edge while retaining its identity. -/
+def reverse : EdgeGraph V E where
+  source := G.target
+  target := G.source
+
+/-- The source of an edge in the reversed graph is its original target. -/
+@[simp] theorem reverse_source (edge : E) : G.reverse.source edge = G.target edge :=
+  rfl
+
+/-- The target of an edge in the reversed graph is its original source. -/
+@[simp] theorem reverse_target (edge : E) : G.reverse.target edge = G.source edge :=
+  rfl
+
+/-- Reversing every edge twice recovers the original graph. -/
+@[simp] theorem reverse_reverse : G.reverse.reverse = G :=
+  rfl
 
 /-- A finite directed walk, retaining the list of edge identities. -/
 inductive Walk (start : V) : V → Type (max uV uE)

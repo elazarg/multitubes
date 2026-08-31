@@ -87,7 +87,7 @@ It is likely a good fit if you need to formalize one of the following.
 | Mixed constraints reducible through residuals or adjoints | [`Mixed.AdjointOrder`](Maths/DirectedTransport/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/DirectedTransport/Mixed/Closure.lean) |
 | Finite systems of inequalities and infeasibility certificates | [`Maths.DirectedTransport.FiniteInequality`](Maths/DirectedTransport/FiniteInequality/Basic.lean) |
 | Maps of the form `x ↦ max a (b + c * x)` | [`Maths.DirectedTransport.MaxAffine`](Maths/DirectedTransport/MaxAffine/Basic.lean) |
-| Affine, max-affine, Loynes, or two-sided reflected recurrences | [`Maths.Recursion`](Maths/Recursion/TransferSummary.lean) |
+| Affine, max-affine, Loynes, or two-sided clamped recurrences | [`Maths.Recursion`](Maths/Recursion/TransferSummary.lean) and [`ClampedAffineFixedPoint`](Maths/Recursion/ClampedAffineFixedPoint.lean) |
 | Fourier–Motzkin elimination, Farkas alternatives, or LP duality | [`Maths.LinearProgramming`](Maths/LinearProgramming/FourierMotzkin.lean) |
 
 This is not intended to replace a general-purpose graph-algorithms package: in particular, it is
@@ -253,7 +253,7 @@ mathlib; directed transport consumes them.
 | Directory | Contents |
 | --- | --- |
 | `Maths/Graph/` | Directed multigraphs, typed walks, circulations, Eulerian trails, infinite walks, zero-charge lassos, and charged relations |
-| `Maths/Recursion/` | Affine and max-affine transfer summaries, fixed points, and one-sided and two-sided reflections |
+| `Maths/Recursion/` | Affine, max-affine, and clamped-affine summaries, fixed points, and one-sided and two-sided reflections |
 | `Maths/LinearProgramming/` | Fourier–Motzkin elimination, alternatives, standard-form LP, sparsity, and duality |
 | `Maths/Algebra/` | The join-semidirect label algebra |
 | `Maths/DirectedTransport/` | Generic, exact, lax, oplax, mixed, additive, finite-inequality, gain-graph, and max-affine transport |
