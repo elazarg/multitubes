@@ -42,6 +42,7 @@ public import Maths.DirectedTransport.Category
 public import Maths.DirectedTransport.CategoricalRetracts
 public import Maths.DirectedTransport.CategoricalRetractAdapter
 public import Maths.DirectedTransport.Closure
+public import Maths.DirectedTransport.Mixed.Closure
 public import Maths.DirectedTransport.Exact
 public import Maths.DirectedTransport.SCC
 public import Maths.DirectedTransport.NormalForms
