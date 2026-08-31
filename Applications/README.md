@@ -11,9 +11,9 @@ lattices, adjoints, or max-affine maps. Its statements are independent of any pa
 and belong in the library.
 
 An **application** supplies domain semantics and domain-specific mathematics. It may use the
-library's specializations and can live in a separate client project. Max-affine
-transport is a specialization, not an application: queueing, stopping, and control are domains
-that can use it.
+library's specializations and can live in an independent Lake package under its dossier or in a
+separate client project. Max-affine transport is a specialization, not an application: queueing,
+stopping, and control are domains that can use it.
 
 ## Domains
 

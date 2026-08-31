@@ -96,10 +96,10 @@ circulations, decomposition, and the certificates used by the transport theory. 
 core theory is discrete; continuous-time or analytic structure must be supplied by an
 application-specific layer.
 
-The [`Applications/`](Applications/) dossiers describe possible domain interpretations and the
-domain-specific mathematics built on the reusable transport specializations. Max-plus and
-max-affine transport belong to the library independently of the queueing, stopping, or control
-models that may use them.
+The [`Applications/`](Applications/) directory contains domain interpretations and downstream
+client packages built on the reusable transport specializations. Max-plus and max-affine
+transport belong to the library independently of the queueing, stopping, or control models that
+may use them.
 
 ## How general is the infrastructure?
 
@@ -262,8 +262,9 @@ The umbrella module [`Maths.lean`](Maths.lean) imports everything. Each group is
 Lake target: `MathsGraph`, `MathsRecursion`, `MathsLinearProgramming`, `MathsAlgebra`, and
 `MathsDirectedTransport`.
 
-[`Applications/`](Applications/) is documentation rather than a Lean source tree. Its domain
-dossiers may inform examples here or separate projects that import this library.
+[`Applications/`](Applications/) contains domain dossiers. Selected dossiers also contain
+independent downstream Lake packages; they import `Maths` without entering its module or
+dependency graph.
 
 ## Building this repository
 

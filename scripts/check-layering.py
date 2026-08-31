@@ -8,6 +8,9 @@
 Both are stated as facts in `README.md` and `CLAUDE.md`; this turns them into checks. The
 script keys on directory and file names rather than on the root namespace, so it gives the same
 answer before and after a move of the tree under a different umbrella.
+
+Downstream packages under `Applications` are deliberately excluded. Their builds are discovered
+generically by `scripts/check.sh`; they do not participate in the reusable library's layering.
 """
 
 import re
@@ -35,11 +38,9 @@ def project_root_name(files):
 
 
 def main():
-    files = sorted(
-        p
-        for p in ROOT.rglob("*.lean")
-        if ".lake" not in p.parts and "scripts" not in p.parts and p.is_file()
-    )
+    # Application clients are separate Lake packages downstream of `Maths`.
+    # This check concerns only the reusable library's internal dependency graph.
+    files = sorted((ROOT / "Maths").rglob("*.lean"))
     if not files:
         sys.exit("no .lean files found")
     root = project_root_name([p for p in files if len(p.relative_to(ROOT).parts) > 1])
