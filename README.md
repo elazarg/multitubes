@@ -15,7 +15,9 @@ A **walk** is an endpoint-indexed finite list of edges, so endpoint compatibilit
 type. A walk denotes the chronological composite of its edge maps (`Transport.walkMap`), and
 concatenation denotes composition. A closed walk therefore denotes an endomorphism of the fiber
 over its base vertex - its **holonomy**. A **section** is a vertex-indexed family that every edge
-map carries to itself; on ordered fibers, a **lax section** asks only for an inequality.
+map carries to itself. A **lax section** and an **oplax section** orient that equality in opposite
+directions. A **mixed-polarity section** selects lax, exact, or oplax behavior independently on
+each edge, relative to an arbitrary fiberwise relation.
 
 The same structure reads several ways, and the library states results in whichever language is
 sharpest for the argument:
@@ -29,9 +31,10 @@ sharpest for the argument:
 - as a labelled transition system transforming a per-state value, with `walkMap` as the
   denotational semantics of paths and a lax section as an inductive invariant or subsolution.
 
-On top of that generic layer the library develops specializations, each of which fixes what the
-fibers and edge maps are and asks when sections or lax sections exist:
+On top of that generic layer the library develops structural extensions and specializations:
 
+- **mixed polarity** (`Mixed/`) - relation-parametric lax, exact, and oplax edge constraints,
+  propagation along walks with a consistent inequality polarity, and a concise ordered interface;
 - **exact** (`Exact.lean`, `SCC.lean`, `NormalForms.lean`, `PotentialRigidity.lean`) - equality of
   forward path maps, without assuming labels form a group; strongly connected and rooted-path
   normal forms, and rigidity of the resulting potentials;
@@ -64,7 +67,7 @@ here, and a fifth consumes all four. `scripts/check-layering.py` checks that bou
 | `Maths/Recursion/` | affine, max-affine, and reflected (Lindley) transfer summaries and their fixed points; the Loynes and two-sided reflections; a cyclic max-affine system with its survival-weighted bound; and rational recurrences linearized in the reciprocal coordinate |
 | `Maths/LinearProgramming/` | Fourier–Motzkin elimination, the theorem of the alternative, standard-form LP, and LP duality |
 | `Maths/Algebra/` | the join-semidirect label algebra |
-| `Maths/DirectedTransport/` | the theory proper: `Basic.lean` and the other root files for the generic layer and its exact specialization, then `Additive/`, `FiniteInequality/`, and `MaxAffine/` |
+| `Maths/DirectedTransport/` | the theory proper: the generic and mixed-polarity layers, exact transport, and the `Additive/`, `FiniteInequality/`, and `MaxAffine/` specializations |
 
 Namespaces stay shallow: the path carries the taxonomy, so `Maths/Graph/EdgeGraph.lean`
 declares `Maths.EdgeGraph`. `Maths.lean` is the umbrella importing every module, so a bare
@@ -85,11 +88,11 @@ lake exe cache get   # fetch prebuilt mathlib oleans; without this the first bui
 lake build
 ```
 
-**Status.** A rebuild from scratch (with `.lake/build` removed) compiles all 63 modules with
-zero errors and zero warnings. A kernel-level audit of the 2307 library declarations reports
+**Status.** A rebuild from scratch (with `.lake/build` removed) compiles all library modules with
+zero errors and zero warnings. A kernel-level audit of the 2419 library declarations reports
 none depending on `sorryAx`, and the only axioms used across the library are `propext`,
 `Classical.choice`, and `Quot.sound` - the same three mathlib itself rests on. Every one of the
-732 names promised by a `## Main ...` docstring section resolves against the compiled
+786 names promised by a `## Main ...` docstring section resolves against the compiled
 environment. `scripts/check.sh` runs all of this.
 
 Complete here means building and sorry-free; it does not mean finished as a mathlib

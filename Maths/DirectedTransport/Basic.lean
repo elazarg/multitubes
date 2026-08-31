@@ -23,7 +23,8 @@ base vertex.
 
 The phrase **operator-labelled transition graph** names the carrier.  The phrase
 **directed transport** names the compositional semantics and its proof tools:
-walk maps, holonomy, sections, lax sections, and monoid-valued walk labels.
+walk maps, holonomy, sections, lax and oplax sections, and monoid-valued walk
+labels.
 
 The same structure can be read in several ways.
 
@@ -37,8 +38,9 @@ The same structure can be read in several ways.
   that the classical notion carries.
 * A section is a flat or equivariant section; in the gain-graph case with the
   group acting simply transitively on the fiber, a trivialization or switching
-  function.  A lax section is a subsolution, subinvariant family, or inductive
-  invariant, according to the application.
+  function.  Lax and oplax sections are respectively subsolutions and
+  supersolutions, or pre-invariants and post-invariants, according to the
+  application.
 * Computationally it is a labelled transition system transforming a per-state
   value, and `walkMap` is the denotational semantics of paths: a walk denotes
   the composite of its edge maps, and concatenation denotes composition
@@ -58,8 +60,8 @@ products of slopes.
 * `Maths.Transport.holonomy` - transport around a closed walk.
 * `Maths.Transport.HasTrivialHolonomy` - every closed-walk
   map is the identity.
-* `Maths.Transport.IsSection` and
-  `Maths.Transport.IsLaxSection`.
+* `Maths.Transport.IsSection`, `Maths.Transport.IsLaxSection`, and
+  `Maths.Transport.IsOplaxSection`.
 * `Maths.ofEdgeAct` and `Maths.transport` -
   the constant-fiber case.
 * `Maths.walkLabel` and
@@ -75,6 +77,9 @@ products of slopes.
   sections.
 * `Maths.Transport.IsLaxSection.walkMap_le` - monotone
   transport of lax sections.
+* `Maths.Transport.IsSection.isOplaxSection` - exact sections are oplax.
+* `Maths.Transport.IsOplaxSection.le_walkMap` - monotone transport of
+  oplax sections.
 * `Maths.walkMap_ofEdgeAct` - the dependent and constant-fiber
   semantics agree.
 * `Maths.transport_eq_smul` and
@@ -86,26 +91,29 @@ products of slopes.
 ## Implementation notes
 
 This file proves only the structural walk-induction lemmas.  Existence of
-sections or lax sections is label-specific potential theory and belongs in the
-specialization that supplies the label algebra.
+sections, lax sections, or oplax sections is label-specific potential theory
+and belongs in the specialization that supplies the label algebra.
 
 The development is stratified by how much order structure the fibers carry, and
 the strata are worth naming because they behave differently under a change of
 order.  Transport itself -- `walkMap`, `holonomy`, `IsSection`, and the exact
 theory built on them -- assumes no order at all; edge maps are arbitrary
-functions between fibers.  `IsLaxSection` and the monotone transport lemmas
-assume only a `Preorder`.  Everything beyond that needs a *join*: the least lax
-majorant of `Maths.DirectedTransport.Closure` is an indexed supremum over all walks
-and assumes a `CompleteLattice`, the labels of `Maths.Algebra.JoinSemidirect`
-act through `⊔` and assume a `SemilatticeSup`, and a max-affine label is defined
-by a join against its floor.
+functions between fibers.  `IsLaxSection` and `IsOplaxSection` assume only a
+fiberwise `LE`.  Turning equalities into inequalities and transporting lax or
+oplax sections along walks require a `Preorder`.  Aggregation results beyond
+the walk calculus need a *join*: the least lax majorant of
+`Maths.DirectedTransport.Closure` is an
+indexed supremum over all walks and assumes a `CompleteLattice`, the labels of
+`Maths.Algebra.JoinSemidirect` act through `⊔` and assume a `SemilatticeSup`,
+and a max-affine label is defined by a join against its floor.
 
-So the exact and lax layers are available for any preordered fiber, while the
-Bellman and max-affine layers are not: they are unavailable exactly when the
-fiber order has no binary joins.  The standard example is the Löwner order on
-positive semidefinite operators, which is an anti-lattice -- a supremum exists
-only for a comparable pair (Kadison) -- so those layers have no operator-valued
-analogue, while the layers below them do.
+So exact transport requires no relation, and the lax and oplax predicates
+require only a fiberwise `LE`, while their walk propagation and the Bellman and
+max-affine layers require progressively more structure.  The latter are
+unavailable exactly when the fiber order has no binary joins.  The standard
+example is the Löwner order on positive semidefinite operators, which is an
+anti-lattice -- a supremum exists only for a comparable pair (Kadison) -- so
+those layers have no operator-valued analogue, while the layers below them do.
 
 ## References
 
@@ -160,7 +168,8 @@ theorem fiberCast_fiberCast {first second third : V} (hfirst : first = second)
     (hvertex : first = second) (point : X) :
     fiberCast (fun _ : V => X) hvertex point = point := rfl
 
-theorem fiberCast_le_fiberCast [∀ vertex : V, Preorder (Fiber vertex)]
+/-- Retyping both sides of a fiberwise comparison preserves the comparison. -/
+theorem fiberCast_le_fiberCast [∀ vertex : V, LE (Fiber vertex)]
     {first second : V} (hvertex : first = second) {point other : Fiber first}
     (hle : point ≤ other) :
     fiberCast Fiber hvertex point ≤ fiberCast Fiber hvertex other := by
@@ -267,19 +276,30 @@ theorem IsSection.holonomy_eq (hfamily : T.IsSection family)
     T.holonomy cycle (family base) = family base :=
   hfamily.walkMap_eq cycle
 
-/-! ### Lax sections -/
+/-! ### Lax and oplax sections -/
+
+/-- A family of fiber points whose target value dominates the transported source
+value on every edge.  Only a fiberwise `LE` is needed to state this predicate. -/
+def IsLaxSection [∀ vertex : V, LE (Fiber vertex)]
+    (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
+  ∀ edge : E, T.edgeMap edge (family (G.source edge)) ≤ family (G.target edge)
+
+/-- A family whose target value is below its transported source value on every
+edge.  Only a fiberwise `LE` is needed to state this predicate. -/
+def IsOplaxSection [∀ vertex : V, LE (Fiber vertex)]
+    (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
+  ∀ edge : E, family (G.target edge) ≤ T.edgeMap edge (family (G.source edge))
 
 section Ordered
 
 variable [∀ vertex : V, Preorder (Fiber vertex)]
 
-/-- A family of fiber points whose target value dominates the transported source
-value on every edge. -/
-def IsLaxSection (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
-  ∀ edge : E, T.edgeMap edge (family (G.source edge)) ≤ family (G.target edge)
-
 theorem IsSection.isLaxSection (hfamily : T.IsSection family) : T.IsLaxSection family :=
   fun edge => (hfamily edge).le
+
+/-- An exact section is an oplax section. -/
+theorem IsSection.isOplaxSection (hfamily : T.IsSection family) : T.IsOplaxSection family :=
+  fun edge => (hfamily edge).ge
 
 /-- With monotone edge maps, a lax section is transported below its value at the
 terminal vertex of every walk. -/
@@ -299,6 +319,25 @@ theorem IsLaxSection.holonomy_le (hmono : ∀ edge : E, Monotone (T.edgeMap edge
     (hfamily : T.IsLaxSection family) (cycle : G.Walk base base) :
     T.holonomy cycle (family base) ≤ family base :=
   hfamily.walkMap_le hmono cycle
+
+/-- With monotone edge maps, an oplax section is transported above its value at
+the terminal vertex of every walk. -/
+theorem IsOplaxSection.le_walkMap (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hfamily : T.IsOplaxSection family) (walk : G.Walk start finish) :
+    family finish ≤ T.walkMap walk (family start) := by
+  induction walk with
+  | nil => exact le_rfl
+  | concat walkSoFar edge legal ih =>
+      rw [walkMap_concat]
+      have hcast := fiberCast_le_fiberCast (Fiber := Fiber) legal.symm ih
+      rw [fiberCast_family] at hcast
+      exact le_trans (hfamily edge) (hmono edge hcast)
+
+/-- An oplax section marks a post-fixed point of every closed-walk holonomy. -/
+theorem IsOplaxSection.le_holonomy (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hfamily : T.IsOplaxSection family) (cycle : G.Walk base base) :
+    family base ≤ T.holonomy cycle (family base) :=
+  hfamily.le_walkMap hmono cycle
 
 end Ordered
 

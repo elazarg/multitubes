@@ -32,6 +32,9 @@ public import Maths.LinearProgramming.NormalizedFarkas
 
 -- Directed transport: the structural theory
 public import Maths.DirectedTransport.Basic
+public import Maths.DirectedTransport.Mixed.Basic
+public import Maths.DirectedTransport.Mixed.Walk
+public import Maths.DirectedTransport.Mixed.Order
 public import Maths.DirectedTransport.Category
 public import Maths.DirectedTransport.CategoricalRetracts
 public import Maths.DirectedTransport.CategoricalRetractAdapter
@@ -100,10 +103,10 @@ feasibility, optimality, extreme-point sparsity, and duality.  `Maths.Algebra` c
 join-semidirect label algebra.
 
 `Maths.DirectedTransport` is the theory the other four serve: operator-labelled transition
-graphs, their walks, holonomy, sections and lax sections, with categorical and strongly connected
-normal forms, complete-lattice closure, gain-graph switching and balance, additive cycle and
-circulation duality with its max-plus spectral theory, finite inequality certificates, and
-max-affine transport.
+graphs, their walks, holonomy, exact, lax, oplax, and mixed-polarity sections, with categorical and
+strongly connected normal forms, complete-lattice closure, gain-graph switching and balance,
+additive cycle and circulation duality with its max-plus spectral theory, finite inequality
+certificates, and max-affine transport.
 
 Import `Maths.DirectedTransport.Basic` when only the structural walk semantics -- the
 computational graph, walks, holonomy, and sections -- are required.

@@ -1,4 +1,5 @@
 /.lake
+/.design
 
 # audit dumps written by scripts/audit.lean
 scripts/.decls
