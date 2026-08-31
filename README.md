@@ -34,8 +34,9 @@ sharpest for the argument:
 On top of that generic layer the library develops structural extensions and specializations:
 
 - **mixed polarity** (`Mixed/`) - relation-parametric lax, exact, and oplax edge constraints,
-  propagation along walks with a consistent inequality polarity, a concise ordered interface,
-  and a complete-lattice Bellman interval characterization;
+  propagation along walks with a consistent inequality polarity, residual reversal to ordinary
+  lax transport when edgewise adjoints exist, a concise ordered interface, and a complete-lattice
+  Bellman interval characterization;
 - **exact** (`Exact.lean`, `SCC.lean`, `NormalForms.lean`, `PotentialRigidity.lean`) - equality of
   forward path maps, without assuming labels form a group; strongly connected and rooted-path
   normal forms, and rigidity of the resulting potentials;
@@ -90,10 +91,10 @@ lake build
 ```
 
 **Status.** A rebuild from scratch (with `.lake/build` removed) compiles all library modules with
-zero errors and zero warnings. A kernel-level audit of the 2428 library declarations reports
+zero errors and zero warnings. A kernel-level audit of the 2450 library declarations reports
 none depending on `sorryAx`, and the only axioms used across the library are `propext`,
 `Classical.choice`, and `Quot.sound` - the same three mathlib itself rests on. Every one of the
-795 names promised by a `## Main ...` docstring section resolves against the compiled
+806 names promised by a `## Main ...` docstring section resolves against the compiled
 environment. `scripts/check.sh` runs all of this.
 
 Complete here means building and sorry-free; it does not mean finished as a mathlib

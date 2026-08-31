@@ -34,7 +34,9 @@ public import Maths.LinearProgramming.NormalizedFarkas
 public import Maths.DirectedTransport.Basic
 public import Maths.DirectedTransport.Mixed.Basic
 public import Maths.DirectedTransport.Mixed.Walk
+public import Maths.DirectedTransport.Mixed.Adjoint
 public import Maths.DirectedTransport.Mixed.Order
+public import Maths.DirectedTransport.Mixed.AdjointOrder
 public import Maths.DirectedTransport.Mixed.Bellman
 public import Maths.DirectedTransport.Category
 public import Maths.DirectedTransport.CategoricalRetracts
