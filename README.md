@@ -1,118 +1,288 @@
 # directed-transport
 
-A Lean 4 library for **directed transport** on operator-labelled transition graphs. The
-library it builds is called `Maths`; this repository is where it lives.
+`directed-transport` is a Lean 4 library for weighted directed graphs, gain graphs,
+flow/circulation identities, and their extension to graphs whose edges carry arbitrary
+transformations. It studies how edge data compose along walks and what paths and cycles imply
+about potentials, sections, inequalities, fixed points, and spectra.
 
-## What this is
+The library starts with familiar graph constructions and progressively removes their customary
+algebraic assumptions. It includes the classical group-valued gain-graph picture, but does not
+require labels to form a group, edge actions to be invertible, or even all vertices to carry the
+same type of value.
 
-A directed multigraph supplies a control-flow skeleton: a vertex type, an edge type, and
-`source`/`target` maps, with edges as data so parallel edges keep their identities
-(`Maths.EdgeGraph`). Each vertex carries a state space - its **fiber** - and each edge
-carries a map from the fiber over its source to the fiber over its target
-(`Maths.Transport`).
+The Lean package is named `maths`, and its modules live under the `Maths` namespace.
 
-A **walk** is an endpoint-indexed finite list of edges, so endpoint compatibility is part of the
-type. A walk denotes the chronological composite of its edge maps (`Transport.walkMap`), and
-concatenation denotes composition. A closed walk therefore denotes an endomorphism of the fiber
-over its base vertex - its **holonomy**. A **section** is a vertex-indexed family that every edge
-map carries to itself. A **lax section** and an **oplax section** orient that equality in opposite
-directions. A **mixed-polarity section** selects lax, exact, or oplax behavior independently on
-each edge, relative to an arbitrary fiberwise relation.
+## From weighted and gain graphs to directed transport
 
-The same structure reads several ways, and the library states results in whichever language is
-sharpest for the argument:
+The basic graph is a directed multigraph: edges are objects in their own right, so parallel edges
+retain their identities. Its finite walks are indexed by both endpoints, making composability
+part of the Lean type.
 
-- as a representation of the free path category of a quiver - spelled out in
-  `Maths.DirectedTransport.Category`, where walks are morphisms and append is composition;
-- as a discrete connection, with `walkMap` as parallel transport and holonomy as monodromy;
-- as the action carried by a gain or voltage graph, in the sense of Zaslavsky, once labels are
-  group-valued - though general monoid labels are one-directional and need not invert under edge
-  reversal;
-- as a labelled transition system transforming a per-state value, with `walkMap` as the
-  denotational semantics of paths and a lax section as an inductive invariant or subsolution.
+Several increasingly general kinds of edge data can be placed on this graph.
 
-On top of that generic layer the library develops structural extensions and specializations:
+1. **Flows and additive weights.** A walk has an edge-multiplicity vector satisfying flow
+   conservation up to its endpoints; a closed walk gives a circulation. If an edge has a weight
+   `w e`, a walk has the sum of its edge weights. This leads to cycle sums, difference constraints,
+   node potentials, circulation duality, and max-plus spectral theory.
+2. **Gains.** If an edge has a label `g e` in a monoid, a walk has the ordered product of its edge
+   labels. For group-valued labels this recovers the usual gain-graph and voltage-graph theory:
+   balance, switching, and switching-triviality in the sense of Zaslavsky. The formalization also
+   proves versions over monoids, using units exactly where inverses are mathematically needed.
+3. **Operators.** An edge may act by an arbitrary function rather than by addition or a group
+   action. Different vertices may carry different state spaces. Walk labels are then replaced by
+   chronological composition of the edge functions.
+4. **Relations and mixed constraints.** A chosen value at each vertex may satisfy an equality, a
+   forward relation, or the reversed relation on each edge. The relation need not initially be an
+   order; ordered, lattice, additive, and residuated results are built as later layers.
 
-- **mixed polarity** (`Mixed/`) - relation-parametric lax, exact, and oplax edge constraints,
-  propagation along walks with a consistent inequality polarity, residual reversal to ordinary
-  lax transport when edgewise adjoints exist, least mixed majorants and bounded sandwich
-  criteria in that residuated setting, a concise ordered interface, and a complete-lattice
-  Bellman interval characterization without residuals;
-- **exact** (`Exact.lean`, `SCC.lean`, `NormalForms.lean`, `PotentialRigidity.lean`) - equality of
-  forward path maps, without assuming labels form a group; strongly connected and rooted-path
-  normal forms, and rigidity of the resulting potentials;
-- **additive** (`Additive/`) - finite-edge potential feasibility over ordered cancellative
-  additive commutative monoids, cycle sums and circulation duality, decomposition over strongly
-  connected components, mixed-polarity feasibility and residual thresholds by signed cycle tests
-  and path envelopes, and, over ordered fields, the max-plus spectral theory: Karp's cycle mean
-  formula and an eigenvector whose eigenvalue is the maximum cycle mean;
-- **finite-inequality** (`FiniteInequality/`) - Farkas-style certificates for finite systems;
-- **join-semidirect** (`JoinSemidirect.lean`) - labels `(floor, action)` acting by
-  `x ↦ floor ⊔ action • x`, composing as a semidirect product;
-- **max-affine** (`MaxAffine/`) - edges labelled by `x ↦ max floor (shift + slope * x)`, its
-  duality theory and its scalar classifications;
-- **gain graphs** (`Switching.lean`) - Zaslavsky's switching action on a monoid-valued labelling,
-  balance as a switching invariant, and balance as switching-triviality.
+The last two steps are the directed-transport abstraction. Let `G` be a directed multigraph. Each
+vertex `v` has a type `F v`, called its fiber, and an edge `e : s → t` carries a function
 
-`Closure.lean` supplies the complete-lattice machinery for the lax side: an explicit closure over
-all directed walks, and a least lax majorant as the least fixed point of a Bellman operator.
+```text
+Tₑ : F s → F t.
+```
 
-This is a library, not a paper. Individual files state their own scope, and several say plainly
-what they deliberately do not develop.
+A walk acts by composing its edge maps in traversal order. A closed walk therefore acts on the
+fiber over its base vertex; this action is its holonomy.
 
-## Layout
+A section chooses one value `x v : F v` at every vertex. Depending on the application, an edge
+can require
 
-The library is `Maths`, under which four groups depend on mathlib alone and on nothing else
-here, and a fifth consumes all four. `scripts/check-layering.py` checks that boundary.
+```text
+exact:  Tₑ (x s) = x t
+lax:    Tₑ (x s) ≤ x t
+oplax:  x t ≤ Tₑ (x s).
+```
 
-| Directory | Contents |
+A mixed section chooses one of these three modes independently for each edge. More generally,
+`≤` can be replaced by a fiberwise relation `R`; the core definition does not assume that `R` is
+an order.
+
+According to the application, this same object can be read as:
+
+- a representation of the free path category of a quiver;
+- a discrete connection, with path transport and holonomy;
+- a labelled transition system, with walks as compositional semantics;
+- subsolutions, supersolutions, and inductive invariants;
+- a gain or voltage graph when labels act on a common fiber;
+- a system of additive difference constraints or feasible node potentials;
+- a max-plus subeigenvector or eigenvector problem; or
+- a max-affine or reflected scalar recurrence.
+
+## Is this the library you are looking for?
+
+It is likely a good fit if you need to formalize one of the following.
+
+| Your problem | Relevant part of the library |
 | --- | --- |
-| `Maths/Graph/` | directed multigraphs and the finite-walk calculus; walk multiplicities as flows, with conservation and integer charge; Eulerian trails, infinite walks, zero-charge lassos; and charged relations, where bounded path budgets are exactly bounded potentials |
-| `Maths/Recursion/` | affine, max-affine, and reflected (Lindley) transfer summaries and their fixed points; the Loynes and two-sided reflections; a cyclic max-affine system with its survival-weighted bound; and rational recurrences linearized in the reciprocal coordinate |
-| `Maths/LinearProgramming/` | Fourier–Motzkin elimination, the theorem of the alternative, standard-form LP, and LP duality |
-| `Maths/Algebra/` | the join-semidirect label algebra |
-| `Maths/DirectedTransport/` | the theory proper: the generic and mixed-polarity layers, exact transport, and the `Additive/`, `FiniteInequality/`, and `MaxAffine/` specializations |
+| Typed directed walks with parallel edges and composition | [`Maths.Graph.EdgeGraph`](Maths/Graph/EdgeGraph.lean) |
+| Walk multiplicities, flow conservation, circulations, and Eulerian realization | [`Maths.Graph.Circulation`](Maths/Graph/Circulation.lean) and [`EulerianTrail`](Maths/Graph/EulerianTrail.lean) |
+| Additive difference constraints and cycle feasibility | [`Additive.Potentials`](Maths/DirectedTransport/Additive/Potentials.lean) and [`Additive.Mixed`](Maths/DirectedTransport/Additive/Mixed.lean) |
+| Gain-graph and voltage-graph switching and balance | [`Maths.DirectedTransport.Switching`](Maths/DirectedTransport/Switching.lean) |
+| Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/DirectedTransport/Additive/CycleMean.lean), [`CriticalGraph`](Maths/DirectedTransport/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/DirectedTransport/Additive/Eigenvector.lean) |
+| Functions between possibly different state spaces along edges | [`Maths.DirectedTransport.Basic`](Maths/DirectedTransport/Basic.lean) |
+| Path independence, trivial holonomy, or exact-section normal forms | [`Maths.DirectedTransport.Exact`](Maths/DirectedTransport/Exact.lean) and [`NormalForms`](Maths/DirectedTransport/NormalForms.lean) |
+| Least solutions of monotone graph inequalities | [`Maths.DirectedTransport.Closure`](Maths/DirectedTransport/Closure.lean) |
+| Exact, lax, oplax, or per-edge mixed constraints | [`Maths.DirectedTransport.Mixed`](Maths/DirectedTransport/Mixed/Basic.lean) |
+| Mixed constraints reducible through residuals or adjoints | [`Mixed.AdjointOrder`](Maths/DirectedTransport/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/DirectedTransport/Mixed/Closure.lean) |
+| Finite systems of inequalities and infeasibility certificates | [`Maths.DirectedTransport.FiniteInequality`](Maths/DirectedTransport/FiniteInequality/Basic.lean) |
+| Maps of the form `x ↦ max a (b + c * x)` | [`Maths.DirectedTransport.MaxAffine`](Maths/DirectedTransport/MaxAffine/Basic.lean) |
+| Affine, max-affine, Loynes, or two-sided reflected recurrences | [`Maths.Recursion`](Maths/Recursion/TransferSummary.lean) |
+| Fourier–Motzkin elimination, Farkas alternatives, or LP duality | [`Maths.LinearProgramming`](Maths/LinearProgramming/FourierMotzkin.lean) |
 
-Namespaces stay shallow: the path carries the taxonomy, so `Maths/Graph/EdgeGraph.lean`
-declares `Maths.EdgeGraph`. `Maths.lean` is the umbrella importing every module, so a bare
-`lake build` compiles the whole library. Each group is also a Lake target of its own -
-`MathsGraph`, `MathsRecursion`, `MathsLinearProgramming`, `MathsAlgebra`,
-`MathsDirectedTransport` - so a group can be built without the rest.
+This is not intended to replace a general-purpose graph-algorithms package: in particular, it is
+not a max-flow/min-cut implementation. Its flow results concern walk multiplicities,
+circulations, decomposition, and the certificates used by the transport theory. Likewise, the
+core theory is discrete; continuous-time or analytic structure must be supplied by an
+application-specific layer.
 
-## Building
+## How general is the infrastructure?
 
-Requires Lean `v4.33.1` (see `lean-toolchain`) and mathlib pinned to the matching `v4.33.1` tag;
-`elan` will fetch the toolchain automatically. The only other dependency is
-[`fixed-point-theorems`](https://github.com/elazarg/fixed-point-theorems-lean4), which supplies
-Brouwer's theorem for the max-affine eigenproblem; nothing else in the library uses it, and the
-linear-programming layer in particular depends on mathlib alone.
+The assumptions increase only when the mathematics needs them.
+
+| Layer | Required structure |
+| --- | --- |
+| Graphs, walks, transport, and holonomy | Arbitrary vertex and edge types; arbitrary fiber types and edge functions |
+| Exact sections | Equality only |
+| Mixed edge constraints | An arbitrary relation on each fiber |
+| Propagation of lax or oplax constraints along walks | Preordered fibers and monotone edge maps |
+| Path closure and least Bellman majorants | Complete-lattice fibers, with the relevant monotonicity or join preservation |
+| Additive potential and cycle criteria | Ordered additive structure; finiteness and cancellation only where stated |
+| Gain-graph switching | Monoid labels and unit-valued switching functions; groups recover the classical case |
+| Max-affine theory | Real scalar maps with the hypotheses stated by each theorem |
+
+In particular, the generic infrastructure is not restricted to group actions. Group-valued gain
+graphs are one specialization. Exact transport works for arbitrary functions, including
+noninvertible ones. Mixed transport does not require an order merely to state or manipulate its
+edge constraints. Complete lattices, adjoints, finiteness, and scalar algebra enter in separate
+theorems rather than in the definition of transport.
+
+## What is formalized
+
+The library includes the following theorem families.
+
+- **Graphs, walks, and flows.** Typed finite walks retain edge identities and encode endpoint
+  compatibility. Their edge multiplicities satisfy endpoint-corrected flow conservation; closed
+  walks produce circulations. The graph layer also includes Eulerian realization, infinite
+  walks, zero-charge lassos, and charged relations.
+- **Additive potentials.** For finite edge types, potential feasibility is characterized by
+  closed-walk weights under the stated ordered-cancellation assumptions. There are circulation
+  duals, strongly connected decompositions, shortest cycle witnesses, quantitative defect
+  bounds, and mixed-polarity cycle and path-envelope criteria.
+- **Max-plus spectral theory.** The additive layer includes cycle means, Karp's formula, critical
+  graphs, Kleene-star generators, subeigenvectors, and eigenvectors.
+- **Gain graphs.** Monoid-valued walk labels compose in path order. Switching acts through
+  unit-valued vertex functions, balance is switching-invariant, and under the stated connectivity
+  hypothesis balance is equivalent to switching-triviality. Groups recover the classical case.
+- **Operator-valued walk semantics.** Arbitrary edge functions compose chronologically.
+  Transport respects concatenation, and exact, lax, and oplax edge constraints propagate along
+  suitable walks.
+- **Exact transport.** Trivial holonomy, path independence, rooted and strongly connected normal
+  forms, categorical retract formulations, and rigidity of potentials are developed without
+  assuming a group of labels.
+- **Lax closure.** On complete lattices, joins over all incoming walks give an explicit least lax
+  section when edge maps preserve the required joins. For merely monotone maps, a Bellman
+  operator gives the least lax majorant as a least fixed point.
+- **Mixed polarity.** Lax, exact, and oplax edges share one relation-parametric interface. When
+  appropriate residuals exist, reversing and relabelling the oplax edges reduces the system to
+  ordinary lax transport, yielding least-majorant and bounded-sandwich criteria. Separately, a
+  complete-lattice Bellman interval characterizes mixed sections without assuming residuals.
+- **Finite inequalities.** Farkas-style alternatives, quantitative certificates, arithmetic
+  consequences, and sparse witnesses are provided for finite systems.
+- **Max-affine transport.** Max-affine labels are closed under composition and support path
+  summaries, scalar fixed-point classifications, contraction results, gauge feasibility,
+  holonomy, duality, relaxation, cycle slack, and spectral results.
+- **Related foundations.** Independent modules cover Eulerian trails, circulations, infinite
+  walks, zero-charge lassos, charged relations, join-semidirect labels, reflected recurrences,
+  Fourier–Motzkin elimination, and standard-form linear-programming duality.
+
+Every source file begins with a module docstring listing its main definitions, results,
+assumptions, and deliberate scope. Those docstrings are the most direct API guide once you have
+chosen a topic from the table above.
+
+## Using the library
+
+Add the repository to a Lake project:
+
+```toml
+[[require]]
+name = "maths"
+git = "https://github.com/elazarg/directed-transport"
+rev = "main"
+```
+
+For a reproducible project, replace `main` with a commit hash. Then fetch dependencies and build:
 
 ```sh
-lake exe cache get   # fetch prebuilt mathlib oleans; without this the first build takes hours
+lake update
+lake exe cache get
 lake build
 ```
 
-**Status.** A rebuild from scratch (with `.lake/build` removed) compiles all library modules with
-zero errors and zero warnings. A kernel-level audit of the 2498 library declarations reports
-none depending on `sorryAx`, and the only axioms used across the library are `propext`,
-`Classical.choice`, and `Quot.sound` - the same three mathlib itself rests on. Every one of the
-840 names promised by a `## Main ...` docstring section resolves against the compiled
-environment. `scripts/check.sh` runs all of this.
+Import only the layer you need. Module names follow the directory path, while declaration names
+use shallow namespaces. For example, importing `Maths.DirectedTransport.Basic` exposes
+`Maths.Transport`, and importing `Maths.Graph.EdgeGraph` exposes `Maths.EdgeGraph`.
 
-Complete here means building and sorry-free; it does not mean finished as a mathlib
-contribution.
+The structural interface is intentionally narrow:
 
-## Style
+```lean
+import Maths.DirectedTransport.Basic
 
-Style is enforced by mathlib's own linters rather than a bespoke script: `lakefile.toml` turns on
-the canonical `linter.style.*` implementations from `Mathlib.Tactic.Linter.*` project-wide, along
-with `autoImplicit = false`. They cover the copyright header, the 100-character line limit, the
-1500-line file limit, `fun` over `λ`, `<|` over `$`, `·` usage, `cases`/`induction`/`refine`/`show`
-forms, whitespace, doc strings, and name checks. A build whose output contains `warning:` is a
-failure.
+#check Maths.EdgeGraph
+#check Maths.Transport
+#check Maths.Transport.walkMap_append
+#check Maths.Transport.IsSection
+#check Maths.Transport.IsLaxSection
+#check Maths.Transport.IsOplaxSection
+```
 
-Each option is set with a `weak.` prefix, deliberately. A linter option exists only once a file has
-transitively imported the module registering it, so a plain setting would be a hard error in a file
-with narrow imports; `weak.` makes it a no-op there instead. The trade-off is that a linter is
-silently skipped in a file that does not import it, so a clean build of a narrowly-importing file
-is not proof that every check ran.
+A complete one-edge example shows the shape of the definitions:
+
+```lean
+import Maths.DirectedTransport.Basic
+
+open Maths
+
+def oneEdgeGraph : EdgeGraph Bool Unit where
+  source _ := false
+  target _ := true
+
+def successorTransport : Transport oneEdgeGraph (fun _ => Nat) where
+  edgeMap _ := Nat.succ
+
+example (x : Bool → Nat) :
+    successorTransport.IsLaxSection x ↔ Nat.succ (x false) ≤ x true := by
+  constructor
+  · intro h
+    simpa [oneEdgeGraph, successorTransport] using h ()
+  · intro h edge
+    cases edge
+    simpa [oneEdgeGraph, successorTransport] using h
+```
+
+For mixed-polarity constraints:
+
+```lean
+import Maths.DirectedTransport.Mixed.Basic
+
+#check Maths.EdgeMode
+#check Maths.Transport.IsMixedSectionFor
+```
+
+For the finite-edge additive cycle criterion:
+
+```lean
+import Maths.DirectedTransport.Additive.Potentials
+
+#check Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
+```
+
+Use `import Maths` only when you want the complete library. Narrow imports avoid unrelated
+algebraic or analytic dependencies and make theorem search more focused.
+
+## Repository layout
+
+Five groups sit under the `Maths` namespace. The first four are reusable foundations built on
+mathlib; directed transport consumes them.
+
+| Directory | Contents |
+| --- | --- |
+| `Maths/Graph/` | Directed multigraphs, typed walks, circulations, Eulerian trails, infinite walks, zero-charge lassos, and charged relations |
+| `Maths/Recursion/` | Affine and max-affine transfer summaries, fixed points, and one-sided and two-sided reflections |
+| `Maths/LinearProgramming/` | Fourier–Motzkin elimination, alternatives, standard-form LP, sparsity, and duality |
+| `Maths/Algebra/` | The join-semidirect label algebra |
+| `Maths/DirectedTransport/` | Generic, exact, lax, oplax, mixed, additive, finite-inequality, gain-graph, and max-affine transport |
+
+The umbrella module [`Maths.lean`](Maths.lean) imports everything. Each group is also a separate
+Lake target: `MathsGraph`, `MathsRecursion`, `MathsLinearProgramming`, `MathsAlgebra`, and
+`MathsDirectedTransport`.
+
+## Building this repository
+
+The project uses Lean `v4.33.1` and the matching mathlib release, as recorded in
+`lean-toolchain` and `lakefile.toml`. The only additional dependency is
+[`fixed-point-theorems`](https://github.com/elazarg/fixed-point-theorems-lean4), used for
+Brouwer's theorem in the max-affine eigenproblem. No other module depends on it.
+
+```sh
+lake exe cache get
+lake build
+```
+
+The first command downloads precompiled mathlib artifacts; building mathlib locally can take
+substantially longer.
+
+## Verification and maturity
+
+The repository is a standalone research library rather than a finished mathlib contribution.
+Its public APIs may continue to evolve as the theory develops.
+
+A clean rebuild currently compiles every library module with zero errors and zero warnings. A
+kernel-level audit of 2,498 declarations finds none depending on `sorryAx`; the only axioms used
+are `propext`, `Classical.choice`, and `Quot.sound`. The 840 declarations named in module
+docstrings are checked against the compiled environment. [`scripts/check.sh`](scripts/check.sh)
+runs the clean build, axiom audit, documentation checks, style checks, and dependency-layering
+checks.
+
+The code follows mathlib conventions, uses mathlib's style linters, and is licensed under the
+[Apache License 2.0](LICENSE).
