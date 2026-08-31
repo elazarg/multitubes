@@ -5,5 +5,6 @@ analysis or synthesis maps on edges. Dilation–erosion adjunctions relate the t
 directions without requiring inverses, while multiresolution transforms can be represented by
 transport between heterogeneous lattices.
 
-Structuring elements, signal semantics, topology, and numerical algorithms supply the
-morphological structure.
+Relation images and cores supply the dilation--erosion adjunction, while path closure constructs
+least dilation envelopes. Structuring elements, signal semantics, topology, and numerical
+algorithms supply the remaining morphological structure.

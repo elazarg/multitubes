@@ -1,0 +1,39 @@
+name = "switchedHybridControl"
+version = "0.1.0"
+license = "Apache-2.0"
+reservoir = false
+packagesDir = "../../.lake/packages"
+defaultTargets = ["SwitchedHybridControl"]
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+weak.linter.style.header = true
+weak.linter.style.longLine = true
+weak.linter.style.longFile = 1500
+weak.linter.style.lambdaSyntax = true
+weak.linter.style.dollarSyntax = true
+weak.linter.style.openClassical = true
+weak.linter.style.cdot = true
+weak.linter.style.cases = true
+weak.linter.style.induction = true
+weak.linter.style.refine = true
+weak.linter.style.show = true
+weak.linter.style.admit = true
+weak.linter.style.nativeDecide = true
+weak.linter.style.setOption = true
+weak.linter.style.missingEnd = true
+weak.linter.style.multiGoal = true
+weak.linter.style.emptyLine = true
+weak.linter.style.whitespace = true
+weak.linter.style.docString = true
+weak.linter.style.nameCheck = true
+weak.linter.style.maxHeartbeats = true
+
+[[require]]
+name = "maths"
+path = "../.."
+
+[[lean_lib]]
+name = "SwitchedHybridControl"
