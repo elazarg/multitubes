@@ -21,6 +21,8 @@ hypothesis: the Galois connections provide the remaining monotonicity.
 
 * `Maths.Transport.leastMixedMajorant` - the canonical least mixed section
   dominating prescribed lower data.
+* `Maths.Transport.leastMixedMajorantClosure` - the least-majorant construction
+  bundled as a closure operator.
 
 ## Main results
 
@@ -29,6 +31,10 @@ hypothesis: the Galois connections provide the remaining monotonicity.
 * `Maths.Transport.exists_isMixedSection_between_iff_leastMixedMajorant_le` -
   a mixed section between lower and upper data exists exactly when the
   canonical majorant is below the upper data.
+* `Maths.Transport.leastMixedMajorant_bot_isLeast` - the closure of bottom is
+  the least mixed section.
+* `Maths.Transport.leastMixedMajorant_eq_self_iff` - the closed points of the
+  least-majorant operator are exactly the mixed sections.
 
 ## Tags
 
@@ -85,6 +91,63 @@ theorem leastMixedMajorant_isLeast
   · intro family hlower hfamily
     apply hleast.2.2 family hlower
     exact (T.isMixedSection_iff_laxification_of_galoisConnection hresidual).mp hfamily
+
+/-- Least mixed majorant as a closure operator.  Its closed points are defined
+to be the mixed sections. -/
+def leastMixedMajorantClosure
+    (hlax : ∀ edge : E, mode edge = .lax → Monotone (T.edgeMap edge))
+    (hresidual : ∀ edge : LaxificationReverseEdge mode,
+      GaloisConnection (residual edge) (T.edgeMap edge.1)) :
+    ClosureOperator (∀ vertex : V, Fiber vertex) :=
+  ClosureOperator.ofPred (T.leastMixedMajorant hlax hresidual)
+    (T.IsMixedSection mode)
+    (fun lower ↦ (T.leastMixedMajorant_isLeast hlax hresidual lower).1)
+    (fun lower ↦ (T.leastMixedMajorant_isLeast hlax hresidual lower).2.1)
+    (fun {lower family} hlower hfamily ↦
+      (T.leastMixedMajorant_isLeast hlax hresidual lower).2.2 family
+        (fun vertex ↦ hlower vertex) hfamily)
+
+/-- Applying the bundled closure operator computes the least mixed majorant. -/
+@[simp] theorem leastMixedMajorantClosure_apply
+    (hlax : ∀ edge : E, mode edge = .lax → Monotone (T.edgeMap edge))
+    (hresidual : ∀ edge : LaxificationReverseEdge mode,
+      GaloisConnection (residual edge) (T.edgeMap edge.1))
+    (lower : ∀ vertex : V, Fiber vertex) :
+    T.leastMixedMajorantClosure hlax hresidual lower =
+      T.leastMixedMajorant hlax hresidual lower :=
+  rfl
+
+/-- A family is fixed by least-majorant closure exactly when it is a mixed
+section. -/
+theorem leastMixedMajorant_eq_self_iff
+    (hlax : ∀ edge : E, mode edge = .lax → Monotone (T.edgeMap edge))
+    (hresidual : ∀ edge : LaxificationReverseEdge mode,
+      GaloisConnection (residual edge) (T.edgeMap edge.1))
+    (family : ∀ vertex : V, Fiber vertex) :
+    T.leastMixedMajorant hlax hresidual family = family ↔
+      T.IsMixedSection mode family := by
+  exact (T.leastMixedMajorantClosure hlax hresidual).isClosed_iff.symm
+
+/-- The mixed closure of bottom is the least mixed section. -/
+theorem leastMixedMajorant_bot_isLeast
+    (hlax : ∀ edge : E, mode edge = .lax → Monotone (T.edgeMap edge))
+    (hresidual : ∀ edge : LaxificationReverseEdge mode,
+      GaloisConnection (residual edge) (T.edgeMap edge.1)) :
+    IsLeast {family | T.IsMixedSection mode family}
+      (T.leastMixedMajorant hlax hresidual ⊥) := by
+  have hleast := T.leastMixedMajorant_isLeast hlax hresidual (⊥ : ∀ vertex, Fiber vertex)
+  exact ⟨hleast.2.1, fun family hfamily ↦
+    hleast.2.2 family (fun _ ↦ bot_le) hfamily⟩
+
+/-- Complete-lattice mixed transport with the supplied residuals has a mixed
+section. -/
+theorem exists_isMixedSection_of_galoisConnection
+    (hlax : ∀ edge : E, mode edge = .lax → Monotone (T.edgeMap edge))
+    (hresidual : ∀ edge : LaxificationReverseEdge mode,
+      GaloisConnection (residual edge) (T.edgeMap edge.1)) :
+    ∃ family, T.IsMixedSection mode family :=
+  ⟨T.leastMixedMajorant hlax hresidual ⊥,
+    (T.leastMixedMajorant_bot_isLeast hlax hresidual).1⟩
 
 /-- A mixed section between lower and upper data exists exactly when the
 canonical mixed majorant of the lower data is below the upper data. -/

@@ -66,6 +66,7 @@ public import Maths.DirectedTransport.Additive.Cycles
 public import Maths.DirectedTransport.Additive.Eigenvector
 public import Maths.DirectedTransport.Additive.Exact
 public import Maths.DirectedTransport.Additive.Mixed
+public import Maths.DirectedTransport.Additive.MixedQuantitative
 public import Maths.DirectedTransport.Additive.Potentials
 public import Maths.DirectedTransport.Additive.Quantitative
 public import Maths.DirectedTransport.Additive.ShortCycles

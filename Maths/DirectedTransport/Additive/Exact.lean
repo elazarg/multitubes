@@ -74,6 +74,8 @@ The walk sum `Maths.walkSum` that this file consumes lives in
   translation transport has a section, without a connectivity hypothesis.
 * `Maths.CycleCoboundary.hasZeroCycleSums_iff_hasTrivialHolonomy` - cycle sums are
   precisely translation holonomy.
+* `Maths.CycleCoboundary.monotone_edgeMap_translationTransport` - ordered
+  translations are monotone edge maps.
 * `Maths.CycleCoboundary.exists_edge_defect_ge_of_pos` and
   `Maths.CycleCoboundary.exists_edge_abs_defect_ge` - quantitative obstruction
   bounds from a positive cycle sum.
@@ -113,12 +115,13 @@ variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 /-! ### Sums of edge data along walks
 
 The generic fold `Maths.walkSum` and its `simp` calculus live with
-the monoid walk label in `Maths.DirectedTransport.Basic`; this section relates it to
-the real walk weight and records its subtraction rule. -/
+the monoid walk label in `Maths.DirectedTransport.Basic`; this section relates
+it to the additive walk weight and records its subtraction rule. -/
 
-/-- The real walk weight of `Maths.DirectedTransport.Additive.Potentials` is the real instance of
-`walkSum`. -/
-theorem walkWeight_eq_walkSum (weight : E → ℝ) {start finish : V}
+/-- The walk weight of `Maths.DirectedTransport.Additive.Potentials` is the
+commutative additive instance of `walkSum`. -/
+theorem walkWeight_eq_walkSum {A : Type*} [AddCommMonoid A]
+    (weight : E → A) {start finish : V}
     (walk : G.Walk start finish) :
     Maths.MaxPlusPotential.walkWeight weight walk = walkSum weight walk := rfl
 
@@ -365,6 +368,14 @@ variable {w : E → A} {start finish : V}
 def translationTransport (G : EdgeGraph V E) (w : E → A) :
     Maths.Transport G (fun _ : V => A) :=
   Maths.ofEdgeAct G A fun edge point => point + w edge
+
+/-- Every edge map of an ordered translation transport is monotone. -/
+theorem monotone_edgeMap_translationTransport
+    [Preorder A] [IsOrderedAddMonoid A] (w : E → A) :
+    ∀ edge : E, Monotone ((translationTransport G w).edgeMap edge) := by
+  intro edge first second hle
+  change first + w edge ≤ second + w edge
+  exact add_le_add_left hle (w edge)
 
 /-- Transport by additive edge data is translation by the walk sum. -/
 @[simp] theorem walkMap_translationTransport (w : E → A)

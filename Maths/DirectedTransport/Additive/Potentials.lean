@@ -84,6 +84,8 @@ component in question reaches the whole graph.
   walk propagation inequality
 - `Maths.MaxPlusPotential.isGreatest_incomingWeights` - with no positive closed
   walk, `maxIncomingWeight` is the greatest weight of a walk arriving at a vertex
+- `Maths.MaxPlusPotential.isLeast_nonnegativePotentials` - the same envelope is
+  the least nonnegative potential
 - `Maths.MaxPlusPotential.maxIncomingWeight_eq_sSup` - over `ℝ` it is therefore
   the supremum of the weights of all arriving walks
 - `Maths.MaxPlusPotential.exists_edge_defect_ge` - a closed walk of weight at
@@ -102,8 +104,10 @@ reversed graph, and is the convention of `Maths.ChargedPathBudget`, which studie
 nonnegative charges and the *oscillation* of a bounded potential, not
 signed weights and cycles.
 
-The weights in the qualitative core live in an ordered additive commutative
-monoid `𝕜`; cancellation is assumed only for the closed-walk duality.
+The predicates `IsPotential` and `IsSubeigenvector` themselves need only
+addition and a comparison relation. Walk propagation uses an ordered additive
+commutative monoid `𝕜`, and cancellation is assumed only for the closed-walk
+duality.
 Multiplication is used only in the cycle *means* of the
 quantitative and matrix sections; the duality itself is purely additive.  The
 candidate potential is a `Finset.max'` over the weights of the walks arriving
@@ -205,19 +209,25 @@ theorem walkWeight_sub_const (weight : E → 𝕜g) (lam : 𝕜g) {start finish 
 
 end AddGroup
 
+section Potential
+
+variable {𝕜p : Type*} [Add 𝕜p] [LE 𝕜p]
+
 /-- A potential for an edge weighting: traversing an edge increases it by at
 least the weight of that edge.  Also called a feasible node potential, a feasible
 price vector, a subinvariant function, or a Lyapunov weighting; in the (max, +)
 semiring it is a subeigenvector of the weight matrix.  The opposite decrement
 convention is the same notion on the reversed graph. -/
-def IsPotential (G : EdgeGraph V E) (weight : E → 𝕜) (φ : V → 𝕜) : Prop :=
+def IsPotential (G : EdgeGraph V E) (weight : E → 𝕜p) (φ : V → 𝕜p) : Prop :=
   ∀ e : E, φ (G.source e) + weight e ≤ φ (G.target e)
+
+end Potential
 
 /-! ### Potentials and their edge defects -/
 
 section AddGroup
 
-variable {𝕜g : Type*} [AddCommGroup 𝕜g] [LinearOrder 𝕜g] [IsOrderedAddMonoid 𝕜g]
+variable {𝕜g : Type*} [AddCommGroup 𝕜g] [Preorder 𝕜g] [IsOrderedAddMonoid 𝕜g]
 
 /-- The amount by which a candidate function fails the increment inequality at
 one edge.  Also called the edge slack, the reduced weight, or the residual of the
@@ -229,7 +239,7 @@ theorem isPotential_iff_forall_defect_nonpos (G : EdgeGraph V E) (weight : E →
     (φ : V → 𝕜g) : IsPotential G weight φ ↔ ∀ e : E, defect G weight φ e ≤ 0 := by
   simp [IsPotential, defect]
 
-omit [LinearOrder 𝕜g] [IsOrderedAddMonoid 𝕜g] in
+omit [Preorder 𝕜g] [IsOrderedAddMonoid 𝕜g] in
 /-- Telescoping along a walk: the defects of the traversed edges sum to the
 weight of the walk corrected by the endpoint values. -/
 theorem sum_defect_eq (weight : E → 𝕜g) (φ : V → 𝕜g) {start finish : V}
@@ -267,9 +277,13 @@ theorem IsPotential.walkWeight_le {weight : E → 𝕜g} {φ : V → 𝕜g}
 
 end AddGroup
 
+section OrderedMonoid
+
+variable {𝕜o : Type*} [AddCommMonoid 𝕜o] [Preorder 𝕜o] [IsOrderedAddMonoid 𝕜o]
+
 /-- A potential bounds a walk after adding the value at its starting vertex.
 This form only needs an additive monoid, unlike `IsPotential.walkWeight_le`. -/
-theorem IsPotential.walkWeight_add_le {weight : E → 𝕜} {φ : V → 𝕜}
+theorem IsPotential.walkWeight_add_le {weight : E → 𝕜o} {φ : V → 𝕜o}
     (hφ : IsPotential G weight φ) {start finish : V} (walk : G.Walk start finish) :
     walkWeight weight walk + φ start ≤ φ finish := by
   induction walk with
@@ -289,11 +303,11 @@ theorem IsPotential.walkWeight_add_le {weight : E → 𝕜} {φ : V → 𝕜}
 
 section CancelOrder
 
-variable [IsOrderedCancelAddMonoid 𝕜]
+variable [IsOrderedCancelAddMonoid 𝕜o]
 
-omit [IsOrderedAddMonoid 𝕜] in
+omit [IsOrderedAddMonoid 𝕜o] in
 /-- Weak duality: a potential forbids closed walks of positive weight. -/
-theorem IsPotential.closedWalk_nonpos {weight : E → 𝕜} {φ : V → 𝕜}
+theorem IsPotential.closedWalk_nonpos {weight : E → 𝕜o} {φ : V → 𝕜o}
     (hφ : IsPotential G weight φ) {vertex : V} (cycle : G.Walk vertex vertex) :
     walkWeight weight cycle ≤ 0 := by
   have h := hφ.walkWeight_add_le cycle
@@ -301,6 +315,8 @@ theorem IsPotential.closedWalk_nonpos {weight : E → 𝕜} {φ : V → 𝕜}
   exact le_of_add_le_add_right h'
 
 end CancelOrder
+
+end OrderedMonoid
 
 /-! ### The duality
 
@@ -497,6 +513,28 @@ theorem maxIncomingWeight_isPotential {weight : E → 𝕜}
   have hle := walkWeight_le_maxIncomingWeight hcyc (walk.concat e rfl)
   rwa [walkWeight_concat, hwalk] at hle
 
+/-- The incoming path envelope is the least nonnegative potential.  Thus its
+maximum-over-paths description and its minimum-over-feasible-potentials
+description are two sides of the same normalization. -/
+theorem isLeast_nonnegativePotentials {weight : E → 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0) :
+    IsLeast {potential : V → 𝕜 | (0 : V → 𝕜) ≤ potential ∧ IsPotential G weight potential}
+      (maxIncomingWeight G weight) := by
+  constructor
+  · exact ⟨fun vertex ↦ le_maxIncomingWeight
+      (zero_mem_nodupIncomingWeights weight vertex),
+      maxIncomingWeight_isPotential hcyc⟩
+  · rintro potential ⟨hnonnegative, hpotential⟩ vertex
+    obtain ⟨start, walk, -, hwalk⟩ := maxIncomingWeight_mem weight vertex
+    rw [← hwalk]
+    calc
+      walkWeight weight walk = walkWeight weight walk + 0 := (add_zero _).symm
+      _ ≤ walkWeight weight walk + potential start :=
+        by
+          simpa [add_comm] using
+            add_le_add_left (hnonnegative start) (walkWeight weight walk)
+      _ ≤ potential vertex := hpotential.walkWeight_add_le walk
+
 section CancelOrder
 
 variable [IsOrderedCancelAddMonoid 𝕜]
@@ -551,19 +589,19 @@ theorem exists_edge_defect_ge {weight : E → 𝕜q} (φ : V → 𝕜q) {vertex 
 
 end Quantitative
 
-section CancelOrder
+section CancelPreorder
 
-variable [IsOrderedCancelAddMonoid 𝕜]
+variable {𝕜c : Type*} [AddCommMonoid 𝕜c] [Preorder 𝕜c]
+variable [IsOrderedCancelAddMonoid 𝕜c]
 
-omit [IsOrderedAddMonoid 𝕜] in
 /-- A closed walk of strictly positive weight excludes every potential. -/
-theorem not_exists_isPotential_of_pos_closedWalk {weight : E → 𝕜} {vertex : V}
+theorem not_exists_isPotential_of_pos_closedWalk {weight : E → 𝕜c} {vertex : V}
     (cycle : G.Walk vertex vertex) (hpos : 0 < walkWeight weight cycle) :
-    ¬ ∃ φ : V → 𝕜, IsPotential G weight φ := by
+    ¬ ∃ φ : V → 𝕜c, IsPotential G weight φ := by
   rintro ⟨φ, hφ⟩
-  exact absurd (hφ.closedWalk_nonpos cycle) (not_le.mpr hpos)
+  exact (not_le_of_gt hpos) (hφ.closedWalk_nonpos cycle)
 
-end CancelOrder
+end CancelPreorder
 
 /-! ### The max-plus matrix reading -/
 
@@ -592,6 +630,12 @@ variable {𝕜g : Type*} [AddCommGroup 𝕜g] [LinearOrder 𝕜g] [IsOrderedAddM
 a matrix of coefficients in the (max, +) semiring. -/
 def matrixWeight (A : ι → ι → 𝕜g) : ι × ι → 𝕜g := fun e => A e.1 e.2
 
+end MatrixGroup
+
+section Subeigenvector
+
+variable {𝕜m : Type*} [Add 𝕜m] [LE 𝕜m]
+
 /-- A subeigenvector of a max-plus matrix for the value `lam`: the max-plus
 matrix-vector product `A ⊙ v`, whose `i`-th coordinate is the supremum over `j`
 of `A i j + v j`, is dominated coordinatewise by `lam + v`.  Also called a
@@ -599,8 +643,14 @@ subinvariant vector, a subharmonic vector, or a super-solution of the max-plus
 eigenvalue equation.  The infimum of the values `lam` for which a subeigenvector
 exists is called the max cycle mean of `A`, the max-plus Perron root, or the
 tropical spectral radius. -/
-def IsSubeigenvector (A : ι → ι → 𝕜g) (lam : 𝕜g) (v : ι → 𝕜g) : Prop :=
+def IsSubeigenvector (A : ι → ι → 𝕜m) (lam : 𝕜m) (v : ι → 𝕜m) : Prop :=
   ∀ i j : ι, A i j + v j ≤ lam + v i
+
+end Subeigenvector
+
+section MatrixGroup
+
+variable {𝕜g : Type*} [AddCommGroup 𝕜g] [LinearOrder 𝕜g] [IsOrderedAddMonoid 𝕜g]
 
 theorem isSubeigenvector_iff_isPotential (A : ι → ι → 𝕜g) (lam : 𝕜g) (v : ι → 𝕜g) :
     IsSubeigenvector A lam v ↔

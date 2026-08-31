@@ -128,7 +128,7 @@ theorem IsMixedSection.walkMap_le_of_lax_or_exact
     T.walkMap walk (family start) ≤ family finish := by
   change T.IsMixedSectionFor (fun _ => (· ≤ ·)) mode family at hfamily
   apply hfamily.walkMap_rel_of_lax_or_exact
-    (fun _ point => le_rfl) (fun _ => le_trans)
+    (fun _ => le_rfl) (fun _ => le_trans)
   · intro edge x y hxy
     exact hmono edge hxy
   · exact hmode
@@ -143,7 +143,7 @@ theorem IsMixedSection.le_walkMap_of_oplax_or_exact
     family finish ≤ T.walkMap walk (family start) := by
   change T.IsMixedSectionFor (fun _ => (· ≤ ·)) mode family at hfamily
   apply hfamily.walkMap_rel_of_oplax_or_exact
-    (fun _ point => le_rfl) (fun _ => le_trans)
+    (fun _ => le_rfl) (fun _ => le_trans)
   · intro edge x y hxy
     exact hmono edge hxy
   · exact hmode

@@ -37,6 +37,9 @@ the expected value `⊥` for lower demand and `⊤` for upper demand.
 * `Maths.Transport.lowerDemand_le_iff` and
   `Maths.Transport.le_upperDemand_iff` - the function-order forms of the
   incoming lower and upper constraints.
+* `Maths.Transport.monotone_lowerDemand` and
+  `Maths.Transport.monotone_upperDemand` - monotonicity inherited from the
+  edge maps.
 * `Maths.Transport.isMixedSection_iff_lowerDemand_le_and_le_upperDemand` -
   the pointwise Bellman interval characterization of ordered mixed sections.
 
@@ -84,6 +87,26 @@ def upperDemand (mode : E → EdgeMode) (family : ∀ vertex : V, Fiber vertex)
   ⨅ edge : IncomingUpperAt (G := G) mode vertex,
     fiberCast Fiber edge.property.1
       (T.edgeMap edge.1 (family (G.source edge.1)))
+
+/-- Lower demand is monotone when every edge transport is monotone. -/
+theorem monotone_lowerDemand
+    (mode : E → EdgeMode)
+    (hmono : ∀ edge : E, (mode edge).IsLaxOrExact → Monotone (T.edgeMap edge)) :
+    Monotone (T.lowerDemand mode) := by
+  intro first second hle vertex
+  refine iSup_mono fun edge ↦ ?_
+  exact fiberCast_le_fiberCast edge.property.1
+    (hmono edge.1 edge.property.2 (hle _))
+
+/-- Upper demand is monotone when every edge transport is monotone. -/
+theorem monotone_upperDemand
+    (mode : E → EdgeMode)
+    (hmono : ∀ edge : E, (mode edge).IsOplaxOrExact → Monotone (T.edgeMap edge)) :
+    Monotone (T.upperDemand mode) := by
+  intro first second hle vertex
+  refine iInf_mono fun edge ↦ ?_
+  exact fiberCast_le_fiberCast edge.property.1
+    (hmono edge.1 edge.property.2 (hle _))
 
 /-- A lower-compatible incoming edge is below the lower demand at its target. -/
 theorem le_lowerDemand {mode : E → EdgeMode}

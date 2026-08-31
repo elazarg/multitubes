@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.DirectedTransport.Basic
+public import Mathlib.Order.Closure
 public import Mathlib.Order.FixedPoints
 public import Mathlib.Order.Hom.CompleteLattice
 
@@ -34,6 +35,8 @@ root is sufficient even when separate cycle witnesses are not.
   the Bellman operator of a monotone transport, as a function and as an order homomorphism.
 * `Maths.Transport.leastLaxMajorant`: its least fixed point above a given lower
   bound.
+* `Maths.Transport.leastLaxMajorantClosure`: the least-majorant construction
+  bundled as a closure operator.
 
 ## Main results
 
@@ -48,6 +51,8 @@ root is sufficient even when separate cycle witnesses are not.
   points of the Bellman operator.
 * `Maths.Transport.leastLaxMajorant_isLeast`: monotone edge maps admit a least
   lax majorant.
+* `Maths.Transport.leastLaxMajorant_eq_self_iff`: the closed points of the
+  least-majorant operator are exactly the lax sections.
 
 ## Implementation notes
 
@@ -350,6 +355,34 @@ theorem leastLaxMajorant_isLeast
   refine ⟨hlower, hlax, fun family hlower' hlax' ↦ ?_⟩
   apply (T.bellmanOrderHom hmono lower).lfp_le
   exact (T.bellman_le_iff lower family).mpr ⟨hlower', hlax'⟩
+
+/-- Least lax majorant as a closure operator.  Its closed points are defined to
+be the lax sections, so the standard closure-operator API supplies
+monotonicity, extensivity, and idempotence. -/
+def leastLaxMajorantClosure
+    (hmono : ∀ edge : E, Monotone (T.edgeMap edge)) :
+    ClosureOperator (∀ vertex : V, Fiber vertex) :=
+  ClosureOperator.ofPred (T.leastLaxMajorant hmono) T.IsLaxSection
+    (fun lower ↦ (T.leastLaxMajorant_isLeast hmono lower).1)
+    (fun lower ↦ (T.leastLaxMajorant_isLeast hmono lower).2.1)
+    (fun {lower family} hlower hfamily ↦
+      (T.leastLaxMajorant_isLeast hmono lower).2.2 family
+        (fun vertex ↦ hlower vertex) hfamily)
+
+/-- Applying the bundled closure operator computes the least lax majorant. -/
+@[simp] theorem leastLaxMajorantClosure_apply
+    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (lower : ∀ vertex : V, Fiber vertex) :
+    T.leastLaxMajorantClosure hmono lower = T.leastLaxMajorant hmono lower :=
+  rfl
+
+/-- A family is fixed by least-majorant closure exactly when it is a lax
+section. -/
+theorem leastLaxMajorant_eq_self_iff
+    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (family : ∀ vertex : V, Fiber vertex) :
+    T.leastLaxMajorant hmono family = family ↔ T.IsLaxSection family := by
+  exact (T.leastLaxMajorantClosure hmono).isClosed_iff.symm
 
 end Bellman
 

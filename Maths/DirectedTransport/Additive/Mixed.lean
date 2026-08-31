@@ -37,10 +37,16 @@ potentials on the laxification graph.
   partial-order reduction to signed lax transport.
 * `Maths.MixedAdditiveTransport.isMixedSection_iff_isPotential_laxified` - the
   mixed-section/potential correspondence.
+* `Maths.MixedAdditiveTransport.walkWeight_eq_zero_of_exact`,
+  `Maths.MixedAdditiveTransport.walkWeight_nonpos_of_lax_or_exact`, and
+  `Maths.MixedAdditiveTransport.walkWeight_nonneg_of_oplax_or_exact` - the
+  original-orientation cycle consequences.
 * `Maths.MixedAdditiveTransport.exists_isMixedSection_iff_forall_laxified_closedWalk_nonpos` -
   the finite-edge cycle feasibility criterion.
 * `Maths.MixedAdditiveTransport.mixedMaxIncomingWeight_isMixedSection` - the
   canonical mixed section supplied by the incoming envelope.
+* `Maths.MixedAdditiveTransport.isLeast_nonnegativeMixedSections` - the
+  envelope is the least nonnegative mixed section.
 * `Maths.MixedAdditiveTransport.isGreatest_laxifiedIncomingWeights` - the
   path-envelope characterization.
 
@@ -159,13 +165,60 @@ theorem isMixedSection_iff_isLaxSection_laxified
 /-- A mixed additive section is exactly an ordinary additive potential on the
 laxification graph with its signed weighting. -/
 theorem isMixedSection_iff_isPotential_laxified
-    [LinearOrder A] [IsOrderedAddMonoid A]
+    [PartialOrder A] [IsOrderedAddMonoid A]
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A) (potential : V → A) :
     (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential ↔
       MaxPlusPotential.IsPotential (Transport.laxificationGraph G mode)
         (laxifiedWeight mode weight) potential := by
   rw [isMixedSection_iff_isLaxSection_laxified]
   rfl
+
+/-- An exact-mode closed walk has zero original signed weight. -/
+theorem walkWeight_eq_zero_of_exact
+    [LE A] (mode : E → EdgeMode) {weight : E → A} {family : V → A}
+    (hfamily : (CycleCoboundary.translationTransport G weight).IsMixedSection mode family)
+    {vertex : V} (cycle : G.Walk vertex vertex)
+    (hmode : ∀ edge ∈ cycle.edges, (mode edge).IsExact) :
+    MaxPlusPotential.walkWeight weight cycle = 0 := by
+  rw [CycleCoboundary.walkWeight_eq_walkSum]
+  apply add_left_cancel (a := family vertex)
+  simpa using hfamily.walkMap_eq_of_exact cycle hmode
+
+section OrderedCycles
+
+variable [Preorder A] [IsOrderedAddMonoid A]
+
+/-- A closed walk using only lax or exact edges has nonpositive original
+weight whenever a mixed section exists. -/
+theorem walkWeight_nonpos_of_lax_or_exact
+    (mode : E → EdgeMode) {weight : E → A} {family : V → A}
+    (hfamily : (CycleCoboundary.translationTransport G weight).IsMixedSection mode family)
+    {vertex : V} (cycle : G.Walk vertex vertex)
+    (hmode : ∀ edge ∈ cycle.edges, (mode edge).IsLaxOrExact) :
+    MaxPlusPotential.walkWeight weight cycle ≤ 0 := by
+  have hwalk := hfamily.walkMap_le_of_lax_or_exact
+    (CycleCoboundary.monotone_edgeMap_translationTransport weight) cycle hmode
+  rw [CycleCoboundary.walkMap_translationTransport,
+    ← CycleCoboundary.walkWeight_eq_walkSum] at hwalk
+  apply le_of_add_le_add_left (a := family vertex)
+  simpa using hwalk
+
+/-- A closed walk using only oplax or exact edges has nonnegative original
+weight whenever a mixed section exists. -/
+theorem walkWeight_nonneg_of_oplax_or_exact
+    (mode : E → EdgeMode) {weight : E → A} {family : V → A}
+    (hfamily : (CycleCoboundary.translationTransport G weight).IsMixedSection mode family)
+    {vertex : V} (cycle : G.Walk vertex vertex)
+    (hmode : ∀ edge ∈ cycle.edges, (mode edge).IsOplaxOrExact) :
+    0 ≤ MaxPlusPotential.walkWeight weight cycle := by
+  have hwalk := hfamily.le_walkMap_of_oplax_or_exact
+    (CycleCoboundary.monotone_edgeMap_translationTransport weight) cycle hmode
+  rw [CycleCoboundary.walkMap_translationTransport,
+    ← CycleCoboundary.walkWeight_eq_walkSum] at hwalk
+  apply le_of_add_le_add_left (a := family vertex)
+  simpa using hwalk
+
+end OrderedCycles
 
 section Finite
 
@@ -217,6 +270,27 @@ theorem mixedMaxIncomingWeight_isMixedSection
       (mixedMaxIncomingWeight G mode weight) := by
   apply (isMixedSection_iff_isPotential_laxified G mode weight _).2
   exact MaxPlusPotential.maxIncomingWeight_isPotential hcycle
+
+/-- The signed incoming path envelope is the least nonnegative mixed section.
+It is a maximum over path weights and simultaneously a minimum over normalized
+feasible sections. -/
+theorem isLeast_nonnegativeMixedSections
+    (mode : E → EdgeMode) [Finite (Transport.LaxificationEdge mode)]
+    {weight : E → A}
+    (hcycle : ∀ (vertex : V)
+      (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
+      MaxPlusPotential.walkWeight (laxifiedWeight mode weight) cycle ≤ 0) :
+    IsLeast
+      {potential : V → A | (0 : V → A) ≤ potential ∧
+        (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential}
+      (mixedMaxIncomingWeight G mode weight) := by
+  have hleast := MaxPlusPotential.isLeast_nonnegativePotentials hcycle
+  constructor
+  · exact ⟨hleast.1.1,
+      (isMixedSection_iff_isPotential_laxified G mode weight _).2 hleast.1.2⟩
+  · rintro potential ⟨hnonnegative, hfamily⟩
+    exact hleast.2 ⟨hnonnegative,
+      (isMixedSection_iff_isPotential_laxified G mode weight _).1 hfamily⟩
 
 /-- A mixed additive section exists exactly when every transformed closed walk
 has nonpositive signed weight. -/
