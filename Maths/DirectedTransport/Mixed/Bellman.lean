@@ -6,7 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.DirectedTransport.Mixed.Order
-public import Mathlib.Order.FixedPoints
+public import Mathlib.Order.CompleteLattice.Basic
 
 /-!
 # Bellman intervals for mixed-polarity transport
@@ -23,6 +23,8 @@ the expected value `⊥` for lower demand and `⊤` for upper demand.
 
 ## Main definitions
 
+* `Maths.Transport.IncomingLowerAt` and `Maths.Transport.IncomingUpperAt` -
+  the subtypes of incoming edges contributing to each demand.
 * `Maths.Transport.lowerDemand` - the join of incoming lower-compatible
   transported values.
 * `Maths.Transport.upperDemand` - the meet of incoming upper-compatible
@@ -30,8 +32,13 @@ the expected value `⊥` for lower demand and `⊤` for upper demand.
 
 ## Main results
 
-* `Maths.Transport.isMixedSection_iff_demands` - the pointwise Bellman
-  interval characterization of ordered mixed sections.
+* `Maths.Transport.le_lowerDemand` and `Maths.Transport.upperDemand_le` - an
+  incoming compatible edge lies on the appropriate side of its demand.
+* `Maths.Transport.lowerDemand_le_iff` and
+  `Maths.Transport.le_upperDemand_iff` - the function-order forms of the
+  incoming lower and upper constraints.
+* `Maths.Transport.isMixedSection_iff_lowerDemand_le_and_le_upperDemand` -
+  the pointwise Bellman interval characterization of ordered mixed sections.
 
 ## Tags
 
@@ -55,26 +62,26 @@ section CompleteLattice
 variable [∀ vertex : V, CompleteLattice (Fiber vertex)]
 
 /-- Incoming edges whose mode supplies a lower constraint. -/
-abbrev LowerIncomingAt (mode : E → EdgeMode) (vertex : V) :=
+abbrev IncomingLowerAt (mode : E → EdgeMode) (vertex : V) :=
   {edge : E // G.target edge = vertex ∧
-    (mode edge = EdgeMode.lax ∨ mode edge = EdgeMode.exact)}
+    EdgeMode.IsLaxOrExact (mode edge)}
 
 /-- Incoming edges whose mode supplies an upper constraint. -/
-abbrev UpperIncomingAt (mode : E → EdgeMode) (vertex : V) :=
+abbrev IncomingUpperAt (mode : E → EdgeMode) (vertex : V) :=
   {edge : E // G.target edge = vertex ∧
-    (mode edge = EdgeMode.oplax ∨ mode edge = EdgeMode.exact)}
+    EdgeMode.IsOplaxOrExact (mode edge)}
 
 /-- The join of transported values contributed by incoming lax or exact edges. -/
 def lowerDemand (mode : E → EdgeMode) (family : ∀ vertex : V, Fiber vertex)
     (vertex : V) : Fiber vertex :=
-  ⨆ edge : LowerIncomingAt (G := G) mode vertex,
+  ⨆ edge : IncomingLowerAt (G := G) mode vertex,
     fiberCast Fiber edge.property.1
       (T.edgeMap edge.1 (family (G.source edge.1)))
 
 /-- The meet of transported values contributed by incoming oplax or exact edges. -/
 def upperDemand (mode : E → EdgeMode) (family : ∀ vertex : V, Fiber vertex)
     (vertex : V) : Fiber vertex :=
-  ⨅ edge : UpperIncomingAt (G := G) mode vertex,
+  ⨅ edge : IncomingUpperAt (G := G) mode vertex,
     fiberCast Fiber edge.property.1
       (T.edgeMap edge.1 (family (G.source edge.1)))
 
@@ -82,10 +89,10 @@ def upperDemand (mode : E → EdgeMode) (family : ∀ vertex : V, Fiber vertex)
 theorem le_lowerDemand {mode : E → EdgeMode}
     {family : ∀ vertex : V, Fiber vertex} {vertex : V}
     {edge : E} (htarget : G.target edge = vertex)
-    (hmode : mode edge = EdgeMode.lax ∨ mode edge = EdgeMode.exact) :
+    (hmode : EdgeMode.IsLaxOrExact (mode edge)) :
     fiberCast Fiber htarget (T.edgeMap edge (family (G.source edge))) ≤
       T.lowerDemand mode family vertex := by
-  exact le_iSup (fun incoming : LowerIncomingAt (G := G) mode vertex ↦
+  exact le_iSup (fun incoming : IncomingLowerAt (G := G) mode vertex ↦
     fiberCast Fiber incoming.property.1
       (T.edgeMap incoming.1 (family (G.source incoming.1))))
     ⟨edge, htarget, hmode⟩
@@ -94,67 +101,76 @@ theorem le_lowerDemand {mode : E → EdgeMode}
 theorem upperDemand_le {mode : E → EdgeMode}
     {family : ∀ vertex : V, Fiber vertex} {vertex : V}
     {edge : E} (htarget : G.target edge = vertex)
-    (hmode : mode edge = EdgeMode.oplax ∨ mode edge = EdgeMode.exact) :
+    (hmode : EdgeMode.IsOplaxOrExact (mode edge)) :
     T.upperDemand mode family vertex ≤
       fiberCast Fiber htarget (T.edgeMap edge (family (G.source edge))) := by
-  exact iInf_le (fun incoming : UpperIncomingAt (G := G) mode vertex ↦
+  exact iInf_le (fun incoming : IncomingUpperAt (G := G) mode vertex ↦
     fiberCast Fiber incoming.property.1
       (T.edgeMap incoming.1 (family (G.source incoming.1))))
     ⟨edge, htarget, hmode⟩
 
-private theorem lowerDemand_le_of_isMixedSection
-    {mode : E → EdgeMode} {family : ∀ vertex : V, Fiber vertex}
-    (hfamily : T.IsMixedSection mode family) (vertex : V) :
-    T.lowerDemand mode family vertex ≤ family vertex := by
-  refine iSup_le fun incoming ↦ ?_
-  rcases incoming with ⟨edge, htarget, hmode⟩
-  rcases hmode with hmode | hmode
-  · simpa only [fiberCast_family] using
-      fiberCast_le_fiberCast htarget (hfamily.lax hmode)
-  · simpa only [fiberCast_family] using
-      (congrArg (fiberCast Fiber htarget) (hfamily.exact hmode)).le
+/-- The lower-demand inequality is equivalent to every lower-compatible edge
+constraint, stated as an inequality in the edge's target fiber. -/
+theorem lowerDemand_le_iff
+    {mode : E → EdgeMode} {family : ∀ vertex : V, Fiber vertex} :
+    T.lowerDemand mode family ≤ family ↔
+      ∀ edge, EdgeMode.IsLaxOrExact (mode edge) →
+        T.edgeMap edge (family (G.source edge)) ≤ family (G.target edge) := by
+  constructor
+  · intro h edge hmode
+    exact (le_lowerDemand T rfl hmode).trans (h (G.target edge))
+  · intro h vertex
+    refine iSup_le fun incoming ↦ ?_
+    rcases incoming with ⟨edge, htarget, hmode⟩
+    simpa only [fiberCast_family] using
+      fiberCast_le_fiberCast htarget (h edge hmode)
 
-private theorem isMixedSection_of_lowerDemand_le
-    {mode : E → EdgeMode} {family : ∀ vertex : V, Fiber vertex}
-    (hlower : ∀ vertex, T.lowerDemand mode family vertex ≤ family vertex)
-    (hupper : ∀ vertex, family vertex ≤ T.upperDemand mode family vertex) :
-    T.IsMixedSection mode family := by
-  intro edge
-  have htarget : G.target edge = G.target edge := rfl
-  cases hmode : mode edge with
-  | lax =>
-      exact (le_lowerDemand T htarget (Or.inl hmode)).trans
-        (hlower (G.target edge))
-  | exact =>
-      apply le_antisymm
-      · exact (le_lowerDemand T htarget (Or.inr hmode)).trans
-          (hlower (G.target edge))
-      · exact (hupper (G.target edge)).trans
-          (upperDemand_le T htarget (Or.inr hmode))
-  | oplax =>
-      exact (hupper (G.target edge)).trans
-        (upperDemand_le T htarget (Or.inl hmode))
+/-- The upper-demand inequality is equivalent to every upper-compatible edge
+constraint, stated as an inequality in the edge's target fiber. -/
+theorem le_upperDemand_iff
+    {mode : E → EdgeMode} {family : ∀ vertex : V, Fiber vertex} :
+    family ≤ T.upperDemand mode family ↔
+      ∀ edge, EdgeMode.IsOplaxOrExact (mode edge) →
+        family (G.target edge) ≤ T.edgeMap edge (family (G.source edge)) := by
+  constructor
+  · intro h edge hmode
+    exact (h (G.target edge)).trans (upperDemand_le T rfl hmode)
+  · intro h vertex
+    refine le_iInf fun incoming ↦ ?_
+    rcases incoming with ⟨edge, htarget, hmode⟩
+    simpa only [fiberCast_family] using
+      fiberCast_le_fiberCast htarget (h edge hmode)
 
 /-- An ordered mixed section is exactly a pointwise interval between its lower
 and upper incoming demands.  Exact edges are included in both demands. -/
-theorem isMixedSection_iff_demands
+theorem isMixedSection_iff_lowerDemand_le_and_le_upperDemand
     {mode : E → EdgeMode} {family : ∀ vertex : V, Fiber vertex} :
     T.IsMixedSection mode family ↔
-      (∀ vertex, T.lowerDemand mode family vertex ≤ family vertex) ∧
-        (∀ vertex, family vertex ≤ T.upperDemand mode family vertex) := by
+      T.lowerDemand mode family ≤ family ∧ family ≤ T.upperDemand mode family := by
   constructor
   · intro hfamily
-    exact ⟨lowerDemand_le_of_isMixedSection T hfamily,
-      fun vertex ↦ by
-        refine le_iInf fun incoming ↦ ?_
-        rcases incoming with ⟨edge, htarget, hmode⟩
-        rcases hmode with hmode | hmode
-        · simpa only [fiberCast_family] using
-            fiberCast_le_fiberCast htarget (hfamily.oplax hmode)
-        · simpa only [fiberCast_family] using
-            (congrArg (fiberCast Fiber htarget) (hfamily.exact hmode)).ge⟩
+    constructor
+    · apply (lowerDemand_le_iff T).mpr
+      intro edge hmode
+      rcases hmode with hmode | hmode
+      · exact hfamily.lax hmode
+      · exact (hfamily.exact hmode).le
+    · apply (le_upperDemand_iff T).mpr
+      intro edge hmode
+      rcases hmode with hmode | hmode
+      · exact hfamily.oplax hmode
+      · exact (hfamily.exact hmode).ge
   · rintro ⟨hlower, hupper⟩
-    exact isMixedSection_of_lowerDemand_le T hlower hupper
+    have hlower' := (lowerDemand_le_iff T).mp hlower
+    have hupper' := (le_upperDemand_iff T).mp hupper
+    intro edge
+    cases hmode : mode edge with
+    | lax => exact hlower' edge (Or.inl hmode)
+    | exact =>
+        apply le_antisymm
+        · exact hlower' edge (Or.inr hmode)
+        · exact hupper' edge (Or.inr hmode)
+    | oplax => exact hupper' edge (Or.inl hmode)
 
 end CompleteLattice
 
