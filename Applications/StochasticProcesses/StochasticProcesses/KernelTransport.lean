@@ -16,10 +16,9 @@ the target states. Its expectation pullback maps target observables to source
 observables. The pullback is contravariant, hence a forward kernel on `G` is
 represented by a transport on `G.reverse`.
 
-The expectation uses `ℝ≥0∞` observables and an unconditional `tsum`. The
-one-loop graph keeps the path statement compact. The same edge map works for
-heterogeneous state fibers; a general forward walk additionally needs the
-reversed edge sequence in `G.reverse`.
+The expectation uses `ℝ≥0∞` observables and an unconditional `tsum`. Forward
+kernels compose along arbitrary typed walks, while their expectation pullbacks
+compose along the corresponding reversed walks.
 
 ## Main definitions
 
@@ -27,6 +26,8 @@ reversed edge sequence in `G.reverse`.
 * `StochasticProcesses.kernelStar` - expectation pullback of a PMF kernel.
 * `StochasticProcesses.kernelPullbackTransport` - dependent pullback transport
   on a reversed graph.
+* `StochasticProcesses.pathKernel` - dependent kernel composition along a
+  typed forward walk.
 * `StochasticProcesses.loopGraph` - the one-vertex, one-edge graph.
 * `StochasticProcesses.kernelTransport` - the reversed pullback transport.
 * `StochasticProcesses.loopWalk` - the walk with a prescribed number of
@@ -37,6 +38,7 @@ reversed edge sequence in `G.reverse`.
 ## Main results
 
 * `StochasticProcesses.expect_mono` - monotonicity of expectation.
+* `StochasticProcesses.expect_pure` - expectation under a point mass.
 * `StochasticProcesses.expect_bind` - expectation through one kernel bind.
 * `StochasticProcesses.kernelStar_monotone` - monotonicity of pullback.
 * `StochasticProcesses.kernelPullbackTransport_edgeMap_monotone` - monotonicity of
@@ -47,6 +49,13 @@ reversed edge sequence in `G.reverse`.
   superharmonic observable families.
 * `StochasticProcesses.isOplaxSection_iff_subharmonic` - oplax sections as
   subharmonic observable families.
+* `StochasticProcesses.walkMap_reverse_eq_expect_pathKernel` - reversed pullback as
+  expectation under a forward path kernel.
+* `StochasticProcesses.pathKernel_append` - kernel composition respects walk
+  concatenation.
+* `StochasticProcesses.expect_pathKernel_eq_of_harmonic` - exact path expectation.
+* `StochasticProcesses.expect_pathKernel_le_of_superharmonic` and
+  `StochasticProcesses.le_expect_pathKernel_of_subharmonic` - one-sided path bounds.
 * `StochasticProcesses.walkMap_loopWalk_eq_iterate` - path-map identification.
 * `StochasticProcesses.superharmonic_iterate_le` - the upper path bound.
 * `StochasticProcesses.subharmonic_iterate_ge` - the lower path bound.
@@ -77,6 +86,17 @@ theorem expect_mono (p : PMF S) {f g : S → ℝ≥0∞}
     (hfg : ∀ s, f s ≤ g s) : expect p f ≤ expect p g := by
   unfold expect
   exact ENNReal.tsum_le_tsum fun s => mul_le_mul_right (hfg s) (p s)
+
+/-- Expectation under a point mass is evaluation at its support point. -/
+@[simp] theorem expect_pure (state : S) (f : S → ℝ≥0∞) :
+    expect (PMF.pure state) f = f state := by
+  unfold expect
+  calc
+    (∑' other, (PMF.pure state) other * f other) =
+        (PMF.pure state) state * f state :=
+      tsum_eq_single state fun other hother => by
+        rw [PMF.pure_apply_of_ne _ _ hother, zero_mul]
+    _ = f state := by rw [PMF.pure_apply_self, one_mul]
 
 /-- Expectation distributes through an arbitrary PMF bind. -/
 theorem expect_bind {T : Type*}
@@ -184,6 +204,130 @@ theorem isOplaxSection_iff_subharmonic {V E : Type*} (G : EdgeGraph V E)
     exact h edge state
   · intro h edge state
     exact h edge state
+
+/-- The PMF obtained by composing the kernels along a typed forward walk. -/
+def pathKernel {V E : Type*} (G : EdgeGraph V E) (State : V → Type*)
+    (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
+    {start : V} : {finish : V} → G.Walk start finish →
+      State start → PMF (State finish)
+  | _, .nil => PMF.pure
+  | _, .concat walk edge legal => fun state =>
+      (pathKernel G State k walk state).bind fun middle =>
+        k edge (fiberCast State legal.symm middle)
+
+/-- The path kernel of an empty walk is the point mass at its input. -/
+@[simp] theorem pathKernel_nil {V E : Type*} (G : EdgeGraph V E) (State : V → Type*)
+    (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
+    {vertex : V} (state : State vertex) :
+    pathKernel G State k (.nil : G.Walk vertex vertex) state = PMF.pure state :=
+  rfl
+
+/-- The path kernel of one edge is its given probability kernel. -/
+@[simp] theorem pathKernel_singleton {V E : Type*} (G : EdgeGraph V E)
+    (State : V → Type*)
+    (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
+    (edge : E) (state : State (G.source edge)) :
+    pathKernel G State k (EdgeGraph.Walk.singleton edge) state = k edge state := by
+  simp [pathKernel, EdgeGraph.Walk.singleton]
+
+/-- Concatenating walks binds their path kernels in traversal order. -/
+theorem pathKernel_append {V E : Type*} (G : EdgeGraph V E) (State : V → Type*)
+    (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
+    {start middle finish : V} (first : G.Walk start middle)
+    (second : G.Walk middle finish) (state : State start) :
+    pathKernel G State k (first.append second) state =
+      (pathKernel G State k first state).bind (pathKernel G State k second) := by
+  induction second with
+  | nil => exact (PMF.bind_pure _).symm
+  | concat second edge legal ih =>
+      simp only [EdgeGraph.Walk.append_concat, pathKernel, ih, PMF.bind_bind]
+
+private theorem walkMap_reverseEdge_eq_expect {V E : Type*} (G : EdgeGraph V E)
+    (State : V → Type*)
+    (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
+    {middle : V} (edge : E) (legal : G.source edge = middle)
+    (f : State (G.target edge) → ℝ≥0∞) :
+    (kernelPullbackTransport G State k).walkMap
+        ((EdgeGraph.Walk.singleton (G := G.reverse) edge).castStart
+            (G.reverse_source edge)
+          |>.castFinish ((G.reverse_target edge).trans legal)) f =
+      fun state => expect (k edge (fiberCast State legal.symm state)) f := by
+  cases legal
+  rfl
+
+/-- Pullback along a reversed walk is expectation under its forward path kernel. -/
+theorem walkMap_reverse_eq_expect_pathKernel {V E : Type*} (G : EdgeGraph V E)
+    (State : V → Type*)
+    (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
+    {start finish : V} (walk : G.Walk start finish)
+    (f : State finish → ℝ≥0∞) (state : State start) :
+    (kernelPullbackTransport G State k).walkMap walk.reverse f state =
+      expect (pathKernel G State k walk state) f := by
+  induction walk with
+  | nil => simp [pathKernel]
+  | @concat middle walk edge legal ih =>
+      rw [EdgeGraph.Walk.reverse_concat walk edge legal, Transport.walkMap_append]
+      rw [walkMap_reverseEdge_eq_expect G State k edge legal]
+      rw [ih]
+      simpa only [pathKernel] using
+        (expect_bind (pathKernel G State k walk state)
+          (fun middle => k edge (fiberCast State legal.symm middle)) f).symm
+
+/-- The exact path consequence of harmonicity. -/
+theorem expect_pathKernel_eq_of_harmonic {V E : Type*} (G : EdgeGraph V E)
+    (State : V → Type*)
+    (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
+    {start finish : V} (walk : G.Walk start finish)
+    (family : ∀ vertex, State vertex → ℝ≥0∞)
+    (hharmonic : ∀ edge state,
+      expect (k edge state) (family (G.target edge)) = family (G.source edge) state)
+    (state : State start) :
+    expect (pathKernel G State k walk state) (family finish) = family start state := by
+  have hsection := (isSection_iff_harmonic G State k family).2 hharmonic
+  have hwalk := hsection.walkMap_eq walk.reverse
+  have hpoint := congrFun hwalk state
+  rw [walkMap_reverse_eq_expect_pathKernel] at hpoint
+  exact hpoint
+
+/-- The upper path consequence of superharmonicity. -/
+theorem expect_pathKernel_le_of_superharmonic {V E : Type*} (G : EdgeGraph V E)
+    (State : V → Type*)
+    (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
+    {start finish : V} (walk : G.Walk start finish)
+    (family : ∀ vertex, State vertex → ℝ≥0∞)
+    (hsuperharmonic : ∀ edge state,
+      expect (k edge state) (family (G.target edge)) ≤ family (G.source edge) state)
+    (state : State start) :
+    expect (pathKernel G State k walk state) (family finish) ≤ family start state := by
+  have hfamily :=
+    (isLaxSection_iff_superharmonic G State k family).2 hsuperharmonic
+  have hmono : ∀ edge, Monotone ((kernelPullbackTransport G State k).edgeMap edge) := by
+    intro edge
+    exact kernelPullbackTransport_edgeMap_monotone G State k edge
+  have hwalk := hfamily.walkMap_le hmono walk.reverse
+  have hpoint := hwalk state
+  rw [walkMap_reverse_eq_expect_pathKernel] at hpoint
+  exact hpoint
+
+/-- The lower path consequence of subharmonicity. -/
+theorem le_expect_pathKernel_of_subharmonic {V E : Type*} (G : EdgeGraph V E)
+    (State : V → Type*)
+    (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
+    {start finish : V} (walk : G.Walk start finish)
+    (family : ∀ vertex, State vertex → ℝ≥0∞)
+    (hsubharmonic : ∀ edge state,
+      family (G.source edge) state ≤ expect (k edge state) (family (G.target edge)))
+    (state : State start) :
+    family start state ≤ expect (pathKernel G State k walk state) (family finish) := by
+  have hfamily :=
+    (isOplaxSection_iff_subharmonic G State k family).2 hsubharmonic
+  have hmono : ∀ edge, Monotone ((kernelPullbackTransport G State k).edgeMap edge) := by
+    intro edge
+    exact kernelPullbackTransport_edgeMap_monotone G State k edge
+  have hwalk := hfamily.le_walkMap hmono walk.reverse
+  have hpoint := hwalk state
+  rw [walkMap_reverse_eq_expect_pathKernel] at hpoint
+  exact hpoint
 
 /-- The loop walk containing exactly `n` copies of the unique edge. -/
 def loopWalk : ℕ → loopGraph.reverse.Walk () ()

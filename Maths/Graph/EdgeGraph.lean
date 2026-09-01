@@ -37,7 +37,8 @@ circulations, and application-specific semantics belong in files that import thi
 * `Maths.EdgeGraph.Walk`: an endpoint-indexed finite walk.
 * `Maths.EdgeGraph.Walk.edges`, `length`, `visited`, `edgeMultiplicity`: the
   basic measurements of a walk.
-* `Maths.EdgeGraph.Walk.append`, `singleton`, `castFinish`: walk constructors.
+* `Maths.EdgeGraph.Walk.append`, `singleton`, `castStart`, `castFinish`, `reverse`:
+  walk constructors.
 * `Maths.EdgeGraph.Walk.VertexSplit`: a witness that a walk visits a vertex,
   together with `splice` for inserting a closed walk there.
 * `Maths.LinkedTo`, `Maths.IsStronglyConnectedAt`, and
@@ -47,6 +48,10 @@ circulations, and application-specific semantics belong in files that import thi
 ## Main results
 
 * `Maths.EdgeGraph.Walk.edges_isChain`: consecutive edges have matching endpoints.
+* `Maths.EdgeGraph.Walk.reverse_nil`, `reverse_concat`, and `reverse_append`: reversal
+  distributes over the basic walk constructors.
+* `Maths.EdgeGraph.Walk.length_reverse`, `edges_reverse`, and `reverse_reverse`:
+  reversal preserves length, reverses the edge list, and is involutive.
 * `Maths.EdgeGraph.Walk.edges_nodup_of_visited_nodup`: pairwise distinct visited
   vertices force pairwise distinct edges.
 * `Maths.EdgeGraph.Walk.exists_splitAtEdge`: a walk splits at any edge it uses.
@@ -344,6 +349,25 @@ def castFinish {start finish finish' : V} (walk : G.Walk start finish)
   subst finish'
   rfl
 
+/-- Change only the initial index of a typed walk along an equality. -/
+def castStart {start start' finish : V} (walk : G.Walk start finish)
+    (hstart : start = start') : G.Walk start' finish :=
+  hstart ▸ walk
+
+/-- Changing the initial index leaves the length unchanged. -/
+@[simp] theorem length_castStart {start start' finish : V}
+    (walk : G.Walk start finish) (hstart : start = start') :
+    (walk.castStart hstart).length = walk.length := by
+  subst start'
+  rfl
+
+/-- Changing the initial index leaves the edge list unchanged. -/
+@[simp] theorem edges_castStart {start start' finish : V}
+    (walk : G.Walk start finish) (hstart : start = start') :
+    (walk.castStart hstart).edges = walk.edges := by
+  subst start'
+  rfl
+
 /-- Concatenate two typed walks at their common endpoint. -/
 def append {start middle : V} (first : G.Walk start middle) :
     {finish : V} → G.Walk middle finish → G.Walk start finish
@@ -353,9 +377,25 @@ def append {start middle : V} (first : G.Walk start middle) :
 @[simp] theorem append_nil (first : G.Walk start middle) :
     first.append (.nil : G.Walk middle middle) = first := rfl
 
+/-- Prepending an empty walk leaves a walk unchanged. -/
+@[simp] theorem nil_append (second : G.Walk middle finish) :
+    (.nil : G.Walk middle middle).append second = second := by
+  induction second with
+  | nil => rfl
+  | concat second edge legal ih => simp [append, ih]
+
 @[simp] theorem append_concat (first : G.Walk start middle)
     (second : G.Walk middle finish) (edge : E) (legal : G.source edge = finish) :
     first.append (.concat second edge legal) = .concat (first.append second) edge legal := rfl
+
+/-- Associativity of typed walk concatenation. -/
+theorem append_assoc {finish' : V} (first : G.Walk start middle) (second : G.Walk middle finish)
+    (third : G.Walk finish finish') :
+    (first.append second).append third = first.append (second.append third) := by
+  induction third with
+  | nil => rfl
+  | concat third edge legal ih =>
+      simp only [append_concat, ih]
 
 @[simp] theorem edges_append (first : G.Walk start middle) (second : G.Walk middle finish) :
     (first.append second).edges = first.edges ++ second.edges := by
@@ -376,6 +416,96 @@ def singleton (edge : E) : G.Walk (G.source edge) (G.target edge) :=
 @[simp] theorem edges_singleton (edge : E) : (singleton (G := G) edge).edges = [edge] := rfl
 
 @[simp] theorem length_singleton (edge : E) : (singleton (G := G) edge).length = 1 := rfl
+
+/-- Reverse a typed walk, changing its graph orientation and endpoint order. -/
+def reverse {start finish : V} : G.Walk start finish → G.reverse.Walk finish start
+  | .nil => .nil
+  | .concat walkSoFar edge legal =>
+      let first := castStart (singleton (G := G.reverse) edge) (G.reverse_source edge)
+      let hfinish := (G.reverse_target edge).trans legal
+      (castFinish first hfinish).append (reverse walkSoFar)
+
+/-- Reversal turns a change of initial index into a change of terminal index. -/
+theorem reverse_castStart {start start' finish : V} (walk : G.Walk start finish)
+    (hstart : start = start') :
+    reverse (walk.castStart hstart) = (reverse walk).castFinish hstart := by
+  subst start'
+  rfl
+
+/-- Reversal turns a change of terminal index into a change of initial index. -/
+theorem reverse_castFinish {start finish finish' : V} (walk : G.Walk start finish)
+    (hfinish : finish = finish') :
+    reverse (walk.castFinish hfinish) = (reverse walk).castStart hfinish := by
+  subst finish'
+  rfl
+
+/-- Reversing a one-edge walk gives the same edge in the reversed graph. -/
+@[simp] theorem reverse_singleton (edge : E) :
+    reverse (singleton (G := G) edge) = singleton (G := G.reverse) edge := by
+  cases G
+  rfl
+
+private theorem reverse_reversedSingleton (edge : E)
+    (hsource : G.reverse.source edge = G.target edge)
+    (hfinish : G.reverse.target edge = G.source edge) :
+    reverse
+        ((singleton (G := G.reverse) edge).castStart hsource |>.castFinish hfinish) =
+      singleton (G := G) edge := by
+  cases G
+  rfl
+
+/-- Reversal leaves an empty walk empty. -/
+@[simp] theorem reverse_nil : (reverse (G := G) (.nil : G.Walk start start)) = .nil := by
+  simp [reverse]
+
+/-- Reversal of a walk extended by an edge starts with the reversed edge. -/
+@[simp] theorem reverse_concat (walkSoFar : G.Walk start finish) (edge : E)
+    (legal : G.source edge = finish) :
+    reverse (walkSoFar.concat edge legal) =
+      (castFinish (castStart (singleton (G := G.reverse) edge) (G.reverse_source edge))
+        ((G.reverse_target edge).trans legal)).append (reverse walkSoFar) := by
+  rfl
+
+/-- Reversal preserves the number of edges in a walk. -/
+@[simp] theorem length_reverse (walk : G.Walk start finish) :
+    walk.reverse.length = walk.length := by
+  induction walk with
+  | nil => rfl
+  | concat walkSoFar edge legal ih =>
+      rw [reverse_concat, length_append, length_castFinish, length_castStart,
+        length_singleton, length_concat, ih]
+      omega
+
+/-- Reversal reverses the chronological edge list of a walk. -/
+@[simp] theorem edges_reverse (walk : G.Walk start finish) :
+    walk.reverse.edges = walk.edges.reverse := by
+  induction walk with
+  | nil => rfl
+  | concat walkSoFar edge legal ih =>
+      rw [reverse_concat, edges_append, edges_castFinish, edges_castStart,
+        edges_singleton, edges_concat, ih]
+      simp
+
+/-- Reversal distributes over typed walk concatenation. -/
+theorem reverse_append (first : G.Walk start middle) (second : G.Walk middle finish) :
+    (first.append second).reverse = second.reverse.append first.reverse := by
+  induction second with
+  | nil => simp [reverse, nil_append]
+  | concat second edge legal ih =>
+      cases legal
+      simp [reverse, ih]
+      rw [append_assoc]
+
+/-- Reversing a typed walk twice recovers the original walk. -/
+@[simp] theorem reverse_reverse (walk : G.Walk start finish) :
+    walk.reverse.reverse = walk := by
+  induction walk with
+  | nil => rfl
+  | concat walkSoFar edge legal ih =>
+      cases legal
+      rw [reverse_concat, reverse_append, ih]
+      rw [reverse_reversedSingleton (G := G) edge]
+      rfl
 
 /-- A typed decomposition of a walk at an occurrence of an edge. -/
 theorem exists_splitAtEdge (walk : G.Walk start finish) (edge : E) (hmem : edge ∈ walk.edges) :

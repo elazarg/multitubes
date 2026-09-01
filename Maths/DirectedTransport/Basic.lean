@@ -72,6 +72,8 @@ products of slopes.
 
 ## Main results
 
+* `Maths.Transport.walkMap_castStart` and `Maths.Transport.walkMap_castFinish` -
+  endpoint reindexing commutes with transport.
 * `Maths.Transport.walkMap_append` - path composition.
 * `Maths.Transport.IsSection.walkMap_eq` - exact transport of
   sections.
@@ -209,6 +211,14 @@ variable {start finish middle finish' base : V}
 
 @[simp] theorem walkMap_singleton (edge : E) (point : Fiber (G.source edge)) :
     T.walkMap (EdgeGraph.Walk.singleton (G := G) edge) point = T.edgeMap edge point := rfl
+
+/-- Retyping the start of a walk retypes its transported input. -/
+@[simp] theorem walkMap_castStart {start' : V} (walk : G.Walk start finish)
+    (hstart : start = start') (point : Fiber start') :
+    T.walkMap (walk.castStart hstart) point =
+      T.walkMap walk (fiberCast Fiber hstart.symm point) := by
+  subst start'
+  rfl
 
 /-- Retyping the endpoint of a walk retypes its transported value. -/
 @[simp] theorem walkMap_castFinish (walk : G.Walk start finish)

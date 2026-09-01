@@ -21,6 +21,7 @@ oplax section rules give harmonic, superharmonic, and subharmonic path bounds.
 * `StochasticProcesses.kernelStar` - expectation pullback of a state kernel.
 * `StochasticProcesses.kernelPullbackTransport` - dependent pullback transport
   on a reversed graph.
+* `StochasticProcesses.pathKernel` - PMF composition along a typed forward walk.
 * `StochasticProcesses.kernelTransport` - the one-loop specialization of the
   pullback transport.
 
@@ -37,6 +38,13 @@ oplax section rules give harmonic, superharmonic, and subharmonic path bounds.
   `StochasticProcesses.isLaxSection_iff_superharmonic`, and
   `StochasticProcesses.isOplaxSection_iff_subharmonic` - the three section
   polarities as pointwise kernel inequalities.
+* `StochasticProcesses.walkMap_reverse_eq_expect_pathKernel` - reversed pullback as
+  expectation under the forward path kernel.
+* `StochasticProcesses.pathKernel_append` - kernel composition respects walk
+  concatenation.
+* `StochasticProcesses.expect_pathKernel_eq_of_harmonic`,
+  `StochasticProcesses.expect_pathKernel_le_of_superharmonic`, and
+  `StochasticProcesses.le_expect_pathKernel_of_subharmonic` - generic path bounds.
 * `StochasticProcesses.walkMap_loopWalk_eq_iterate` - the transport walk map
   is the expectation of the corresponding iterated kernel.
 * `StochasticProcesses.superharmonic_iterate_le` and
