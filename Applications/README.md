@@ -37,3 +37,4 @@ stopping, and control are domains that can use it.
 | [Persistence modules](PersistenceModules/) | Compatible elements in noninvertible diagrams |
 | [Discrete-event systems](DiscreteEventSystems/) | Max-plus/min-plus closure and residuation |
 | [Quantitative relations](QuantitativeRelations/) | Compositional error and privacy grades |
+| [Web of trust](WebOfTrust/) | Provenance-aware endorsement and evidence closure |
