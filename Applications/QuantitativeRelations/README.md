@@ -1,7 +1,6 @@
-# Quantitative and graded relations
+# Quantitative relations
 
-This dossier interprets relations enriched by grades measuring error, discrepancy, robustness, or
-privacy. Composition is governed by an ordered monoid or quantale, for example
-`R ε ; R δ ≤ R (ε + δ)`, so a walk transports both relations and accumulated grades. Metric,
-divergence, privacy, and robustness semantics remain domain-specific; the grading algebra should
-build on enriched relation theory.
+This client attaches grades from a canonically ordered additive monoid to mixed-polarity
+relations on dependent fibers. Edge costs accumulate with `Maths.walkSum`. A graded section
+propagates along walks of either compatible polarity, and along arbitrary mixed walks when the
+relation is symmetric. A pseudometric instance specializes the grades to `ℝ≥0`.
