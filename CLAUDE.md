@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Project guidance for Multitube (`multitube`).
+Project guidance for Multitubes (`multitubes`).
 
 ## What this is
 
@@ -16,11 +16,11 @@ join-semidirect, and max-affine specializations. Five groups sit under the umbre
                            the Loynes and two-sided reflections
   Maths/LinearProgramming/ Fourier-Motzkin elimination and standard-form LP duality
   Maths/Algebra/           the join-semidirect label algebra
-  Maths/Multitube/         the theory the other four serve
+  Maths/Multitubes/         the theory the other four serve
   ```
 
 The first four depend on mathlib alone and not on each other. Keep it that way: a new import
-from `Maths/Multitube/` into any of them inverts the layering.
+from `Maths/Multitubes/` into any of them inverts the layering.
 
 ## Conventions
 

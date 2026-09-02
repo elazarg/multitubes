@@ -1,6 +1,6 @@
 # Applications
 
-This directory records domain perspectives for Multitube. Each subdirectory describes the
+This directory records domain perspectives for Multitubes. Each subdirectory describes the
 interpretation a domain can give to its path actions and constraints; domain-specific
 developments may live in a separate project.
 

@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitube.Mixed.AdjointOrder
+public import Maths.Multitubes.Mixed.AdjointOrder
 public import QuantumTransport.Kraus
 
 /-!

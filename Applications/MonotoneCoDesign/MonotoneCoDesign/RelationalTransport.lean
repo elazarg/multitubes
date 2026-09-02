@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitube.Closure
+public import Maths.Multitubes.Closure
 public import Mathlib.Data.Rel
 public import Mathlib.Order.Hom.CompleteLattice
 

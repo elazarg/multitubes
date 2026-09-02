@@ -54,7 +54,7 @@ compact minimum-mass face.
 
 Together these are the standard-form counterparts of the inequality-form results in
 `Maths.LinearProgramming.FourierMotzkin`, and they are what the sparse-certificate
-arguments in `Maths.FiniteInequality` and `Maths.Multitube.MaxAffine` consume.
+arguments in `Maths.FiniteInequality` and `Maths.Multitubes.MaxAffine` consume.
 
 ## Main definitions
 

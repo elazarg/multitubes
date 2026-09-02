@@ -23,7 +23,7 @@ The standard-form linear program is `max ⟪c, z⟫` over the nonnegative affine
 with `Aᵀ *ᵥ y ≥ c`. This file proves weak duality, strong duality, dual attainment and
 complementary slackness for that pair.
 
-Following the pattern of `Maths.Multitube.MaxAffine.Duality` and
+Following the pattern of `Maths.Multitubes.MaxAffine.Duality` and
 `Maths.FiniteInequality.worstResidualAtMost_iff_normalizedDual_le`, strong duality
 is stated as an exact *threshold* equivalence, not an equality of optima: for every
 level `t`, the primal attains at least `t` exactly when the dual is bounded below by `t` (and

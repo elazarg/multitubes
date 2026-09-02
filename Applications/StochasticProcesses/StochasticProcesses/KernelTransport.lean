@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitube.Basic
+public import Maths.Multitubes.Basic
 public import Mathlib.Probability.ProbabilityMassFunction.Monad
 
 /-!

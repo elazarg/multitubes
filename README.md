@@ -1,6 +1,6 @@
-# Multitube
+# Multitubes
 
-Multitube is a Lean 4 library for compositional data and constraints on directed multigraphs.
+Multitubes is a Lean 4 library for compositional data and constraints on directed multigraphs.
 It covers weighted graphs, gain graphs, and flow/circulation identities, then extends them to
 graphs whose edges carry arbitrary transformations. It studies how edge data compose along
 walks and what paths and cycles imply about potentials, sections, inequalities, fixed points,
@@ -59,10 +59,10 @@ A mixed section chooses one of these three modes independently for each edge. Mo
 `≤` can be replaced by a fiberwise relation `R`; the core definition does not assume that `R` is
 an order.
 
-The name *Multitube* comes from the ordered picture: lax and oplax constraints can act as two
-walls around admissible propagation through a branching quiver, while exact compatibility is
-the zero-width case. This is an intuition, not an assumption. The underlying path action needs
-no order, and the mixed-constraint layer can use an arbitrary relation.
+In the ordered picture, a pair of lax and oplax constraints bounds an admissible tube along an
+edge, while exact compatibility is the zero-width case. The name *Multitubes* evokes the
+interacting tubes of a branching quiver. This is an intuition, not an assumption: the underlying
+path action needs no order, and the mixed-constraint layer can use an arbitrary relation.
 
 According to the application, this same object can be read as:
 
@@ -83,16 +83,16 @@ It is likely a good fit if you need to formalize one of the following.
 | --- | --- |
 | Typed directed walks with parallel edges and composition | [`Maths.Graph.EdgeGraph`](Maths/Graph/EdgeGraph.lean) |
 | Walk multiplicities, flow conservation, circulations, and Eulerian realization | [`Maths.Graph.Circulation`](Maths/Graph/Circulation.lean) and [`EulerianTrail`](Maths/Graph/EulerianTrail.lean) |
-| Additive difference constraints and cycle feasibility | [`Additive.Potentials`](Maths/Multitube/Additive/Potentials.lean) and [`Additive.Mixed`](Maths/Multitube/Additive/Mixed.lean) |
-| Gain-graph and voltage-graph switching and balance | [`Maths.Multitube.Switching`](Maths/Multitube/Switching.lean) |
-| Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/Multitube/Additive/CycleMean.lean), [`CriticalGraph`](Maths/Multitube/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/Multitube/Additive/Eigenvector.lean) |
-| Functions between possibly different state spaces along edges | [`Maths.Multitube.Basic`](Maths/Multitube/Basic.lean) |
-| Path independence, trivial holonomy, or exact-section normal forms | [`Maths.Multitube.Exact`](Maths/Multitube/Exact.lean) and [`NormalForms`](Maths/Multitube/NormalForms.lean) |
-| Least solutions of monotone graph inequalities | [`Maths.Multitube.Closure`](Maths/Multitube/Closure.lean) |
-| Exact, lax, oplax, or per-edge mixed constraints | [`Maths.Multitube.Mixed`](Maths/Multitube/Mixed/Basic.lean) |
-| Mixed constraints reducible through residuals or adjoints | [`Mixed.AdjointOrder`](Maths/Multitube/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/Multitube/Mixed/Closure.lean) |
-| Finite systems of inequalities and infeasibility certificates | [`Maths.Multitube.FiniteInequality`](Maths/Multitube/FiniteInequality/Basic.lean) |
-| Maps of the form `x ↦ max a (b + c * x)` | [`Maths.Multitube.MaxAffine`](Maths/Multitube/MaxAffine/Basic.lean) |
+| Additive difference constraints and cycle feasibility | [`Additive.Potentials`](Maths/Multitubes/Additive/Potentials.lean) and [`Additive.Mixed`](Maths/Multitubes/Additive/Mixed.lean) |
+| Gain-graph and voltage-graph switching and balance | [`Maths.Multitubes.Switching`](Maths/Multitubes/Switching.lean) |
+| Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/Multitubes/Additive/CycleMean.lean), [`CriticalGraph`](Maths/Multitubes/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/Multitubes/Additive/Eigenvector.lean) |
+| Functions between possibly different state spaces along edges | [`Maths.Multitubes.Basic`](Maths/Multitubes/Basic.lean) |
+| Path independence, trivial holonomy, or exact-section normal forms | [`Maths.Multitubes.Exact`](Maths/Multitubes/Exact.lean) and [`NormalForms`](Maths/Multitubes/NormalForms.lean) |
+| Least solutions of monotone graph inequalities | [`Maths.Multitubes.Closure`](Maths/Multitubes/Closure.lean) |
+| Exact, lax, oplax, or per-edge mixed constraints | [`Maths.Multitubes.Mixed`](Maths/Multitubes/Mixed/Basic.lean) |
+| Mixed constraints reducible through residuals or adjoints | [`Mixed.AdjointOrder`](Maths/Multitubes/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/Multitubes/Mixed/Closure.lean) |
+| Finite systems of inequalities and infeasibility certificates | [`Maths.Multitubes.FiniteInequality`](Maths/Multitubes/FiniteInequality/Basic.lean) |
+| Maps of the form `x ↦ max a (b + c * x)` | [`Maths.Multitubes.MaxAffine`](Maths/Multitubes/MaxAffine/Basic.lean) |
 | Affine, max-affine, Loynes, or two-sided clamped recurrences | [`Maths.Recursion`](Maths/Recursion/TransferSummary.lean) and [`ClampedAffineFixedPoint`](Maths/Recursion/ClampedAffineFixedPoint.lean) |
 | Fourier–Motzkin elimination, Farkas alternatives, or LP duality | [`Maths.LinearProgramming`](Maths/LinearProgramming/FourierMotzkin.lean) |
 
@@ -178,7 +178,7 @@ Add the repository to a Lake project:
 ```toml
 [[require]]
 name = "maths"
-git = "https://github.com/elazarg/multitube"
+git = "https://github.com/elazarg/multitubes"
 rev = "main"
 ```
 
@@ -191,13 +191,13 @@ lake build
 ```
 
 Import only the layer you need. Module names follow the directory path, while declaration names
-use shallow namespaces. For example, importing `Maths.Multitube.Basic` exposes
+use shallow namespaces. For example, importing `Maths.Multitubes.Basic` exposes
 `Maths.Transport`, and importing `Maths.Graph.EdgeGraph` exposes `Maths.EdgeGraph`.
 
 The structural interface is intentionally narrow:
 
 ```lean
-import Maths.Multitube.Basic
+import Maths.Multitubes.Basic
 
 #check Maths.EdgeGraph
 #check Maths.Transport
@@ -210,7 +210,7 @@ import Maths.Multitube.Basic
 A complete one-edge example shows the shape of the definitions:
 
 ```lean
-import Maths.Multitube.Basic
+import Maths.Multitubes.Basic
 
 open Maths
 
@@ -234,7 +234,7 @@ example (x : Bool → Nat) :
 For mixed-polarity constraints:
 
 ```lean
-import Maths.Multitube.Mixed.Basic
+import Maths.Multitubes.Mixed.Basic
 
 #check Maths.EdgeMode
 #check Maths.Transport.IsMixedSectionFor
@@ -243,7 +243,7 @@ import Maths.Multitube.Mixed.Basic
 For the finite-edge additive cycle criterion:
 
 ```lean
-import Maths.Multitube.Additive.Potentials
+import Maths.Multitubes.Additive.Potentials
 
 #check Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
 ```
@@ -254,7 +254,7 @@ algebraic or analytic dependencies and make theorem search more focused.
 ## Repository layout
 
 Five groups sit under the `Maths` namespace. The first four are reusable foundations built on
-mathlib; Multitube consumes them.
+mathlib; the Multitubes layer consumes them.
 
 | Directory | Contents |
 | --- | --- |
@@ -262,11 +262,11 @@ mathlib; Multitube consumes them.
 | `Maths/Recursion/` | Affine, max-affine, and clamped-affine summaries, fixed points, and one-sided and two-sided reflections |
 | `Maths/LinearProgramming/` | Fourier–Motzkin elimination, alternatives, standard-form LP, sparsity, and duality |
 | `Maths/Algebra/` | The join-semidirect label algebra |
-| `Maths/Multitube/` | Generic, exact, lax, oplax, mixed, additive, finite-inequality, gain-graph, and max-affine transport |
+| `Maths/Multitubes/` | Generic, exact, lax, oplax, mixed, additive, finite-inequality, gain-graph, and max-affine transport |
 
 The umbrella module [`Maths.lean`](Maths.lean) imports everything. Each group is also a separate
 Lake target: `MathsGraph`, `MathsRecursion`, `MathsLinearProgramming`, `MathsAlgebra`, and
-`MathsMultitube`.
+`MathsMultitubes`.
 
 [`Applications/`](Applications/) contains domain dossiers. Selected dossiers also contain
 independent downstream Lake packages; they import `Maths` without entering its module or

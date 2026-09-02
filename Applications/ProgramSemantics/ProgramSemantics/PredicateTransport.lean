@@ -5,8 +5,8 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitube.Closure
-public import Maths.Multitube.Mixed.AdjointOrder
+public import Maths.Multitubes.Closure
+public import Maths.Multitubes.Mixed.AdjointOrder
 public import Mathlib.Data.Set.Lattice.Image
 public import Mathlib.Order.Hom.CompleteLattice
 

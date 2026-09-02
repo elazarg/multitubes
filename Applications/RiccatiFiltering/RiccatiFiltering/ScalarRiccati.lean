@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitube.Mixed.Order
+public import Maths.Multitubes.Mixed.Order
 public import Mathlib.Data.NNReal.Defs
 
 import Mathlib.Tactic.Linarith

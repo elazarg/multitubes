@@ -32,67 +32,67 @@ public import Maths.LinearProgramming.Duality
 public import Maths.LinearProgramming.NormalizedFarkas
 
 -- Transport: the structural theory
-public import Maths.Multitube.Basic
-public import Maths.Multitube.Mixed.Basic
-public import Maths.Multitube.Mixed.Walk
-public import Maths.Multitube.Mixed.Adjoint
-public import Maths.Multitube.Mixed.Order
-public import Maths.Multitube.Mixed.AdjointOrder
-public import Maths.Multitube.Mixed.Bellman
-public import Maths.Multitube.Category
-public import Maths.Multitube.CategoricalRetracts
-public import Maths.Multitube.CategoricalRetractAdapter
-public import Maths.Multitube.Closure
-public import Maths.Multitube.Mixed.Closure
-public import Maths.Multitube.Exact
-public import Maths.Multitube.SCC
-public import Maths.Multitube.NormalForms
-public import Maths.Multitube.PotentialRigidity
-public import Maths.Multitube.Switching
+public import Maths.Multitubes.Basic
+public import Maths.Multitubes.Mixed.Basic
+public import Maths.Multitubes.Mixed.Walk
+public import Maths.Multitubes.Mixed.Adjoint
+public import Maths.Multitubes.Mixed.Order
+public import Maths.Multitubes.Mixed.AdjointOrder
+public import Maths.Multitubes.Mixed.Bellman
+public import Maths.Multitubes.Category
+public import Maths.Multitubes.CategoricalRetracts
+public import Maths.Multitubes.CategoricalRetractAdapter
+public import Maths.Multitubes.Closure
+public import Maths.Multitubes.Mixed.Closure
+public import Maths.Multitubes.Exact
+public import Maths.Multitubes.SCC
+public import Maths.Multitubes.NormalForms
+public import Maths.Multitubes.PotentialRigidity
+public import Maths.Multitubes.Switching
 
 -- Transport: finite inequality certificates
-public import Maths.Multitube.FiniteInequality.Arithmetic
-public import Maths.Multitube.FiniteInequality.Basic
-public import Maths.Multitube.FiniteInequality.Quantitative
-public import Maths.Multitube.FiniteInequality.Sparse
+public import Maths.Multitubes.FiniteInequality.Arithmetic
+public import Maths.Multitubes.FiniteInequality.Basic
+public import Maths.Multitubes.FiniteInequality.Quantitative
+public import Maths.Multitubes.FiniteInequality.Sparse
 
 -- Transport: additive specialization and max-plus spectra
-public import Maths.Multitube.Additive.Budget
-public import Maths.Multitube.Additive.Circuits
-public import Maths.Multitube.Additive.CirculationDecomposition
-public import Maths.Multitube.Additive.Condensation
-public import Maths.Multitube.Additive.CriticalGraph
-public import Maths.Multitube.Additive.CycleMean
-public import Maths.Multitube.Additive.Cycles
-public import Maths.Multitube.Additive.Eigenvector
-public import Maths.Multitube.Additive.Exact
-public import Maths.Multitube.Additive.Mixed
-public import Maths.Multitube.Additive.MixedQuantitative
-public import Maths.Multitube.Additive.Potentials
-public import Maths.Multitube.Additive.Quantitative
-public import Maths.Multitube.Additive.ShortCycles
+public import Maths.Multitubes.Additive.Budget
+public import Maths.Multitubes.Additive.Circuits
+public import Maths.Multitubes.Additive.CirculationDecomposition
+public import Maths.Multitubes.Additive.Condensation
+public import Maths.Multitubes.Additive.CriticalGraph
+public import Maths.Multitubes.Additive.CycleMean
+public import Maths.Multitubes.Additive.Cycles
+public import Maths.Multitubes.Additive.Eigenvector
+public import Maths.Multitubes.Additive.Exact
+public import Maths.Multitubes.Additive.Mixed
+public import Maths.Multitubes.Additive.MixedQuantitative
+public import Maths.Multitubes.Additive.Potentials
+public import Maths.Multitubes.Additive.Quantitative
+public import Maths.Multitubes.Additive.ShortCycles
 
 -- Transport: max-affine specialization
-public import Maths.Multitube.MaxAffine.Additive
-public import Maths.Multitube.MaxAffine.Arithmetic
-public import Maths.Multitube.MaxAffine.Basic
-public import Maths.Multitube.MaxAffine.Contraction
-public import Maths.Multitube.MaxAffine.CycleSlack
-public import Maths.Multitube.MaxAffine.Duality
-public import Maths.Multitube.MaxAffine.Eigenproblem
-public import Maths.Multitube.MaxAffine.Farkas
-public import Maths.Multitube.MaxAffine.FixedPoint
-public import Maths.Multitube.MaxAffine.GaugeFeasibility
-public import Maths.Multitube.MaxAffine.GaugeHolonomy
-public import Maths.Multitube.MaxAffine.JoinSemidirect
-public import Maths.Multitube.MaxAffine.LeastEigenvalue
-public import Maths.Multitube.MaxAffine.Paths
-public import Maths.Multitube.MaxAffine.Relaxation
-public import Maths.Multitube.MaxAffine.Scalar
-public import Maths.Multitube.MaxAffine.Sections
-public import Maths.Multitube.MaxAffine.Slopes
-public import Maths.Multitube.MaxAffine.Sparse
-public import Maths.Multitube.MaxAffine.Spectrum
+public import Maths.Multitubes.MaxAffine.Additive
+public import Maths.Multitubes.MaxAffine.Arithmetic
+public import Maths.Multitubes.MaxAffine.Basic
+public import Maths.Multitubes.MaxAffine.Contraction
+public import Maths.Multitubes.MaxAffine.CycleSlack
+public import Maths.Multitubes.MaxAffine.Duality
+public import Maths.Multitubes.MaxAffine.Eigenproblem
+public import Maths.Multitubes.MaxAffine.Farkas
+public import Maths.Multitubes.MaxAffine.FixedPoint
+public import Maths.Multitubes.MaxAffine.GaugeFeasibility
+public import Maths.Multitubes.MaxAffine.GaugeHolonomy
+public import Maths.Multitubes.MaxAffine.JoinSemidirect
+public import Maths.Multitubes.MaxAffine.LeastEigenvalue
+public import Maths.Multitubes.MaxAffine.Paths
+public import Maths.Multitubes.MaxAffine.Relaxation
+public import Maths.Multitubes.MaxAffine.Scalar
+public import Maths.Multitubes.MaxAffine.Sections
+public import Maths.Multitubes.MaxAffine.Slopes
+public import Maths.Multitubes.MaxAffine.Sparse
+public import Maths.Multitubes.MaxAffine.Spectrum
 
 /-!
 # Maths
@@ -109,12 +109,12 @@ alternative by Fourier-Motzkin elimination together with standard-form linear pr
 feasibility, optimality, extreme-point sparsity, and duality.  `Maths.Algebra` carries the
 join-semidirect label algebra.
 
-`Maths.Multitube` is the theory the other four serve: operator-labelled transition
+`Maths.Multitubes` is the theory the other four serve: operator-labelled transition
 graphs, their walks, holonomy, exact, lax, oplax, and mixed-polarity sections, with categorical and
 strongly connected normal forms, complete-lattice closure, gain-graph switching and balance,
 additive cycle and circulation duality with its max-plus spectral theory, finite inequality
 certificates, and max-affine transport.
 
-Import `Maths.Multitube.Basic` when only the structural walk semantics -- the
+Import `Maths.Multitubes.Basic` when only the structural walk semantics -- the
 computational graph, walks, holonomy, and sections -- are required.
 -/
