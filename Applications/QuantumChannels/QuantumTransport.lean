@@ -8,7 +8,7 @@ module
 public import QuantumTransport.Discard
 
 /-!
-# Quantum directed transport
+# Quantum transport
 
 This is the umbrella module for transport by finite-dimensional Kraus maps and
 for the discard-channel obstruction to residual reversal.
@@ -16,7 +16,7 @@ for the discard-channel obstruction to residual reversal.
 ## Main definitions
 
 * `QuantumTransport.krausMap` - a heterogeneous finite Kraus map.
-* `QuantumTransport.ofKrausFamily` - directed transport by edgewise Kraus maps.
+* `QuantumTransport.ofKrausFamily` - transport by edgewise Kraus maps.
 * `QuantumTransport.discard` - the two-to-one-dimensional discard channel on
   positive cones.
 
@@ -29,5 +29,5 @@ for the discard-channel obstruction to residual reversal.
 
 ## Tags
 
-quantum channel, Kraus map, directed transport, Löwner order, residual
+quantum channel, Kraus map, transport, Löwner order, residual
 -/

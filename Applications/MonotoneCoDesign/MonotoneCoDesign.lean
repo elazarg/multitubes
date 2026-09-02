@@ -12,7 +12,7 @@ public import MonotoneCoDesign.RelationalTransport
 # Monotone co-design by relational transport
 
 Co-design feasibility relations compose along typed graph walks. Existential image embeds the
-native relational semantics into directed transport on powersets, where feasible assignments are
+native relational semantics into transport on powersets, where feasible assignments are
 oplax sections and path closure constructs least attainable families.
 
 ## Main definitions
@@ -44,7 +44,7 @@ oplax sections and path closure constructs least attainable families.
 
 ## Tags
 
-monotone co-design, feasibility relation, relational composition, directed transport, powerset
+monotone co-design, feasibility relation, relational composition, transport, powerset
 -/
 
 @[expose] public section

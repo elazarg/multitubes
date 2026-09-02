@@ -1,6 +1,6 @@
 # Program semantics and abstract interpretation
 
-Directed transport can model a control-flow graph whose fibers are concrete states, predicates,
+Transport can model a control-flow graph whose fibers are concrete states, predicates,
 expectations, or abstract domains. Lax sections express inductive invariants and conservative
 analyses, while exact sections express compatible assignments. Forward and backward semantics can
 be related by adjunctions, and fiberwise logical relations can express soundness of abstraction.

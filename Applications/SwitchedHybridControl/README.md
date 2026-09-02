@@ -1,6 +1,6 @@
 # Switched and hybrid control
 
-Directed transport can model switched and hybrid certificates by taking fibers to candidate
+Transport can model switched and hybrid certificates by taking fibers to candidate
 Lyapunov or storage functions and edges to pullbacks along mode dynamics or resets. With the
 orientation chosen for pullback, lax conditions express decrease. Dependent fibers cover
 mode-dependent state spaces and noninvertible resets.

@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Mixed.AdjointOrder
+public import Maths.Multitube.Mixed.AdjointOrder
 public import QuantumTransport.Kraus
 
 /-!
@@ -30,7 +30,7 @@ available for every completely positive map, even in finite dimension.
 * `QuantumTransport.discardKraus` - coordinate Kraus operators for discard.
 * `QuantumTransport.discard` - the two-dimensional discard channel.
 * `QuantumTransport.discardGraph` - the one-edge graph carrying discard.
-* `QuantumTransport.discardTransport` - discard as directed transport.
+* `QuantumTransport.discardTransport` - discard as transport.
 
 ## Main results
 
@@ -306,7 +306,7 @@ def discardOrder : (vertex : Bool) →
   | false => fun first second => first.1 ≤ second.1
   | true => fun first second => first.1 ≤ second.1
 
-/-- The one-edge directed transport whose edge map is discard. -/
+/-- The one-edge transport whose edge map is discard. -/
 def discardTransport : Transport discardGraph discardFiber where
   edgeMap _ := discard
 
@@ -315,7 +315,7 @@ def discardMode : Unit → EdgeMode :=
   fun _ => .oplax
 
 /-- The oplax discard edge admits no residual family satisfying the reversal
-law used by directed-transport laxification. -/
+law used by transport laxification. -/
 theorem not_exists_discardResidual :
     ¬ ∃ residual : ∀ edge : Transport.LaxificationReverseEdge discardMode,
         discardFiber (discardGraph.target edge.1) →

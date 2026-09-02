@@ -1,9 +1,10 @@
-# directed-transport
+# Multitube
 
-`directed-transport` is a Lean 4 library for weighted directed graphs, gain graphs,
-flow/circulation identities, and their extension to graphs whose edges carry arbitrary
-transformations. It studies how edge data compose along walks and what paths and cycles imply
-about potentials, sections, inequalities, fixed points, and spectra.
+Multitube is a Lean 4 library for compositional data and constraints on directed multigraphs.
+It covers weighted graphs, gain graphs, and flow/circulation identities, then extends them to
+graphs whose edges carry arbitrary transformations. It studies how edge data compose along
+walks and what paths and cycles imply about potentials, sections, inequalities, fixed points,
+and spectra.
 
 The library starts with familiar graph constructions and progressively removes their customary
 algebraic assumptions. It includes the classical group-valued gain-graph picture, but does not
@@ -12,7 +13,7 @@ same type of value.
 
 The Lean package is named `maths`, and its modules live under the `Maths` namespace.
 
-## From weighted and gain graphs to directed transport
+## From weighted and gain graphs to path actions and constraints
 
 The basic graph is a directed multigraph: edges are objects in their own right, so parallel edges
 retain their identities. Its finite walks are indexed by both endpoints, making composability
@@ -35,7 +36,7 @@ Several increasingly general kinds of edge data can be placed on this graph.
    forward relation, or the reversed relation on each edge. The relation need not initially be an
    order; ordered, lattice, additive, and residuated results are built as later layers.
 
-The last two steps are the directed-transport abstraction. Let `G` be a directed multigraph. Each
+The central abstraction is an operator-labelled quiver. Let `G` be a directed multigraph. Each
 vertex `v` has a type `F v`, called its fiber, and an edge `e : s → t` carries a function
 
 ```text
@@ -58,6 +59,11 @@ A mixed section chooses one of these three modes independently for each edge. Mo
 `≤` can be replaced by a fiberwise relation `R`; the core definition does not assume that `R` is
 an order.
 
+The name *Multitube* comes from the ordered picture: lax and oplax constraints can act as two
+walls around admissible propagation through a branching quiver, while exact compatibility is
+the zero-width case. This is an intuition, not an assumption. The underlying path action needs
+no order, and the mixed-constraint layer can use an arbitrary relation.
+
 According to the application, this same object can be read as:
 
 - a representation of the free path category of a quiver;
@@ -77,16 +83,16 @@ It is likely a good fit if you need to formalize one of the following.
 | --- | --- |
 | Typed directed walks with parallel edges and composition | [`Maths.Graph.EdgeGraph`](Maths/Graph/EdgeGraph.lean) |
 | Walk multiplicities, flow conservation, circulations, and Eulerian realization | [`Maths.Graph.Circulation`](Maths/Graph/Circulation.lean) and [`EulerianTrail`](Maths/Graph/EulerianTrail.lean) |
-| Additive difference constraints and cycle feasibility | [`Additive.Potentials`](Maths/DirectedTransport/Additive/Potentials.lean) and [`Additive.Mixed`](Maths/DirectedTransport/Additive/Mixed.lean) |
-| Gain-graph and voltage-graph switching and balance | [`Maths.DirectedTransport.Switching`](Maths/DirectedTransport/Switching.lean) |
-| Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/DirectedTransport/Additive/CycleMean.lean), [`CriticalGraph`](Maths/DirectedTransport/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/DirectedTransport/Additive/Eigenvector.lean) |
-| Functions between possibly different state spaces along edges | [`Maths.DirectedTransport.Basic`](Maths/DirectedTransport/Basic.lean) |
-| Path independence, trivial holonomy, or exact-section normal forms | [`Maths.DirectedTransport.Exact`](Maths/DirectedTransport/Exact.lean) and [`NormalForms`](Maths/DirectedTransport/NormalForms.lean) |
-| Least solutions of monotone graph inequalities | [`Maths.DirectedTransport.Closure`](Maths/DirectedTransport/Closure.lean) |
-| Exact, lax, oplax, or per-edge mixed constraints | [`Maths.DirectedTransport.Mixed`](Maths/DirectedTransport/Mixed/Basic.lean) |
-| Mixed constraints reducible through residuals or adjoints | [`Mixed.AdjointOrder`](Maths/DirectedTransport/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/DirectedTransport/Mixed/Closure.lean) |
-| Finite systems of inequalities and infeasibility certificates | [`Maths.DirectedTransport.FiniteInequality`](Maths/DirectedTransport/FiniteInequality/Basic.lean) |
-| Maps of the form `x ↦ max a (b + c * x)` | [`Maths.DirectedTransport.MaxAffine`](Maths/DirectedTransport/MaxAffine/Basic.lean) |
+| Additive difference constraints and cycle feasibility | [`Additive.Potentials`](Maths/Multitube/Additive/Potentials.lean) and [`Additive.Mixed`](Maths/Multitube/Additive/Mixed.lean) |
+| Gain-graph and voltage-graph switching and balance | [`Maths.Multitube.Switching`](Maths/Multitube/Switching.lean) |
+| Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/Multitube/Additive/CycleMean.lean), [`CriticalGraph`](Maths/Multitube/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/Multitube/Additive/Eigenvector.lean) |
+| Functions between possibly different state spaces along edges | [`Maths.Multitube.Basic`](Maths/Multitube/Basic.lean) |
+| Path independence, trivial holonomy, or exact-section normal forms | [`Maths.Multitube.Exact`](Maths/Multitube/Exact.lean) and [`NormalForms`](Maths/Multitube/NormalForms.lean) |
+| Least solutions of monotone graph inequalities | [`Maths.Multitube.Closure`](Maths/Multitube/Closure.lean) |
+| Exact, lax, oplax, or per-edge mixed constraints | [`Maths.Multitube.Mixed`](Maths/Multitube/Mixed/Basic.lean) |
+| Mixed constraints reducible through residuals or adjoints | [`Mixed.AdjointOrder`](Maths/Multitube/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/Multitube/Mixed/Closure.lean) |
+| Finite systems of inequalities and infeasibility certificates | [`Maths.Multitube.FiniteInequality`](Maths/Multitube/FiniteInequality/Basic.lean) |
+| Maps of the form `x ↦ max a (b + c * x)` | [`Maths.Multitube.MaxAffine`](Maths/Multitube/MaxAffine/Basic.lean) |
 | Affine, max-affine, Loynes, or two-sided clamped recurrences | [`Maths.Recursion`](Maths/Recursion/TransferSummary.lean) and [`ClampedAffineFixedPoint`](Maths/Recursion/ClampedAffineFixedPoint.lean) |
 | Fourier–Motzkin elimination, Farkas alternatives, or LP duality | [`Maths.LinearProgramming`](Maths/LinearProgramming/FourierMotzkin.lean) |
 
@@ -172,7 +178,7 @@ Add the repository to a Lake project:
 ```toml
 [[require]]
 name = "maths"
-git = "https://github.com/elazarg/directed-transport"
+git = "https://github.com/elazarg/multitube"
 rev = "main"
 ```
 
@@ -185,13 +191,13 @@ lake build
 ```
 
 Import only the layer you need. Module names follow the directory path, while declaration names
-use shallow namespaces. For example, importing `Maths.DirectedTransport.Basic` exposes
+use shallow namespaces. For example, importing `Maths.Multitube.Basic` exposes
 `Maths.Transport`, and importing `Maths.Graph.EdgeGraph` exposes `Maths.EdgeGraph`.
 
 The structural interface is intentionally narrow:
 
 ```lean
-import Maths.DirectedTransport.Basic
+import Maths.Multitube.Basic
 
 #check Maths.EdgeGraph
 #check Maths.Transport
@@ -204,7 +210,7 @@ import Maths.DirectedTransport.Basic
 A complete one-edge example shows the shape of the definitions:
 
 ```lean
-import Maths.DirectedTransport.Basic
+import Maths.Multitube.Basic
 
 open Maths
 
@@ -228,7 +234,7 @@ example (x : Bool → Nat) :
 For mixed-polarity constraints:
 
 ```lean
-import Maths.DirectedTransport.Mixed.Basic
+import Maths.Multitube.Mixed.Basic
 
 #check Maths.EdgeMode
 #check Maths.Transport.IsMixedSectionFor
@@ -237,7 +243,7 @@ import Maths.DirectedTransport.Mixed.Basic
 For the finite-edge additive cycle criterion:
 
 ```lean
-import Maths.DirectedTransport.Additive.Potentials
+import Maths.Multitube.Additive.Potentials
 
 #check Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
 ```
@@ -248,7 +254,7 @@ algebraic or analytic dependencies and make theorem search more focused.
 ## Repository layout
 
 Five groups sit under the `Maths` namespace. The first four are reusable foundations built on
-mathlib; directed transport consumes them.
+mathlib; Multitube consumes them.
 
 | Directory | Contents |
 | --- | --- |
@@ -256,11 +262,11 @@ mathlib; directed transport consumes them.
 | `Maths/Recursion/` | Affine, max-affine, and clamped-affine summaries, fixed points, and one-sided and two-sided reflections |
 | `Maths/LinearProgramming/` | Fourier–Motzkin elimination, alternatives, standard-form LP, sparsity, and duality |
 | `Maths/Algebra/` | The join-semidirect label algebra |
-| `Maths/DirectedTransport/` | Generic, exact, lax, oplax, mixed, additive, finite-inequality, gain-graph, and max-affine transport |
+| `Maths/Multitube/` | Generic, exact, lax, oplax, mixed, additive, finite-inequality, gain-graph, and max-affine transport |
 
 The umbrella module [`Maths.lean`](Maths.lean) imports everything. Each group is also a separate
 Lake target: `MathsGraph`, `MathsRecursion`, `MathsLinearProgramming`, `MathsAlgebra`, and
-`MathsDirectedTransport`.
+`MathsMultitube`.
 
 [`Applications/`](Applications/) contains domain dossiers. Selected dossiers also contain
 independent downstream Lake packages; they import `Maths` without entering its module or
@@ -286,12 +292,10 @@ substantially longer.
 The repository is a standalone research library rather than a finished mathlib contribution.
 Its public APIs may continue to evolve as the theory develops.
 
-A clean rebuild currently compiles every library module with zero errors and zero warnings. A
-kernel-level audit of 2,498 declarations finds none depending on `sorryAx`; the only axioms used
-are `propext`, `Classical.choice`, and `Quot.sound`. The 840 declarations named in module
-docstrings are checked against the compiled environment. [`scripts/check.sh`](scripts/check.sh)
-runs the clean build, axiom audit, documentation checks, style checks, and dependency-layering
-checks.
+[`scripts/check.sh`](scripts/check.sh) enforces a clean build with zero errors and zero warnings,
+checks that no declaration depends on `sorryAx`, resolves names promised by module docstrings,
+and checks style and dependency layering. The permitted axioms are `propext`,
+`Classical.choice`, and `Quot.sound`.
 
 The code follows mathlib conventions, uses mathlib's style linters, and is licensed under the
 [Apache License 2.0](LICENSE).

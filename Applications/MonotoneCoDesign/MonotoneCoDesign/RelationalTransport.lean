@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Closure
+public import Maths.Multitube.Closure
 public import Mathlib.Data.Rel
 public import Mathlib.Order.Hom.CompleteLattice
 
@@ -15,11 +15,11 @@ public import Mathlib.Order.Hom.CompleteLattice
 A relation-labelled graph gives native existential path semantics: two interface values are
 related along a walk when intermediate values can be chosen at every component boundary.
 Existential image turns each edge relation into an ordinary map between powersets. The native
-walk relation and the resulting directed transport agree exactly.
+walk relation and the resulting transport agree exactly.
 
 A feasible assignment chooses one interface value at each vertex and satisfies every edge
 relation. Such assignments correspond to singleton-valued oplax sections of the powerset
-transport. This exposes the existing directed-transport walk and closure theorems without making
+transport. This exposes the existing walk and closure theorems without making
 relations primitive in the general library.
 
 ## Main definitions
@@ -74,7 +74,7 @@ namespace RelationTransport
 
 variable (T : RelationTransport G Fiber)
 
-/-- Regard the maps of an ordinary directed transport as their function-graph relations. -/
+/-- Regard the maps of an ordinary transport as their function-graph relations. -/
 def ofTransport (transport : Transport G Fiber) : RelationTransport G Fiber where
   edgeRelation edge := Function.graph (transport.edgeMap edge)
 

@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Mixed.Order
+public import Maths.Multitube.Mixed.Order
 public import Mathlib.Data.NNReal.Defs
 
 import Mathlib.Tactic.Linarith
@@ -18,7 +18,7 @@ observation update is `p * r / (p + r)`. It is monotone in the prior and never e
 Composing it with the affine prediction `p ↦ gain * p + processNoise` gives a nonlinear scalar
 Riccati map.
 
-Edgewise scalar Riccati maps form a monotone directed transport. Mixed local covariance bounds
+Edgewise scalar Riccati maps form a monotone transport. Mixed local covariance bounds
 therefore propagate along every typed walk of a compatible polarity without requiring a closed
 form for the composite nonlinear recurrence.
 
@@ -105,7 +105,7 @@ theorem scalarRiccati_le_prediction (gain processNoise observationNoise prior : 
 
 variable {V : Type uV} {E : Type uE} (G : EdgeGraph V E)
 
-/-- Directed transport by edgewise nonlinear scalar Riccati updates. -/
+/-- Transport by edgewise nonlinear scalar Riccati updates. -/
 def scalarRiccatiTransport (gain processNoise observationNoise : E → ℝ≥0) :
     Transport G (fun _vertex ↦ ℝ≥0) where
   edgeMap edge := scalarRiccati (gain edge) (processNoise edge) (observationNoise edge)

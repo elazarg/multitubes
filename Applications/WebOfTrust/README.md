@@ -1,6 +1,6 @@
 # Web of trust
 
-A web of trust can be read as directed transport of evidence. Vertices are identities, keys,
+A web of trust can be read as transport of evidence. Vertices are identities, keys,
 organizations, or trust contexts. An edge is an endorsement, certification, delegation, or
 referral. Its map describes what evidence at the source can establish at the target; composing
 edge maps gives the semantics of an endorsement chain.
@@ -26,7 +26,7 @@ principals contributing to their provenance. This avoids collapsing the model pr
 single score. Fibers may vary by trust context, and transfers may be noninvertible or relational.
 Scalar attenuation and max-product trust remain available as simpler specializations.
 
-The wider directed-transport vocabulary suggests further models. Holonomy describes circular
+The wider transport vocabulary suggests further models. Holonomy describes circular
 endorsement and possible self-amplification. Graded relations measure confidence loss along a
 chain. Residuals support backward queries asking what source evidence would suffice for a target
 claim. Exact, lax, and oplax modes can distinguish delegation, lower evidence guarantees, and

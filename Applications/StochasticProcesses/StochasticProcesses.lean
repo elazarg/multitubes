@@ -53,7 +53,7 @@ oplax section rules give harmonic, superharmonic, and subharmonic path bounds.
 ## Tags
 
 stochastic processes, Markov kernel, expectation, harmonic, superharmonic,
-subharmonic, directed transport
+subharmonic, transport
 -/
 
 @[expose] public section

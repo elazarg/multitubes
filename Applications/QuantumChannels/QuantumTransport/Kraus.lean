@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Mixed.Order
+public import Maths.Multitube.Mixed.Order
 public import Mathlib.Analysis.Matrix.Order
 
 /-!
@@ -13,7 +13,7 @@ public import Mathlib.Analysis.Matrix.Order
 
 A finite Kraus family from one coordinate space to another defines a positive
 map between their matrix algebras. These maps preserve the Löwner order and
-therefore label a directed transport whose lax and oplax constraints propagate
+therefore label a transport whose lax and oplax constraints propagate
 along walks of a compatible polarity.
 
 The input and output coordinate types may differ.
@@ -49,7 +49,7 @@ mixed-walk calculus.
 
 ## Tags
 
-completely positive map, Kraus map, directed transport, Löwner order, mixed section
+completely positive map, Kraus map, transport, Löwner order, mixed section
 -/
 
 @[expose] public section
@@ -117,14 +117,14 @@ variable {V : Type uV} {E : Type uE} (G : EdgeGraph V E)
 variable (W : V → Type uW) [∀ vertex, Fintype (W vertex)]
 variable (κe : E → Type uK) [∀ edge, Fintype (κe edge)]
 
-/-- The directed transport whose edge maps are the supplied Kraus maps. -/
+/-- The transport whose edge maps are the supplied Kraus maps. -/
 def ofKrausFamily
     (K : (edge : E) →
       κe edge → Matrix (W (G.target edge)) (W (G.source edge)) ℂ) :
     Transport G (fun vertex => Matrix (W vertex) (W vertex) ℂ) where
   edgeMap edge := krausMap (K edge)
 
-/-- The directed transport induced by edgewise Kraus maps on positive cones. -/
+/-- The transport induced by edgewise Kraus maps on positive cones. -/
 def ofKrausFamilyOnPositiveCone
     (K : (edge : E) →
       κe edge → Matrix (W (G.target edge)) (W (G.source edge)) ℂ) :

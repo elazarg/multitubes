@@ -1,6 +1,6 @@
 # Cellular sheaves and heterogeneous sensor fusion
 
-Directed transport can model compatible assignments in cellular diagrams with heterogeneous
+Transport can model compatible assignments in cellular diagrams with heterogeneous
 stalks. A graph edge has restriction maps forming a span
 
 ```text

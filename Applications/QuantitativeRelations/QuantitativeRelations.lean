@@ -8,9 +8,9 @@ module
 public import QuantitativeRelations.GradedTransport
 
 /-!
-# Quantitative relations and directed transport
+# Quantitative relations and transport
 
-Graded mixed relations attach an additive edge cost to dependent directed transport.
+Graded mixed relations attach an additive edge cost to dependent transport.
 
 ## Main definitions
 

@@ -1,13 +1,13 @@
 # CLAUDE.md
 
-Project guidance for `directed-transport`.
+Project guidance for Multitube (`multitube`).
 
 ## What this is
 
 A standalone, mathlib-idiomatic Lean library under a `Maths` umbrella. Its subject is
-**directed transport**: operator-labelled transition graphs, their walks, holonomy, sections
-and lax sections, and the exact, additive, finite-inequality, join-semidirect, and max-affine
-specializations. Five groups sit under the umbrella:
+compositional data and constraints on quivers: operator-labelled transition graphs, their
+walks, holonomy, sections and lax sections, and the exact, additive, finite-inequality,
+join-semidirect, and max-affine specializations. Five groups sit under the umbrella:
 
   ```
   Maths/Graph/             typed walks, circulations, Eulerian trails, infinite walks,
@@ -16,11 +16,11 @@ specializations. Five groups sit under the umbrella:
                            the Loynes and two-sided reflections
   Maths/LinearProgramming/ Fourier-Motzkin elimination and standard-form LP duality
   Maths/Algebra/           the join-semidirect label algebra
-  Maths/DirectedTransport/ the theory the other four serve
+  Maths/Multitube/         the theory the other four serve
   ```
 
 The first four depend on mathlib alone and not on each other. Keep it that way: a new import
-from `Maths/DirectedTransport/` into any of them inverts the layering.
+from `Maths/Multitube/` into any of them inverts the layering.
 
 ## Conventions
 

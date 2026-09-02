@@ -1,6 +1,6 @@
 # Riccati equations and filtering
 
-This client treats covariance updates as directed transport across modes, sensor configurations,
+This client treats covariance updates as transport across modes, sensor configurations,
 or information states. Its matrix fibers are positive semidefinite covariance matrices in the
 Löwner order. Heterogeneous prediction edges carry
 

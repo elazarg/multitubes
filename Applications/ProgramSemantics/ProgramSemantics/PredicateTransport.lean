@@ -5,13 +5,13 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Closure
-public import Maths.DirectedTransport.Mixed.AdjointOrder
+public import Maths.Multitube.Closure
+public import Maths.Multitube.Mixed.AdjointOrder
 public import Mathlib.Data.Set.Lattice.Image
 public import Mathlib.Order.Hom.CompleteLattice
 
 /-!
-# Predicate transformers for directed transport
+# Predicate transformers for transport
 
 A state transition acts on predicates by inverse image.  The direct image of a predicate is
 its existential postcondition, and Mathlib's `Set.image_preimage` theorem makes direct image
@@ -51,7 +51,7 @@ computes the least inductive predicate family above prescribed lower data.
 ## Tags
 
 program semantics, predicate transformer, weakest precondition, strongest postcondition,
-directed transport, Galois connection, path closure
+transport, Galois connection, path closure
 -/
 
 @[expose] public section
@@ -98,7 +98,7 @@ def directImageResidual (G : EdgeGraph V E)
 
 /-- Mixed inverse-image predicate constraints become all-lax direct-image constraints after
 edge reversal.  This is the weakest-precondition/strongest-postcondition adjunction at the
-level of entire directed transports.  Thus the source graph is read in the backward
+level of entire transports.  Thus the source graph is read in the backward
 orientation described by `predicateTransport`. -/
 theorem mixedPredicateLaxification_iff
     (G : EdgeGraph V E)

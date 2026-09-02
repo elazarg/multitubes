@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Basic
+public import Maths.Multitube.Basic
 public import Mathlib.Algebra.Order.Monoid.Defs
 public import Mathlib.Algebra.Order.Monoid.Unbundled.Basic
 public import Mathlib.Data.Fin.Basic
@@ -50,7 +50,7 @@ construction permits dependent state spaces and arbitrary, including noninjectiv
 ## Tags
 
 switched systems, hybrid systems, Lyapunov function, storage function, pullback, reset,
-dependent state space, directed transport
+dependent state space, transport
 -/
 
 @[expose] public section

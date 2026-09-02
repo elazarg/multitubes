@@ -8,7 +8,7 @@ module
 public import MathematicalMorphology.RelationalTransport
 
 /-!
-# Relational mathematical morphology and directed transport
+# Relational mathematical morphology and transport
 
 Relational dilation and erosion provide a small mathematical-morphology client for directed
 transport.  A relation's existential image is dilation, while its universal core is erosion.
@@ -34,7 +34,7 @@ relation to be functional or invertible.
 
 ## Tags
 
-mathematical morphology, dilation, erosion, relation, directed transport, Galois connection
+mathematical morphology, dilation, erosion, relation, transport, Galois connection
 -/
 
 @[expose] public section

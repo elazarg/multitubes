@@ -8,9 +8,9 @@ module
 public import ProgramSemantics.PredicateTransport
 
 /-!
-# Program semantics and directed transport
+# Program semantics and transport
 
-Predicate transformers give a small program-semantics client for directed transport.  A
+Predicate transformers give a small program-semantics client for transport.  A
 state transition acts contravariantly on predicates by inverse image.  Its direct image is
 the residual supplied when an oplax predicate constraint is reversed.  This works for
 noninjective transitions, where the two predicate transformers are not inverse functions.
@@ -37,7 +37,7 @@ noninjective transitions, where the two predicate transformers are not inverse f
 ## Tags
 
 program semantics, predicate transformer, weakest precondition, strongest postcondition,
-directed transport, Galois connection, noninjective
+transport, Galois connection, noninjective
 -/
 
 @[expose] public section

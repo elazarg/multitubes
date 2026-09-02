@@ -10,7 +10,7 @@ public import SwitchedHybridControl.Control
 /-!
 # Switched and hybrid control
 
-This application reads a directed transport as a switched or hybrid certificate graph.  A
+This application reads a transport as a switched or hybrid certificate graph.  A
 physical transition is oriented from its pre-state mode to its post-state mode, while the
 certificate graph reverses that edge so that a target energy is pulled back to the source.
 The concrete example has two heterogeneous state spaces and a noninjective reset.
@@ -45,7 +45,7 @@ The concrete example has two heterogeneous state spaces and a noninjective reset
 ## Tags
 
 switched systems, hybrid systems, Lyapunov function, storage function, pullback, reset,
-directed transport
+transport
 -/
 
 @[expose] public section

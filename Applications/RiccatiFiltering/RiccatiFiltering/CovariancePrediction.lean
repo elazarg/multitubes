@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Mixed.Order
+public import Maths.Multitube.Mixed.Order
 public import Mathlib.Analysis.Matrix.Order
 
 /-!
@@ -39,7 +39,7 @@ directly to mode-dependent covariance bounds.
 
 ## Tags
 
-covariance prediction, positive semidefinite matrix, Löwner order, directed transport
+covariance prediction, positive semidefinite matrix, Löwner order, transport
 -/
 
 @[expose] public section
@@ -78,7 +78,7 @@ theorem monotone_covariancePrediction {I : Type uI} {O : Type uO}
 variable {V : Type uV} {E : Type uE} (G : EdgeGraph V E)
 variable (W : V → Type uW) [∀ vertex, Fintype (W vertex)]
 
-/-- Directed transport by mode-dependent covariance prediction maps. -/
+/-- Transport by mode-dependent covariance prediction maps. -/
 def predictionTransport
     (dynamics : (edge : E) →
       Matrix (W (G.target edge)) (W (G.source edge)) ℂ)

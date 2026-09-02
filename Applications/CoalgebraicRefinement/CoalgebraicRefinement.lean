@@ -12,7 +12,7 @@ public import CoalgebraicRefinement.Deterministic
 
 A deterministic labeled coalgebra lifts relations by comparing observations and equally labeled
 successors. Simulations are post-fixed relations, the greatest simulation is a Knaster–Tarski
-fixed point, and finite unfoldings are walks of a one-loop directed transport.
+fixed point, and finite unfoldings are walks of a one-loop transport.
 
 ## Main definitions
 
@@ -37,7 +37,7 @@ fixed point, and finite unfoldings are walks of a one-loop directed transport.
 
 ## Tags
 
-coalgebra, simulation, bisimulation, relation lifting, greatest fixed point, directed transport
+coalgebra, simulation, bisimulation, relation lifting, greatest fixed point, transport
 -/
 
 @[expose] public section

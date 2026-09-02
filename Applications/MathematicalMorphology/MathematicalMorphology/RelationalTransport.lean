@@ -5,8 +5,8 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Closure
-public import Maths.DirectedTransport.Mixed.AdjointOrder
+public import Maths.Multitube.Closure
+public import Maths.Multitube.Mixed.AdjointOrder
 public import Mathlib.Data.Rel
 public import Mathlib.Order.Hom.CompleteLattice
 
@@ -41,7 +41,7 @@ applies to dilation transport and computes the least inductive signal family abo
 
 ## Tags
 
-mathematical morphology, dilation, erosion, relation, directed transport, path closure
+mathematical morphology, dilation, erosion, relation, transport, path closure
 -/
 
 @[expose] public section

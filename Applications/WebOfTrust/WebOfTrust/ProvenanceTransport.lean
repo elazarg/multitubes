@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Closure
+public import Maths.Multitube.Closure
 public import Mathlib.Order.Hom.CompleteLattice
 
 /-!
@@ -17,7 +17,7 @@ arbitrary unions says that alternatives may be transported independently and tha
 created from an empty input.
 
 A sound assignment contains every record transferred across each endorsement. This is precisely
-a lax section. The directed-transport path closure therefore constructs the least sound
+a lax section. The transport path closure therefore constructs the least sound
 assignment containing prescribed seed evidence and identifies each generated record with an
 endorsement-chain witness.
 
@@ -54,7 +54,7 @@ universe uV uE uP
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 variable {Evidence : V → Type uP}
 
-/-- Directed transport induced by union-preserving endorsement transfers on evidence sets. -/
+/-- Transport induced by union-preserving endorsement transfers on evidence sets. -/
 def evidenceTransport (G : EdgeGraph V E)
     (transfer : (edge : E) →
       sSupHom (Set (Evidence (G.source edge))) (Set (Evidence (G.target edge)))) :

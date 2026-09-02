@@ -31,68 +31,68 @@ public import Maths.LinearProgramming.StandardForm
 public import Maths.LinearProgramming.Duality
 public import Maths.LinearProgramming.NormalizedFarkas
 
--- Directed transport: the structural theory
-public import Maths.DirectedTransport.Basic
-public import Maths.DirectedTransport.Mixed.Basic
-public import Maths.DirectedTransport.Mixed.Walk
-public import Maths.DirectedTransport.Mixed.Adjoint
-public import Maths.DirectedTransport.Mixed.Order
-public import Maths.DirectedTransport.Mixed.AdjointOrder
-public import Maths.DirectedTransport.Mixed.Bellman
-public import Maths.DirectedTransport.Category
-public import Maths.DirectedTransport.CategoricalRetracts
-public import Maths.DirectedTransport.CategoricalRetractAdapter
-public import Maths.DirectedTransport.Closure
-public import Maths.DirectedTransport.Mixed.Closure
-public import Maths.DirectedTransport.Exact
-public import Maths.DirectedTransport.SCC
-public import Maths.DirectedTransport.NormalForms
-public import Maths.DirectedTransport.PotentialRigidity
-public import Maths.DirectedTransport.Switching
+-- Transport: the structural theory
+public import Maths.Multitube.Basic
+public import Maths.Multitube.Mixed.Basic
+public import Maths.Multitube.Mixed.Walk
+public import Maths.Multitube.Mixed.Adjoint
+public import Maths.Multitube.Mixed.Order
+public import Maths.Multitube.Mixed.AdjointOrder
+public import Maths.Multitube.Mixed.Bellman
+public import Maths.Multitube.Category
+public import Maths.Multitube.CategoricalRetracts
+public import Maths.Multitube.CategoricalRetractAdapter
+public import Maths.Multitube.Closure
+public import Maths.Multitube.Mixed.Closure
+public import Maths.Multitube.Exact
+public import Maths.Multitube.SCC
+public import Maths.Multitube.NormalForms
+public import Maths.Multitube.PotentialRigidity
+public import Maths.Multitube.Switching
 
--- Directed transport: finite inequality certificates
-public import Maths.DirectedTransport.FiniteInequality.Arithmetic
-public import Maths.DirectedTransport.FiniteInequality.Basic
-public import Maths.DirectedTransport.FiniteInequality.Quantitative
-public import Maths.DirectedTransport.FiniteInequality.Sparse
+-- Transport: finite inequality certificates
+public import Maths.Multitube.FiniteInequality.Arithmetic
+public import Maths.Multitube.FiniteInequality.Basic
+public import Maths.Multitube.FiniteInequality.Quantitative
+public import Maths.Multitube.FiniteInequality.Sparse
 
--- Directed transport: additive specialization and max-plus spectra
-public import Maths.DirectedTransport.Additive.Budget
-public import Maths.DirectedTransport.Additive.Circuits
-public import Maths.DirectedTransport.Additive.CirculationDecomposition
-public import Maths.DirectedTransport.Additive.Condensation
-public import Maths.DirectedTransport.Additive.CriticalGraph
-public import Maths.DirectedTransport.Additive.CycleMean
-public import Maths.DirectedTransport.Additive.Cycles
-public import Maths.DirectedTransport.Additive.Eigenvector
-public import Maths.DirectedTransport.Additive.Exact
-public import Maths.DirectedTransport.Additive.Mixed
-public import Maths.DirectedTransport.Additive.MixedQuantitative
-public import Maths.DirectedTransport.Additive.Potentials
-public import Maths.DirectedTransport.Additive.Quantitative
-public import Maths.DirectedTransport.Additive.ShortCycles
+-- Transport: additive specialization and max-plus spectra
+public import Maths.Multitube.Additive.Budget
+public import Maths.Multitube.Additive.Circuits
+public import Maths.Multitube.Additive.CirculationDecomposition
+public import Maths.Multitube.Additive.Condensation
+public import Maths.Multitube.Additive.CriticalGraph
+public import Maths.Multitube.Additive.CycleMean
+public import Maths.Multitube.Additive.Cycles
+public import Maths.Multitube.Additive.Eigenvector
+public import Maths.Multitube.Additive.Exact
+public import Maths.Multitube.Additive.Mixed
+public import Maths.Multitube.Additive.MixedQuantitative
+public import Maths.Multitube.Additive.Potentials
+public import Maths.Multitube.Additive.Quantitative
+public import Maths.Multitube.Additive.ShortCycles
 
--- Directed transport: max-affine specialization
-public import Maths.DirectedTransport.MaxAffine.Additive
-public import Maths.DirectedTransport.MaxAffine.Arithmetic
-public import Maths.DirectedTransport.MaxAffine.Basic
-public import Maths.DirectedTransport.MaxAffine.Contraction
-public import Maths.DirectedTransport.MaxAffine.CycleSlack
-public import Maths.DirectedTransport.MaxAffine.Duality
-public import Maths.DirectedTransport.MaxAffine.Eigenproblem
-public import Maths.DirectedTransport.MaxAffine.Farkas
-public import Maths.DirectedTransport.MaxAffine.FixedPoint
-public import Maths.DirectedTransport.MaxAffine.GaugeFeasibility
-public import Maths.DirectedTransport.MaxAffine.GaugeHolonomy
-public import Maths.DirectedTransport.MaxAffine.JoinSemidirect
-public import Maths.DirectedTransport.MaxAffine.LeastEigenvalue
-public import Maths.DirectedTransport.MaxAffine.Paths
-public import Maths.DirectedTransport.MaxAffine.Relaxation
-public import Maths.DirectedTransport.MaxAffine.Scalar
-public import Maths.DirectedTransport.MaxAffine.Sections
-public import Maths.DirectedTransport.MaxAffine.Slopes
-public import Maths.DirectedTransport.MaxAffine.Sparse
-public import Maths.DirectedTransport.MaxAffine.Spectrum
+-- Transport: max-affine specialization
+public import Maths.Multitube.MaxAffine.Additive
+public import Maths.Multitube.MaxAffine.Arithmetic
+public import Maths.Multitube.MaxAffine.Basic
+public import Maths.Multitube.MaxAffine.Contraction
+public import Maths.Multitube.MaxAffine.CycleSlack
+public import Maths.Multitube.MaxAffine.Duality
+public import Maths.Multitube.MaxAffine.Eigenproblem
+public import Maths.Multitube.MaxAffine.Farkas
+public import Maths.Multitube.MaxAffine.FixedPoint
+public import Maths.Multitube.MaxAffine.GaugeFeasibility
+public import Maths.Multitube.MaxAffine.GaugeHolonomy
+public import Maths.Multitube.MaxAffine.JoinSemidirect
+public import Maths.Multitube.MaxAffine.LeastEigenvalue
+public import Maths.Multitube.MaxAffine.Paths
+public import Maths.Multitube.MaxAffine.Relaxation
+public import Maths.Multitube.MaxAffine.Scalar
+public import Maths.Multitube.MaxAffine.Sections
+public import Maths.Multitube.MaxAffine.Slopes
+public import Maths.Multitube.MaxAffine.Sparse
+public import Maths.Multitube.MaxAffine.Spectrum
 
 /-!
 # Maths
@@ -109,12 +109,12 @@ alternative by Fourier-Motzkin elimination together with standard-form linear pr
 feasibility, optimality, extreme-point sparsity, and duality.  `Maths.Algebra` carries the
 join-semidirect label algebra.
 
-`Maths.DirectedTransport` is the theory the other four serve: operator-labelled transition
+`Maths.Multitube` is the theory the other four serve: operator-labelled transition
 graphs, their walks, holonomy, exact, lax, oplax, and mixed-polarity sections, with categorical and
 strongly connected normal forms, complete-lattice closure, gain-graph switching and balance,
 additive cycle and circulation duality with its max-plus spectral theory, finite inequality
 certificates, and max-affine transport.
 
-Import `Maths.DirectedTransport.Basic` when only the structural walk semantics -- the
+Import `Maths.Multitube.Basic` when only the structural walk semantics -- the
 computational graph, walks, holonomy, and sections -- are required.
 -/

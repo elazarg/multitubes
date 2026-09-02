@@ -72,8 +72,8 @@ name = "MathsAlgebra"
 globs = ["Maths.Algebra.+"]
 
 [[lean_lib]]
-name = "MathsDirectedTransport"
-globs = ["Maths.DirectedTransport.+"]
+name = "MathsMultitube"
+globs = ["Maths.Multitube.+"]
 
 # The umbrella, importing all of the above.
 [[lean_lib]]

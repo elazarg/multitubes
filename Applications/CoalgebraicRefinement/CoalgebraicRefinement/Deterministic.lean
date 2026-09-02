@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Basic
+public import Maths.Multitube.Basic
 public import Mathlib.Order.FixedPoints
 
 /-!
@@ -17,7 +17,7 @@ state relation by requiring related current observations and related equally lab
 
 The lifting is monotone. Its post-fixed points are simulations, and Knaster–Tarski supplies their
 greatest member. The same lifting labels a one-loop transport on the relation lattice. Under this
-translation simulations are oplax sections, so directed-transport walk induction gives every
+translation simulations are oplax sections, so transport walk induction gives every
 finite unfolding theorem. The greatest simulation is a fixed point and hence an exact section.
 
 ## Main definitions
@@ -240,7 +240,7 @@ def refinementGraph : EdgeGraph Unit Unit where
   source := fun _ => ()
   target := fun _ => ()
 
-/-- The relation lifting as a one-loop directed transport. -/
+/-- The relation lifting as a one-loop transport. -/
 def refinementTransport
     (left : DeterministicSystem Label LeftOutput LeftState)
     (right : DeterministicSystem Label RightOutput RightState)

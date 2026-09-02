@@ -5,11 +5,11 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.DirectedTransport.Basic
+public import Maths.Multitube.Basic
 public import Mathlib.Probability.ProbabilityMassFunction.Monad
 
 /-!
-# Expectation pullback as directed transport
+# Expectation pullback as transport
 
 A probability kernel maps a source state to a probability mass function on
 the target states. Its expectation pullback maps target observables to source
@@ -62,7 +62,7 @@ compose along the corresponding reversed walks.
 
 ## Tags
 
-probability, PMF, expectation, kernel, pullback, directed transport
+probability, PMF, expectation, kernel, pullback, transport
 -/
 
 noncomputable section

@@ -30,7 +30,7 @@ IMPORT_RE = re.compile(r"^\s*(?:public\s+)?import\s+([A-Za-z0-9_.]+)", re.MULTIL
 
 
 def project_root_name(files):
-    """The single top-level directory the library lives in, e.g. `DirectedTransport` or `Maths`."""
+    """The single top-level directory containing the library, such as `Maths`."""
     roots = {f.relative_to(ROOT).parts[0] for f in files}
     if len(roots) != 1:
         sys.exit(f"expected one library root, found {sorted(roots)}")
