@@ -32,9 +32,13 @@ Several increasingly general kinds of edge data can be placed on this graph.
 3. **Operators.** An edge may act by an arbitrary function rather than by addition or a group
    action. Different vertices may carry different state spaces. Walk labels are then replaced by
    chronological composition of the edge functions.
-4. **Relations and mixed constraints.** A chosen value at each vertex may satisfy an equality, a
-   forward relation, or the reversed relation on each edge. The relation need not initially be an
-   order; ordered, lattice, additive, and residuated results are built as later layers.
+4. **Relations.** An edge may carry a binary relation rather than a function. Relations compose
+   existentially along walks and embed faithfully as functions between powersets. This supports
+   nondeterministic and set-valued transitions without making powersets foundational.
+5. **Mixed constraints.** For function-labelled edges, a chosen value at each vertex may satisfy
+   an equality, a forward comparison, or the reversed comparison on each edge. The comparison
+   need not initially be an order; ordered, lattice, additive, and residuated results are later
+   layers.
 
 The central abstraction is an operator-labelled quiver. Let `G` be a directed multigraph. Each
 vertex `v` has a type `F v`, called its fiber, and an edge `e : s → t` carries a function
@@ -87,6 +91,7 @@ It is likely a good fit if you need to formalize one of the following.
 | Gain-graph and voltage-graph switching and balance | [`Maths.Multitubes.Switching`](Maths/Multitubes/Switching.lean) |
 | Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/Multitubes/Additive/CycleMean.lean), [`CriticalGraph`](Maths/Multitubes/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/Multitubes/Additive/Eigenvector.lean) |
 | Functions between possibly different state spaces along edges | [`Maths.Multitubes.Basic`](Maths/Multitubes/Basic.lean) |
+| Relations between possibly different state spaces along edges | [`Maths.Multitubes.Relational`](Maths/Multitubes/Relational.lean) |
 | Path independence, trivial holonomy, or exact-section normal forms | [`Maths.Multitubes.Exact`](Maths/Multitubes/Exact.lean) and [`NormalForms`](Maths/Multitubes/NormalForms.lean) |
 | Least solutions of monotone graph inequalities | [`Maths.Multitubes.Closure`](Maths/Multitubes/Closure.lean) |
 | Exact, lax, oplax, or per-edge mixed constraints | [`Maths.Multitubes.Mixed`](Maths/Multitubes/Mixed/Basic.lean) |
@@ -114,6 +119,7 @@ The assumptions increase only when the mathematics needs them.
 | Layer | Required structure |
 | --- | --- |
 | Graphs, walks, transport, and holonomy | Arbitrary vertex and edge types; arbitrary fiber types and edge functions |
+| Relation-labelled transport | Arbitrary endpoint relations; no order or algebraic structure |
 | Exact sections | Equality only |
 | Mixed edge constraints | An arbitrary relation on each fiber |
 | Propagation of lax or oplax constraints along walks | Preordered fibers and monotone edge maps |
@@ -148,6 +154,10 @@ The library includes the following theorem families.
 - **Operator-valued walk semantics.** Arbitrary edge functions compose chronologically.
   Transport respects concatenation, and exact, lax, and oplax edge constraints propagate along
   suitable walks.
+- **Relation-valued walk semantics.** Arbitrary edge relations compose existentially. Their
+  native walk relations agree exactly with ordinary walk transport under the existential-image
+  embedding into powersets; point-valued relational sections become singleton-valued oplax
+  sections, and optional path closure is exact reachability.
 - **Exact transport.** Trivial holonomy, path independence, rooted and strongly connected normal
   forms, categorical retract formulations, and rigidity of potentials are developed without
   assuming a group of labels.

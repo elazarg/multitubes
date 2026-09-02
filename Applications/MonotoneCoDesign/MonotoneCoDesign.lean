@@ -5,8 +5,8 @@ Authors: Elazar Gershuni
 -/
 module
 
+public import Maths.Multitubes.RelationalClosure
 public import MonotoneCoDesign.MonotoneFeasibility
-public import MonotoneCoDesign.RelationalTransport
 
 /-!
 # Monotone co-design by relational transport
@@ -17,26 +17,24 @@ oplax sections and path closure constructs least attainable families.
 
 ## Main definitions
 
-* `MonotoneCoDesign.RelationTransport` - relations attached to typed graph edges.
-* `MonotoneCoDesign.RelationTransport.walkRelation` - relational composition along a walk.
-* `MonotoneCoDesign.RelationTransport.powersetTransport` - the existential-image adapter.
-* `MonotoneCoDesign.RelationTransport.ofTransport` - ordinary transport embedded by function
-  graphs.
+* `Maths.RelationTransport` - relations attached to typed graph edges.
+* `Maths.RelationTransport.walkRelation` - relational composition along a walk.
+* `Maths.RelationTransport.powersetTransport` - the existential-image adapter.
+* `Maths.RelationTransport.ofTransport` - ordinary transport embedded by function graphs.
 * `MonotoneCoDesign.IsMonotoneFeasibility` - co-design monotonicity for a feasibility relation.
 * `MonotoneCoDesign.orderFeasibility` - the identity monotone feasibility relation.
 
 ## Main results
 
-* `MonotoneCoDesign.RelationTransport.walkMap_eq_image_walkRelation` - powerset walk transport
-  agrees with native relational composition.
-* `MonotoneCoDesign.RelationTransport.walkRelation_ofTransport` - the relational extension
-  recovers ordinary walk transport on functions.
-* `MonotoneCoDesign.RelationTransport.isOplaxSection_singleton_iff` - native feasible assignments
-  are singleton-valued oplax sections.
-* `MonotoneCoDesign.RelationTransport.IsFeasibleAssignment.walkRelation` - local feasibility
-  propagates along every walk.
-* `MonotoneCoDesign.RelationTransport.mem_pathClosure_iff` - closure is existential path
-  attainability.
+* `Maths.RelationTransport.walkMap_eq_image_walkRelation` - powerset walk transport agrees with
+  native relational composition.
+* `Maths.RelationTransport.walkRelation_ofTransport` - the relational extension recovers ordinary
+  walk transport on functions.
+* `Maths.RelationTransport.isOplaxSection_singleton_iff` - native compatible assignments are
+  singleton-valued oplax sections.
+* `Maths.RelationTransport.IsSection.walkRelation` - local compatibility propagates along every
+  walk.
+* `Maths.RelationTransport.mem_pathClosure_iff` - closure is existential path attainability.
 * `MonotoneCoDesign.IsMonotoneFeasibility.comp` - serial composition preserves co-design
   monotonicity.
 * `MonotoneCoDesign.RelationTransport.HasMonotoneFeasibility.walkRelation_of_pos` - nonempty

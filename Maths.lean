@@ -43,6 +43,8 @@ public import Maths.Multitubes.Category
 public import Maths.Multitubes.CategoricalRetracts
 public import Maths.Multitubes.CategoricalRetractAdapter
 public import Maths.Multitubes.Closure
+public import Maths.Multitubes.Relational
+public import Maths.Multitubes.RelationalClosure
 public import Maths.Multitubes.Mixed.Closure
 public import Maths.Multitubes.Exact
 public import Maths.Multitubes.SCC

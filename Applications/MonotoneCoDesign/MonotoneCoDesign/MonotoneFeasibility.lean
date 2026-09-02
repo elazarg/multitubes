@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import MonotoneCoDesign.RelationalTransport
+public import Maths.Multitubes.Relational
 public import Mathlib.Order.UpperLower.Basic
 
 /-!
@@ -142,14 +142,14 @@ universe uV uE uI
 
 variable {V : Type uV} {E : Type uE} {G : Maths.EdgeGraph V E}
 variable {Interface : V → Type uI} [∀ vertex, Preorder (Interface vertex)]
-variable {T : RelationTransport G Interface}
+variable {T : Maths.RelationTransport G Interface}
 
 /-- Every component relation of a network has monotone co-design feasibility. -/
-def HasMonotoneFeasibility (T : RelationTransport G Interface) : Prop :=
+def HasMonotoneFeasibility (T : Maths.RelationTransport G Interface) : Prop :=
   ∀ edge, IsMonotoneFeasibility (T.edgeRelation edge)
 
 /-- Reindexing an edge relation along its endpoint equality preserves monotone feasibility. -/
-theorem HasMonotoneFeasibility.edgeRelation_cast (hT : T.HasMonotoneFeasibility)
+theorem HasMonotoneFeasibility.edgeRelation_cast (hT : HasMonotoneFeasibility T)
     (edge : E) {vertex : V} (legal : G.source edge = vertex) :
     IsMonotoneFeasibility
       ({(source, target) |
@@ -159,20 +159,20 @@ theorem HasMonotoneFeasibility.edgeRelation_cast (hT : T.HasMonotoneFeasibility)
   simpa using hT edge
 
 /-- A nonempty walk ending in one more component has monotone composite feasibility. -/
-theorem HasMonotoneFeasibility.walkRelation_concat (hT : T.HasMonotoneFeasibility)
+theorem HasMonotoneFeasibility.walkRelation_concat (hT : HasMonotoneFeasibility T)
     {start finish : V} (walk : G.Walk start finish) (edge : E)
     (legal : G.source edge = finish) :
     IsMonotoneFeasibility (T.walkRelation (walk.concat edge legal)) := by
   cases walk with
   | nil =>
-      simpa [walkRelation] using hT.edgeRelation_cast edge legal
+      simpa [Maths.RelationTransport.walkRelation] using hT.edgeRelation_cast edge legal
   | concat walk previous previousLegal =>
-      rw [walkRelation]
+      rw [Maths.RelationTransport.walkRelation]
       exact (hT.walkRelation_concat walk previous previousLegal).comp
         (hT.edgeRelation_cast edge legal)
 
 /-- Every nonempty path through a monotone co-design network has monotone feasibility. -/
-theorem HasMonotoneFeasibility.walkRelation_of_pos (hT : T.HasMonotoneFeasibility)
+theorem HasMonotoneFeasibility.walkRelation_of_pos (hT : HasMonotoneFeasibility T)
     {start finish : V} (walk : G.Walk start finish) (hpos : 0 < walk.length) :
     IsMonotoneFeasibility (T.walkRelation walk) := by
   cases walk with

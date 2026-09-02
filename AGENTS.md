@@ -5,8 +5,8 @@ Project guidance for Multitubes (`multitubes`).
 ## What this is
 
 A standalone, mathlib-idiomatic Lean library under a `Maths` umbrella. Its subject is
-compositional data and constraints on quivers: operator-labelled transition graphs, their
-walks, holonomy, sections and lax sections, and the exact, additive, finite-inequality,
+compositional data and constraints on quivers: operator- and relation-labelled transition graphs,
+their walks, holonomy, sections and lax sections, and the exact, additive, finite-inequality,
 join-semidirect, and max-affine specializations. Five groups sit under the umbrella:
 
   ```
