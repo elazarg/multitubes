@@ -1,14 +1,15 @@
 # Cellular sheaves and heterogeneous sensor fusion
 
-Transport can model compatible assignments in cellular diagrams with heterogeneous
-stalks. A graph edge has restriction maps forming a span
+This client treats a graph sheaf edge as a span of restriction maps between heterogeneous stalks:
 
 ```text
 F(v) -> F(e) <- F(w),
 ```
 
-and subdivision into an incidence graph turns the span into ordinary transport. Exact sections of
-the resulting transport represent compatible families.
+Subdivision into a bipartite incidence graph turns the span into exact map transport. Taking the
+pullback relation of the restrictions instead gives relation-labelled transport on the original
+graph. Both descriptions recover the same compatible assignments; noninjective restrictions show
+why compatibility need not determine a function or permit reconstruction.
 
 Sheaf cohomology, topology, uncertainty models, and fusion algorithms supply the domain-specific
 structure.
