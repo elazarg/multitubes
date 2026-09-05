@@ -36,7 +36,7 @@ slack mean is the normalized shift sum divided by the reciprocal-target mass.
 * `Maths.MaxAffineTransport.pathSlope_gaugeCriticalLabelList`: the raw slope product
   along a critical path is the endpoint gauge ratio, so a critical cycle has raw slope one.
 * `Maths.MaxAffineTransport.pathShift_gaugeCriticalLabelList`,
-  `MaxAffineTransport.pathRelaxationMass_gaugeCriticalLabelList`: the raw affine shift and the
+  `Maths.MaxAffineTransport.pathRelaxationMass_gaugeCriticalLabelList`: the raw affine shift and the
   raw uniform-relaxation mass are the terminal gauge times the normalized walk weight and the
   reciprocal-target mass respectively. Both require a positive gauge.
 * `Maths.MaxAffineTransport.rawCycleMean_eq_gaugeCriticalCycleRatio`: the raw max-affine
@@ -45,8 +45,8 @@ slack mean is the normalized shift sum divided by the reciprocal-target mass.
 * `Maths.MaxAffineTransport.hasCyclicSlack_gaugeCriticalCycle_iff_cycleRatio_le`: on a
   nonempty critical cycle, the exact original slack criterion is that ratio bound. Floors stay
   arbitrary - at raw product one they do not move the threshold.
-* `MaxAffineTransport.exists_isLaxSection_iff_prefixedCycleHolonomies_of_nonexpansiveGauge`,
-  `MaxAffineTransport.exists_isLaxSection_iff_prefixedCycleHolonomies_of_expansiveGauge`:
+* `Maths.MaxAffineTransport.exists_isLaxSection_iff_prefixedCycleHolonomies_of_nonexpansiveGauge`,
+  `Maths.MaxAffineTransport.exists_isLaxSection_iff_prefixedCycleHolonomies_of_expansiveGauge`:
   feasibility is equivalent to pre-fixedness of every *original* cycle holonomy, not only the
   critical ones. The expansive form assumes floors absent.
 -/

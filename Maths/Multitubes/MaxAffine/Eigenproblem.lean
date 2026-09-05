@@ -106,7 +106,9 @@ doubling of slope `2`: its eigenvalues are exactly the reals from `5` upwards
 (`Maths.MaxAffineTransport.eigenvalues_loopLabel`), each of them above `5` carried by two distinct
 eigenvectors (`Maths.MaxAffineTransport.exists_pair_ne_isEigenvector_loopLabel`).  So no formula
 determines the eigenvalue at nonnegative slopes straddling one, and the question is which real
-numbers are eigenvalues, not which one is.
+numbers are eigenvalues, not which one is. A finite-policy description of that set as a union of
+closed convex subsets is given in `Maths.Multitubes.MaxAffine.PolicySpectrum`; efficient
+computation and structural criteria avoiding enumeration require additional results.
 
 The **least** eigenvalue is not open, and needs none of this file: every eigenvalue is a level at
 which the inequality `F x ≤ lam + x` is solvable, and by

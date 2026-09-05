@@ -91,13 +91,16 @@ It is likely a good fit if you need to formalize one of the following.
 | Gain-graph and voltage-graph switching and balance | [`Maths.Multitubes.Switching`](Maths/Multitubes/Switching.lean) |
 | Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/Multitubes/Additive/CycleMean.lean), [`CriticalGraph`](Maths/Multitubes/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/Multitubes/Additive/Eigenvector.lean) |
 | Functions between possibly different state spaces along edges | [`Maths.Multitubes.Basic`](Maths/Multitubes/Basic.lean) |
+| Morphisms, directed simulations, and closure soundness | [`Maths.Multitubes.Morphism`](Maths/Multitubes/Morphism.lean) |
 | Relations between possibly different state spaces along edges | [`Maths.Multitubes.Relational`](Maths/Multitubes/Relational.lean) |
 | Path independence, trivial holonomy, or exact-section normal forms | [`Maths.Multitubes.Exact`](Maths/Multitubes/Exact.lean) and [`NormalForms`](Maths/Multitubes/NormalForms.lean) |
 | Least solutions of monotone graph inequalities | [`Maths.Multitubes.Closure`](Maths/Multitubes/Closure.lean) |
 | Exact, lax, oplax, or per-edge mixed constraints | [`Maths.Multitubes.Mixed`](Maths/Multitubes/Mixed/Basic.lean) |
 | Mixed constraints reducible through residuals or adjoints | [`Mixed.AdjointOrder`](Maths/Multitubes/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/Multitubes/Mixed/Closure.lean) |
-| Finite systems of inequalities and infeasibility certificates | [`Maths.Multitubes.FiniteInequality`](Maths/Multitubes/FiniteInequality/Basic.lean) |
+| Finite inequalities and executable rational witness checking | [`FiniteInequality.Basic`](Maths/Multitubes/FiniteInequality/Basic.lean) and [`CertificateCheck`](Maths/Multitubes/FiniteInequality/CertificateCheck.lean) |
 | Maps of the form `x ↦ max a (b + c * x)` | [`Maths.Multitubes.MaxAffine`](Maths/Multitubes/MaxAffine/Basic.lean) |
+| Finite-policy description of max-affine spectra | [`MaxAffine.PolicySpectrum`](Maths/Multitubes/MaxAffine/PolicySpectrum.lean) |
+| Error bounds for switched and hybrid executions | [`SwitchedHybridControl.ErrorBounds`](Applications/SwitchedHybridControl/SwitchedHybridControl/ErrorBounds.lean) |
 | Affine, max-affine, Loynes, or two-sided clamped recurrences | [`Maths.Recursion`](Maths/Recursion/TransferSummary.lean) and [`ClampedAffineFixedPoint`](Maths/Recursion/ClampedAffineFixedPoint.lean) |
 | Fourier–Motzkin elimination, Farkas alternatives, or LP duality | [`Maths.LinearProgramming`](Maths/LinearProgramming/FourierMotzkin.lean) |
 
@@ -110,7 +113,9 @@ application-specific layer.
 The [`Applications/`](Applications/) directory contains domain interpretations and downstream
 client packages built on the reusable transport specializations. Max-plus and max-affine
 transport belong to the library independently of the queueing, stopping, or control models that
-may use them.
+may use them. The switched and hybrid control client proves that local affine error comparisons
+give mode-dependent bounds along shared executions, and supplies sparse certificates when its
+bounded-radius comparison constraints are infeasible.
 
 ## How general is the infrastructure?
 
@@ -153,7 +158,9 @@ The library includes the following theorem families.
   hypothesis balance is equivalent to switching-triviality. Groups recover the classical case.
 - **Operator-valued walk semantics.** Arbitrary edge functions compose chronologically.
   Transport respects concatenation, and exact, lax, and oplax edge constraints propagate along
-  suitable walks.
+  suitable walks. Fiberwise morphisms commute with all walk transports and preserve sections;
+  directed simulations preserve the corresponding ordered sections and give a global soundness
+  bound between least lax-majorant closures.
 - **Relation-valued walk semantics.** Arbitrary edge relations compose existentially. Their
   native walk relations agree exactly with ordinary walk transport under the existential-image
   embedding into powersets; point-valued relational sections become singleton-valued oplax
@@ -169,10 +176,14 @@ The library includes the following theorem families.
   ordinary lax transport, yielding least-majorant and bounded-sandwich criteria. Separately, a
   complete-lattice Bellman interval characterizes mixed sections without assuming residuals.
 - **Finite inequalities.** Farkas-style alternatives, quantitative certificates, arithmetic
-  consequences, and sparse witnesses are provided for finite systems.
+  consequences, and sparse witnesses are provided for finite systems. Exact rational arithmetic
+  checks externally supplied feasible points and infeasibility certificates, with soundness over
+  both rational and real systems.
 - **Max-affine transport.** Max-affine labels are closed under composition and support path
   summaries, scalar fixed-point classifications, contraction results, gauge feasibility,
-  holonomy, duality, relaxation, cycle slack, and spectral results.
+  holonomy, duality, relaxation, cycle slack, and spectral results. For finite graphs with an
+  incoming edge at every vertex, the spectrum is represented as a finite union of closed convex
+  policy-level sets.
 - **Related foundations.** Independent modules cover Eulerian trails, circulations, infinite
   walks, zero-charge lassos, charged relations, join-semidirect labels, reflected recurrences,
   Fourier–Motzkin elimination, and standard-form linear-programming duality.

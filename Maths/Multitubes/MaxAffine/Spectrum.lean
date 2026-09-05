@@ -39,7 +39,7 @@ For slopes at most one, and for slopes at least one with floors absent, a lax se
 when every closed walk of the unit-slope subgraph has nonpositive shift sum, by the two cycle
 criteria of `Maths.Multitubes.MaxAffine.Slopes`.  Those two are one criterion read along
 the constant recession directions `1` and `-1`, by
-`MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction`;
+`Maths.MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction`;
 the pairs of statements below inherit that duplication, and are kept apart because relaxation
 moves the branch index to that of the relaxed labelling.
 Relaxing by `lam` subtracts `lam` from
@@ -121,12 +121,14 @@ across that identification without any coercion of walks.
 
 ## TODO
 
-Which levels above the least one are eigenvalues.  The bottom of the up-set is settled: on a
+Find structural criteria and efficient algorithms for the levels above the least eigenvalue.
+`Maths.Multitubes.MaxAffine.PolicySpectrum` characterizes the entire spectrum as a finite union
+of closed convex policy-level sets, without restrictions on slope signs or connectivity. On a
 strongly connected graph with nonnegative slopes and an incoming edge at every vertex, a least
 relaxation level is the least eigenvalue, by `Maths.Multitubes.MaxAffine.LeastEigenvalue`, so
-it is the optimum of an explicit finite linear program in the pair `(lam, x)`.  The two-loop
-labelling shows that everything above it may be an eigenvalue too, and nothing here says when that
-happens.
+it is the optimum of an explicit finite linear program in the pair `(lam, x)`. The two-loop
+labelling shows that everything above it may be an eigenvalue too. A criterion avoiding policy
+enumeration, and executable computation of policy endpoints, require further results.
 
 ## References
 

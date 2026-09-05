@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The four invariants the library's claims rest on. Run from the repository root.
+# The repository invariants its mathematical claims rest on. Run from the repository root.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 status=0
@@ -7,11 +7,7 @@ status=0
 echo "== clean rebuild =="
 rm -rf .lake/build
 log=$(mktemp)
-lake build 2>&1 | tee "$log"
-errors=$(grep -c 'error:' "$log")
-warnings=$(grep -c 'warning:' "$log")
-echo "errors $errors, warnings $warnings"
-[ "$errors" -eq 0 ] && [ "$warnings" -eq 0 ] || status=1
+scripts/check-command.sh "$log" lake build || status=1
 
 echo "== application package rebuilds =="
 application_count=0
@@ -21,24 +17,35 @@ while IFS= read -r app_lakefile; do
   echo "-- $app_dir"
   rm -rf "$app_dir/.lake/build"
   app_log=$(mktemp)
-  (cd "$app_dir" && lake build) 2>&1 | tee "$app_log"
-  app_errors=$(grep -c 'error:' "$app_log")
-  app_warnings=$(grep -c 'warning:' "$app_log")
-  echo "errors $app_errors, warnings $app_warnings"
-  [ "$app_errors" -eq 0 ] && [ "$app_warnings" -eq 0 ] || status=1
+  (cd "$app_dir" && ../../scripts/check-command.sh "$app_log" lake build) || status=1
 done < <(find Applications -mindepth 2 -maxdepth 2 -name lakefile.toml -print | sort)
 echo "application packages $application_count"
 
 echo "== environment audit =="
-lake env lean scripts/audit.lean || status=1
-grep -q . scripts/.sorries && { echo "FAIL: declarations depend on sorryAx"; status=1; }
-echo "axioms: $(tr '\n' ' ' < scripts/.axioms)"
+audit_dir=.lake/audit
+rm -rf "$audit_dir"
+mkdir -p "$audit_dir"
+audit_log=$(mktemp)
+AUDIT_NAMESPACE=Maths AUDIT_OUTPUT="$audit_dir/Maths" \
+  lake env lean scripts/audit.lean 2>&1 | tee "$audit_log" || status=1
+grep -q 'warning:' "$audit_log" && { echo "FAIL: warning in Maths audit"; status=1; }
+python3 scripts/audit-applications.py || status=1
+for audit_failure in "$audit_dir"/*.sorries "$audit_dir"/*.forbidden; do
+  [ -s "$audit_failure" ] && {
+    echo "FAIL: $(basename "$audit_failure")"
+    cat "$audit_failure"
+    status=1
+  }
+done
 
 echo "== docstrings =="
 python3 scripts/check-docstrings.py || status=1
 
 echo "== layering =="
 python3 scripts/check-layering.py || status=1
+
+echo "== checker regressions =="
+python3 scripts/test-checkers.py || status=1
 
 echo "== line length and set_option =="
 lean_files=$(find Maths.lean Maths Applications -path '*/.lake' -prune -o -name '*.lean' -print)

@@ -8,29 +8,41 @@ import Maths
 /-!
 # Environment audit
 
-Dumps the compiled environment for the two checks that the build itself cannot make: that no
-declaration depends on `sorryAx`, and that every name a `## Main ...` docstring section promises
-actually exists.  Run through `scripts/check.sh`, which reads the files written here.
+Audits declarations below the namespace selected by `AUDIT_NAMESPACE`. The output file stem is
+selected by `AUDIT_OUTPUT`; both default to `Maths`. Application packages run a generated copy
+whose import is changed to their library root module.
 -/
 
 open Lean Elab Command
 
 run_cmd Command.liftCoreM do
   let env ← getEnv
+  let namespaceName := (← IO.getEnv "AUDIT_NAMESPACE").getD "Maths"
+  let output := (← IO.getEnv "AUDIT_OUTPUT").getD "scripts/.audit-Maths"
+  let auditRoot := Name.mkSimple namespaceName
+  let allowed : NameSet := {``propext, ``Classical.choice, ``Quot.sound}
   let mut names := #[]
   let mut axioms : NameSet := {}
   let mut sorries := #[]
+  let mut forbidden := #[]
   for (n, _) in env.constants.toList do
-    unless (`Maths).isPrefixOf n do continue
+    unless auditRoot.isPrefixOf n do continue
     unless n.isInternal do
       names := names.push n
       for a in (← Lean.collectAxioms n) do
         axioms := axioms.insert a
         if a == ``sorryAx then sorries := sorries.push n
+        unless allowed.contains a do forbidden := forbidden.push (n, a)
   let sorted := names.qsort (fun a b => a.toString < b.toString)
-  IO.FS.writeFile "scripts/.decls" (String.intercalate "\n" (sorted.toList.map toString))
-  IO.FS.writeFile "scripts/.axioms"
+  if names.isEmpty then
+    throwError "no declarations found below audit namespace {namespaceName}"
+  IO.FS.writeFile (output ++ ".decls")
+    (String.intercalate "\n" (sorted.toList.map toString))
+  IO.FS.writeFile (output ++ ".axioms")
     (String.intercalate "\n" (axioms.toList.map toString))
-  IO.FS.writeFile "scripts/.sorries"
+  IO.FS.writeFile (output ++ ".sorries")
     (String.intercalate "\n" (sorries.toList.map toString))
-  logInfo s!"declarations {names.size}, sorry-dependent {sorries.size}"
+  IO.FS.writeFile (output ++ ".forbidden")
+    (String.intercalate "\n" (forbidden.toList.map fun (n, a) => s!"{n}: {a}"))
+  logInfo (s!"{namespaceName}: declarations {names.size}, sorry-dependent {sorries.size}, " ++
+    s!"forbidden-axiom dependencies {forbidden.size}")

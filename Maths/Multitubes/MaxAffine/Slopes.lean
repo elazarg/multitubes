@@ -46,21 +46,21 @@ satisfy every cycle-product equation vacuously while carrying a zero slope.
 
 ## Main results
 
-* `MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction`:
+* `Maths.MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_const_direction`:
   **along any nonzero constant recession direction, feasibility reduces exactly to the affine rows
   of the unit-slope edges.**  The two slope regimes are its instances at `1` and at `-1`.
-* `MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one`:
+* `Maths.MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one`:
   when every slope is at most one, feasibility reduces exactly to the affine rows of the unit-slope
   edges; floors and strictly subunit rows are noncritical.
-* `MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_one_le_slope`:
+* `Maths.MaxAffineTransport.exists_isLaxSection_iff_exists_unitSlopePotential_of_one_le_slope`:
   the superunit companion, where floorlessness is what the sign change costs.
-* `MaxAffineTransport.exists_unitSlopePotential_iff_unitSlopeCycles_nonpos`: the additive
+* `Maths.MaxAffineTransport.exists_unitSlopePotential_iff_unitSlopeCycles_nonpos`: the additive
   duality read on the unit-slope subgraph, with no slope regime and an arbitrary vertex type.
   Composed with either reduction it gives a cycle criterion.
-* `MaxAffineTransport.exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_slope_le_one`:
+* `Maths.MaxAffineTransport.exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_slope_le_one`:
   the resulting cycle criterion - a lax section exists exactly when every closed walk of the
   unit-slope subgraph has nonpositive shift sum.
-* `MaxAffineTransport.exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_one_le_slope`:
+* `Maths.MaxAffineTransport.exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_one_le_slope`:
   the same criterion in the superunit regime, which additionally requires every floor absent.
 * `Maths.MaxAffineTransport.exists_nonexpansiveGauge_iff_cycleProduct_le_one`:
   **positive gauge theorem** - for nonnegative slopes and finitely many edges, a nonexpansive
@@ -68,7 +68,7 @@ satisfy every cycle-product equation vacuously while carrying a zero slope.
   arbitrary.
 * `Maths.MaxAffineTransport.exists_expansiveGauge_iff_one_le_cycleProduct`: the
   dual statement, under the stronger hypothesis that every slope is strictly positive.
-* `MaxAffineTransport.cycleProduct_eq_one_iff_exists_slopeGauge_of_stronglyConnected`:
+* `Maths.MaxAffineTransport.cycleProduct_eq_one_iff_exists_slopeGauge_of_stronglyConnected`:
   **multiplicative holonomy equivalence** - on a strongly connected graph, nonnegative slopes
   have unit product around every closed walk exactly when they are ratios of one positive
   vertex gauge. Strong connectivity is needed: see the DAG remark above.

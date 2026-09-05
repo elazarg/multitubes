@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Check the two layering claims the library makes in prose.
+"""Check the reusable library's foundation and external dependency boundaries.
 
-1. The linear-programming group imports nothing from the project outside itself.
-2. `FixedPointTheorems` is imported by `MaxAffine/Eigenproblem` alone. `MaxAffine/Spectrum` is
-   its only consumer and reaches Brouwer transitively, so the entry point is a single file.
+1. Each of Graph, Recursion, LinearProgramming, and Algebra imports only mathlib and itself.
+2. `FixedPointTheorems` is imported by `MaxAffine/Eigenproblem` alone. Downstream spectral files
+   reach Brouwer transitively through that single entry point.
 
 Both are stated as facts in `README.md` and `CLAUDE.md`; this turns them into checks. The
 script keys on directory and file names rather than on the root namespace, so it gives the same
@@ -14,14 +14,14 @@ generically by `scripts/check.sh`; they do not participate in the reusable libra
 """
 
 import re
+import os
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(os.environ.get("MULTITUBES_ROOT", Path(__file__).resolve().parent.parent))
 
-# The linear-programming group, by the directory holding it. It has been called both
-# `LinearAlgebra` and `LinearProgramming`; accept either so the check survives the rename.
-LP_DIRS = {"LinearAlgebra", "LinearProgramming"}
+# The four foundations must remain mutually independent and depend only on mathlib.
+FOUNDATIONS = {"Graph", "Recursion", "LinearProgramming", "Algebra"}
 
 # The only file permitted to reach for a fixed-point theorem.
 BROUWER_ALLOWED = {("MaxAffine", "Eigenproblem")}
@@ -46,19 +46,24 @@ def main():
     root = project_root_name([p for p in files if len(p.relative_to(ROOT).parts) > 1])
 
     failures = []
-    lp_seen = brouwer_seen = 0
+    foundation_seen = {group: 0 for group in FOUNDATIONS}
+    brouwer_seen = 0
 
     for path in files:
         parts = path.relative_to(ROOT).with_suffix("").parts
         imports = IMPORT_RE.findall(path.read_text(encoding="utf-8"))
         internal = [i for i in imports if i.split(".")[0] == root]
 
-        # (1) the linear-programming group is closed under project imports
-        if len(parts) > 1 and parts[-2] in LP_DIRS:
-            lp_seen += 1
+        # (1) every foundation group is closed under project imports
+        if len(parts) > 2 and parts[1] in FOUNDATIONS:
+            group = parts[1]
+            foundation_seen[group] += 1
             for imp in internal:
-                if imp.split(".")[1] not in LP_DIRS:
-                    failures.append(f"{path.relative_to(ROOT)}: LP group imports {imp}")
+                imported_parts = imp.split(".")
+                if len(imported_parts) < 2 or imported_parts[1] != group:
+                    failures.append(
+                        f"{path.relative_to(ROOT)}: {group} foundation imports {imp}"
+                    )
 
         # (2) Brouwer is confined
         if any(i.split(".")[0] == "FixedPointTheorems" for i in imports):
@@ -71,7 +76,8 @@ def main():
 
     print(f"library root      : {root}")
     print(f"files scanned     : {len(files)}")
-    print(f"linear-programming: {lp_seen} files, closed under project imports")
+    for group in sorted(FOUNDATIONS):
+        print(f"{group:18}: {foundation_seen[group]} files, closed under project imports")
     print(f"FixedPointTheorems: {brouwer_seen} importers")
 
     if failures:
@@ -79,7 +85,7 @@ def main():
         for f in failures:
             print("  " + f)
         return 1
-    print("\nOK — both layering claims hold")
+    print("\nOK — foundation and Brouwer boundaries hold")
     return 0
 
 

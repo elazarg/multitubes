@@ -19,7 +19,7 @@ noninjective transitions, where the two predicate transformers are not inverse f
 
 * `ProgramSemantics.predicateTransport` - inverse-image transport of predicates.
 * `ProgramSemantics.forwardPredicateTransport` - direct-image transport of predicates.
-* `ProgramSemantics.reverseGraph` - the edge-reversed control-flow graph.
+* `Maths.EdgeGraph.reverse` - the edge-reversed control-flow graph.
 * `ProgramSemantics.StateSaturated` - predicates constant on transition kernel classes.
 * `ProgramSemantics.collapse` - a noninjective Boolean state transition.
 

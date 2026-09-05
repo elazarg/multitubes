@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import SwitchedHybridControl.Control
+public import SwitchedHybridControl.ErrorBounds
 
 /-!
 # Switched and hybrid control
@@ -25,6 +26,8 @@ The concrete example has two heterogeneous state spaces and a noninjective reset
 * `SwitchedHybridControl.pullbackTransport` - the uncharged pullback value transport.
 * `SwitchedHybridControl.examplePhysicalGraph` - the two-mode physical transition graph.
 * `SwitchedHybridControl.exampleEnergy` - the concrete energy family.
+* `SwitchedHybridControl.ErrorComparison` and `SwitchedHybridControl.IsRadiusFamily` - local
+  affine error propagation and compatible mode-dependent radii.
 
 ## Main results
 
@@ -41,6 +44,10 @@ The concrete example has two heterogeneous state spaces and a noninjective reset
 * `SwitchedHybridControl.exampleReset_noninjective` - the reset merges two states.
 * `SwitchedHybridControl.exampleCycle_strict_decrease` - the closed physical cycle strictly
   decreases the energy at state `1` of `Fin 3`.
+* `SwitchedHybridControl.ErrorComparison.walk_error_le` - affine local error estimates imply
+  mode-dependent error bounds along every shared execution.
+* `SwitchedHybridControl.radius_feasible_iff` - bounded comparison radii are exactly a finite
+  linear-inequality feasibility problem.
 
 ## Tags
 

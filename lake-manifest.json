@@ -8,7 +8,7 @@
    "rev": "8506daa06b98520a97e36a90abe7c314d53af626",
    "name": "«fixed-point-theorems»",
    "manifestFile": "lake-manifest.json",
-   "inputRev": "main",
+   "inputRev": "8506daa06b98520a97e36a90abe7c314d53af626",
    "inherited": false,
    "configFile": "lakefile.toml"},
   {"url": "https://github.com/leanprover-community/mathlib4",

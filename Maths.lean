@@ -27,6 +27,7 @@ public import Maths.Recursion.CyclicMaxAffine
 
 -- Linear programming: Fourier-Motzkin elimination and standard-form duality
 public import Maths.LinearProgramming.FourierMotzkin
+public import Maths.LinearProgramming.CertificateCheck
 public import Maths.LinearProgramming.StandardForm
 public import Maths.LinearProgramming.Duality
 public import Maths.LinearProgramming.NormalizedFarkas
@@ -43,6 +44,7 @@ public import Maths.Multitubes.Category
 public import Maths.Multitubes.CategoricalRetracts
 public import Maths.Multitubes.CategoricalRetractAdapter
 public import Maths.Multitubes.Closure
+public import Maths.Multitubes.Morphism
 public import Maths.Multitubes.Relational
 public import Maths.Multitubes.RelationalClosure
 public import Maths.Multitubes.Mixed.Closure
@@ -55,6 +57,8 @@ public import Maths.Multitubes.Switching
 -- Transport: finite inequality certificates
 public import Maths.Multitubes.FiniteInequality.Arithmetic
 public import Maths.Multitubes.FiniteInequality.Basic
+public import Maths.Multitubes.FiniteInequality.CertificateCheck
+public import Maths.Multitubes.FiniteInequality.Parametric
 public import Maths.Multitubes.FiniteInequality.Quantitative
 public import Maths.Multitubes.FiniteInequality.Sparse
 
@@ -89,6 +93,7 @@ public import Maths.Multitubes.MaxAffine.GaugeHolonomy
 public import Maths.Multitubes.MaxAffine.JoinSemidirect
 public import Maths.Multitubes.MaxAffine.LeastEigenvalue
 public import Maths.Multitubes.MaxAffine.Paths
+public import Maths.Multitubes.MaxAffine.PolicySpectrum
 public import Maths.Multitubes.MaxAffine.Relaxation
 public import Maths.Multitubes.MaxAffine.Scalar
 public import Maths.Multitubes.MaxAffine.Sections

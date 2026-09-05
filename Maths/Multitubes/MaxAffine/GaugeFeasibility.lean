@@ -41,22 +41,17 @@ At a raw residual level, the exact critical-cycle bound is `T_C / S_C`, where
   the additive defect of the rescaled critical graph over the gauge at the target.  Every
   identification below of critical affine inequalities with additive ones is this one identity
   read at some level.
-* `MaxAffineTransport.worstResidualAtMost_iff_criticalAffineResidualAtMost_of_nonexpansiveGauge`:
-  at every raw residual threshold, a nonexpansive gauge deletes exactly the noncritical branch rows
-  - floors and strictly contracting rows never bind.
-* `MaxAffineTransport.worstResidualAtMost_iff_criticalAffineResidualAtMost_of_expansiveGauge`:
-  the same reduction for an expansive gauge, which additionally requires every floor absent.
+* At every raw residual threshold, feasibility reduces to
+  `Maths.MaxAffineTransport.CriticalAffineResidualAtMost`: a nonexpansive gauge deletes the
+  noncritical branch rows, so floors and strictly contracting rows never bind. The same reduction
+  holds for an expansive gauge when every floor is absent.
 * `Maths.MaxAffineTransport.worstResidualAtMost_iff_cycleRatio_le_of_nonexpansiveGauge`,
-  `MaxAffineTransport.worstResidualAtMost_iff_cycleRatio_le_of_expansiveGauge`: the
+  `Maths.MaxAffineTransport.worstResidualAtMost_iff_cycleRatio_le_of_expansiveGauge`: the
   **quantitative gauge theorems** - the exact raw worst-residual threshold is the supremum of
   `gaugeCriticalCycleRatio` over *nonempty* critical cycles, in both gauge regimes.
-* `MaxAffineTransport.exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_nonexpansiveGauge`,
-  `MaxAffineTransport.exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_expansiveGauge`:
-  feasibility holds exactly when every critical cycle has nonpositive normalized shift sum. The
-  expansive form assumes floors absent.
-* `MaxAffineTransport.exists_isLaxSection_iff_gaugeCriticalHolonomy_prefixed_of_nonexpansiveGauge`,
-  `MaxAffineTransport.exists_isLaxSection_iff_gaugeCriticalHolonomy_prefixed_of_expansiveGauge`:
-  the same criteria restated as pre-fixedness of every normalized critical-cycle holonomy.
+* At threshold zero, the quantitative gauge theorems characterize feasibility by nonpositive
+  normalized shifts on every critical cycle. Equivalently, every normalized critical-cycle
+  holonomy has a pre-fixed point. The expansive statements require absent floors.
 -/
 
 @[expose] public section
