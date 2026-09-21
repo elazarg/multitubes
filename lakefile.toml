@@ -1,5 +1,5 @@
 name = "maths"
-version = "0.1.0"
+version = "4.33.1"
 keywords = ["math"]
 defaultTargets = ["Maths"]
 
