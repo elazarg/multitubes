@@ -295,7 +295,7 @@ dependency graph.
 
 ## Building this repository
 
-The project uses Lean `v4.33.1` and the matching mathlib release, as recorded in
+The project uses Lean `v4.34.0` and the matching mathlib release, as recorded in
 `lean-toolchain` and `lakefile.toml`. The only additional dependency is
 [`fixed-point-theorems`](https://github.com/elazarg/fixed-point-theorems-lean4), used for
 Brouwer's theorem in the max-affine eigenproblem. No other module depends on it.

@@ -6,7 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.Basic
-public import Mathlib.Data.Rel
+public import Mathlib.Basic.Rel
 
 /-!
 # Relation-labelled transport

@@ -6,7 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.Additive.Potentials
-public import Mathlib.Data.Finite.Prod
+public import Mathlib.Basic.Finite.Prod
 public import Mathlib.Data.Finset.Lattice.Fold
 
 import Maths.Multitubes.Additive.ShortCycles

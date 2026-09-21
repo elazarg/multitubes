@@ -6,7 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.Mixed.Walk
-public import Mathlib.Data.NNReal.Defs
+public import Mathlib.Basic.NNReal.Defs
 public import Mathlib.Topology.MetricSpace.Pseudo.Defs
 
 /-!

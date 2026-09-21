@@ -237,10 +237,10 @@ theorem pathClosure_rootedLower_eq_base
   · refine iSup_le fun source ↦ iSup_le fun walk ↦ ?_
     by_cases hsource : source = base
     · subst source
-      rw [rootedLower, dif_pos rfl, fiberCast_rfl]
+      rw [rootedLower, dite_eq_left rfl, fiberCast_rfl]
       change T.holonomy walk point ≤ point
       exact hcycle walk
-    · rw [rootedLower, dif_neg hsource]
+    · rw [rootedLower, dite_eq_right hsource]
       rw [T.walkMap_bot hSup.map_bot walk]
       exact bot_le
   · simpa using T.le_pathClosure (rootedLower (Fiber := Fiber) base point) base

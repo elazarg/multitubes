@@ -6,7 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.FiniteInequality.Basic
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 
 import Maths.LinearProgramming.FourierMotzkin
 import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset

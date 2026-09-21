@@ -516,17 +516,17 @@ theorem hasCyclicSlack_iff_cyclicSlackThreshold_le
   rcases lt_trichotomy (pathSlope labels) 1 with hproduct | hproduct | hproduct
   · have hneproduct : pathSlope labels ≠ 1 := ne_of_lt hproduct
     have hnexpansive : ¬1 < pathSlope labels := not_lt_of_ge hproduct.le
-    rw [cyclicSlackThreshold, if_neg hne, if_neg hneproduct,
-      if_neg hnexpansive]
+    rw [cyclicSlackThreshold, ite_eq_right hne, ite_eq_right hneproduct,
+      ite_eq_right hnexpansive]
     simp only [bot_le, iff_true]
     exact hasCyclicSlack_of_pathSlope_lt_one hslope hproduct level
-  · rw [cyclicSlackThreshold, if_neg hne, if_pos hproduct]
+  · rw [cyclicSlackThreshold, ite_eq_right hne, ite_eq_left hproduct]
     rw [hasCyclicSlack_iff_cycleMean_le_of_pathSlope_eq_one
       hne hslope hproduct]
     simp
   · have hneproduct : pathSlope labels ≠ 1 := ne_of_gt hproduct
-    rw [cyclicSlackThreshold, if_neg hne, if_neg hneproduct,
-      if_pos hproduct]
+    rw [cyclicSlackThreshold, ite_eq_right hne, ite_eq_right hneproduct,
+      ite_eq_left hproduct]
     exact hasCyclicSlack_iff_expansiveCyclicSlackThreshold_le
       hne hslope hproduct level
 

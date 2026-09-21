@@ -358,7 +358,7 @@ theorem signedCirculationLift_isNormalizedCertificate
       split_ifs <;> linarith
     simp_rw [hterm]
     rw [Finset.sum_add_distrib]
-    simp only [Finset.sum_ite_eq', Finset.mem_univ, if_true]
+    simp only [Finset.sum_ite_eq', Finset.mem_univ, ite_true]
     dsimp only [slack]
     ring
   · intro vertex
@@ -555,7 +555,7 @@ theorem exists_genuineSignedCircuitVector_decomposition
   · intro i hpositive
     refine ⟨hsimple i, ?_⟩
     intro hbacktrack
-    simp only [circuitWeight, if_pos hbacktrack] at hpositive
+    simp only [circuitWeight, ite_eq_left hbacktrack] at hpositive
     exact (lt_irrefl 0) hpositive
   · intro edge
     rw [hcirculationSum edge]

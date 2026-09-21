@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Algebra.QuadraticDiscriminant
 public import Mathlib.Analysis.SpecificLimits.Normed
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 public import Mathlib.Analysis.Real.Sqrt
 public import Mathlib.LinearAlgebra.Matrix.Charpoly.Disc
 public import Mathlib.LinearAlgebra.Matrix.Notation
@@ -638,7 +638,7 @@ theorem linearFractionalGL_smul_coe {c d x : ℝ} (hc : c ≠ 0) (hden : c + d *
   have h10 : (linearFractionalGL d hc) 1 0 = d := rfl
   have h11 : (linearFractionalGL d hc) 1 1 = c := rfl
   rw [OnePoint.smul_some_eq_ite, h00, h01, h10, h11,
-    if_neg (by rw [add_comm]; exact hden), linearFractionalStep_apply]
+    ite_eq_right (by rw [add_comm]; exact hden), linearFractionalStep_apply]
   ring_nf
 
 /-- The transfer matrices of a coefficient cycle multiply. -/

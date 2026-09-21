@@ -8,7 +8,7 @@ module
 public import Mathlib.Analysis.Convex.Extreme
 public import Mathlib.Analysis.Normed.Order.Lattice
 public import Mathlib.Data.Matrix.Mul
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.PiProd
 
 import Maths.LinearProgramming.FourierMotzkin
@@ -423,12 +423,12 @@ theorem mulVec_eq_sum_supportColumns
     · rw [hd_supp j hj]
       refine (Finset.sum_eq_zero fun k _ => ?_).symm
       have hne : j ≠ k.1 := fun hkj => k.property (hkj ▸ hj)
-      rw [if_neg hne]
+      rw [ite_eq_right hne]
       simp
     · rw [Finset.sum_eq_single (⟨j, hj⟩ : {k : Col // z k ≠ 0})]
       · simp
       · intro k _ hkj
-        rw [if_neg fun hkj' => hkj (Subtype.ext hkj'.symm)]
+        rw [ite_eq_right fun hkj' => hkj (Subtype.ext hkj'.symm)]
         simp
       · simp
   calc
@@ -471,7 +471,7 @@ theorem eq_zero_of_extreme_standardFeasible
     by_cases hzj : z j = 0
     · rw [hzj, hd_supp j hzj]
       simp
-    · simp only [hzj, if_false] at hbound
+    · simp only [hzj, ite_false] at hbound
       have hdenom_pos : (0 : 𝕜) < |d j| + 1 := by positivity
       have hfull : ε * (|d j| + 1) ≤ z j := (le_div_iff₀ hdenom_pos).mp hbound
       nlinarith
@@ -521,7 +521,7 @@ theorem linearIndependent_supportColumns_of_extreme_standardFeasible
     simp only [hd, Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.single_apply]
     refine Finset.sum_eq_zero fun i _ => ?_
     have hne : k ≠ i.1 := fun hki => i.property (hki ▸ hk)
-    rw [if_neg hne]
+    rw [ite_eq_right hne]
     simp
   have hd_eval (k : {k : Col // z k ≠ 0}) : d k.1 = f k - g k := by
     simp only [hd, Finset.sum_apply]
@@ -529,7 +529,7 @@ theorem linearIndependent_supportColumns_of_extreme_standardFeasible
     · simp
     · intro l _ hlk
       simp only [Pi.smul_apply, smul_eq_mul, Pi.single_apply]
-      rw [if_neg fun heq => hlk (Subtype.ext heq.symm)]
+      rw [ite_eq_right fun heq => hlk (Subtype.ext heq.symm)]
       simp
     · simp
   have hd_kernel : A *ᵥ d = 0 := by

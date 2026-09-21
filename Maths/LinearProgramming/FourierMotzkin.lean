@@ -360,7 +360,7 @@ theorem feasible_of_fm_feasible (A : I → Fin (n + 1) → 𝕜) (b : I → 𝕜
       by_cases hPos : (Finset.univ : Finset (PosRows A)).Nonempty
       · change (if h : _ then Finset.univ.sup' h L
                 else if h' : _ then Finset.univ.inf' h' U else 0) ≤ U hiN
-        rw [dif_pos hPos]
+        rw [dite_eq_left hPos]
         apply Finset.sup'_le
         intro p _
         exact reduced_pair_ineq hx' p hiN
@@ -368,7 +368,7 @@ theorem feasible_of_fm_feasible (A : I → Fin (n + 1) → 𝕜) (b : I → 𝕜
           ⟨hiN, Finset.mem_univ _⟩
         change (if h : _ then Finset.univ.sup' h L
                 else if h' : _ then Finset.univ.inf' h' U else 0) ≤ U hiN
-        rw [dif_neg hPos, dif_pos hNeg]
+        rw [dite_eq_right hPos, dite_eq_left hNeg]
         exact Finset.inf'_le _ (Finset.mem_univ hiN)
     have hUval : A i (Fin.last n) * U hiN
         = b i - ∑ j : Fin n, A i j.castSucc * x' j := by
@@ -393,7 +393,7 @@ theorem feasible_of_fm_feasible (A : I → Fin (n + 1) → 𝕜) (b : I → 𝕜
     have hLbound : L hiP ≤ x_last := by
       change L hiP ≤ (if h : _ then Finset.univ.sup' h L
                        else if h' : _ then Finset.univ.inf' h' U else 0)
-      rw [dif_pos hPos]
+      rw [dite_eq_left hPos]
       exact Finset.le_sup' _ (Finset.mem_univ hiP)
     have hLval : A i (Fin.last n) * L hiP
         = b i - ∑ j : Fin n, A i j.castSucc * x' j := by

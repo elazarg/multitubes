@@ -7,7 +7,7 @@ module
 
 public import Maths.Multitubes.Closure
 public import Maths.Multitubes.Mixed.AdjointOrder
-public import Mathlib.Data.Rel
+public import Mathlib.Basic.Rel
 public import Mathlib.Order.Hom.CompleteLattice
 
 /-!

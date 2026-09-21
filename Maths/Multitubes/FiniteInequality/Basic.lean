@@ -6,7 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.LinearProgramming.FourierMotzkin
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 public import Mathlib.Data.Matrix.Mul
 
 import Mathlib.Tactic.Linarith

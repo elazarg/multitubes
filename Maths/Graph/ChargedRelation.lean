@@ -5,8 +5,8 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Mathlib.Data.Real.Basic
-public import Mathlib.Data.ENNReal.Real
+public import Mathlib.Basic.Real.Basic
+public import Mathlib.Basic.ENNReal.Real
 
 import Mathlib.Order.ConditionallyCompleteLattice.Basic
 
@@ -180,10 +180,10 @@ theorem highChargeCount_mul_le_chargeSum
   | nil state => simp
   | cons edge rest ih =>
       by_cases hedge : threshold ≤ R.charge edge
-      · simp only [highChargeCount_cons, hedge, if_true,
+      · simp only [highChargeCount_cons, hedge, ite_true,
           Nat.cast_add, Nat.cast_one, chargeSum_cons]
         nlinarith
-      · simp only [highChargeCount_cons, hedge, if_false, chargeSum_cons]
+      · simp only [highChargeCount_cons, hedge, ite_false, chargeSum_cons]
         nlinarith [R.charge_nonneg edge]
 
 /-- Classical decidability, used only to define counting functions on arbitrary predicates. -/
@@ -220,10 +220,10 @@ theorem sourceVisitCount_mul_le_chargeSum
   | nil state => simp
   | cons edge rest ih =>
       by_cases hedge : property (R.src edge)
-      · simp only [sourceVisitCount_cons, hedge, if_true,
+      · simp only [sourceVisitCount_cons, hedge, ite_true,
           Nat.cast_add, Nat.cast_one, chargeSum_cons]
         nlinarith [hcharge edge hedge]
-      · simp only [sourceVisitCount_cons, hedge, if_false, chargeSum_cons]
+      · simp only [sourceVisitCount_cons, hedge, ite_false, chargeSum_cons]
         nlinarith [R.charge_nonneg edge]
 
 /-- The one-edge path. -/

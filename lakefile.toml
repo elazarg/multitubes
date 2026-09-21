@@ -1,5 +1,5 @@
 name = "maths"
-version = "4.33.1"
+version = "4.34.0"
 keywords = ["math"]
 defaultTargets = ["Maths"]
 
@@ -44,12 +44,12 @@ weak.linter.style.maxHeartbeats = true
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.33.1"
+rev = "v4.34.0"
 
 [[require]]
 name = "fixed-point-theorems"
 git = "https://github.com/elazarg/fixed-point-theorems-lean4"
-rev = "8506daa06b98520a97e36a90abe7c314d53af626"
+rev = "d9c3aba7340f21a13df59c61d92bfe9622e40da2"
 
 # The four groups, each buildable alone. The first three depend on mathlib and on
 # nothing else in this package, which `scripts/check-layering.py` checks for the

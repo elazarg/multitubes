@@ -102,7 +102,7 @@ private theorem sccUnitPotential_spec
   have hpathReturn :
       walkLabel label sourcePath * walkLabel label sourceReturn = 1 := by
     simpa using hflat (G.source edge) (sourceReturn.append sourcePath)
-  simp only [sccUnitPotential, dif_pos htarget, dif_pos hsource]
+  simp only [sccUnitPotential, dite_eq_left htarget, dite_eq_left hsource]
   change label edge = walkLabel label targetPath * walkLabel label sourceReturn
   calc
     label edge = label edge *

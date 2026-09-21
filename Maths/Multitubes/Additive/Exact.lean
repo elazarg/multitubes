@@ -11,7 +11,7 @@ public import Maths.Graph.ChargedRelation
 public import Maths.Graph.EdgeGraph
 public import Mathlib.Algebra.Group.TypeTags.Basic
 public import Mathlib.Algebra.Order.BigOperators.Group.List
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 import Mathlib.Tactic.Abel
 import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.LinearCombination
@@ -217,7 +217,7 @@ theorem basePotential_eq_walkSum_of_baseCycleSums_eq_zero
   have hchosen := hzero (hreach.some.append hback.some)
   have hgiven := hzero (walk.append hback.some)
   rw [walkSum_append] at hchosen hgiven
-  rw [basePotential, dif_pos hreach]
+  rw [basePotential, dite_eq_left hreach]
   linear_combination (norm := abel) hchosen - hgiven
 
 /-- **Reconstruction of a potential.**  If every closed walk at `base` has
@@ -317,7 +317,7 @@ theorem cycleSum_le_length_mul_of_defect_le {δ : ℝ}
     (hdefect : ∀ edge ∈ cycle.edges, defect G w φ edge ≤ δ) :
     walkSum w cycle ≤ (cycle.length : ℝ) * δ := by
   have hsum : (cycle.edges.map (defect G w φ)).sum ≤ cycle.edges.length • δ := by
-    have hbound := List.sum_le_card_nsmul (cycle.edges.map (defect G w φ)) δ (by
+    have hbound := List.sum_le_length_nsmul (cycle.edges.map (defect G w φ)) δ (by
       intro value hvalue
       obtain ⟨edge, hedge, rfl⟩ := List.mem_map.mp hvalue
       exact hdefect edge hedge)

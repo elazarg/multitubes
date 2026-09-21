@@ -238,7 +238,7 @@ theorem maximalTrailWithin_isClosed
   have hin := walk.incomingMultiplicity_le_edgeSetMultiplicity_of_trail
     allowed htrail finish
   have hallowedBalance := hbalanced finish
-  rw [if_pos rfl, if_neg (Ne.symm hfinish)] at hflow
+  rw [ite_eq_left rfl, ite_eq_right (Ne.symm hfinish)] at hflow
   omega
 
 /-- From any vertex with an allowed outgoing edge, a balanced finite edge set contains a
@@ -685,7 +685,7 @@ private theorem count_map_eq_sum_toFinset_ite
       simp only [List.map_cons, List.count_cons, List.toFinset_cons]
       rw [Finset.sum_insert (by simpa using hnodup.1), ih hnodup.2]
       by_cases hvalue : mapValue first = value
-      · simp only [hvalue, beq_self_eq_true, if_true]
+      · simp only [hvalue, beq_self_eq_true, ite_true]
         omega
       · simp [hvalue, beq_iff_eq]
 

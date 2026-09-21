@@ -6,11 +6,11 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.MaxAffine.Contraction
-public import Mathlib.Analysis.Convex.StdSimplex
 public import Mathlib.Analysis.SpecialFunctions.Pow.Continuity
 
 import FixedPointTheorems.brouwer
 import Mathlib.Algebra.BigOperators.Field
+import Mathlib.Geometry.Convex.ConvexSpace.CompactSpaceStdSimplex
 import Mathlib.Topology.Order.Lattice
 
 /-!
@@ -319,7 +319,8 @@ variable [Fintype V] [Fintype E] [DecidableEq V]
 omit [Fintype E] [DecidableEq V] in
 /-- Some coordinate of a point of the standard simplex is positive, its coordinates being
 nonnegative and summing to one. -/
-theorem exists_pos_of_mem_stdSimplex {y : V → ℝ} (hy : y ∈ stdSimplex ℝ V) :
+theorem exists_pos_of_mem_stdSimplex {y : V → ℝ}
+    (hy : y ∈ {y : V → ℝ | (∀ v, 0 ≤ y v) ∧ ∑ v, y v = 1}) :
     ∃ u : V, 0 < y u := by
   by_contra hcon
   have hzero : ∀ u : V, y u = 0 := fun u => le_antisymm (not_lt.1 fun h => hcon ⟨u, h⟩) (hy.1 u)
@@ -337,7 +338,7 @@ simplex is positive, and the edge leaving that vertex contributes a positive mon
 operator at its target. -/
 theorem coneScale_pos (G : EdgeGraph V E) (label : E → Label)
     (hout : ∀ vertex : V, ∃ e : E, G.source e = vertex) {y : V → ℝ}
-    (hy : y ∈ stdSimplex ℝ V) : 0 < coneScale G label y := by
+    (hy : y ∈ {y : V → ℝ | (∀ v, 0 ≤ y v) ∧ ∑ v, y v = 1}) : 0 < coneScale G label y := by
   obtain ⟨u, hu⟩ := exists_pos_of_mem_stdSimplex hy
   obtain ⟨e, he⟩ := hout u
   have hterm : 0 < coneTerm G label y e := by
@@ -356,7 +357,8 @@ def coneMap (G : EdgeGraph V E) (label : E → Label) (y : V → ℝ) (vertex : 
 /-- The normalized cone operator lands in the standard simplex. -/
 theorem coneMap_mem_stdSimplex (G : EdgeGraph V E) (label : E → Label)
     (hout : ∀ vertex : V, ∃ e : E, G.source e = vertex) {y : V → ℝ}
-    (hy : y ∈ stdSimplex ℝ V) : coneMap G label y ∈ stdSimplex ℝ V := by
+    (hy : y ∈ {y : V → ℝ | (∀ v, 0 ≤ y v) ∧ ∑ v, y v = 1}) :
+    coneMap G label y ∈ {y : V → ℝ | (∀ v, 0 ≤ y v) ∧ ∑ v, y v = 1} := by
   have hscale := coneScale_pos G label hout hy
   refine ⟨fun vertex => div_nonneg (coneOperator_nonneg G label y vertex) hscale.le, ?_⟩
   simp only [coneMap]
@@ -370,9 +372,9 @@ on which the cone operator acts by a positive scalar. -/
 theorem exists_mem_stdSimplex_coneOperator_eq [Nonempty V] (G : EdgeGraph V E) (label : E → Label)
     (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (hout : ∀ vertex : V, ∃ e : E, G.source e = vertex) :
-    ∃ (rho : ℝ) (y : V → ℝ), y ∈ stdSimplex ℝ V ∧ 0 < rho ∧
+    ∃ (rho : ℝ) (y : V → ℝ), y ∈ {y : V → ℝ | (∀ v, 0 ≤ y v) ∧ ∑ v, y v = 1} ∧ 0 < rho ∧
       ∀ vertex : V, coneOperator G label y vertex = rho * y vertex := by
-  set s : Set (V → ℝ) := stdSimplex ℝ V with hs
+  set s : Set (V → ℝ) := {y : V → ℝ | (∀ v, 0 ≤ y v) ∧ ∑ v, y v = 1} with hs
   have hscale : ∀ y : s, 0 < coneScale G label (y : V → ℝ) := fun y =>
     coneScale_pos G label hout y.2
   have hcontScale : Continuous fun y : s => coneScale G label (y : V → ℝ) :=
@@ -384,8 +386,25 @@ theorem exists_mem_stdSimplex_coneOperator_eq [Nonempty V] (G : EdgeGraph V E) (
     exact Continuous.div
       ((continuous_coneOperator G label hslope vertex).comp continuous_subtype_val) hcontScale
       fun y => (hscale y).ne'
-  obtain ⟨y, hy⟩ := brouwer_fixed_point s (convex_stdSimplex ℝ V) (isCompact_stdSimplex ℝ V)
-    ⟨_, single_mem_stdSimplex ℝ (Classical.arbitrary V)⟩ ⟨_, hcont⟩
+  have hconvex : Convex ℝ s := by
+    intro f hf g hg a b ha hb hab
+    refine ⟨fun v => add_nonneg (mul_nonneg ha (hf.1 v)) (mul_nonneg hb (hg.1 v)), ?_⟩
+    simp only [Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+    rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum, hf.2, hg.2,
+      mul_one, mul_one, hab]
+  have hrange : s = Set.range
+      (fun w : Convexity.StdSimplex ℝ V => (w.weights : V → ℝ)) := by
+    rw [Convexity.StdSimplex.range_toFun_comp_weights]
+    ext y
+    simp [s]
+  have hcompact : IsCompact s := by
+    rw [hrange]
+    exact isCompact_range (continuous_pi fun v =>
+      Convexity.StdSimplex.continuous_weights_apply ℝ v)
+  have hnonempty : s.Nonempty := by
+    rw [hrange]
+    exact Set.range_nonempty _
+  obtain ⟨y, hy⟩ := brouwer_fixed_point s hconvex hcompact hnonempty ⟨_, hcont⟩
   refine ⟨coneScale G label (y : V → ℝ), (y : V → ℝ), y.2, hscale y, fun vertex => ?_⟩
   have hfix : coneMap G label (y : V → ℝ) = (y : V → ℝ) := congrArg Subtype.val hy
   have hcoord := congrFun hfix vertex
@@ -406,7 +425,7 @@ the source of an edge contributes a positive monomial at its target; strong conn
 spreads positivity everywhere. -/
 theorem coneOperator_fixedPoint_pos (G : EdgeGraph V E) (label : E → Label)
     (hconn : ∀ start finish : V, Nonempty (G.Walk start finish)) {rho : ℝ} (hrho : 0 < rho)
-    {y : V → ℝ} (hy : y ∈ stdSimplex ℝ V)
+    {y : V → ℝ} (hy : y ∈ {y : V → ℝ | (∀ v, 0 ≤ y v) ∧ ∑ v, y v = 1})
     (hfix : ∀ vertex : V, coneOperator G label y vertex = rho * y vertex) (vertex : V) :
     0 < y vertex := by
   obtain ⟨u, hu⟩ := exists_pos_of_mem_stdSimplex hy

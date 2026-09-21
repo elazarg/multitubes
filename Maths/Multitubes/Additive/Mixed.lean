@@ -8,7 +8,7 @@ module
 public import Maths.Multitubes.Additive.Exact
 public import Maths.Multitubes.Mixed.AdjointOrder
 
-import Mathlib.Data.Finite.Sum
+import Mathlib.Basic.Finite.Sum
 
 /-!
 # Additive mixed-polarity transport

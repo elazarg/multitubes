@@ -8,7 +8,7 @@ module
 public import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 public import Mathlib.Data.Fin.Basic
 public import Mathlib.Data.Fintype.Basic
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
@@ -132,7 +132,7 @@ theorem survivalProduct_nonneg (hq : ∀ i, 0 ≤ q i) (k : ℕ) :
 /-- Survival factors in `[0, 1]` have products in `[0, 1]`. -/
 theorem survivalProduct_le_one (hq0 : ∀ i, 0 ≤ q i) (hq1 : ∀ i, q i ≤ 1) (k : ℕ) :
     survivalProduct q k ≤ 1 :=
-  Finset.prod_le_one (fun i _ => hq0 i) fun i _ => hq1 i
+  Finset.prod_le_one₀ (fun i _ => hq0 i) fun i _ => hq1 i
 
 /-- The empty weighted rate is `0`. -/
 @[simp] theorem weightedRate_zero : weightedRate p q 0 = 0 := by

@@ -7,7 +7,7 @@ module
 
 public import Maths.LinearProgramming.FourierMotzkin
 public import Mathlib.Data.Rat.Cast.Order
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 
 import Mathlib.Data.Rat.BigOperators
 import Mathlib.Algebra.BigOperators.Fin

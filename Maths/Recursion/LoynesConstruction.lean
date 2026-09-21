@@ -201,7 +201,7 @@ variable {a}
 /-- Retentions bounded by `ρ` make the accumulated transport geometric. -/
 theorem pastTransport_le_pow {ρ : ℝ} (ha : ∀ k, 0 ≤ a k) (hρ : ∀ k, a k ≤ ρ) (j : ℕ) :
     pastTransport a j ≤ ρ ^ j := by
-  have h := Finset.prod_le_prod (s := Finset.range j) (f := a) (g := fun _ => ρ)
+  have h := Finset.prod_le_prod₀ (s := Finset.range j) (f := a) (g := fun _ => ρ)
     (fun k _ => ha k) fun k _ => hρ k
   simpa [pastTransport] using h
 

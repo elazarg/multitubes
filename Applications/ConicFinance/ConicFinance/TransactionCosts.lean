@@ -7,8 +7,8 @@ module
 
 public import Maths.Multitubes.Relational
 public import Mathlib.Analysis.Convex.Hull
-public import Mathlib.Data.Rel
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Rel
+public import Mathlib.Basic.Real.Basic
 
 import Mathlib.Tactic.Abel
 import Mathlib.Tactic.NormNum

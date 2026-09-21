@@ -148,8 +148,8 @@ private theorem sum_edgeMultiplicity_mul_signedDelta_eq_zero
     rw [Finset.sum_filter]
     refine Finset.sum_congr rfl fun edge _ => ?_
     by_cases h : vertex = endpoint edge
-    · rw [if_pos h, if_pos h.symm]
-    · rw [if_neg h, if_neg (Ne.symm h)]
+    · rw [ite_eq_left h, ite_eq_left h.symm]
+    · rw [ite_eq_right h, ite_eq_right (Ne.symm h)]
   rw [hfilter, hfilter, hbalanceReal, sub_self]
 
 /-- Every nonempty directed circuit in the doubled graph is a normalized

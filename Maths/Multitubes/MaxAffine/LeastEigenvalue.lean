@@ -450,14 +450,14 @@ theorem source_mem_criticalVertices (hslope : ∀ e : E, 0 ≤ (label e).slope)
   have hlower : 0 < ∑ c, coefficient c * branchSlope label c *
       (if u = G.source (branchEdge label c) then (1 : ℝ) else 0) := by
     refine lt_of_lt_of_le ?_ (Finset.single_le_sum hgainNonneg (Finset.mem_univ branch))
-    rw [if_pos hu, mul_one]
+    rw [ite_eq_left hu, mul_one]
     exact mul_pos hpos hgain
   obtain ⟨c, -, hne⟩ := Finset.exists_ne_zero_of_sum_ne_zero
     (by rw [hbalance]; exact hlower.ne')
   have hcoef : coefficient c ≠ 0 := fun h => hne (by rw [h, zero_mul])
   have htarget : u = G.target (branchEdge label c) := by
     by_contra hcon
-    exact hne (by rw [if_neg hcon, mul_zero])
+    exact hne (by rw [ite_eq_right hcon, mul_zero])
   exact ⟨c, lt_of_le_of_ne (hcoefficient.1 c) (Ne.symm hcoef), htarget.symm⟩
 
 /-- **The critical coordinates are frozen.**  A candidate below an optimal potential and agreeing

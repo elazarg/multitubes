@@ -440,7 +440,7 @@ theorem exists_unitPotential_of_trivialCycleLabels {base : V}
         inv_val := by
           simpa using hflat base
             (hsourceLinked.1.some.append hsourceLinked.2.some) } := by
-    simp only [potential, dif_pos hsourceLinked]
+    simp only [potential, dite_eq_left hsourceLinked]
   have htarget : potential (G.target edge) =
       { val := walkLabel label htargetLinked.1.some
         inv := walkLabel label htargetLinked.2.some
@@ -450,7 +450,7 @@ theorem exists_unitPotential_of_trivialCycleLabels {base : V}
         inv_val := by
           simpa using hflat base
             (htargetLinked.1.some.append htargetLinked.2.some) } := by
-    simp only [potential, dif_pos htargetLinked]
+    simp only [potential, dite_eq_left htargetLinked]
   rw [hsource, htarget]
   have hparallel := walkLabel_eq_of_trivialCycleLabels_of_return hflat
     (hsourceLinked.1.some.concat edge rfl) htargetLinked.1.some

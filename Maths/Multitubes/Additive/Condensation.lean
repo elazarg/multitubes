@@ -176,7 +176,7 @@ theorem hasSCCPotentialAt_iff_exists_isPotential_induce (weight : E → ℝ) (ba
     have ht : G.target edge ∈ sccSet G (toSCC G base) :=
       mem_sccSet_toSCC_iff_linkedTo.mpr htarget
     have hedge := hψ ⟨edge, hs, ht⟩
-    simp only [φ, dif_pos hs, dif_pos ht]
+    simp only [φ, dite_eq_left hs, dite_eq_left ht]
     exact hedge
 
 private theorem walkWeight_le_of_forall_mem_edges {weight : E → ℝ} {φ : V → ℝ}

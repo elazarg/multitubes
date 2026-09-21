@@ -10,10 +10,10 @@ public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 public import Mathlib.Data.Finset.Max
 public import Mathlib.Data.Fintype.Card
 public import Mathlib.Data.Set.Finite.Basic
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 
 import Mathlib.Algebra.Order.BigOperators.Group.List
-import Mathlib.Data.Finite.Prod
+import Mathlib.Basic.Finite.Prod
 import Mathlib.Data.Fintype.Order
 import Mathlib.Data.Set.Finite.List
 import Mathlib.Order.ConditionallyCompleteLattice.Basic
@@ -462,7 +462,7 @@ theorem exists_bound_walkWeight (weight : E → 𝕜)
       rw [List.mem_map] at hx
       obtain ⟨e, _, rfl⟩ := hx
       exact (hcap e).trans (le_max_left _ _)
-    have := List.sum_le_card_nsmul (pruned.edges.map weight) (max cap 0) hbound
+    have := List.sum_le_length_nsmul (pruned.edges.map weight) (max cap 0) hbound
     simpa [walkWeight, EdgeGraph.Walk.edges_length] using this
   refine hsum.trans (nsmul_le_nsmul_left (le_max_right _ _) hlen)
 

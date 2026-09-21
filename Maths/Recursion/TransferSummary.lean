@@ -7,7 +7,7 @@ module
 
 public import Mathlib.Algebra.BigOperators.Intervals
 public import Mathlib.Data.Finset.Lattice.Fold
-public import Mathlib.Data.Real.Basic
+public import Mathlib.Basic.Real.Basic
 public import Mathlib.LinearAlgebra.AffineSpace.AffineMap
 
 import Mathlib.Algebra.BigOperators.Ring.Finset
