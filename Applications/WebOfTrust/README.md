@@ -37,3 +37,15 @@ Cryptographic validity, revocation, time, identity resolution, Sybil resistance,
 independence requirements are separate semantics. Policies such as requiring several distinct
 introducers need evidence records that retain those introducers, or a richer aggregation layer;
 they do not follow from scalar path propagation alone.
+
+[`ThresholdPolicy.lean`](WebOfTrust/ThresholdPolicy.lean) gives a finite example of that richer
+aggregation. Two seed tokens travel to a common context, and a monotone threshold edge releases a
+third token only after both have arrived. The threshold map does not preserve unions: neither seed
+alone triggers it, while their union does. A reverse-ordered sweep therefore needs two passes.
+The generic local-relaxation theory certifies the resulting fixed sweep as the least sound
+assignment above the seeds.
+
+This example marks the boundary of the all-path union formula. Individual path images do not
+combine evidence at an intermediate vertex, while local relaxation repeatedly aggregates the
+current values before transporting them. The finite computation models a logical threshold only;
+it does not establish cryptographic validity, independence of endorsers, probability, or truth.

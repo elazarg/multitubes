@@ -14,8 +14,8 @@ ingredients are known; no literature novelty is claimed for the proposed transfe
 | Known result and source field | Portable statement | Applications after transfer | Current gap |
 | --- | --- | --- | --- |
 | Max-plus cycle means; log-Chebyshev pairwise ranking | The least uniform additive residual is the largest signed cycle mean. | Timing bottlenecks, unit-scale sensor inconsistency, relative ranking. | Core threshold theorem exists; sensor threshold/certificate adapter added. |
-| Chebyshev optimality and complementary slackness | An optimal worst-residual fit has a small balanced set of active rows. | Sensor explanations, worst-case calibration, max-affine residual optimization. | Connect existing duality, optimal dual attainment, and sparsity. |
-| Chaotic iteration in program analysis | Fair local inflationary updates stabilize at the least section above seeds under ACC. | Finite reachability, morphology, evidence propagation, finite resource domains. | Generic schedule, fairness, and stabilization theorem. |
+| Chebyshev optimality and complementary slackness | An optimal worst-residual fit has a small balanced set of active rows. | Sensor explanations, worst-case calibration, max-affine residual optimization. | Implemented generically and connected to affine sensors. |
+| Chaotic iteration in program analysis | Fair local inflationary updates stabilize at the least section above seeds under ACC. | Finite reachability, morphology, evidence propagation, finite resource domains. | Generic fair schedules and finite covering sweeps implemented; finite threshold evidence client added. |
 | Bekić decomposition in synchronous/dataflow semantics | Simultaneous monotone least fixed points can be solved by nested block fixed points. | Modular analysis, recursive co-design, SCC-based closure computation. | Heterogeneous product theorem and block restriction/assembly API. |
 | Hoffman error bounds in optimization | Small linear constraint violations imply proximity to a feasible section. | Sensor repair, radius correction, quantitative verification. | A normed polyhedral error-bound layer. |
 | Doob harmonic transform in probability | Positive exact sections normalize positive kernel transport; lax ones give sub-Markov transport. | Stochastic verification, positive-operator normalization, changed-measure finite paths. | Finite kernel normalization and its transport adapter. |
@@ -66,7 +66,7 @@ Known source: [Sukhorukova, Ugon, and Yost, *Chebyshev approximation for multiva
 functions*](https://arxiv.org/abs/1510.06076), section 2. The convex optimality condition
 uses signed gradients of worst residuals; ordinary ordered alternation is a further special case.
 
-Proposed generic statement: for finitely many nonempty rows, put
+For a nonempty finite row family, write
 `ρ(x) = maxᵢ (bᵢ - ⟨δᵢ, x⟩)`. A global minimizer x with value t admits weights u such that
 
 ```text
@@ -78,26 +78,29 @@ Conversely these conditions and the residual upper bound prove optimality by wei
 The weights can be chosen on at most `rank(span {δᵢ}) + 1` active rows by a convex-hull or
 extreme-point argument. This is a certificate for the optimum, not merely for a rejected threshold.
 
-The [normalized duality](../Maths/Multitubes/FiniteInequality/Quantitative.lean),
-[sparse certificate](../Maths/Multitubes/FiniteInequality/Sparse.lean), and
-[LP complementary-slackness](../Maths/LinearProgramming/Duality.lean) theories supply most
-ingredients. A related tightness theorem already appears as
-`MaxAffineTransport.branchResidual_eq_of_pos` in
+The generic result is now packaged in
+[OptimalCertificate](../Maths/Multitubes/FiniteInequality/OptimalCertificate.lean). It combines
+normalized threshold duality with compact dual attainment, complementary slackness, and the
+extreme-point sparsity mechanism from
+[Sparse](../Maths/Multitubes/FiniteInequality/Sparse.lean). A related branch-specific tightness
+theorem already appears as `MaxAffineTransport.branchResidual_eq_of_pos` in
 [LeastEigenvalue](../Maths/Multitubes/MaxAffine/LeastEigenvalue.lean).
 
-For sensors, the support identifies worst signed comparisons that jointly prevent improvement.
+For sensors, [ActiveCertificate](../Applications/CellularSheaves/CellularSheaves/ActiveCertificate.lean)
+identifies worst signed comparisons that jointly prevent improvement.
 For general max-affine systems it identifies active affine/floor branches at an optimal relaxation.
 There need not be an ordering with alternating signs, uniqueness, a minimum-cardinality
 explanation, or at least `dimension + 1` active rows. Degenerate normals invalidate those claims.
-The zero-row case is excluded from this finite maximum statement and handled separately in
-the sensor minimum convention.
+An explicit nonempty-row assumption is unnecessary: existence of an attained least real level
+already rules out the empty family. The sensor adapter assumes a comparison exists so that its
+least nonnegative tolerance is also the unrestricted least residual level.
 
 ### 3. Fair worklists become a generic closure algorithm
 
 Known source: [Cousot and Cousot, *Abstract Interpretation and Application to Logic Programs*](https://www.di.ens.fr/~cousot/publications.www/CousotCousot-JLP-v2-n4-p511--547-1992.pdf),
 section 4.2.4, particularly the chaotic-iteration termination statement.
 
-Proposed transport version: start from the seed family. Processing edge `e : s → t` changes
+The formal transport version starts from the seed family. Processing edge `e : s → t` changes
 only the target to `x(t) ⊔ T(e)(x(s))`. Assume monotone edge maps and the ascending chain
 condition on the product of the fibers. A schedule processing every edge infinitely often
 eventually stabilizes at the least lax section above the seeds. Finite graphs and finite-height
@@ -108,12 +111,14 @@ feasible majorant. ACC gives eventual constancy. Fairness then forces every loca
 and the preserved comparison gives leastness. Complete-lattice fibers identify this result
 with `leastLaxMajorant` in [Closure](../Maths/Multitubes/Closure.lean).
 
-The existing [finite reachability client](../Applications/ProgramSemantics/ProgramSemantics/FiniteReachability.lean) proves a special
-saturation algorithm, not this scheduling theorem. Once generalized, finite morphology and
-trust propagation could use the same worklist correctness result. Termination of a concrete
-queue requires a queue invariant; a numerical step bound requires bounded fairness as well as
-a height bound. A finite graph alone does not prevent infinite ascending value chains.
-Widening can restore termination but generally sacrifices equality with the least solution.
+The generic theorem is implemented in [Worklist](../Maths/Multitubes/Worklist.lean). Fair
+schedules converge eventually under ACC on the family product, and repeated finite sweeps do so
+when their edge list covers every edge. The finite threshold-evidence client uses the generic
+fixed-sweep stopping theorem to prove its computed result least among sound seed extensions.
+Termination of a concrete queue requires a queue invariant; a numerical step bound requires
+bounded fairness as well as a height bound. A finite graph alone does not prevent infinite
+ascending value chains. Widening can restore termination but generally sacrifices equality with
+the least solution.
 
 ### 4. Bekić decomposition becomes modular section solving
 
@@ -258,17 +263,17 @@ Neither exact SCC retracts nor generic relation composition already proves these
 1. **Sensor cycle characterization: implemented.** Its abstract theorem was already checked;
    the new adapter makes a timing/optimization theorem answer a sensor question without
    reproducing its proof.
-2. **Package balanced active optimal certificates.** This has the shortest path to a broadly
-   reusable new endpoint in the existing finite-inequality API.
-3. **Add fair worklists and Bekić/block closure.** Together they turn more existence results into
-   reusable computation principles. Prove scheduling correctness before claiming an executable
-   solver or a performance bound.
+2. **Balanced active optimal certificates: implemented.** The generic endpoint and affine-sensor
+   adapter give matching active certificates with rank-plus-one support.
+3. **Fair worklists and threshold evidence: implemented.** Fair schedules under product ACC,
+   finite covering sweeps, and a finite conjunctive evidence client are formalized. Bekić/block
+   closure remains a separate proposal.
 4. **Develop finite Doob normalization.** This is the clearest conceptual transfer between
    probability and the transport/gauge viewpoint, with a concrete finite-path theorem.
 5. **Treat Hoffman repair and boundary reduction as separate larger developments.** They offer
    substantial application value but need metric/polyhedral or interface structure absent today.
 
-## Implemented transfer and validation
+## Implemented transfers and current status
 
 Added [CellularSheaves/CycleConsistency.lean](../Applications/CellularSheaves/CellularSheaves/CycleConsistency.lean), imported by the
 application umbrella. Under explicit unit source and target scales:
@@ -280,21 +285,22 @@ application umbrella. Under explicit unit source and target scales:
 
 `signedComparisonGraph` and `signedComparisonWeight` expose the comparison graph and signed
 real offsets. The proof uses the existing mixed-additive theorem; no core theorem is duplicated.
-This addition provides a mathematical characterization and a certificate theorem, not a new
-executable optimizer or cycle search. Selection of a maximizing cycle is not packaged in the
-sensor API. The other seven rows in the table remain proposals, with their existing ingredients
-identified above.
+This cycle addition provides a characterization and supplied-cycle certificate, not an executable
+optimizer or cycle search. Selection of a maximizing cycle is not packaged in the sensor API.
 
-The targeted CellularSheaves build and `bash scripts/check.sh` passed with zero errors and
-warnings. Full log: `/tmp/multitubes-application-transfers-check.log`.
+[FiniteInequality/OptimalCertificate](../Maths/Multitubes/FiniteInequality/OptimalCertificate.lean)
+now proves dual attainment at an attained least residual level, complementary slackness on the
+positive support, the converse optimality certificate, and a choice with support at most the
+row-span rank plus one. The affine-sensor adapter packages these results for worst signed
+comparisons at the minimum uniform tolerance.
 
-- All 84 core modules and all 15 application packages rebuilt from clean state.
-- The kernel audit checked 2,768 core and 119 CellularSheaves declarations, plus every other
-  application namespace. There were zero sorry-dependent or forbidden-axiom declarations.
-- All 1,435 indexed names and 191 prose references resolved.
-- Layering, checker regressions, Lean line length, and option checks passed.
-- Local Markdown links and the application/theorem interpretations were independently reviewed.
-- `git diff --check` passed.
-
-Sol agents audited existing interfaces, implemented the sensor adapter, reviewed its statements,
-and ran the clean checks. The research specifications remain separate from the proved additions.
+[Worklist](../Maths/Multitubes/Worklist.lean) now proves eventual equality with the least lax
+majorant for fair schedules under product ACC and for repeated finite sweeps whose list covers
+every edge. [ThresholdPolicy](../Applications/WebOfTrust/WebOfTrust/ThresholdPolicy.lean) uses
+the generic fixed-sweep theorem to prove that its two-pass conjunctive evidence result is the
+least sound assignment above its seeds.
+Bekić decomposition, Hoffman bounds, Doob normalization, complete abstraction, and boundary
+elimination remain proposals with the prerequisites described above. The clean rebuild of all
+86 core modules and 15 application packages passed with zero warnings; kernel, documentation,
+and repository audits also passed. The [implementation review](active-certificates-and-worklists-2026-09-22.md)
+records the exact statements, application limits, and validation counts.

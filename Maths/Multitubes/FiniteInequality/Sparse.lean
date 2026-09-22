@@ -186,7 +186,8 @@ theorem exists_positive_normalizedCertificate_of_infeasible
       exact Or.inl ⟨hpositive, hmassPos⟩
 
 omit [Fintype State] in
-private theorem normalizedCertificateSet_isCompact
+/-- The normalized certificate polytope is compact. -/
+theorem normalizedCertificateSet_isCompact
     (delta : Row → State → ℝ) :
     IsCompact (LinearProgramming.normalizedFarkasCertificateSet
       (balanceMatrix delta) (fun _ => 1)) := by
@@ -335,6 +336,25 @@ private theorem vectorSpan_range_le_span_range
     (Submodule.subset_span ⟨firstRow, rfl⟩)
     (Submodule.subset_span ⟨secondRow, rfl⟩)
 
+/-- Linear independence of the augmented columns on a coefficient's support bounds that support
+by the rank of the balance vectors plus one. -/
+theorem support_card_le_rank_add_one_of_linearIndependent
+    (delta : Row → State → ℝ) (coefficient : Row → ℝ)
+    (hlinear : LinearIndependent ℝ
+      (fun row : {row : Row // coefficient row ≠ 0} =>
+        augmentedColumn delta row.1)) :
+    Fintype.card {row : Row // coefficient row ≠ 0} ≤
+      (Set.range delta).finrank ℝ + 1 := by
+  have haffine := affineIndependent_of_linearIndependent_augmented
+    delta coefficient hlinear
+  have hcard := haffine.card_le_finrank_succ
+  apply hcard.trans
+  apply Nat.add_le_add_right
+  apply Submodule.finrank_mono
+  exact (vectorSpan_mono ℝ <| by
+    rintro _ ⟨row, rfl⟩
+    exact ⟨row.1, rfl⟩).trans (vectorSpan_range_le_span_range delta)
+
 /-- **Rank plus one support bound.**  If the balance columns have rank `r`,
 an infeasibility certificate can be chosen with at most `r + 1` positive
 coordinates. -/
@@ -350,16 +370,8 @@ theorem exists_positive_normalizedCertificate_support_card_le_rank_add_one
   obtain ⟨coefficient, hcertificate, hpositive, hlinear⟩ :=
     exists_positive_normalizedCertificate_linearIndependent
       delta base hinfeasible
-  refine ⟨coefficient, hcertificate, hpositive, ?_⟩
-  have haffine := affineIndependent_of_linearIndependent_augmented
-    delta coefficient hlinear
-  have hcard := haffine.card_le_finrank_succ
-  apply hcard.trans
-  apply Nat.add_le_add_right
-  apply Submodule.finrank_mono
-  exact (vectorSpan_mono ℝ <| by
-    rintro _ ⟨row, rfl⟩
-    exact ⟨row.1, rfl⟩).trans (vectorSpan_range_le_span_range delta)
+  exact ⟨coefficient, hcertificate, hpositive,
+    support_card_le_rank_add_one_of_linearIndependent delta coefficient hlinear⟩
 
 /-- **Rank-sparse rational certificate.**  For rational row data, the
 rank-plus-one support bound and rationality can be achieved simultaneously.

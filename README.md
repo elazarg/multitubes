@@ -95,9 +95,11 @@ It is likely a good fit if you need to formalize one of the following.
 | Relations between possibly different state spaces along edges | [`Maths.Multitubes.Relational`](Maths/Multitubes/Relational.lean) |
 | Path independence, trivial holonomy, or exact-section normal forms | [`Maths.Multitubes.Exact`](Maths/Multitubes/Exact.lean) and [`NormalForms`](Maths/Multitubes/NormalForms.lean) |
 | Least solutions of monotone graph inequalities | [`Maths.Multitubes.Closure`](Maths/Multitubes/Closure.lean) |
+| Fair local relaxation and finite covering sweeps | [`Maths.Multitubes.Worklist`](Maths/Multitubes/Worklist.lean) |
 | Exact, lax, oplax, or per-edge mixed constraints | [`Maths.Multitubes.Mixed`](Maths/Multitubes/Mixed/Basic.lean) |
 | Mixed constraints reducible through residuals or adjoints | [`Mixed.AdjointOrder`](Maths/Multitubes/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/Multitubes/Mixed/Closure.lean) |
 | Finite inequalities and executable rational witness checking | [`FiniteInequality.Basic`](Maths/Multitubes/FiniteInequality/Basic.lean) and [`CertificateCheck`](Maths/Multitubes/FiniteInequality/CertificateCheck.lean) |
+| Balanced active certificates for least residual levels | [`FiniteInequality.OptimalCertificate`](Maths/Multitubes/FiniteInequality/OptimalCertificate.lean) |
 | Maps of the form `x ↦ max a (b + c * x)` | [`Maths.Multitubes.MaxAffine`](Maths/Multitubes/MaxAffine/Basic.lean) |
 | Finite-policy description of max-affine spectra | [`MaxAffine.PolicySpectrum`](Maths/Multitubes/MaxAffine/PolicySpectrum.lean) |
 | Reachability criteria for max-affine eigenvectors | [`MaxAffine.AnchoredEigenvalue`](Maths/Multitubes/MaxAffine/AnchoredEigenvalue.lean) and [`ReducibleExamples`](Maths/Multitubes/MaxAffine/ReducibleExamples.lean) |
@@ -185,7 +187,9 @@ The library includes the following theorem families.
   assuming a group of labels.
 - **Lax closure.** On complete lattices, joins over all incoming walks give an explicit least lax
   section when edge maps preserve the required joins. For merely monotone maps, a Bellman
-  operator gives the least lax majorant as a least fixed point.
+  operator gives the least lax majorant as a least fixed point. Fair schedules of local edge
+  relaxations eventually reach it when the product order satisfies ACC. Repeated finite sweeps
+  have the same conclusion when each sweep list covers every edge.
 - **Mixed polarity.** Lax, exact, and oplax edges share one relation-parametric interface. When
   appropriate residuals exist, reversing and relabelling the oplax edges reduces the system to
   ordinary lax transport, yielding least-majorant and bounded-sandwich criteria. Separately, a
@@ -193,7 +197,9 @@ The library includes the following theorem families.
 - **Finite inequalities.** Farkas-style alternatives, quantitative certificates, arithmetic
   consequences, and sparse witnesses are provided for finite systems. Exact rational arithmetic
   checks externally supplied feasible points and infeasibility certificates, with soundness over
-  both rational and real systems.
+  both rational and real systems. Every attained least worst-residual level has a matching
+  normalized balanced certificate; it can be supported on active rows with cardinality at most
+  the rank of the row-vector span plus one.
 - **Max-affine transport.** Max-affine labels are closed under composition and support path
   summaries, scalar fixed-point classifications, contraction results, gauge feasibility,
   holonomy, duality, relaxation, cycle slack, and spectral results. On finite graphs with

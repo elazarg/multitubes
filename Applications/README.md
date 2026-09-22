@@ -65,6 +65,8 @@ Several dossiers contain standalone Lake packages with checked end-to-end exampl
   inequalities, checks rational assignments and inconsistency certificates, and proves that a
   least nonnegative uniform tolerance is attained. A three-sensor inconsistent triangle has
   exactly optimal tolerance one third, certified by a reading and normalized dual weights.
+  At any attained optimum with at least one comparison, a normalized balanced certificate can
+  be chosen on worst signed comparisons, with support bounded by the signed-row rank plus one.
 - [Switched and hybrid control](SwitchedHybridControl/) propagates affine error radii along
   executions. A gauge with rate below one gives geometric excess decay even with an amplifying
   edge;
@@ -72,3 +74,9 @@ Several dossiers contain standalone Lake packages with checked end-to-end exampl
   cycle gives radius existence. On finite graphs, the contraction gauge criterion only needs
   closed walks of length at most the number of modes. The least-radius construction gives an
   exact upper-budget criterion, and rational witness checks certify radii or infeasibility.
+
+- [Web of trust](WebOfTrust/) applies finite covering sweeps to a monotone conjunctive evidence
+  rule that does not preserve unions. Two reverse-ordered sweeps reach a fixed sound assignment,
+  and the generic sweep stopping theorem proves it lies below every sound assignment containing
+  the seeds. Separately, the core worklist theory proves fair-schedule convergence under product
+  ACC and convergence of repeated covering sweeps.

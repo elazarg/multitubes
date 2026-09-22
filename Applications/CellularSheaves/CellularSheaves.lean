@@ -8,6 +8,7 @@ module
 public import CellularSheaves.GraphSheaf
 public import CellularSheaves.OptimalTolerance
 public import CellularSheaves.CycleConsistency
+public import CellularSheaves.ActiveCertificate
 
 /-!
 # Graph sheaves as exact and relational transport
@@ -49,6 +50,8 @@ and an attained optimal uniform tolerance.
   tolerance `1 / 3`.
 * `CellularSheaves.RationalSensorNetwork.exists_isConsistent_uniform_iff_closedWalk_le` -
   unit-scale uniform consistency is exactly a signed closed-walk mean bound.
+* `CellularSheaves.RationalSensorNetwork.exists_rankSparse_activeCertificate` - an optimal
+  reading has a rank-sparse normalized certificate supported on active signed comparisons.
 
 ## Tags
 

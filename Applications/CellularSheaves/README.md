@@ -37,9 +37,14 @@ reading, certifies the minimum tolerance.
 
 The general affine-consistency and duality results allow arbitrary scales, without positivity
 or invertibility. The cycle characterization above assumes both scales are one. These results
-establish consistency and optimal tolerance, not reconstruction of a hidden signal. The executable
-functions check supplied assignments and certificates. A general solver that searches for either
-witness is not implemented.
+establish consistency and optimal tolerance, not reconstruction of a hidden signal. For every
+network with at least one comparison, every reading at the minimum tolerance has a normalized
+optimal certificate whose positive rows are tight signed comparisons. The certificate can be
+chosen with support at most the rank of the signed comparison normals plus one. This is an
+existence theorem; it does not assert uniqueness, minimum support, or ordered alternation.
+
+The executable functions check supplied assignments and certificates. A general solver that
+searches for either witness is not implemented.
 
 Sheaf cohomology, topology, richer uncertainty models, and fusion algorithms remain outside the
 current scope.

@@ -44,6 +44,7 @@ public import Maths.Multitubes.Category
 public import Maths.Multitubes.CategoricalRetracts
 public import Maths.Multitubes.CategoricalRetractAdapter
 public import Maths.Multitubes.Closure
+public import Maths.Multitubes.Worklist
 public import Maths.Multitubes.Morphism
 public import Maths.Multitubes.Relational
 public import Maths.Multitubes.RelationalClosure
@@ -61,6 +62,7 @@ public import Maths.Multitubes.FiniteInequality.CertificateCheck
 public import Maths.Multitubes.FiniteInequality.Parametric
 public import Maths.Multitubes.FiniteInequality.Quantitative
 public import Maths.Multitubes.FiniteInequality.Sparse
+public import Maths.Multitubes.FiniteInequality.OptimalCertificate
 
 -- Transport: additive specialization and max-plus spectra
 public import Maths.Multitubes.Additive.Budget
