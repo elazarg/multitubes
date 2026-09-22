@@ -4,6 +4,9 @@ This directory records domain perspectives for Multitubes. Each subdirectory des
 interpretation a domain can give to its path actions and constraints; domain-specific
 developments may live in a separate project.
 
+The [concept dictionary](CONCEPTS.md) maps abstract constructions to domain terminology,
+with formal theorem anchors, transport directions, and qualifications for prospective mappings.
+
 ## Specializations and applications
 
 A **specialization** adds reusable mathematical structure, such as additive weights, complete
@@ -27,16 +30,16 @@ stopping, and control are domains that can use it.
 | [Cellular sheaves](CellularSheaves/) | Compatible assignments across heterogeneous stalks |
 | [Stochastic processes](StochasticProcesses/) | Expectation pullback, finite hitting, and barrier bounds |
 | [Resource theories](ResourceTheories/) | Monotones on networks of free conversions |
-| [Quantum channels](QuantumChannels/) | Positive maps on ordered observables |
+| [Quantum channels](QuantumChannels/) | Kraus maps on ordered positive-semidefinite matrices |
 | [Data migration](DataMigration/) | Route consistency and adjoint migration |
 | [Formal concept analysis](FormalConceptAnalysis/) | Transport among concept lattices |
-| [Conic finance](ConicFinance/) | Replication and hedging under set-valued transfers |
+| [Conic finance](ConicFinance/) | Solvency orders and attainable portfolio increments |
 | [Coalgebraic refinement](CoalgebraicRefinement/) | Simulations transported by relation liftings |
-| [Games and model checking](GamesModelChecking/) | Progress measures and alternating fixed points |
+| [Games and model checking](GamesModelChecking/) | Alternating fixed points and limits of local sections |
 | [Obstacle problems](ObstacleProblems/) | Contact and continuation for two-sided recurrences |
 | [Persistence modules](PersistenceModules/) | Compatible elements in noninvertible diagrams |
 | [Discrete-event systems](DiscreteEventSystems/) | Max-plus timed synchronization and cycle time |
-| [Quantitative relations](QuantitativeRelations/) | Compositional error and privacy grades |
+| [Quantitative relations](QuantitativeRelations/) | Additive path budgets and pseudometric error bounds |
 | [Web of trust](WebOfTrust/) | Provenance-aware endorsement and evidence closure |
 
 ## Compiled capstones
