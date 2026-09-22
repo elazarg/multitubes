@@ -45,6 +45,8 @@ walk witness of length at most `Fintype.card V`.
   that maximizer decides the threshold, so the optimal residual is its mean.  Note the
   nonemptiness hypothesis is required: with no nonempty closed walk there is no maximizer and
   every real threshold is attainable.
+* `Maths.AdditiveTransport.exists_negative_residual_bound`: strictly negative nonempty cycle
+  weights admit one uniformly negative residual bound on a finite graph.
 -/
 
 @[expose] public section
@@ -285,6 +287,37 @@ theorem exists_short_closedWalk_realizing_residual_threshold
         exact_mod_cast hotherPos
       have hbound := (div_le_iff₀ hlengthPos).mp hmean
       simpa only [mul_comm] using hbound
+
+/-- Strict negativity on nonempty closed walks up to the number of vertices gives a uniformly
+negative residual bound on a finite graph. Acyclic graphs are included. -/
+theorem exists_negative_residual_bound_of_short [Fintype V] [Finite E]
+    (G : EdgeGraph V E) (weight : E → ℝ)
+    (hnegative : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      0 < cycle.length → cycle.length ≤ Fintype.card V → walkWeight weight cycle < 0) :
+    ∃ level : ℝ, level < 0 ∧ WorstDirectedResidualAtMost G weight level := by
+  classical
+  by_cases hexists : ∃ (vertex : V) (cycle : G.Walk vertex vertex), 0 < cycle.length
+  · obtain ⟨vertex, best, hpos, hcard, hthreshold⟩ :=
+      exists_short_closedWalk_realizing_residual_threshold G weight hexists
+    refine ⟨walkWeight weight best / best.length, ?_, (hthreshold _).mpr le_rfl⟩
+    exact div_neg_of_neg_of_pos (hnegative vertex best hpos hcard) (by exact_mod_cast hpos)
+  · refine ⟨-1, by norm_num, ?_⟩
+    apply (worstDirectedResidualAtMost_iff_closedWalk_le G weight (-1)).mpr
+    intro vertex cycle
+    cases cycle with
+    | nil => simp [walkWeight]
+    | concat walk edge legal =>
+        exact (hexists ⟨G.target edge, walk.concat edge legal, by simp⟩).elim
+
+/-- On a finite graph, strict negativity on every nonempty closed walk gives a potential
+whose edge residuals have one strictly negative upper bound. Acyclic graphs are included. -/
+theorem exists_negative_residual_bound [Fintype V] [Finite E]
+    (G : EdgeGraph V E) (weight : E → ℝ)
+    (hnegative : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      0 < cycle.length → walkWeight weight cycle < 0) :
+    ∃ level : ℝ, level < 0 ∧ WorstDirectedResidualAtMost G weight level :=
+  exists_negative_residual_bound_of_short G weight fun vertex cycle hpos _ =>
+    hnegative vertex cycle hpos
 
 end AdditiveTransport
 

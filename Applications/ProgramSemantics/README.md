@@ -7,3 +7,8 @@ be related by adjunctions, and fiberwise logical relations can express soundness
 
 Programming-language semantics, computability, termination, and finite representations supply the
 domain-specific structure.
+
+`ProgramSemantics.FiniteReachability` provides an executable saturation analysis for finite
+control locations and a common finite state type. It proves agreement with typed-walk execution
+and the least direct-image predicate closure, and checks a noninjective Boolean reset example.
+Dependent finite state fibers remain a possible extension of this finite-state interface.

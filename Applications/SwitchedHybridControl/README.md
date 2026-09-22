@@ -15,3 +15,11 @@ normalized certificate supported on at most the number of modes plus one rows. T
 example uses heterogeneous state spaces and a noninjective reset, and also rejects an
 incompatible upper budget. This rejection concerns the affine comparison model; it does not by
 itself prove that the physical system is unsafe.
+
+`WeightedError.lean` strengthens the finite-execution bound when a positive mode gauge makes
+all normalized edge gains contractive. Excess over an invariant radius then decays geometrically
+along every walk, even when an individual transition amplifies error. Its concrete affine example
+uses real states, unit approximate states, the transitions `x ↦ 1 + 2x` and
+`x ↦ 1 + x / 8`, invariant radii `3 / 2` and `4`, and gauge values `1` and `4`; the
+machine-checked rate is `1 / 2` for every typed execution. The displayed invariant radii are
+also proved pointwise least for this two-edge comparison.

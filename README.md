@@ -100,7 +100,11 @@ It is likely a good fit if you need to formalize one of the following.
 | Finite inequalities and executable rational witness checking | [`FiniteInequality.Basic`](Maths/Multitubes/FiniteInequality/Basic.lean) and [`CertificateCheck`](Maths/Multitubes/FiniteInequality/CertificateCheck.lean) |
 | Maps of the form `x ↦ max a (b + c * x)` | [`Maths.Multitubes.MaxAffine`](Maths/Multitubes/MaxAffine/Basic.lean) |
 | Finite-policy description of max-affine spectra | [`MaxAffine.PolicySpectrum`](Maths/Multitubes/MaxAffine/PolicySpectrum.lean) |
-| Error bounds for switched and hybrid executions | [`SwitchedHybridControl.ErrorBounds`](Applications/SwitchedHybridControl/SwitchedHybridControl/ErrorBounds.lean) |
+| Strict contraction gauges from finite cycle checks | [`MaxAffine.ContractiveGauge`](Maths/Multitubes/MaxAffine/ContractiveGauge.lean) |
+| Executable finite-state reachability | [`ProgramSemantics.FiniteReachability`](Applications/ProgramSemantics/ProgramSemantics/FiniteReachability.lean) |
+| Finite-horizon hitting and barrier certificates | [`StochasticProcesses.HittingBarrier`](Applications/StochasticProcesses/StochasticProcesses/HittingBarrier.lean) |
+| Timed max-plus synchronization networks | [`DiscreteEventSystems.Synchronization`](Applications/DiscreteEventSystems/DiscreteEventSystems/Synchronization.lean) |
+| Error bounds for switched and hybrid executions | [`SwitchedHybridControl.WeightedError`](Applications/SwitchedHybridControl/SwitchedHybridControl/WeightedError.lean) |
 | Affine, max-affine, Loynes, or two-sided clamped recurrences | [`Maths.Recursion`](Maths/Recursion/TransferSummary.lean) and [`ClampedAffineFixedPoint`](Maths/Recursion/ClampedAffineFixedPoint.lean) |
 | Fourier–Motzkin elimination, Farkas alternatives, or LP duality | [`Maths.LinearProgramming`](Maths/LinearProgramming/FourierMotzkin.lean) |
 
@@ -113,9 +117,13 @@ application-specific layer.
 The [`Applications/`](Applications/) directory contains domain interpretations and downstream
 client packages built on the reusable transport specializations. Max-plus and max-affine
 transport belong to the library independently of the queueing, stopping, or control models that
-may use them. The switched and hybrid control client proves that local affine error comparisons
-give mode-dependent bounds along shared executions, and supplies sparse certificates when its
-bounded-radius comparison constraints are infeasible.
+may use them. Compiled capstones connect finite reachability with typed-walk execution and least
+path closure, finite-horizon hitting with stopped-kernel endpoint probabilities and
+superharmonic barriers, and timed synchronization with a max-plus recurrence. The switched and
+hybrid control client proves geometric error bounds in a contraction gauge, robustness under
+bounded bias perturbations, and existence of invariant radii from strict cycle contraction.
+These results concern finite executions or explicitly defined finite-horizon suprema; they do
+not introduce continuous-time semantics or an infinite-trajectory probability measure.
 
 ## How general is the infrastructure?
 

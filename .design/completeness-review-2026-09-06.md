@@ -260,3 +260,11 @@ Graph-changing morphisms, relational comparison, reindexing and gluing; generic 
 and SCC computation; complete rational solver or policy enumerator; rational spectrum endpoints;
 weighted contraction synthesis and perturbation bounds for the error comparison model; max-plus
 eventual periodicity; and the application capstones in the census remain further work.
+
+## Subsequent capstone round
+
+The 2026-09-22 round addresses finite program reachability, stochastic hitting barriers,
+max-plus timed-event synchronization, and strict-cycle control gauges with geometric error
+and perturbation bounds. Its scope, arguments, validation, and remaining limits are recorded
+in [capstones-2026-09-22.md](capstones-2026-09-22.md). The earlier census and baseline counts
+above are historical snapshots, not claims about that later tree.

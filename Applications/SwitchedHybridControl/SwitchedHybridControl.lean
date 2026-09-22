@@ -7,6 +7,7 @@ module
 
 public import SwitchedHybridControl.Control
 public import SwitchedHybridControl.ErrorBounds
+public import SwitchedHybridControl.WeightedError
 
 /-!
 # Switched and hybrid control
@@ -28,6 +29,9 @@ The concrete example has two heterogeneous state spaces and a noninjective reset
 * `SwitchedHybridControl.exampleEnergy` - the concrete energy family.
 * `SwitchedHybridControl.ErrorComparison` and `SwitchedHybridControl.IsRadiusFamily` - local
   affine error propagation and compatible mode-dependent radii.
+* `SwitchedHybridControl.weightedConcreteTransport` and
+  `SwitchedHybridControl.weightedExecutionComparison` - actual affine executions with an
+  amplifying transition and their comparison data.
 
 ## Main results
 
@@ -48,6 +52,12 @@ The concrete example has two heterogeneous state spaces and a noninjective reset
   mode-dependent error bounds along every shared execution.
 * `SwitchedHybridControl.radius_feasible_iff` - bounded comparison radii are exactly a finite
   linear-inequality feasibility problem.
+* `SwitchedHybridControl.ErrorComparison.walk_error_le_geometric` - excess over an invariant
+  radius decays along every walk when measured in a contraction gauge.
+* `SwitchedHybridControl.weightedExecution_walk_geometric` - the all-walk geometric estimate
+  for the affine execution example with expansion gain two.
+* `SwitchedHybridControl.weightedRadius_le_of_isRadiusFamily` - the example radii are pointwise
+  least among all invariant radius families.
 
 ## Tags
 

@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import ProgramSemantics.PredicateTransport
+public import ProgramSemantics.FiniteReachability
 
 /-!
 # Program semantics and transport
@@ -22,6 +23,8 @@ noninjective transitions, where the two predicate transformers are not inverse f
 * `Maths.EdgeGraph.reverse` - the edge-reversed control-flow graph.
 * `ProgramSemantics.StateSaturated` - predicates constant on transition kernel classes.
 * `ProgramSemantics.collapse` - a noninjective Boolean state transition.
+* `ProgramSemantics.reachableConfigurations` - terminating finite-state saturation.
+* `ProgramSemantics.reachableStates` - saturation projected to control locations.
 
 ## Main results
 
@@ -33,11 +36,16 @@ noninjective transitions, where the two predicate transformers are not inverse f
   image is equivalent to kernel saturation.
 * `ProgramSemantics.collapse_preimage_image_singleton` - inverse image after direct
   image saturates a predicate for a collapsing transition.
+* `ProgramSemantics.mem_reachableConfigurations_iff` - finite saturation agrees with
+  typed-walk execution.
+* `ProgramSemantics.mem_reachableStates_iff_pathClosure` - finite saturation agrees with
+  the least predicate closure.
+* `ProgramSemantics.reset_reachableStates` - a checked noninjective safety example.
 
 ## Tags
 
 program semantics, predicate transformer, weakest precondition, strongest postcondition,
-transport, Galois connection, noninjective
+transport, Galois connection, noninjective, finite-state reachability
 -/
 
 @[expose] public section

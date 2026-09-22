@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import StochasticProcesses.KernelTransport
+public import StochasticProcesses.HittingBarrier
 
 /-!
 # Nonnegative stochastic transport
@@ -24,6 +25,10 @@ oplax section rules give harmonic, superharmonic, and subharmonic path bounds.
 * `StochasticProcesses.pathKernel` - PMF composition along a typed forward walk.
 * `StochasticProcesses.kernelTransport` - the one-loop specialization of the
   pullback transport.
+* `StochasticProcesses.hitBy` and `StochasticProcesses.eventuallyHit` - finite-horizon
+  hitting probabilities and their supremum.
+* `StochasticProcesses.stoppedKernel` - the absorbing-on-target kernel used to express finite
+  hitting as an endpoint event.
 
 ## Main results
 
@@ -49,6 +54,13 @@ oplax section rules give harmonic, superharmonic, and subharmonic path bounds.
   is the expectation of the corresponding iterated kernel.
 * `StochasticProcesses.superharmonic_iterate_le` and
   `StochasticProcesses.subharmonic_iterate_ge` - one-sided path bounds.
+* `StochasticProcesses.hitBy_le_barrier` and
+  `StochasticProcesses.eventuallyHit_le_barrier` - superharmonic barrier certificates.
+* `StochasticProcesses.hitBy_eq_expect_stopped` - finite-horizon hitting as the target endpoint
+  probability for the stopped kernel.
+* `StochasticProcesses.hitBy_le_one` and `StochasticProcesses.eventuallyHit_le_one` - probability
+  normalization bounds.
+* `StochasticProcesses.eventuallyHit_trial_start` - a sharp fair-trial example.
 
 ## Tags
 

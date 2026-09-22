@@ -19,13 +19,13 @@ stopping, and control are domains that can use it.
 
 | Dossier | Central interpretation |
 | --- | --- |
-| [Switched and hybrid control](SwitchedHybridControl/) | Lyapunov and storage along dynamics |
+| [Switched and hybrid control](SwitchedHybridControl/) | Lyapunov certificates, affine error radii, and gauge contraction |
 | [Riccati equations and filtering](RiccatiFiltering/) | Covariance transport in the Löwner order |
-| [Program semantics](ProgramSemantics/) | Invariants, simulations, and predicate transformers |
+| [Program semantics](ProgramSemantics/) | Invariants, predicate transformers, and finite reachability |
 | [Mathematical morphology](MathematicalMorphology/) | Adjoint morphology on image lattices |
 | [Monotone co-design](MonotoneCoDesign/) | Relational functionality and resource feasibility |
 | [Cellular sheaves](CellularSheaves/) | Compatible assignments across heterogeneous stalks |
-| [Stochastic processes](StochasticProcesses/) | Observable pullback and martingale inequalities |
+| [Stochastic processes](StochasticProcesses/) | Expectation pullback, finite hitting, and barrier bounds |
 | [Resource theories](ResourceTheories/) | Monotones on networks of free conversions |
 | [Quantum channels](QuantumChannels/) | Positive maps on ordered observables |
 | [Data migration](DataMigration/) | Route consistency and adjoint migration |
@@ -35,6 +35,27 @@ stopping, and control are domains that can use it.
 | [Games and model checking](GamesModelChecking/) | Progress measures and alternating fixed points |
 | [Obstacle problems](ObstacleProblems/) | Contact and continuation for two-sided recurrences |
 | [Persistence modules](PersistenceModules/) | Compatible elements in noninvertible diagrams |
-| [Discrete-event systems](DiscreteEventSystems/) | Max-plus/min-plus closure and residuation |
+| [Discrete-event systems](DiscreteEventSystems/) | Max-plus timed synchronization and cycle time |
 | [Quantitative relations](QuantitativeRelations/) | Compositional error and privacy grades |
 | [Web of trust](WebOfTrust/) | Provenance-aware endorsement and evidence closure |
+
+## Compiled capstones
+
+Several dossiers contain standalone Lake packages with checked end-to-end examples:
+
+- [Program semantics](ProgramSemantics/) computes finite-state reachability by bounded
+  saturation and proves agreement with typed-walk execution and least path closure. It assumes
+  finite control locations, edges, and a common finite state space.
+- [Stochastic processes](StochasticProcesses/) defines finite-horizon target hitting, identifies
+  it with the endpoint event for the kernel stopped on the target, and proves superharmonic
+  barrier bounds. Its eventual value is the supremum of finite horizons; no probability measure
+  on infinite trajectories is constructed.
+- [Discrete-event systems](DiscreteEventSystems/) implements a max-plus timed network, proves
+  linear growth from an eigen-schedule, bounds timing offsets, and checks a delay perturbation.
+  The throughput result uses floorless unit-slope labels.
+- [Switched and hybrid control](SwitchedHybridControl/) propagates affine error radii along
+  executions. A gauge with rate below one gives geometric excess decay even with an amplifying
+  edge;
+  bounded bias changes have an explicit radius margin, and strict contraction of every nonempty
+  cycle gives radius existence. On finite graphs, the contraction gauge criterion only needs
+  closed walks of length at most the number of modes.
