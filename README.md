@@ -100,11 +100,13 @@ It is likely a good fit if you need to formalize one of the following.
 | Finite inequalities and executable rational witness checking | [`FiniteInequality.Basic`](Maths/Multitubes/FiniteInequality/Basic.lean) and [`CertificateCheck`](Maths/Multitubes/FiniteInequality/CertificateCheck.lean) |
 | Maps of the form `x ↦ max a (b + c * x)` | [`Maths.Multitubes.MaxAffine`](Maths/Multitubes/MaxAffine/Basic.lean) |
 | Finite-policy description of max-affine spectra | [`MaxAffine.PolicySpectrum`](Maths/Multitubes/MaxAffine/PolicySpectrum.lean) |
+| Reachability criteria for max-affine eigenvectors | [`MaxAffine.AnchoredEigenvalue`](Maths/Multitubes/MaxAffine/AnchoredEigenvalue.lean) and [`ReducibleExamples`](Maths/Multitubes/MaxAffine/ReducibleExamples.lean) |
 | Strict contraction gauges from finite cycle checks | [`MaxAffine.ContractiveGauge`](Maths/Multitubes/MaxAffine/ContractiveGauge.lean) |
+| Least max-affine radii and contractive Bellman iteration | [`MaxAffine.RadiusFixedPoint`](Maths/Multitubes/MaxAffine/RadiusFixedPoint.lean) |
 | Executable finite-state reachability | [`ProgramSemantics.FiniteReachability`](Applications/ProgramSemantics/ProgramSemantics/FiniteReachability.lean) |
 | Finite-horizon hitting and barrier certificates | [`StochasticProcesses.HittingBarrier`](Applications/StochasticProcesses/StochasticProcesses/HittingBarrier.lean) |
 | Timed max-plus synchronization networks | [`DiscreteEventSystems.Synchronization`](Applications/DiscreteEventSystems/DiscreteEventSystems/Synchronization.lean) |
-| Error bounds for switched and hybrid executions | [`SwitchedHybridControl.WeightedError`](Applications/SwitchedHybridControl/SwitchedHybridControl/WeightedError.lean) |
+| Error bounds and least radii for switched and hybrid executions | [`SwitchedHybridControl.LeastRadius`](Applications/SwitchedHybridControl/SwitchedHybridControl/LeastRadius.lean) |
 | Affine, max-affine, Loynes, or two-sided clamped recurrences | [`Maths.Recursion`](Maths/Recursion/TransferSummary.lean) and [`ClampedAffineFixedPoint`](Maths/Recursion/ClampedAffineFixedPoint.lean) |
 | Fourier–Motzkin elimination, Farkas alternatives, or LP duality | [`Maths.LinearProgramming`](Maths/LinearProgramming/FourierMotzkin.lean) |
 
@@ -121,7 +123,8 @@ may use them. Compiled capstones connect finite reachability with typed-walk exe
 path closure, finite-horizon hitting with stopped-kernel endpoint probabilities and
 superharmonic barriers, and timed synchronization with a max-plus recurrence. The switched and
 hybrid control client proves geometric error bounds in a contraction gauge, robustness under
-bounded bias perturbations, and existence of invariant radii from strict cycle contraction.
+bounded bias perturbations, a least invariant-radius construction with an exact upper-budget
+criterion, and executable rational checking of radius and infeasibility certificates.
 These results concern finite executions or explicitly defined finite-horizon suprema; they do
 not introduce continuous-time semantics or an infinite-trajectory probability measure.
 
@@ -189,9 +192,14 @@ The library includes the following theorem families.
   both rational and real systems.
 - **Max-affine transport.** Max-affine labels are closed under composition and support path
   summaries, scalar fixed-point classifications, contraction results, gauge feasibility,
-  holonomy, duality, relaxation, cycle slack, and spectral results. For finite graphs with an
-  incoming edge at every vertex, the spectrum is represented as a finite union of closed convex
-  policy-level sets.
+  holonomy, duality, relaxation, cycle slack, and spectral results. On finite graphs with
+  nonnegative slopes and an incoming edge at every vertex, the spectrum equals the relaxation set
+  when vertices carrying constant branches or contracting closed walks reach every vertex. At the
+  least level, reachable critical vertices of an optimal certificate also suffice, without strong
+  connectivity. A strict contraction gauge selects the least feasible radius above arbitrary lower
+  data, with geometric Bellman iteration bounds and no incoming-edge assumption. For finite graphs
+  with an incoming edge at every vertex, the spectrum is represented as a finite union of closed
+  convex policy-level sets.
 - **Related foundations.** Independent modules cover Eulerian trails, circulations, infinite
   walks, zero-charge lassos, charged relations, join-semidirect labels, reflected recurrences,
   Fourier–Motzkin elimination, and standard-form linear-programming duality.

@@ -59,6 +59,10 @@ This closes the gap between cycle conditions, scalable error bounds, and perturb
 It does not yet construct the unique least bounded Bellman fixed point or certify numerical
 iteration toward that point.
 
+The follow-up in `research-directions-2026-09-22.md` now supplies the least Bellman fixed
+point, real iteration convergence with a geometric bound, and exact rational witness
+checking. An executable approximation algorithm with a certified stopping rule remains open.
+
 ## Application completion criteria
 
 ### Program semantics

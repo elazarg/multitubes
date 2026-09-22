@@ -7,6 +7,8 @@ module
 
 public import SwitchedHybridControl.Control
 public import SwitchedHybridControl.ErrorBounds
+public import SwitchedHybridControl.LeastRadius
+public import SwitchedHybridControl.RationalRadius
 public import SwitchedHybridControl.WeightedError
 
 /-!
@@ -58,6 +60,12 @@ The concrete example has two heterogeneous state spaces and a noninjective reset
   for the affine execution example with expansion gain two.
 * `SwitchedHybridControl.weightedRadius_le_of_isRadiusFamily` - the example radii are pointwise
   least among all invariant radius families.
+* `SwitchedHybridControl.ErrorComparison.exists_radius_bounded_iff_leastErrorRadius_le` - a
+  bounded invariant radius exists exactly when the synthesized least radius meets the budget.
+* `SwitchedHybridControl.RationalRadiusData.walk_error_le_of_checkRadius` - an exactly checked
+  rational radius bounds the error along every shared execution.
+* `SwitchedHybridControl.RationalRadiusData.not_exists_real_radius_of_checkCertificate` - an
+  exactly checked rational certificate rules out every real bounded radius.
 
 ## Tags
 
