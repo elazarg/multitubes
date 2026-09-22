@@ -8,10 +8,13 @@ percentage: neither the concept inventory nor the applicable pairs had been fixe
 
 The reader-facing results are [Applications/CONCEPTS.md](../Applications/CONCEPTS.md) and
 [the core dictionary](../Applications/THEORY_DICTIONARY.md).
-It covers concept families and all 19 application dossiers, distinguishing proved adapters,
+They cover concept families and all 19 application dossiers, distinguishing proved adapters,
 mathematical interpretations, and prospective applications. It is not a claim that every
 declaration has a special name in every field. A missing familiar name can be harmless; a
 missing interpretation or missing hypotheses can hide an actual application gap.
+
+The subsequent [application-result transfer study](application-result-transfers-2026-09-22.md)
+identifies known theorems that could move from application fields into transport and back.
 
 ## Findings
 

@@ -7,6 +7,7 @@ module
 
 public import CellularSheaves.GraphSheaf
 public import CellularSheaves.OptimalTolerance
+public import CellularSheaves.CycleConsistency
 
 /-!
 # Graph sheaves as exact and relational transport
@@ -27,6 +28,8 @@ and an attained optimal uniform tolerance.
 * `CellularSheaves.RationalSensorNetwork` - finite affine sensor comparisons with rational data.
 * `CellularSheaves.RationalSensorNetwork.minimumUniformTolerance` - the least nonnegative
   uniform consistency tolerance.
+* `CellularSheaves.RationalSensorNetwork.signedComparisonGraph` - the doubled graph for
+  unit-scale comparison residuals.
 
 ## Main results
 
@@ -44,6 +47,8 @@ and an attained optimal uniform tolerance.
   network has an attained least nonnegative uniform tolerance.
 * `CellularSheaves.minimumUniformTolerance_triangle` - the inconsistent triangle has optimal
   tolerance `1 / 3`.
+* `CellularSheaves.RationalSensorNetwork.exists_isConsistent_uniform_iff_closedWalk_le` -
+  unit-scale uniform consistency is exactly a signed closed-walk mean bound.
 
 ## Tags
 

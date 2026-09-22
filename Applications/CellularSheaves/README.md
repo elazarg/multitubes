@@ -28,10 +28,18 @@ It has no exactly compatible reading. The checker accepts the reading
 `(0, -1/3, -2/3)` at tolerance `1/3`, and a normalized obstruction proves that `1/3` is the least
 nonnegative uniform tolerance.
 
-Scales are arbitrary affine coefficients; the theory does not assume positivity or invertibility.
-Consequently these results establish consistency and optimal tolerance, not reconstruction of a
-hidden signal. The executable functions check supplied assignments and certificates. A general
-solver that searches for either witness is not implemented.
+For unit source and target scales, the absolute sensor residual is the absolute value of an
+exact-mode additive defect. Doubling every edge into its two signed directions gives a cycle
+characterization:
+a uniform tolerance is feasible exactly when every closed walk has signed offset at most its
+length times the tolerance. A positive-length cycle attaining the bound, together with a feasible
+reading, certifies the minimum tolerance.
+
+The general affine-consistency and duality results allow arbitrary scales, without positivity
+or invertibility. The cycle characterization above assumes both scales are one. These results
+establish consistency and optimal tolerance, not reconstruction of a hidden signal. The executable
+functions check supplied assignments and certificates. A general solver that searches for either
+witness is not implemented.
 
 Sheaf cohomology, topology, richer uncertainty models, and fusion algorithms remain outside the
 current scope.
