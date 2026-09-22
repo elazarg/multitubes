@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import CellularSheaves.GraphSheaf
+public import CellularSheaves.OptimalTolerance
 
 /-!
 # Graph sheaves as exact and relational transport
@@ -13,7 +14,9 @@ public import CellularSheaves.GraphSheaf
 A graph sheaf has vertex and edge stalks with two restriction maps for each graph edge. Its global
 sections admit two equivalent transport descriptions: exact sections on the bipartite incidence
 graph, and relational sections on the original graph using the pullback relation of the two
-restrictions.
+restrictions.  For finite real sensor networks, affine endpoint restrictions additionally give an
+exact signed linear-inequality model of approximate consistency, executable rational witnesses,
+and an attained optimal uniform tolerance.
 
 ## Main definitions
 
@@ -21,6 +24,9 @@ restrictions.
 * `CellularSheaves.GraphSheaf.IsCompatible` - compatible vertex-stalk assignments.
 * `CellularSheaves.GraphSheaf.incidenceTransport` - exact transport on the incidence graph.
 * `CellularSheaves.GraphSheaf.relationTransport` - pullback relations on the original graph.
+* `CellularSheaves.RationalSensorNetwork` - finite affine sensor comparisons with rational data.
+* `CellularSheaves.RationalSensorNetwork.minimumUniformTolerance` - the least nonnegative
+  uniform consistency tolerance.
 
 ## Main results
 
@@ -30,10 +36,18 @@ restrictions.
   sections on the original graph.
 * `CellularSheaves.erasedSheaf_not_functional` - noninjective restrictions can produce a relation
   that is not the graph of any function.
+* `CellularSheaves.RationalSensorNetwork.isConsistent_zero_iff_isCompatible` - exact sensor
+  consistency is graph-sheaf compatibility.
+* `CellularSheaves.RationalSensorNetwork.not_exists_isConsistent_of_checkCertificate` - an exact
+  rational Farkas check certifies real inconsistency.
+* `CellularSheaves.RationalSensorNetwork.isLeast_minimumUniformTolerance` - every finite affine
+  network has an attained least nonnegative uniform tolerance.
+* `CellularSheaves.minimumUniformTolerance_triangle` - the inconsistent triangle has optimal
+  tolerance `1 / 3`.
 
 ## Tags
 
-cellular sheaf, incidence graph, exact section, pullback relation, heterogeneous fiber
+cellular sheaf, sensor consistency, optimal tolerance, exact section, rational certificate
 -/
 
 @[expose] public section

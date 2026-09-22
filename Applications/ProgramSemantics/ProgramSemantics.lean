@@ -7,6 +7,7 @@ module
 
 public import ProgramSemantics.PredicateTransport
 public import ProgramSemantics.FiniteReachability
+public import ProgramSemantics.AbstractAnalysis
 
 /-!
 # Program semantics and transport
@@ -25,6 +26,7 @@ noninjective transitions, where the two predicate transformers are not inverse f
 * `ProgramSemantics.collapse` - a noninjective Boolean state transition.
 * `ProgramSemantics.reachableConfigurations` - terminating finite-state saturation.
 * `ProgramSemantics.reachableStates` - saturation projected to control locations.
+* `ProgramSemantics.AbstractDomain` - a sound finite abstraction of concrete transitions.
 
 ## Main results
 
@@ -41,11 +43,15 @@ noninjective transitions, where the two predicate transformers are not inverse f
 * `ProgramSemantics.mem_reachableStates_iff_pathClosure` - finite saturation agrees with
   the least predicate closure.
 * `ProgramSemantics.reset_reachableStates` - a checked noninjective safety example.
+* `ProgramSemantics.AbstractDomain.computedReachability_sound` - finite abstract saturation
+  contains concrete least closure after concretization.
+* `ProgramSemantics.parity_walk_even` - computed parity reachability proves all-walk safety for
+  an infinite natural-number state space.
 
 ## Tags
 
 program semantics, predicate transformer, weakest precondition, strongest postcondition,
-transport, Galois connection, noninjective, finite-state reachability
+transport, Galois connection, noninjective, finite-state reachability, abstract interpretation
 -/
 
 @[expose] public section

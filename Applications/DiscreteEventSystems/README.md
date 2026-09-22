@@ -23,4 +23,16 @@ The phase `(0, 2)` is certified to grow by exactly `3n`, giving cycle time `3` a
 throughput `1/3` event cycles per unit time. A checked perturbation raises the first self-delay to
 four; synchronized phase `(0, 0)` then has cycle time `4`, so its certified throughput is `1/4`.
 
+`CertifiedSchedule.lean` derives a phase from a maximizing cycle instead of assuming one. Given
+a cycle-time bound attained at a vertex that reaches every event, it uses greatest shifted walk
+weights to construct a schedule. On a finite globally reachable graph with a nonempty cycle, a
+maximum-mean closed walk exists and yields such a schedule mathematically. The returned walk
+directly records the attained mean and proves optimality against every phase satisfying the edge
+demands at any proposed upper cycle time. This is an existence and certificate theorem, not an
+executable optimizer.
+
+For the two-event network, the second event's delay-three self-loop is the bottleneck. The rooted
+construction gives phase `(-2, 0)`, a translate of `(0, 2)`, and proves both the cycle-time-three
+schedule and the lower bound `3` for every competing feasible cycle time.
+
 Build the capstone from this directory with `lake build`.

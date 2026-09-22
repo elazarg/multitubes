@@ -107,3 +107,11 @@ warnings; 2,768 core declarations and every application declaration were free of
 forbidden axioms; 1,377 index names and 191 prose references resolved; layering, checker
 regressions, line length, and `set_option` checks passed. The full log is
 `/tmp/multitubes-utilization-check.log`.
+
+## Subsequent capstones
+
+The three recommended connections are now implemented in the follow-up described by
+`connected-capstones-2026-09-22.md`: cycle-certified optimal timing, generic finite abstract
+analysis with concrete safety, and affine sensor consistency with optimal tolerance. The table
+above records the `8804c68` baseline. General executable timing/sensor optimization remains open;
+the delivered timing construction is mathematical, and the sensor functions check witnesses.

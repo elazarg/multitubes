@@ -104,8 +104,10 @@ It is likely a good fit if you need to formalize one of the following.
 | Strict contraction gauges from finite cycle checks | [`MaxAffine.ContractiveGauge`](Maths/Multitubes/MaxAffine/ContractiveGauge.lean) |
 | Least max-affine radii and contractive Bellman iteration | [`MaxAffine.RadiusFixedPoint`](Maths/Multitubes/MaxAffine/RadiusFixedPoint.lean) |
 | Executable finite-state reachability | [`ProgramSemantics.FiniteReachability`](Applications/ProgramSemantics/ProgramSemantics/FiniteReachability.lean) |
+| Finite abstract analysis of infinite concrete state spaces | [`ProgramSemantics.AbstractAnalysis`](Applications/ProgramSemantics/ProgramSemantics/AbstractAnalysis.lean) |
+| Affine sensor consistency and optimal uniform tolerance | [`CellularSheaves.OptimalTolerance`](Applications/CellularSheaves/CellularSheaves/OptimalTolerance.lean) |
 | Finite-horizon hitting and barrier certificates | [`StochasticProcesses.HittingBarrier`](Applications/StochasticProcesses/StochasticProcesses/HittingBarrier.lean) |
-| Timed max-plus synchronization networks | [`DiscreteEventSystems.Synchronization`](Applications/DiscreteEventSystems/DiscreteEventSystems/Synchronization.lean) |
+| Certified optimal timing from max-plus bottleneck cycles | [`DiscreteEventSystems.CertifiedSchedule`](Applications/DiscreteEventSystems/DiscreteEventSystems/CertifiedSchedule.lean) |
 | Error bounds and least radii for switched and hybrid executions | [`SwitchedHybridControl.LeastRadius`](Applications/SwitchedHybridControl/SwitchedHybridControl/LeastRadius.lean) |
 | Affine, max-affine, Loynes, or two-sided clamped recurrences | [`Maths.Recursion`](Maths/Recursion/TransferSummary.lean) and [`ClampedAffineFixedPoint`](Maths/Recursion/ClampedAffineFixedPoint.lean) |
 | Fourier–Motzkin elimination, Farkas alternatives, or LP duality | [`Maths.LinearProgramming`](Maths/LinearProgramming/FourierMotzkin.lean) |
@@ -120,11 +122,13 @@ The [`Applications/`](Applications/) directory contains domain interpretations a
 client packages built on the reusable transport specializations. Max-plus and max-affine
 transport belong to the library independently of the queueing, stopping, or control models that
 may use them. Compiled capstones connect finite reachability with typed-walk execution and least
-path closure, finite-horizon hitting with stopped-kernel endpoint probabilities and
-superharmonic barriers, and timed synchronization with a max-plus recurrence. The switched and
-hybrid control client proves geometric error bounds in a contraction gauge, robustness under
-bounded bias perturbations, a least invariant-radius construction with an exact upper-budget
-criterion, and executable rational checking of radius and infeasibility certificates.
+path closure. Finite abstract saturation also proves safety for infinite concrete state spaces
+through transport simulations. Other capstones connect finite-horizon hitting with stopped-kernel
+probabilities and barriers, timed synchronization with optimal bottleneck-cycle schedules, and
+affine sensor consistency with rational certificates and an attained least uniform tolerance.
+The switched and hybrid control client proves geometric error bounds in a contraction gauge,
+robustness under bounded bias perturbations, a least invariant-radius construction with an exact
+upper-budget criterion, and executable rational checking of radius and infeasibility certificates.
 These results concern finite executions or explicitly defined finite-horizon suprema; they do
 not introduce continuous-time semantics or an infinite-trajectory probability measure.
 

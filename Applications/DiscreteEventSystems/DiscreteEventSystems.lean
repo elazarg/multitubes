@@ -5,6 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
+public import DiscreteEventSystems.CertifiedSchedule
 public import DiscreteEventSystems.Synchronization
 
 /-!
@@ -19,6 +20,7 @@ event waits for every prerequisite represented by the incoming alternatives.
 * `DiscreteEventSystems.TimedNetwork`: a floorless unit-slope max-plus network.
 * `DiscreteEventSystems.TimedNetwork.step`: one update of all event times.
 * `DiscreteEventSystems.exampleNetwork`: a two-event synchronization network.
+* `DiscreteEventSystems.TimedNetwork.rootedPhase`: the phase constructed from a critical cycle.
 
 ## Main results
 
@@ -33,6 +35,11 @@ event waits for every prerequisite represented by the incoming alternatives.
 * `DiscreteEventSystems.example_linear_growth`: its event times grow by three per firing.
 * `DiscreteEventSystems.example_delayed_schedule`: increasing one delay changes the certified
   cycle time from three to four.
+* `DiscreteEventSystems.TimedNetwork.exists_optimalSchedule`: finite global reachability selects
+  a maximum-mean bottleneck cycle and constructs an optimal schedule.
+* `DiscreteEventSystems.example_certified_schedule` and
+  `DiscreteEventSystems.example_cycleTime_optimal`: the example schedule is constructed from its
+  bottleneck cycle, which proves that every competing feasible cycle time is at least three.
 
 ## Tags
 

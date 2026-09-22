@@ -45,17 +45,27 @@ Several dossiers contain standalone Lake packages with checked end-to-end exampl
 
 - [Program semantics](ProgramSemantics/) computes finite-state reachability by bounded
   saturation and proves agreement with typed-walk execution and least path closure. It assumes
-  finite control locations, edges, and a common finite state space.
+  finite control locations, edges, and a common finite state space for exact saturation. A finite
+  abstraction can also analyze infinite concrete states: an upper simulation carries the computed
+  abstract closure to a concrete all-walk guarantee. The parity analyzer verifies natural-number
+  executions with addition by two and reset to zero.
 - [Stochastic processes](StochasticProcesses/) defines finite-horizon target hitting, identifies
   it with the endpoint event for the kernel stopped on the target, and proves superharmonic
   barrier bounds. Its eventual value is the supremum of finite horizons; no probability measure
   on infinite trajectories is constructed.
 - [Discrete-event systems](DiscreteEventSystems/) implements a max-plus timed network, proves
-  linear growth from an eigen-schedule, bounds timing offsets, and checks a delay perturbation.
-  The throughput result uses floorless unit-slope labels.
+  linear growth from an eigen-schedule, bounds timing offsets, and constructs an optimal phase
+  from a maximizing cycle. Finite global reachability and a nonempty cycle give existence; the
+  returned bottleneck certifies optimality against every feasible cycle-time bound. This is a
+  mathematical construction, and the throughput result uses floorless unit-slope labels.
+- [Cellular sheaves](CellularSheaves/) models approximate affine sensor agreement as signed
+  inequalities, checks rational assignments and inconsistency certificates, and proves that a
+  least nonnegative uniform tolerance is attained. A three-sensor inconsistent triangle has
+  exactly optimal tolerance one third, certified by a reading and normalized dual weights.
 - [Switched and hybrid control](SwitchedHybridControl/) propagates affine error radii along
   executions. A gauge with rate below one gives geometric excess decay even with an amplifying
   edge;
   bounded bias changes have an explicit radius margin, and strict contraction of every nonempty
   cycle gives radius existence. On finite graphs, the contraction gauge criterion only needs
-  closed walks of length at most the number of modes.
+  closed walks of length at most the number of modes. The least-radius construction gives an
+  exact upper-budget criterion, and rational witness checks certify radii or infeasibility.
