@@ -34,8 +34,6 @@ columns, which is at most the coordinate rank plus one.
 
 ## Main results
 
-* `Maths.FiniteInequality.exists_positive_normalizedCertificate_of_infeasible`:
-  infeasibility produces a normalized certificate of positive objective.
 * `Maths.FiniteInequality.exists_maximizing_normalizedCertificate`: the objective attains its
   maximum over the normalized certificates, when there are any.
 * `Maths.FiniteInequality.exists_normalizedCertificate_linearIndependent_value_ge`: every
@@ -144,42 +142,6 @@ theorem mem_normalizedFarkasCertificateSet_iff
     | inr _ =>
         change (∑ row, 1 * coefficient row) = 1
         simpa using hcertificate.2.1
-
-/-- Infeasibility produces a normalized certificate with positive objective. -/
-theorem exists_positive_normalizedCertificate_of_infeasible
-    (delta : Row → State → ℝ) (base : Row → ℝ)
-    (hinfeasible : ¬∃ potential : State → ℝ,
-      ∀ row, base row ≤ dotProduct (delta row) potential) :
-    ∃ coefficient : Row → ℝ,
-      IsNormalizedCertificate delta coefficient ∧
-        0 < certificateValue base coefficient := by
-  classical
-  rcases exists_potential_or_nonnegative_incompatibility delta base with
-    hpotential | ⟨coefficient, hnonneg, hbalance, hpositive⟩
-  · exact (hinfeasible hpotential).elim
-  · have hmassNonneg : 0 ≤ ∑ row, coefficient row :=
-      Finset.sum_nonneg fun row _ => hnonneg row
-    have hmassPos : 0 < ∑ row, coefficient row := by
-      by_contra hnot
-      have hmassZero : ∑ row, coefficient row = 0 :=
-        le_antisymm (le_of_not_gt hnot) hmassNonneg
-      have hzero := (Fintype.sum_eq_zero_iff_of_nonneg hnonneg).1 hmassZero
-      have : ∑ row, coefficient row * base row = 0 := by simp [hzero]
-      linarith
-    let mass := ∑ row, coefficient row
-    let normalized : Row → ℝ := fun row => coefficient row / mass
-    refine ⟨normalized, ⟨fun row => div_nonneg (hnonneg row) hmassNonneg,
-      ?_, ?_⟩, ?_⟩
-    · dsimp [normalized, mass]
-      rw [← Finset.sum_div, div_self hmassPos.ne']
-    · intro state
-      dsimp [normalized, mass]
-      simp only [div_mul_eq_mul_div]
-      rw [← Finset.sum_div, hbalance state, zero_div]
-    · dsimp [certificateValue, normalized, mass]
-      simp only [div_mul_eq_mul_div]
-      rw [← Finset.sum_div, div_pos_iff]
-      exact Or.inl ⟨hpositive, hmassPos⟩
 
 omit [Fintype State] in
 /-- The normalized certificate polytope is compact. -/

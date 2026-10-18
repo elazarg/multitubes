@@ -39,6 +39,9 @@ threshold is attainable, which is precisely the unbounded-below case.
   threshold duality - a worst-residual threshold is attainable exactly when every normalized
   certificate has objective at most that threshold.  It is stated level by level, not
   through an extended-real infimum, which keeps the certificate-free case meaningful.
+* `Maths.FiniteInequality.exists_positive_normalizedCertificate_of_infeasible`:
+  infeasibility produces a normalized certificate of positive objective, by dividing a Farkas
+  certificate by its mass.
 * `Maths.FiniteInequality.certificateValue_le_of_worstResidualAtMost`: the easy
   direction, usable on its own.
 * `Maths.FiniteInequality.Recession.coefficient_eq_zero_of_not_critical`: every
@@ -90,6 +93,42 @@ private theorem weighted_shiftedBase_eq (base : Row → ℝ)
   rw [Finset.sum_sub_distrib, ← Finset.sum_mul]
   ring
 
+/-- Infeasibility produces a normalized certificate with positive objective. -/
+theorem exists_positive_normalizedCertificate_of_infeasible
+    (delta : Row → State → ℝ) (base : Row → ℝ)
+    (hinfeasible : ¬∃ potential : State → ℝ,
+      ∀ row, base row ≤ dotProduct (delta row) potential) :
+    ∃ coefficient : Row → ℝ,
+      IsNormalizedCertificate delta coefficient ∧
+        0 < certificateValue base coefficient := by
+  classical
+  rcases exists_potential_or_nonnegative_incompatibility delta base with
+    hpotential | ⟨coefficient, hnonneg, hbalance, hpositive⟩
+  · exact (hinfeasible hpotential).elim
+  · have hmassNonneg : 0 ≤ ∑ row, coefficient row :=
+      Finset.sum_nonneg fun row _ => hnonneg row
+    have hmassPos : 0 < ∑ row, coefficient row := by
+      by_contra hnot
+      have hmassZero : ∑ row, coefficient row = 0 :=
+        le_antisymm (le_of_not_gt hnot) hmassNonneg
+      have hzero := (Fintype.sum_eq_zero_iff_of_nonneg hnonneg).1 hmassZero
+      have : ∑ row, coefficient row * base row = 0 := by simp [hzero]
+      linarith
+    let mass := ∑ row, coefficient row
+    let normalized : Row → ℝ := fun row => coefficient row / mass
+    refine ⟨normalized, ⟨fun row => div_nonneg (hnonneg row) hmassNonneg,
+      ?_, ?_⟩, ?_⟩
+    · dsimp [normalized, mass]
+      rw [← Finset.sum_div, div_self hmassPos.ne']
+    · intro state
+      dsimp [normalized, mass]
+      simp only [div_mul_eq_mul_div]
+      rw [← Finset.sum_div, hbalance state, zero_div]
+    · dsimp [certificateValue, normalized, mass]
+      simp only [div_mul_eq_mul_div]
+      rw [← Finset.sum_div, div_pos_iff]
+      exact Or.inl ⟨hpositive, hmassPos⟩
+
 /-- Weak normalized duality. -/
 theorem certificateValue_le_of_worstResidualAtMost
     {delta : Row → State → ℝ} {base : Row → ℝ} {level : ℝ}
@@ -119,41 +158,14 @@ theorem worstResidualAtMost_iff_normalizedDual_le
   · intro hlevel coefficient hcertificate
     exact certificateValue_le_of_worstResidualAtMost hlevel hcertificate
   · intro hdual
-    rcases exists_potential_or_nonnegative_incompatibility delta
-      (fun row => base row - level) with
-      hpotential | ⟨coefficient, hnonneg, hbalance, hpositive⟩
-    · exact ⟨hpotential.choose, fun row => by
-        have := hpotential.choose_spec row
-        linarith⟩
-    · have hmassNonneg : 0 ≤ ∑ row, coefficient row :=
-        Finset.sum_nonneg fun row _ => hnonneg row
-      have hmassPos : 0 < ∑ row, coefficient row := by
-        by_contra hnot
-        have hmassZero : ∑ row, coefficient row = 0 :=
-          le_antisymm (le_of_not_gt hnot) hmassNonneg
-        have hzero := (Fintype.sum_eq_zero_iff_of_nonneg hnonneg).1 hmassZero
-        have : ∑ row, coefficient row * (base row - level) = 0 := by
-          simp [hzero]
-        linarith
-      let mass := ∑ row, coefficient row
-      let normalized : Row → ℝ := fun row => coefficient row / mass
-      have hnormalized : IsNormalizedCertificate delta normalized := by
-        refine ⟨fun row => div_nonneg (hnonneg row) hmassNonneg, ?_, ?_⟩
-        · dsimp [normalized, mass]
-          rw [← Finset.sum_div, div_self hmassPos.ne']
-        · intro state
-          dsimp [normalized, mass]
-          simp only [div_mul_eq_mul_div]
-          rw [← Finset.sum_div, hbalance state, zero_div]
-      have hvalue : level < certificateValue base normalized := by
-        dsimp [certificateValue, normalized, mass]
-        simp only [div_mul_eq_mul_div]
-        rw [← Finset.sum_div]
-        rw [weighted_shiftedBase_eq] at hpositive
-        simp only [certificateValue] at hpositive
-        rw [lt_div_iff₀ hmassPos]
-        nlinarith
-      exact (not_lt_of_ge (hdual normalized hnormalized) hvalue).elim
+    by_contra hlevel
+    obtain ⟨coefficient, hcertificate, hpositive⟩ :=
+      exists_positive_normalizedCertificate_of_infeasible delta (fun row => base row - level)
+        fun ⟨potential, hpotential⟩ =>
+          hlevel ⟨potential, fun row => by linarith [hpotential row]⟩
+    simp only [certificateValue] at hpositive
+    rw [weighted_shiftedBase_eq, hcertificate.2.1] at hpositive
+    linarith [hdual coefficient hcertificate]
 
 /-! ## Recession reduction -/
 
