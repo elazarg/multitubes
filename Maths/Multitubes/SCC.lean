@@ -67,7 +67,7 @@ strongly connected component. -/
 def Transport.sccTrivialization (hflat : T.HasTrivialHolonomy)
     (base vertex : V) (hlinked : LinkedTo G base vertex) :
     Fiber base ≃ Fiber vertex :=
-  T.walkMapEquivOfTrivialHolonomy hflat hlinked.1.some hlinked.2.some
+  T.walkMapEquivOfTrivialHolonomy (hflat base) (hflat vertex) hlinked.1.some hlinked.2.some
 
 theorem Transport.sccTrivialization_edgeMap
     (hflat : T.HasTrivialHolonomy) (base : V) (edge : E)
@@ -82,7 +82,7 @@ theorem Transport.sccTrivialization_edgeMap
     T.walkMap htarget.1.some (T.walkMap hsource.2.some point)
   rw [← T.walkMap_append]
   exact congrFun
-    (T.walkMap_eq_of_trivialHolonomy_of_return hflat
+    (T.walkMap_eq_of_trivialHolonomy_of_return (hflat _) (hflat _)
       (EdgeGraph.Walk.singleton edge)
       (hsource.2.some.append htarget.1.some)
       (htarget.2.some.append hsource.1.some)) point

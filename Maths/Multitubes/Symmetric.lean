@@ -149,21 +149,24 @@ points fixed by every base holonomy of the symmetric transport. -/
 noncomputable def ofEquivsSectionEquiv {base : V}
     (hconnected : IsStronglyConnectedAt G.symmetrization base) :
     {family : ∀ vertex, Fiber vertex // (ofEquivs constraint).IsSection family} ≃
-      {point : Fiber base // (ofEquivs constraint).IsBaseHolonomyFixed base point} where
+      {point : Fiber base // (ofEquivs constraint).IsHolonomyFixedAt base point} where
   toFun family := ⟨family.1 base, fun cycle => family.2.holonomy_eq cycle⟩
   invFun point :=
-    let hunique := existsUnique_section_of_base_fixed_of_injective_returns hconnected
+    let hunique := existsUnique_section_of_base_fixed_of_injective_returns
+      (fun vertex => (hconnected vertex).1)
       point.1 point.2 (fun vertex => (hconnected vertex).2.some)
       (fun vertex => walkMap_injective (ofEquivs_edgeMap_injective constraint) _)
     ⟨hunique.exists.choose, hunique.exists.choose_spec.1⟩
   left_inv family := by
-    have hunique := existsUnique_section_of_base_fixed_of_injective_returns hconnected
+    have hunique := existsUnique_section_of_base_fixed_of_injective_returns
+      (fun vertex => (hconnected vertex).1)
       (family.1 base) (fun cycle => family.2.holonomy_eq cycle)
       (fun vertex => (hconnected vertex).2.some)
       (fun vertex => walkMap_injective (ofEquivs_edgeMap_injective constraint) _)
     exact Subtype.ext (hunique.unique hunique.exists.choose_spec ⟨family.2, rfl⟩)
   right_inv point := by
-    have hunique := existsUnique_section_of_base_fixed_of_injective_returns hconnected
+    have hunique := existsUnique_section_of_base_fixed_of_injective_returns
+      (fun vertex => (hconnected vertex).1)
       point.1 point.2 (fun vertex => (hconnected vertex).2.some)
       (fun vertex => walkMap_injective (ofEquivs_edgeMap_injective constraint) _)
     exact Subtype.ext hunique.exists.choose_spec.2

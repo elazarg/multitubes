@@ -31,6 +31,8 @@ without a separate proof.
 
 ## Main results
 
+* `Maths.map_eq_of_isFlatAt_of_return`: a path functor flat at both endpoints of two parallel
+  walks with a return walk sends them to the same morphism.
 * `Maths.categoricalIngress_comp_return`: ingress followed by return is the identity, so the
   projectors split.
 * `Maths.categoricalRetractProjector_idempotent`: the projectors are idempotent.
@@ -68,6 +70,23 @@ private theorem map_append {start middle finish : V}
     (front : G.Walk start middle) (back : G.Walk middle finish) :
     F.map (front.append back) = F.map front ≫ F.map back :=
   F.map_comp front back
+
+/-- **Path independence of flat path functors.**  A path functor flat at both endpoints of two
+parallel walks sends them to the same morphism, as soon as a return walk exists.  Transports and
+monoid labellings are path functors, so this is the path independence of flat transport
+(`Maths.Transport.walkMap_eq_of_trivialHolonomy_of_return`) and of flat labels
+(`Maths.walkLabel_eq_of_trivialCycleLabels_of_return`). -/
+theorem map_eq_of_isFlatAt_of_return {start finish : V} (hstart : IsFlatAt F start)
+    (hfinish : IsFlatAt F finish) (first second : G.Walk start finish)
+    (back : G.Walk finish start) : F.map first = F.map second := by
+  have hback : F.map back ≫ F.map second = 𝟙 _ := by
+    rw [← map_append]
+    exact hfinish _
+  have hfront : F.map first ≫ F.map back = 𝟙 _ := by
+    rw [← map_append]
+    exact hstart _
+  calc F.map first = F.map first ≫ F.map back ≫ F.map second := by rw [hback, Category.comp_id]
+    _ = F.map second := by rw [← Category.assoc, hfront, Category.id_comp]
 
 /-- The chosen morphism from the base object to one vertex object. -/
 def categoricalIngress (paths : ∀ vertex, G.Walk base vertex)
@@ -182,13 +201,13 @@ end
 /-- One-base flatness of a transport is flatness of its path functor. -/
 theorem Transport.isFlatAt_toPathFunctor_iff {Fiber : V → Type uF} (T : Transport G Fiber)
     {base : V} :
-    IsFlatAt T.toPathFunctor base ↔ ∀ cycle : G.Walk base base, T.holonomy cycle = id :=
+    IsFlatAt T.toPathFunctor base ↔ T.HasTrivialHolonomyAt base :=
   forall_congr' fun _ => ⟨fun h => funext (ConcreteCategory.congr_hom h),
     fun h => ConcreteCategory.hom_ext _ _ (congrFun h)⟩
 
 /-- One-base flatness of a monoid labelling is flatness of its label functor. -/
 theorem isFlatAt_labelFunctor_iff {M : Type uM} [Monoid M] (label : E → M) {base : V} :
-    IsFlatAt (labelFunctor (G := G) label) base ↔ HasTrivialBaseLabels G label base :=
+    IsFlatAt (labelFunctor (G := G) label) base ↔ HasTrivialCycleLabelsAt G label base :=
   Iff.rfl
 
 end Maths

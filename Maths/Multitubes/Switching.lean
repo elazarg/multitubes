@@ -56,6 +56,9 @@ balance on the symmetrization, treated in `Maths.Multitubes.Symmetric`.
 * `Maths.walkLabel_switch` - walk labels transform by endpoint correction.
 * `Maths.isUnitPotential_iff_eq_switch` - unit potentials are the switchings of the trivial
   gain.
+* `Maths.switch_one_eq_mulCoboundary` and `Maths.isUnitPotential_iff_eq_mulCoboundary` - those
+  switchings are the multiplicative coboundaries `Maths.mulCoboundary`, so a unit potential is a
+  coboundary.
 * `Maths.switch_switch` and `Maths.switch_one` - switching is an
   action of the group of unit-valued vertex functions on gains.
 * `Maths.hasTrivialCycleLabels_switch_iff` - balance is a switching invariant.
@@ -138,6 +141,18 @@ theorem isUnitPotential_iff_eq_switch {η : V → Mˣ} :
     IsUnitPotential G label η ↔ label = switch G η 1 := by
   rw [isUnitPotential_iff_label_eq, funext_iff]
   simp [switch_apply]
+
+/-- Switching the trivial gain gives the multiplicative coboundary of the switching function. -/
+theorem switch_one_eq_mulCoboundary (η : V → Mˣ) :
+    switch G η 1 = fun edge => ((mulCoboundary G η edge : Mˣ) : M) := by
+  funext edge
+  simp [div_eq_mul_inv]
+
+/-- **Unit potentials are coboundaries.**  A unit potential for a gain is a unit-valued vertex
+function whose multiplicative coboundary is the gain. -/
+theorem isUnitPotential_iff_eq_mulCoboundary {η : V → Mˣ} :
+    IsUnitPotential G label η ↔ label = fun edge => ((mulCoboundary G η edge : Mˣ) : M) := by
+  rw [isUnitPotential_iff_eq_switch, switch_one_eq_mulCoboundary]
 
 /-! ### The trivial gain -/
 

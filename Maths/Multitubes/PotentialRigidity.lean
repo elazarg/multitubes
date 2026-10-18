@@ -52,7 +52,7 @@ theorem hasTrivialCycleLabels_iff_parallelLabels {base : V}
         walkLabel label first = walkLabel label second := by
   constructor
   · intro hflat start finish first second
-    exact walkLabel_eq_of_trivialCycleLabels_of_return hflat first second
+    exact walkLabel_eq_of_trivialCycleLabels_of_return (hflat _) (hflat _) first second
       (hconnected.nonempty_walk finish start).some
   · intro hparallel vertex cycle
     simpa using hparallel cycle (.nil : G.Walk vertex vertex)

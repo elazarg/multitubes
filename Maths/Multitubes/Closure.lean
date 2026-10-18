@@ -58,6 +58,8 @@ even when separate cycle witnesses are not.
   the least lax section above the lower data.
 * `Maths.Transport.pathClosure_eq_leastLaxMajorant`: so it is the explicit formula for the least
   lax majorant.
+* `Maths.Transport.pathClosure_eq_iSup_iterate_incomingSup`: Kleene iteration, the path closure
+  as the join of the iterates of the incoming join.
 * `Maths.Transport.rooted_pathClosure_isLeast`: the rooted form, where one pre-fixed witness at
   the root suffices.
 * `Maths.Transport.LaxHom.leastLaxMajorant_le_map`: soundness of abstract closure,
@@ -352,6 +354,34 @@ theorem pathClosure_eq_leastLaxMajorant (hsup : T.PreservesSSup)
     (lower : ∀ vertex, Fiber vertex) :
     T.pathClosure lower = T.leastLaxMajorant lower :=
   (pathClosure_isLeast hsup lower).unique (leastLaxMajorant_isLeast hsup.isMonotone lower)
+
+/-- Transport of lower data along a walk of length `n` is below the `n`-th iterate of the
+incoming join on that data. -/
+theorem walkMap_le_iterate_incomingSup (hmono : T.IsMonotone) (lower : ∀ vertex, Fiber vertex)
+    {start finish : V} (walk : G.Walk start finish) :
+    T.walkMap walk (lower start) ≤ T.incomingSup^[walk.length] lower finish := by
+  induction walk with
+  | nil => exact le_rfl
+  | concat edge walk ih =>
+      rw [walkMap_concat, EdgeGraph.Walk.length_concat, Function.iterate_succ_apply']
+      exact (hmono edge ih).trans (edgeMap_le_incomingSup _ edge)
+
+/-- **Kleene iteration.**  For supremum-preserving edge maps, the path closure is the join of the
+iterates of the incoming join on the lower data: its `n`-th iterate collects the walks of
+length `n`. -/
+theorem pathClosure_eq_iSup_iterate_incomingSup (hsup : T.PreservesSSup)
+    (lower : ∀ vertex, Fiber vertex) :
+    T.pathClosure lower = ⨆ n : ℕ, T.incomingSup^[n] lower := by
+  refine le_antisymm (fun vertex ↦ iSup_le fun source ↦ iSup_le fun walk ↦ ?_) (iSup_le ?_)
+  · rw [iSup_apply]
+    exact le_iSup_of_le walk.length (walkMap_le_iterate_incomingSup hsup.isMonotone lower walk)
+  · intro n
+    induction n with
+    | zero => exact T.le_pathClosure lower
+    | succ n ih =>
+        rw [Function.iterate_succ_apply']
+        exact (hsup.isMonotone.monotone_incomingSup ih).trans
+          (isLaxSection_iff_incomingSup_le.1 (isLaxSection_pathClosure hsup lower))
 
 /-- Every walk preserves bottom when all edge maps do. -/
 theorem walkMap_bot (hbot : ∀ edge : E, T.edgeMap edge ⊥ = ⊥)

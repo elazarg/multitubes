@@ -51,8 +51,8 @@ bounded range.
 
 ## Main definitions
 
-* `Maths.CycleCoboundary.coboundary` and
-  `Maths.CycleCoboundary.IsCoboundary`.
+* `Maths.CycleCoboundary.IsCoboundary` - edge data that is the `Maths.coboundary` of a
+  vertex potential.
 * `Maths.translationTransport` - the direct additive reading as
   a `Maths.Transport`.
 
@@ -120,15 +120,6 @@ it to the additive walk weight and records its subtraction rule. -/
 section Coboundary
 
 variable {A : Type*} [AddCommGroup A]
-
-/-- The edge data induced by a vertex potential: the difference of the
-potential across each edge.  Also called an exact `1`-cochain, a potential
-difference, a discrete gradient, or a tension. -/
-def coboundary (G : EdgeGraph V E) (φ : V → A) : E → A :=
-  fun edge => φ (G.target edge) - φ (G.source edge)
-
-@[simp] theorem coboundary_apply (φ : V → A) (edge : E) :
-    coboundary G φ edge = φ (G.target edge) - φ (G.source edge) := rfl
 
 /-- Edge data is **exact** when it is the coboundary of some vertex potential. -/
 def IsCoboundary (G : EdgeGraph V E) (w : E → A) : Prop :=

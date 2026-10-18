@@ -24,7 +24,8 @@ that no odd concrete state is reachable. The reset is deliberately noninjective.
 ## Main definitions
 
 * `ProgramSemantics.AbstractDomain.concretizeSet`: concretization of abstract-state sets.
-* `ProgramSemantics.AbstractDomain.concretization`: concretization as a lax morphism of predicate transports.
+* `ProgramSemantics.AbstractDomain.concretization`: concretization as a lax morphism of
+  predicate transports.
 * `ProgramSemantics.parityReachable`: executable saturation of the parity abstraction.
 
 ## Main results

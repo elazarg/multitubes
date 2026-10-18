@@ -663,7 +663,7 @@ theorem exists_slopeGauge_of_cycleProduct_eq_one_of_stronglyConnected
   let gauge : V → ℝ := fun vertex ↦ Real.exp (potential vertex)
   refine ⟨gauge, fun vertex ↦ Real.exp_pos _, fun edge ↦ ?_⟩
   have hedge := hpotential edge
-  rw [CycleCoboundary.coboundary_apply] at hedge
+  rw [coboundary_apply] at hedge
   change Real.log (slope edge) =
     potential (G.target edge) - potential (G.source edge) at hedge
   calc

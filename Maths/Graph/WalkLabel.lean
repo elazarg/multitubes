@@ -9,6 +9,7 @@ public import Maths.Graph.EdgeGraph
 public import Mathlib.Algebra.BigOperators.Group.List.Defs
 public import Mathlib.Algebra.Group.Defs
 public import Mathlib.Algebra.Group.TypeTags.Basic
+public import Mathlib.Algebra.Group.Opposite
 public import Mathlib.Algebra.Order.Monoid.Defs
 
 import Mathlib.Algebra.BigOperators.Group.List.Basic
@@ -27,23 +28,28 @@ multiplication are natural.
   `Maths.walkSum` is the sum of edge data along a walk: its tension, line integral, or
   cycle sum.
 
-The two agree in a commutative monoid (`Maths.walkLabel_eq_walkProd`).  A labelling is
+The first is the second in the opposite monoid (`Maths.walkLabel_eq_unop_walkProd`), and the two
+agree in a commutative monoid (`Maths.walkLabel_eq_walkProd`).  A labelling is
 *flat*, or *balanced*, when every closed walk has trivial label.
 
 ## Main definitions
 
 * `Maths.walkLabel` - the composite label of a walk in action order.
 * `Maths.HasTrivialCycleLabels` - every closed walk has identity label, and
-  `Maths.HasTrivialBaseLabels` - every closed walk at one base does.
+  `Maths.HasTrivialCycleLabelsAt` - every closed walk at one base does.
 * `Maths.HasZeroCycleSums` - every closed walk has zero sum.
 * `Maths.walkProd` and `Maths.walkSum` - the chronological product and sum of edge data
   along a walk.
+* `Maths.mulCoboundary` and `Maths.coboundary` - the ratio and the difference of a vertex
+  function across each edge.
 
 ## Main results
 
 * `Maths.walkLabel_append` - walk labels are anti-multiplicative under concatenation.
 * `Maths.walkProd_append` and `Maths.walkSum_append` - chronological products and sums are
   multiplicative and additive under concatenation.
+* `Maths.walkLabel_eq_unop_walkProd` - the action order is the chronological order of the
+  opposite monoid.
 * `Maths.walkLabel_eq_walkProd` - the two orders agree in a commutative monoid.
 * `Maths.hasTrivialCycleLabels_ofAdd_iff` - zero cycle sums are trivial cycle labels of the
   multiplicative reading, so additive statements follow from multiplicative ones.
@@ -114,14 +120,14 @@ variable {label : E → M}
   | nil => rfl
   | concat edge walkSoFar ih => simp [ih]
 
+/-- Every closed walk at one selected base has identity composite label. -/
+def HasTrivialCycleLabelsAt (G : EdgeGraph V E) (label : E → M) (base : V) : Prop :=
+  ∀ cycle : G.Walk base base, walkLabel label cycle = 1
+
 /-- Every closed walk has identity composite label.  For group-labelled gain graphs this is
 balance; for a transport it is flatness. -/
 def HasTrivialCycleLabels (G : EdgeGraph V E) (label : E → M) : Prop :=
-  ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkLabel label cycle = 1
-
-/-- Flatness only at one selected base: every closed walk there has identity label. -/
-def HasTrivialBaseLabels (G : EdgeGraph V E) (label : E → M) (base : V) : Prop :=
-  ∀ cycle : G.Walk base base, walkLabel label cycle = 1
+  ∀ vertex : V, HasTrivialCycleLabelsAt G label vertex
 
 end Label
 
@@ -196,6 +202,20 @@ sum. -/
 def HasZeroCycleSums {A : Type*} [AddMonoid A] (G : EdgeGraph V E) (w : E → A) : Prop :=
   ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum w cycle = 0
 
+section Opposite
+
+variable {M : Type uM} [Monoid M]
+
+/-- The action-order label is the chronological product in the opposite monoid. -/
+theorem walkLabel_eq_unop_walkProd (label : E → M) (walk : G.Walk start finish) :
+    walkLabel label walk = (walkProd (fun edge => MulOpposite.op (label edge)) walk).unop := by
+  induction walk with
+  | nil => rfl
+  | concat edge walkSoFar ih =>
+      rw [walkLabel_concat, walkProd_concat, MulOpposite.unop_mul, MulOpposite.unop_op, ih]
+
+end Opposite
+
 section CommMonoid
 
 variable {M : Type uM} [CommMonoid M]
@@ -233,6 +253,24 @@ theorem hasTrivialCycleLabels_ofAdd_iff :
   forall₂_congr fun _ _ => by rw [walkLabel_ofAdd, ofAdd_eq_one]
 
 end Additive
+
+section Group
+
+variable {M : Type uM} [Group M]
+
+/-- The multiplicative coboundary of a vertex function: its ratio across each edge, the value
+at the target divided by the value at the source. -/
+@[to_additive coboundary /-- The coboundary of a vertex potential: its difference across each
+edge.  Also called an exact `1`-cochain, a potential difference, a discrete gradient, or a
+tension. -/]
+def mulCoboundary (G : EdgeGraph V E) (η : V → M) : E → M :=
+  fun edge => η (G.target edge) / η (G.source edge)
+
+@[to_additive (attr := simp) coboundary_apply]
+theorem mulCoboundary_apply (η : V → M) (edge : E) :
+    mulCoboundary G η edge = η (G.target edge) / η (G.source edge) := rfl
+
+end Group
 
 section CommGroup
 
