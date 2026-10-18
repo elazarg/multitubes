@@ -51,7 +51,8 @@ Several dossiers contain standalone Lake packages with checked end-to-end exampl
   finite control locations, edges, and a common finite state space for exact saturation. A finite
   abstraction can also analyze infinite concrete states: an upper simulation carries the computed
   abstract closure to a concrete all-walk guarantee. The parity analyzer verifies natural-number
-  executions with addition by two and reset to zero.
+  executions with addition by two and reset to zero. Octagon constraints over a field are
+  decided by closed walks of a doubled literal graph, with a checked integer counterexample.
 - [Stochastic processes](StochasticProcesses/) defines finite-horizon target hitting, identifies
   it with the endpoint event for the kernel stopped on the target, and proves superharmonic
   barrier bounds. Its eventual value is the supremum of finite horizons; no probability measure

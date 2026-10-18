@@ -20,3 +20,11 @@ worked parity domain analyzes natural-number instructions that add two or reset 
 zero, computes only the even cell, and thereby excludes every odd concrete result. The even cell
 also contains unreachable values such as `2` at initialization, making the abstraction's loss of
 precision explicit.
+
+`ProgramSemantics.Octagon` treats the octagon domain's unit two-variable constraints `±x ± y ≤ c`.
+Doubling each variable into a positive and a negative literal turns every constraint into two
+edges of a skew-symmetric graph. Over a linearly ordered field the system is feasible exactly when
+that graph admits a potential, equivalently when every closed walk has nonnegative total bound.
+The integer case is different: `2x ≤ 1` and `-2x ≤ -1` pass the cycle test but have no integer
+solution, which is checked in `integer_gap`. Integer tightening and closure algorithms are not
+formalized.

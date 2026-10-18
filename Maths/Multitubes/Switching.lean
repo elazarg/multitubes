@@ -34,12 +34,16 @@ action of the group of unit-valued vertex functions on gains; it is stated as re
 lemmas, not as a `MulAction` instance, because the action depends on the edge graph,
 not only on the types involved.
 
-The main result says that when every edge endpoint is linked to a base vertex balance is
-exactly switching-triviality: a gain has trivial cycle labels precisely when it is a switching of
-the constant-one gain.  The switching function exhibited is the unit potential of
-`Maths.exists_unitPotential_of_trivialCycleLabels`, and
+The main result says that when every edge lies on a closed walk balance is exactly
+switching-triviality: a gain has trivial cycle labels precisely when it is a switching of the
+constant-one gain.  No connectivity is assumed; the switching function is assembled one
+strongly connected component at a time from the unit potential of
+`Maths.exists_unitPotential_of_trivialCycleLabels_of_hasEdgeReturns`.  On a rooted region,
 `Maths.existsUnique_normalizedUnitPotential_of_trivialCycleLabels` measures its
 uniqueness: the switching functions trivializing a flat gain form a torsor for the unit group.
+
+Balance here quantifies over directed closed walks.  The classical, undirected notion is
+balance on the symmetrization, treated in `Maths.Multitubes.Symmetric`.
 
 ## Main definitions
 
@@ -51,9 +55,11 @@ uniqueness: the switching functions trivializing a flat gain form a torsor for t
 * `Maths.switch_switch` and `Maths.switch_one` - switching is an
   action of the group of unit-valued vertex functions on gains.
 * `Maths.hasTrivialCycleLabels_switch_iff` - balance is a switching invariant.
-* `Maths.hasTrivialCycleLabels_iff_exists_switch_one` - when every edge
-  endpoint is linked to a base vertex, a gain is balanced exactly when it is a switching
-  of the trivial gain.
+* `Maths.hasTrivialCycleLabels_iff_exists_switch_one_of_hasEdgeReturns` - when every
+  edge lies on a closed walk, a gain is balanced exactly when it is a switching of the
+  trivial gain.
+* `Maths.hasTrivialCycleLabels_iff_exists_switch_one` - the rooted case, when every edge
+  endpoint is linked to a base vertex.
 
 ## References
 
@@ -146,20 +152,29 @@ theorem hasTrivialCycleLabels_switch_iff (η : V → Mˣ) :
   · rw [walkLabel_switch, h vertex cycle]
     simp
 
-/-- **Balance is switching-triviality.**  When every edge endpoint is linked to a base
-vertex, a monoid-valued gain is balanced exactly when it is a switching of the trivial
-gain.  The switching function exhibited in the forward direction is the unit potential of
-`Maths.exists_unitPotential_of_trivialCycleLabels`. -/
-theorem hasTrivialCycleLabels_iff_exists_switch_one {base : V}
-    (hlinked : EdgeEndpointsLinkedTo G base) :
+/-- **Balance is switching-triviality, component by component.**  When every edge lies on
+a closed walk, a monoid-valued gain is balanced exactly when it is a switching of the
+trivial gain.  No base vertex or connectivity is assumed; the switching function exhibited
+is the unit potential of `Maths.exists_unitPotential_of_trivialCycleLabels_of_hasEdgeReturns`. -/
+theorem hasTrivialCycleLabels_iff_exists_switch_one_of_hasEdgeReturns
+    (hreturn : HasEdgeReturns G) :
     HasTrivialCycleLabels G label ↔ ∃ η : V → Mˣ, label = switch G η 1 := by
   constructor
   · intro hflat
     obtain ⟨potential, hpotential⟩ :=
-      exists_unitPotential_of_trivialCycleLabels hlinked hflat
+      exists_unitPotential_of_trivialCycleLabels_of_hasEdgeReturns hreturn hflat
     refine ⟨potential, funext fun edge => ?_⟩
     rw [hpotential edge, switch_apply, Pi.one_apply, mul_one, Units.val_mul]
   · rintro ⟨η, rfl⟩
     exact (hasTrivialCycleLabels_switch_iff η).mpr hasTrivialCycleLabels_one
+
+/-- **Balance is switching-triviality.**  When every edge endpoint is linked to a base
+vertex, a monoid-valued gain is balanced exactly when it is a switching of the trivial
+gain.  This is the rooted case of
+`Maths.hasTrivialCycleLabels_iff_exists_switch_one_of_hasEdgeReturns`. -/
+theorem hasTrivialCycleLabels_iff_exists_switch_one {base : V}
+    (hlinked : EdgeEndpointsLinkedTo G base) :
+    HasTrivialCycleLabels G label ↔ ∃ η : V → Mˣ, label = switch G η 1 :=
+  hasTrivialCycleLabels_iff_exists_switch_one_of_hasEdgeReturns hlinked.hasEdgeReturns
 
 end Maths

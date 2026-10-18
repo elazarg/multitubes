@@ -52,14 +52,10 @@ universe uV uE
 
 variable {V : Type uV} {E : Type uE}
 
-/-- The directed graph containing both orientations of every edge identity. -/
-def signedGraph (G : EdgeGraph V E) : EdgeGraph V (SignedEdge E) where
-  source
-    | (edge, false) => G.source edge
-    | (edge, true) => G.target edge
-  target
-    | (edge, false) => G.target edge
-    | (edge, true) => G.source edge
+/-- The directed graph containing both orientations of every edge identity: the
+symmetrization `Maths.EdgeGraph.symmetrization`, indexed by signed edges. -/
+abbrev signedGraph (G : EdgeGraph V E) : EdgeGraph V (SignedEdge E) :=
+  G.symmetrization
 
 @[simp] theorem signedGraph_source_false (G : EdgeGraph V E) (edge : E) :
     (signedGraph G).source (edge, false) = G.source edge := rfl

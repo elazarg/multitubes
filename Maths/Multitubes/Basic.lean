@@ -75,6 +75,7 @@ products of slopes.
 * `Maths.Transport.walkMap_castStart` and `Maths.Transport.walkMap_castFinish` -
   endpoint reindexing commutes with transport.
 * `Maths.Transport.walkMap_append` - path composition.
+* `Maths.Transport.walkMap_injective` - walks of injective edge maps transport injectively.
 * `Maths.Transport.IsSection.walkMap_eq` - exact transport of
   sections.
 * `Maths.Transport.IsLaxSection.walkMap_le` - monotone
@@ -158,6 +159,12 @@ variable {Fiber : V → Type uF}
   subst hvertex
   rfl
 
+/-- Retyping a fiber point leaves it unchanged as a point of the total space. -/
+theorem sigma_mk_fiberCast {first second : V} (hvertex : first = second) (point : Fiber first) :
+    (⟨second, fiberCast Fiber hvertex point⟩ : Σ vertex, Fiber vertex) = ⟨first, point⟩ := by
+  subst hvertex
+  rfl
+
 theorem fiberCast_fiberCast {first second third : V} (hfirst : first = second)
     (hsecond : second = third) (point : Fiber first) :
     fiberCast Fiber hsecond (fiberCast Fiber hfirst point) =
@@ -237,6 +244,16 @@ theorem walkMap_append (first : G.Walk start middle) (second : G.Walk middle fin
   | nil => rfl
   | concat walkSoFar edge legal ih =>
       rw [EdgeGraph.Walk.append_concat, walkMap_concat, walkMap_concat, ih]
+
+/-- Transport along a walk is injective when every edge map is. -/
+theorem walkMap_injective (hinjective : ∀ edge, Function.Injective (T.edgeMap edge))
+    (walk : G.Walk start finish) : Function.Injective (T.walkMap walk) := by
+  induction walk with
+  | nil => exact Function.injective_id
+  | concat walkSoFar edge legal ih =>
+      intro first second hequal
+      simp only [walkMap_concat] at hequal
+      exact ih (by simpa [fiberCast] using hinjective edge hequal)
 
 /-- Transport around a closed walk, an endomorphism of the fiber over its base
 vertex. -/

@@ -170,21 +170,6 @@ variable {V : Type uV} {E : Type uE}
 
 namespace EdgeGraph
 
-/-- The subgraph on a set of edges: the vertices are those of the ambient graph and the edges are
-the members of the set, with the ambient endpoints.  This is the edge-indexed analogue of
-`Maths.EdgeGraph.induce`, which selects a set of vertices instead. -/
-def restrictEdges (G : EdgeGraph V E) (S : Set E) : EdgeGraph V S where
-  source edge := G.source edge.1
-  target edge := G.target edge.1
-
-/-- The source map of an edge subgraph restricts the ambient source map. -/
-@[simp] theorem restrictEdges_source (G : EdgeGraph V E) (S : Set E) (edge : S) :
-    (G.restrictEdges S).source edge = G.source edge.1 := rfl
-
-/-- The target map of an edge subgraph restricts the ambient target map. -/
-@[simp] theorem restrictEdges_target (G : EdgeGraph V E) (S : Set E) (edge : S) :
-    (G.restrictEdges S).target edge = G.target edge.1 := rfl
-
 namespace Walk
 
 variable {G : EdgeGraph V E}

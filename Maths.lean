@@ -10,6 +10,7 @@ public import Maths.Algebra.JoinSemidirect
 
 -- Graph and walk combinatorics
 public import Maths.Graph.EdgeGraph
+public import Maths.Graph.Morphism
 public import Maths.Graph.Circulation
 public import Maths.Graph.EulerianTrail
 public import Maths.Graph.InfiniteWalk
@@ -54,6 +55,9 @@ public import Maths.Multitubes.SCC
 public import Maths.Multitubes.NormalForms
 public import Maths.Multitubes.PotentialRigidity
 public import Maths.Multitubes.Switching
+public import Maths.Multitubes.Symmetric
+public import Maths.Multitubes.Frustration
+public import Maths.Multitubes.ElementsGraph
 
 -- Transport: finite inequality certificates
 public import Maths.Multitubes.FiniteInequality.Arithmetic

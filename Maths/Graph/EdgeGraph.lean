@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Mathlib.Data.List.Chain
+public import Mathlib.Data.Set.CoeSort
 
 import Mathlib.Data.List.ChainOfFn
 import Mathlib.Data.List.Count
@@ -34,6 +35,8 @@ circulations, and application-specific semantics belong in files that import thi
   and `target` maps.
 * `Maths.EdgeGraph.reverse`: the graph obtained by reversing every edge while
   retaining its identity.
+* `Maths.EdgeGraph.restrictEdges`: the subgraph on a set of edges.
+* `Maths.EdgeGraph.symmetrization`: the graph carrying both orientations of every edge.
 * `Maths.EdgeGraph.Walk`: an endpoint-indexed finite walk.
 * `Maths.EdgeGraph.Walk.edges`, `length`, `visited`, `edgeMultiplicity`: the
   basic measurements of a walk.
@@ -41,9 +44,9 @@ circulations, and application-specific semantics belong in files that import thi
   walk constructors.
 * `Maths.EdgeGraph.Walk.VertexSplit`: a witness that a walk visits a vertex,
   together with `splice` for inserting a closed walk there.
-* `Maths.LinkedTo`, `Maths.IsStronglyConnectedAt`, and
-  `Maths.EdgeEndpointsLinkedTo`: the walk-existence reachability scopes
-  consumed by the potential and normal-form theory.
+* `Maths.LinkedTo`, `Maths.IsStronglyConnectedAt`, `Maths.EdgeEndpointsLinkedTo`, and
+  `Maths.HasEdgeReturns`: the walk-existence reachability scopes consumed by the potential
+  and normal-form theory.
 
 ## Main results
 
@@ -64,6 +67,8 @@ circulations, and application-specific semantics belong in files that import thi
 * `Maths.EdgeGraph.Walk.VertexSplit.length_splice`: splicing adds lengths.
 * `Maths.EdgeGraph.reverse_reverse`: reversing every edge twice recovers the
   original graph.
+* `Maths.EdgeGraph.symmetrization_hasEdgeReturns`: every edge of the symmetrization
+  returns along its opposite orientation.
 
 ## Tags
 
@@ -104,6 +109,54 @@ def reverse : EdgeGraph V E where
 /-- Reversing every edge twice recovers the original graph. -/
 @[simp] theorem reverse_reverse : G.reverse.reverse = G :=
   rfl
+
+/-- The subgraph on a set of edges: the vertices are those of the ambient graph and the edges are
+the members of the set, with the ambient endpoints.  This is the edge-indexed analogue of
+`Maths.EdgeGraph.induce`, which selects a set of vertices instead. -/
+def restrictEdges (S : Set E) : EdgeGraph V S where
+  source edge := G.source edge.1
+  target edge := G.target edge.1
+
+/-- The source map of an edge subgraph restricts the ambient source map. -/
+@[simp] theorem restrictEdges_source (S : Set E) (edge : S) :
+    (G.restrictEdges S).source edge = G.source edge.1 := rfl
+
+/-- The target map of an edge subgraph restricts the ambient target map. -/
+@[simp] theorem restrictEdges_target (S : Set E) (edge : S) :
+    (G.restrictEdges S).target edge = G.target edge.1 := rfl
+
+/-- The graph carrying both orientations of every edge identity: `(edge, false)` runs
+forward and `(edge, true)` runs backward.  Directed walks in it are the undirected walks
+of `G`, so it is the carrier of classical, undirected gain-graph notions. -/
+def symmetrization : EdgeGraph V (E × Bool) where
+  source
+    | (edge, false) => G.source edge
+    | (edge, true) => G.target edge
+  target
+    | (edge, false) => G.target edge
+    | (edge, true) => G.source edge
+
+@[simp] theorem symmetrization_source_false (edge : E) :
+    G.symmetrization.source (edge, false) = G.source edge := rfl
+
+@[simp] theorem symmetrization_source_true (edge : E) :
+    G.symmetrization.source (edge, true) = G.target edge := rfl
+
+@[simp] theorem symmetrization_target_false (edge : E) :
+    G.symmetrization.target (edge, false) = G.target edge := rfl
+
+@[simp] theorem symmetrization_target_true (edge : E) :
+    G.symmetrization.target (edge, true) = G.source edge := rfl
+
+/-- The opposite orientation of an edge of the symmetrization. -/
+@[simp] theorem symmetrization_source_not (edge : E × Bool) :
+    G.symmetrization.source (edge.1, !edge.2) = G.symmetrization.target edge := by
+  rcases edge with ⟨edge, _ | _⟩ <;> rfl
+
+/-- The opposite orientation of an edge of the symmetrization. -/
+@[simp] theorem symmetrization_target_not (edge : E × Bool) :
+    G.symmetrization.target (edge.1, !edge.2) = G.symmetrization.source edge := by
+  rcases edge with ⟨edge, _ | _⟩ <;> rfl
 
 /-- A finite directed walk, retaining the list of edge identities. -/
 inductive Walk (start : V) : V → Type (max uV uE)
@@ -347,6 +400,22 @@ def castFinish {start finish finish' : V} (walk : G.Walk start finish)
     (walk : G.Walk start finish) (hfinish : finish = finish') :
     (walk.castFinish hfinish).edges = walk.edges := by
   subst finish'
+  rfl
+
+/-- Changing the terminal index of a walk leaves it heterogeneously equal. -/
+theorem castFinish_heq {start finish finish' : V} (walk : G.Walk start finish)
+    (hfinish : finish = finish') : walk.castFinish hfinish ≍ walk := by
+  subst hfinish
+  rfl
+
+/-- Extending heterogeneously equal walks by equal edges gives heterogeneously equal walks. -/
+theorem concat_heq_concat {start middle middle' : V} {first : G.Walk start middle}
+    {second : G.Walk start middle'} (hmiddle : middle = middle') (hwalk : first ≍ second)
+    {edge edge' : E} (hedge : edge = edge') (legal : G.source edge = middle)
+    (legal' : G.source edge' = middle') :
+    first.concat edge legal ≍ second.concat edge' legal' := by
+  subst hmiddle hedge
+  cases eq_of_heq hwalk
   rfl
 
 /-- Change only the initial index of a typed walk along an equality. -/
@@ -632,5 +701,42 @@ theorem IsStronglyConnectedAt.edgeEndpointsLinkedTo {base : V}
     (hconnected : IsStronglyConnectedAt G base) :
     EdgeEndpointsLinkedTo G base :=
   fun _ => ⟨hconnected _, hconnected _⟩
+
+/-- Every vertex is linked to itself by the empty walk. -/
+theorem LinkedTo.refl (vertex : V) : LinkedTo G vertex vertex :=
+  ⟨⟨.nil⟩, ⟨.nil⟩⟩
+
+/-- Linking is symmetric. -/
+theorem LinkedTo.symm {first second : V} (h : LinkedTo G first second) :
+    LinkedTo G second first :=
+  ⟨h.2, h.1⟩
+
+/-- Linking is transitive. -/
+theorem LinkedTo.trans {first second third : V} (h₁ : LinkedTo G first second)
+    (h₂ : LinkedTo G second third) : LinkedTo G first third :=
+  ⟨⟨h₁.1.some.append h₂.1.some⟩, ⟨h₂.2.some.append h₁.2.some⟩⟩
+
+/-- Every edge lies on a closed walk: its target walks back to its source.  This is the
+local reachability that component-wise coboundary reconstruction consumes; it imposes no
+connectivity between different strongly connected components. -/
+def HasEdgeReturns (G : EdgeGraph V E) : Prop :=
+  ∀ edge : E, Nonempty (G.Walk (G.target edge) (G.source edge))
+
+/-- With edge returns, the endpoints of every edge are linked to each other. -/
+theorem HasEdgeReturns.linkedTo (hreturn : HasEdgeReturns G) (edge : E) :
+    LinkedTo G (G.source edge) (G.target edge) :=
+  ⟨⟨EdgeGraph.Walk.singleton edge⟩, hreturn edge⟩
+
+/-- A graph whose every edge lies in a strongly connected component reachable from `base`
+has edge returns. -/
+theorem EdgeEndpointsLinkedTo.hasEdgeReturns {base : V}
+    (hlinked : EdgeEndpointsLinkedTo G base) : HasEdgeReturns G :=
+  fun edge => ((hlinked edge).2.symm.trans (hlinked edge).1).1
+
+/-- In the symmetrization every edge returns along its opposite orientation. -/
+theorem EdgeGraph.symmetrization_hasEdgeReturns : HasEdgeReturns G.symmetrization := by
+  rintro ⟨edge, orientation⟩
+  refine ⟨(EdgeGraph.Walk.singleton (G := G.symmetrization) (edge, !orientation)).castStart
+    ?_ |>.castFinish ?_⟩ <;> cases orientation <;> rfl
 
 end Maths

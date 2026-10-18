@@ -88,7 +88,10 @@ It is likely a good fit if you need to formalize one of the following.
 | Typed directed walks with parallel edges and composition | [`Maths.Graph.EdgeGraph`](Maths/Graph/EdgeGraph.lean) |
 | Walk multiplicities, flow conservation, circulations, and Eulerian realization | [`Maths.Graph.Circulation`](Maths/Graph/Circulation.lean) and [`EulerianTrail`](Maths/Graph/EulerianTrail.lean) |
 | Additive difference constraints and cycle feasibility | [`Additive.Potentials`](Maths/Multitubes/Additive/Potentials.lean) and [`Additive.Mixed`](Maths/Multitubes/Additive/Mixed.lean) |
-| Gain-graph and voltage-graph switching and balance | [`Maths.Multitubes.Switching`](Maths/Multitubes/Switching.lean) |
+| Gain-graph and voltage-graph switching and balance | [`Maths.Multitubes.Switching`](Maths/Multitubes/Switching.lean) and [`Symmetric`](Maths/Multitubes/Symmetric.lean) |
+| Frustration index and balancing deletions | [`Maths.Multitubes.Frustration`](Maths/Multitubes/Frustration.lean) |
+| Derived and covering graphs, path lifting, and monodromy | [`Maths.Multitubes.ElementsGraph`](Maths/Multitubes/ElementsGraph.lean) |
+| Graph morphisms and isomorphisms | [`Maths.Graph.Morphism`](Maths/Graph/Morphism.lean) |
 | Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/Multitubes/Additive/CycleMean.lean), [`CriticalGraph`](Maths/Multitubes/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/Multitubes/Additive/Eigenvector.lean) |
 | Functions between possibly different state spaces along edges | [`Maths.Multitubes.Basic`](Maths/Multitubes/Basic.lean) |
 | Morphisms, directed simulations, and closure soundness | [`Maths.Multitubes.Morphism`](Maths/Multitubes/Morphism.lean) |
@@ -171,8 +174,15 @@ The library includes the following theorem families.
 - **Max-plus spectral theory.** The additive layer includes cycle means, Karp's formula, critical
   graphs, Kleene-star generators, subeigenvectors, and eigenvectors.
 - **Gain graphs.** Monoid-valued walk labels compose in path order. Switching acts through
-  unit-valued vertex functions, balance is switching-invariant, and under the stated connectivity
-  hypothesis balance is equivalent to switching-triviality. Groups recover the classical case.
+  unit-valued vertex functions, balance is switching-invariant, and when every edge lies on a
+  closed walk balance is equivalent to switching-triviality. On the symmetrization this gives
+  Zaslavsky's balance theorem for unit-valued gains with no connectivity hypothesis. Constraints
+  given by bijections are satisfiable exactly at the common fixed points of the base holonomies.
+  Frustration indices are characterized by deletion and bounded below by disjoint unbalanced
+  cycles.
+- **Graphs of elements.** Every transport unfolds into a graph over its base: the derived graph
+  of a voltage graph, or the state graph of a relation. Walks lift uniquely, holonomy is
+  monodromy, sections are sheets, and switching acts by graph isomorphism.
 - **Operator-valued walk semantics.** Arbitrary edge functions compose chronologically.
   Transport respects concatenation, and exact, lax, and oplax edge constraints propagate along
   suitable walks. Fiberwise morphisms commute with all walk transports and preserve sections;
@@ -305,7 +315,7 @@ mathlib; the Multitubes layer consumes them.
 
 | Directory | Contents |
 | --- | --- |
-| `Maths/Graph/` | Directed multigraphs, typed walks, circulations, Eulerian trails, infinite walks, zero-charge lassos, and charged relations |
+| `Maths/Graph/` | Directed multigraphs, typed walks, graph morphisms, circulations, Eulerian trails, infinite walks, zero-charge lassos, and charged relations |
 | `Maths/Recursion/` | Affine, max-affine, and clamped-affine summaries, fixed points, and one-sided and two-sided reflections |
 | `Maths/LinearProgramming/` | Fourier–Motzkin elimination, alternatives, standard-form LP, sparsity, and duality |
 | `Maths/Algebra/` | The join-semidirect label algebra |
