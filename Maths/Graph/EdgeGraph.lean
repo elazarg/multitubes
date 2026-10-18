@@ -5,6 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
+public import Mathlib.Data.Fintype.Card
 public import Mathlib.Data.List.Chain
 public import Mathlib.Data.Set.CoeSort
 
@@ -46,6 +47,9 @@ circulations, and application-specific semantics belong in files that import thi
   basic measurements of a walk.
 * `Maths.EdgeGraph.Walk.append`, `singleton`, `iterate`, `castStart`, `castFinish`,
   `reverse`: walk constructors.
+* `Maths.EdgeGraph.Walk.IsSimpleCycle`: a nonempty closed walk with no decomposition into two
+  nonempty closed walks at a repeated vertex, the decomposition-invariant form of a simple
+  directed cycle.
 * `Maths.EdgeGraph.Walk.VertexSplit`: a witness that a walk visits a vertex,
   together with `splice` for inserting a closed walk there.
 * `Maths.RootReaches`, `Maths.LinkedTo`, `Maths.IsStronglyConnectedAt`,
@@ -69,6 +73,11 @@ circulations, and application-specific semantics belong in files that import thi
   it visits.
 * `Maths.EdgeGraph.Walk.exists_closedSubwalk_of_not_nodup`: a walk revisiting a
   vertex contains a nonempty closed subwalk.
+* `Maths.EdgeGraph.Walk.IsSimpleCycle.length_le_card`: a simple cycle on finitely many
+  vertices has at most one edge per vertex.
+* `Maths.EdgeGraph.exists_walk_length_eq_forall_mem_edges` and
+  `Maths.EdgeGraph.exists_walk_length_eq`: when every vertex has an incoming edge of some
+  kind, every vertex ends walks of every length along edges of that kind.
 * `Maths.linkedTo_source_of_mem_edges` and `Maths.linkedTo_target_of_mem_edges`: a closed
   walk stays inside the strongly connected component of its base.
 * `Maths.EdgeGraph.Walk.VertexSplit.length_splice`: splicing adds lengths.
@@ -402,6 +411,39 @@ theorem source_of_mem_head? (walk : G.Walk start finish) {edge : E}
         exact (walkSoFar.eq_of_length_eq_zero hstart).symm
       · rw [List.head?_append_of_ne_nil _ (by simp [hsnoc])] at hhead
         exact ih hhead
+
+/-- A closed walk with no proper nonempty closed subwalk whose removal leaves
+a nonempty closed walk.  This is the decomposition-invariant form of a simple
+directed cycle and includes one-edge loops. -/
+def IsSimpleCycle {base : V} (cycle : G.Walk base base) : Prop :=
+  0 < cycle.length ∧
+    ∀ (vertex : V) (before : G.Walk base vertex)
+      (inner : G.Walk vertex vertex) (after : G.Walk vertex base),
+      cycle.edges = before.edges ++ inner.edges ++ after.edges →
+      0 < inner.length → 0 < before.length + after.length → False
+
+/-- A simple cycle on finitely many vertices has at most one edge per vertex. -/
+theorem IsSimpleCycle.length_le_card [Fintype V] {base : V} {cycle : G.Walk base base}
+    (hsimple : cycle.IsSimpleCycle) : cycle.length ≤ Fintype.card V := by
+  classical
+  by_contra hcard
+  cases cycle with
+  | nil => exact (Nat.not_lt_zero _ hsimple.1)
+  | concat edge initial =>
+      have hinitialDup : ¬initial.visited.Nodup := by
+        intro hnodup
+        have hlengthCard := hnodup.length_le_card
+        rw [length_visited] at hlengthCard
+        simp only [length_concat] at hcard
+        exact hcard hlengthCard
+      obtain ⟨middle, before, inner, after, hinnerPos, hedges⟩ :=
+        initial.exists_closedSubwalk_of_not_nodup hinitialDup
+      have hcycleEdges :
+          (initial.concat edge).edges =
+            before.edges ++ inner.edges ++ (after.concat edge).edges := by
+        simp only [edges_concat, hedges, List.append_assoc]
+      exact hsimple.2 middle before inner (after.concat edge)
+        hcycleEdges hinnerPos (by rw [length_concat]; omega)
 
 /-- The first edge of a nonempty typed walk starts at its initial vertex. -/
 theorem source_head (walk : G.Walk start finish) (hne : walk.edges ≠ []) :
@@ -799,6 +841,34 @@ theorem nonempty_restrictEdges_of_forall_mem {S : Set E} {start finish : V}
   rw [← edges_length, ← edges_length, edges_ofRestrictEdges, List.length_map]
 
 end Walk
+
+variable {G}
+
+/-- **Backward walks of every length.**  If every vertex is the target of an edge with
+property `P`, then every vertex ends a walk of any prescribed length all of whose edges have
+property `P`: such edges can be prepended indefinitely. -/
+theorem exists_walk_length_eq_forall_mem_edges (P : E → Prop)
+    (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex ∧ P e) (count : ℕ) (vertex : V) :
+    ∃ (start : V) (walk : G.Walk start vertex), walk.length = count ∧ ∀ e ∈ walk.edges, P e := by
+  induction count generalizing vertex with
+  | zero => exact ⟨vertex, .nil, rfl, by simp⟩
+  | succ count ih =>
+      obtain ⟨edge, htarget, hedge⟩ := hin vertex
+      obtain ⟨start, walk, hlen, hall⟩ := ih (G.source edge)
+      refine ⟨start, (walk.concat edge).castFinish htarget, by simp [hlen], fun e hmem => ?_⟩
+      rw [Walk.edges_castFinish, Walk.edges_concat, List.mem_append, List.mem_singleton] at hmem
+      rcases hmem with hmem | rfl
+      · exact hall e hmem
+      · exact hedge
+
+/-- Every vertex is the endpoint of a walk with any prescribed number of edges, as soon as
+every vertex has an incoming edge. -/
+theorem exists_walk_length_eq (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex)
+    (count : ℕ) (vertex : V) :
+    ∃ (start : V) (walk : G.Walk start vertex), walk.length = count :=
+  let ⟨start, walk, hlen, _⟩ := exists_walk_length_eq_forall_mem_edges (fun _ => True)
+    (fun vertex => (hin vertex).imp fun _ h => ⟨h, trivial⟩) count vertex
+  ⟨start, walk, hlen⟩
 
 end EdgeGraph
 

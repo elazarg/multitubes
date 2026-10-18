@@ -434,21 +434,10 @@ prepend tight edges indefinitely. -/
 theorem exists_walk_length_eq_forall_tight {weight : E → 𝕜} {lam : 𝕜} {φ : V → 𝕜}
     (hφ : IsGraphEigenvector G weight lam φ) (count : ℕ) (vertex : V) :
     ∃ (base : V) (walk : G.Walk base vertex), walk.length = count ∧
-      ∀ e ∈ walk.edges, φ (G.source e) + weight e = lam + φ (G.target e) := by
-  induction count generalizing vertex with
-  | zero => exact ⟨vertex, .nil, rfl, by simp⟩
-  | succ count ih =>
-      obtain ⟨edge, htarget, htight⟩ := hφ.2 vertex
-      obtain ⟨base, walk, hlen, hall⟩ := ih (G.source edge)
-      refine ⟨base, (walk.concat edge).castFinish htarget, by simp [hlen], ?_⟩
-      intro e hmem
-      rw [EdgeGraph.Walk.edges_castFinish, EdgeGraph.Walk.edges_concat, List.mem_append] at hmem
-      rcases hmem with hmem | hmem
-      · exact hall e hmem
-      · rw [List.mem_singleton] at hmem
-        subst hmem
-        rw [htarget]
-        exact htight
+      ∀ e ∈ walk.edges, φ (G.source e) + weight e = lam + φ (G.target e) :=
+  EdgeGraph.exists_walk_length_eq_forall_mem_edges _
+    (fun vertex => (hφ.2 vertex).imp fun _ ⟨htarget, htight⟩ => ⟨htarget, htarget ▸ htight⟩)
+    count vertex
 
 /-- **The backward tight walk reaches a critical vertex.**  With finitely many vertices, walking
 backwards along tight edges of an eigenvector must revisit a vertex; the closed walk so traversed

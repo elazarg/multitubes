@@ -46,6 +46,8 @@ support.
 
 ## Main results
 
+* `Maths.EdgeGraph.Walk.sum_edgeMultiplicity_eq_length`: the edge multiplicities of a walk
+  add up to its length.
 * `Maths.EdgeGraph.Walk.edgeMultiplicity_flow_with_endpoints`: endpoint-corrected
   flow conservation for every finite typed walk.
 * `Maths.EdgeGraph.Walk.edgeMultiplicity_balanced`: the edge multiplicities of a
@@ -281,6 +283,15 @@ variable {G} {start finish : V}
     G.incomingMultiplicity
       ((Walk.nil : G.Walk start start).edgeMultiplicity) vertex = 0 := by
   simp [incomingMultiplicity]
+
+/-- The edge multiplicities of a walk add up to its length. -/
+theorem sum_edgeMultiplicity_eq_length [Fintype E] [DecidableEq E] (walk : G.Walk start finish) :
+    ∑ edge, walk.edgeMultiplicity edge = walk.length := by
+  induction walk with
+  | nil => simp
+  | concat edge walk ih =>
+      simp only [edgeMultiplicity_concat, length_concat, Finset.sum_add_distrib, ih]
+      simp
 
 /-- Extending a walk by one edge adds one unit of outgoing multiplicity at that edge's
 source. -/

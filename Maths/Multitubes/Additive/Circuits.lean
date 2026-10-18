@@ -87,16 +87,6 @@ def circuitCoefficient [DecidableEq E] {G : EdgeGraph V E} {base : V}
     (cycle : G.Walk base base) (edge : E) : ℝ :=
   cycle.edgeMultiplicity edge / cycle.length
 
-private theorem sum_edgeMultiplicity_eq_length [Fintype E] [DecidableEq E]
-    {G : EdgeGraph V E} {start finish : V} (walk : G.Walk start finish) :
-    ∑ edge, walk.edgeMultiplicity edge = walk.length := by
-  induction walk with
-  | nil => simp
-  | concat edge walk ih =>
-      simp only [EdgeGraph.Walk.edgeMultiplicity_concat,
-        EdgeGraph.Walk.length_concat, Finset.sum_add_distrib, ih]
-      simp
-
 /-- Weighting each edge by the number of times a walk traverses it recovers the walk sum. -/
 theorem sum_edgeMultiplicity_mul_eq_walkSum
     [Fintype E] [DecidableEq E] {G : EdgeGraph V E}
@@ -148,7 +138,7 @@ theorem circuitCoefficient_isNormalizedCertificate
   refine ⟨fun edge => div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _), ?_, ?_⟩
   · simp only [circuitCoefficient, ← Finset.sum_div]
     rw [show (∑ edge, (cycle.edgeMultiplicity edge : ℝ)) = cycle.length by
-      exact_mod_cast sum_edgeMultiplicity_eq_length cycle]
+      exact_mod_cast cycle.sum_edgeMultiplicity_eq_length]
     exact div_self (by exact_mod_cast hne.ne')
   · intro vertex
     simp only [circuitCoefficient, div_mul_eq_mul_div, ← Finset.sum_div]
@@ -217,7 +207,7 @@ theorem normalizedSignedCirculationDual_le_iff_simpleCycles_le
       FiniteInequality.IsNormalizedCertificate (signedDelta G) coefficient →
         FiniteInequality.certificateValue orientedWeight coefficient ≤ level) ↔
       ∀ (base : V) (cycle : (signedGraph G).Walk base base),
-        IsSimpleCycle cycle →
+        cycle.IsSimpleCycle →
           walkSum orientedWeight cycle ≤
             cycle.length * level := by
   rw [normalizedSignedCirculationDual_le_iff_closedWalk_le,
@@ -267,7 +257,7 @@ theorem symmetricResidualAtMost_iff_simpleSignedCycles_le
     (level : ℝ) :
     SymmetricResidualAtMost G weight level ↔
       ∀ (base : V) (cycle : (signedGraph G).Walk base base),
-        IsSimpleCycle cycle →
+        cycle.IsSimpleCycle →
           walkSum (signedBase weight) cycle ≤
             cycle.length * level := by
   rw [symmetricResidualAtMost_iff_signedClosedWalk_le,
@@ -298,7 +288,7 @@ theorem normalizedSignedDual_le_iff_simpleSignedCycles_le
         FiniteInequality.certificateValue
           (signedBase weight) coefficient ≤ level) ↔
       ∀ (base : V) (cycle : (signedGraph G).Walk base base),
-        IsSimpleCycle cycle →
+        cycle.IsSimpleCycle →
           walkSum (signedBase weight) cycle ≤
             cycle.length * level := by
   rw [← symmetricResidualAtMost_iff_normalizedSignedDual_le,

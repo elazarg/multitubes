@@ -139,7 +139,7 @@ theorem mixedResidualAtMost_iff_laxified_simpleCycle_le
     MixedResidualAtMost G mode weight level ↔
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-        AdditiveTransport.IsSimpleCycle cycle →
+        cycle.IsSimpleCycle →
         walkSum (laxifiedWeight mode weight) cycle ≤
           cycle.length * level := by
   rw [mixedResidualAtMost_iff_worstDirectedResidualAtMost,
@@ -175,7 +175,7 @@ theorem exists_isMixedSection_iff_forall_laxified_simpleCycle_nonpos
       (translationTransport G weight).IsMixedSection mode potential) ↔
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-        AdditiveTransport.IsSimpleCycle cycle →
+        cycle.IsSimpleCycle →
           walkSum (laxifiedWeight mode weight) cycle ≤ 0 := by
   rw [exists_isMixedSection_iff_mixedResidualAtMost_zero,
     mixedResidualAtMost_iff_laxified_simpleCycle_le]

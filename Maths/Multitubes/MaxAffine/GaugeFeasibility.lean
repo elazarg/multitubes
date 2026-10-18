@@ -242,7 +242,7 @@ theorem criticalAffineGaugeResidualAtMost_iff_simpleCycle_mean_le
     CriticalAffineGaugeResidualAtMost (G := G) label gauge level ↔
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
-        AdditiveTransport.IsSimpleCycle cycle →
+        cycle.IsSimpleCycle →
           walkSum (gaugeCriticalShift label gauge) cycle ≤
             cycle.length * level := by
   rw [criticalAffineGaugeResidualAtMost_iff_closedWalk_mean_le gauge hgauge,

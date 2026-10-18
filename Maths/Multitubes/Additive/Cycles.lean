@@ -10,16 +10,13 @@ public import Maths.Multitubes.Additive.Quantitative
 /-!
 # Simple-cycle reduction for additive transport
 
-A nonempty closed walk is simple when it has no decomposition into two
-nonempty closed walks at a repeated vertex.  Every nonempty closed walk is
+A nonempty closed walk is simple (`Maths.EdgeGraph.Walk.IsSimpleCycle`) when it has no
+decomposition into two nonempty closed walks at a repeated vertex.  Every nonempty closed walk is
 dominated in mean weight by such a simple cycle.  Consequently all closed-walk
 mean inequalities can be checked on simple cycles alone.
 
 ## Main definitions
 
-* `Maths.AdditiveTransport.IsSimpleCycle`: a nonempty closed walk with no
-  decomposition into two nonempty closed walks at a repeated vertex.  This is the
-  decomposition-invariant form of a simple directed cycle, and it includes one-edge loops.
 * `Maths.AdditiveTransport.CycleMeanDominates`: one closed walk has mean weight at
   least that of another, stated by cross-multiplication so that it is meaningful without
   dividing by a length.
@@ -48,16 +45,6 @@ namespace AdditiveTransport
 universe uV uE
 
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
-
-/-- A closed walk with no proper nonempty closed subwalk whose removal leaves
-a nonempty closed walk.  This is the decomposition-invariant form of a simple
-directed cycle and includes one-edge loops. -/
-def IsSimpleCycle {base : V} (cycle : G.Walk base base) : Prop :=
-  0 < cycle.length ∧
-    ∀ (vertex : V) (before : G.Walk base vertex)
-      (inner : G.Walk vertex vertex) (after : G.Walk vertex base),
-      cycle.edges = before.edges ++ inner.edges ++ after.edges →
-      0 < inner.length → 0 < before.length + after.length → False
 
 /-- Cross-multiplied comparison of cycle means, avoiding division and defined
 safely for an empty reference walk. -/
@@ -93,7 +80,7 @@ cycle whose mean weight is at least as large. -/
 theorem exists_simpleCycle_cycleMeanDominates (weight : E → ℝ)
     {base : V} (reference : G.Walk base base) (hne : 0 < reference.length) :
     ∃ (simpleBase : V) (simple : G.Walk simpleBase simpleBase),
-      IsSimpleCycle simple ∧ CycleMeanDominates weight simple reference := by
+      simple.IsSimpleCycle ∧ CycleMeanDominates weight simple reference := by
   classical
   let Good : ℕ → Prop := fun length =>
     ∃ (candidateBase : V) (candidate : G.Walk candidateBase candidateBase),
@@ -149,7 +136,7 @@ theorem exists_simpleCycle_mean_gt_of_closedWalk
     (hviolation : cycle.length * level <
       walkSum weight cycle) :
     ∃ (simpleBase : V) (simple : G.Walk simpleBase simpleBase),
-      IsSimpleCycle simple ∧
+      simple.IsSimpleCycle ∧
         simple.length * level < walkSum weight simple := by
   have hne : 0 < cycle.length := by
     by_contra hnot
@@ -178,7 +165,7 @@ theorem forall_closedWalk_mean_le_iff_simpleCycle
     (∀ (base : V) (cycle : G.Walk base base),
       walkSum weight cycle ≤ cycle.length * level) ↔
     (∀ (base : V) (cycle : G.Walk base base),
-      IsSimpleCycle cycle →
+      cycle.IsSimpleCycle →
         walkSum weight cycle ≤ cycle.length * level) := by
   constructor
   · intro hall base cycle _
@@ -197,7 +184,7 @@ theorem worstDirectedResidualAtMost_iff_simpleCycles_le
     (level : ℝ) :
     WorstDirectedResidualAtMost G weight level ↔
       ∀ (base : V) (cycle : G.Walk base base),
-        IsSimpleCycle cycle →
+        cycle.IsSimpleCycle →
           walkSum weight cycle ≤ cycle.length * level := by
   rw [worstDirectedResidualAtMost_iff_closedWalk_le,
     forall_closedWalk_mean_le_iff_simpleCycle]

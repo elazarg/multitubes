@@ -108,18 +108,6 @@ variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 
 /-! ### Walks of a prescribed length -/
 
-/-- Every vertex is the endpoint of a walk with any prescribed number of edges, as soon as
-every vertex has an incoming edge. -/
-theorem exists_walk_length_eq (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex)
-    (count : ℕ) (vertex : V) :
-    ∃ (start : V) (walk : G.Walk start vertex), walk.length = count := by
-  induction count generalizing vertex with
-  | zero => exact ⟨vertex, .nil, rfl⟩
-  | succ count ih =>
-      obtain ⟨e, he⟩ := hin vertex
-      obtain ⟨start, walk, hlen⟩ := ih (G.source e)
-      exact ⟨start, (walk.concat e).castFinish he, by simp [hlen]⟩
-
 /-- Weights of the walks arriving at a vertex with a prescribed number of edges. -/
 def lengthIncomingWeights (G : EdgeGraph V E) (weight : E → 𝕜) (count : ℕ)
     (vertex : V) : Set 𝕜 :=
@@ -143,7 +131,7 @@ theorem nonempty_lengthIncomingWeights
     (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex) (weight : E → 𝕜)
     (count : ℕ) (vertex : V) :
     (lengthIncomingWeights G weight count vertex).Nonempty := by
-  obtain ⟨start, walk, hlen⟩ := exists_walk_length_eq hin count vertex
+  obtain ⟨start, walk, hlen⟩ := EdgeGraph.exists_walk_length_eq hin count vertex
   exact ⟨walkSum weight walk, start, walk, hlen, rfl⟩
 
 /-! ### The step-value table -/
@@ -367,7 +355,7 @@ theorem exists_closedWalk_length_pos [Fintype V] [Nonempty V]
     ∃ (base : V) (cycle : G.Walk base base), 0 < cycle.length := by
   obtain ⟨target⟩ := (inferInstance : Nonempty V)
   obtain ⟨start, walk, hlen⟩ :=
-    exists_walk_length_eq (G := G) hin (Fintype.card V) target
+    EdgeGraph.exists_walk_length_eq (G := G) hin (Fintype.card V) target
   have hdup : ¬ walk.visited.Nodup := by
     intro hnodup
     have hcard := hnodup.length_le_card

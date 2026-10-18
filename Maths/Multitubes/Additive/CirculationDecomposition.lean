@@ -93,32 +93,7 @@ theorem circuitCoefficient_eq_edgeListCoefficient [DecidableEq E]
 def simpleSignedCircuitCoefficients [DecidableEq E] (G : EdgeGraph V E) :
     Set (SignedEdge E → ℝ) :=
   {coefficient | ∃ (base : V) (cycle : (signedGraph G).Walk base base),
-    IsSimpleCycle cycle ∧ circuitCoefficient cycle = coefficient}
-
-/-- A decomposition-simple cycle on a finite graph has at most one edge per
-vertex. -/
-theorem IsSimpleCycle.length_le_card [Fintype V] {G : EdgeGraph V E}
-    {base : V} {cycle : G.Walk base base} (hsimple : IsSimpleCycle cycle) :
-    cycle.length ≤ Fintype.card V := by
-  classical
-  by_contra hcard
-  cases cycle with
-  | nil => exact (Nat.not_lt_zero _ hsimple.1)
-  | concat edge initial =>
-      have hinitialDup : ¬initial.visited.Nodup := by
-        intro hnodup
-        have hlengthCard := hnodup.length_le_card
-        rw [EdgeGraph.Walk.length_visited] at hlengthCard
-        simp only [EdgeGraph.Walk.length_concat] at hcard
-        exact hcard hlengthCard
-      obtain ⟨middle, before, inner, after, hinnerPos, hedges⟩ :=
-        initial.exists_closedSubwalk_of_not_nodup hinitialDup
-      have hcycleEdges :
-          (initial.concat edge).edges =
-            before.edges ++ inner.edges ++ (after.concat edge).edges := by
-        simp only [EdgeGraph.Walk.edges_concat, hedges, List.append_assoc]
-      exact hsimple.2 middle before inner (after.concat edge)
-        hcycleEdges hinnerPos (by simp)
+    cycle.IsSimpleCycle ∧ circuitCoefficient cycle = coefficient}
 
 /-- There are only finitely many normalized coefficient vectors of simple
 signed circuits on a finite multigraph. -/
@@ -174,7 +149,7 @@ theorem normalizedCertificate_mem_convexHull_simpleSignedCircuits
   let orientedWeight : SignedEdge E → ℝ :=
     fun edge => functional (Pi.single edge 1)
   have hsimple (base : V) (cycle : (signedGraph G).Walk base base)
-      (hcycle : IsSimpleCycle cycle) :
+      (hcycle : cycle.IsSimpleCycle) :
       walkSum orientedWeight cycle ≤
         cycle.length * level := by
     have hmem : circuitCoefficient cycle ∈ circuits :=
@@ -203,7 +178,7 @@ theorem exists_simpleSignedCircuit_decomposition
       (cycle : ∀ i, (signedGraph G).Walk (base i) (base i)),
       (∀ i, 0 ≤ convexWeight i) ∧
       (∑ i, convexWeight i) = 1 ∧
-      (∀ i, IsSimpleCycle (cycle i)) ∧
+      (∀ i, (cycle i).IsSimpleCycle) ∧
       ∀ edge, coefficient edge =
         ∑ i, convexWeight i * circuitCoefficient (cycle i) edge := by
   have hmem :=
@@ -215,7 +190,7 @@ theorem exists_simpleSignedCircuit_decomposition
   let base : ι → V := fun i => (hpoint i).choose
   let cycle : ∀ i, (signedGraph G).Walk (base i) (base i) :=
     fun i => (hpoint i).choose_spec.choose
-  have hcycle (i : ι) : IsSimpleCycle (cycle i) :=
+  have hcycle (i : ι) : (cycle i).IsSimpleCycle :=
     (hpoint i).choose_spec.choose_spec.1
   have hpointEq (i : ι) : circuitCoefficient (cycle i) = point i :=
     (hpoint i).choose_spec.choose_spec.2
@@ -403,7 +378,7 @@ def IsImmediateSignedBacktrack {G : EdgeGraph V E} {base : V}
 choice of traversal direction for each edge. -/
 def IsGenuineSignedCircuit {G : EdgeGraph V E} {base : V}
     (cycle : (signedGraph G).Walk base base) : Prop :=
-  IsSimpleCycle cycle ∧ ¬IsImmediateSignedBacktrack cycle
+  cycle.IsSimpleCycle ∧ ¬IsImmediateSignedBacktrack cycle
 
 /-- Immediate backtracks carry no signed circulation. -/
 theorem signedCircuitVector_eq_zero_of_immediateBacktrack
@@ -474,7 +449,7 @@ theorem exists_simpleSignedCircuitVector_decomposition
       (cycle : ∀ i, (signedGraph G).Walk (base i) (base i)),
       (∀ i, 0 ≤ convexWeight i) ∧
       (∑ i, convexWeight i) = 1 ∧
-      (∀ i, IsSimpleCycle (cycle i)) ∧
+      (∀ i, (cycle i).IsSimpleCycle) ∧
       ∀ edge, circulation edge =
         ∑ i, convexWeight i * signedCircuitVector (cycle i) edge := by
   obtain ⟨coefficient, hcoefficient, hprojection⟩ :=
