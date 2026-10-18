@@ -426,7 +426,7 @@ theorem exists_isEigenvector_of_slope_nonneg_of_incoming [Nonempty V] (G : EdgeG
     (hinEdge : ∀ vertex : V, ∃ e : E, G.target e = vertex)
     (hconn : ∀ start finish : V, Nonempty (G.Walk start finish)) :
     ∃ (lam : ℝ) (x : V → ℝ), IsEigenvector G label lam x := by
-  have hout := EdgeGraph.exists_source_eq hinEdge hconn
+  have hout vertex := EdgeGraph.exists_source_eq (hinEdge vertex) (hconn vertex)
   obtain ⟨rho, y, hy, hrho, hfix⟩ :=
     exists_mem_stdSimplex_coneOperator_eq G label hslope hout
   have hpos : ∀ vertex : V, 0 < y vertex :=

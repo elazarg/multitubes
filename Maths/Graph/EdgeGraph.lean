@@ -78,8 +78,8 @@ circulations, and application-specific semantics belong in files that import thi
 * `Maths.EdgeGraph.exists_walk_length_eq_forall_mem_edges` and
   `Maths.EdgeGraph.exists_walk_length_eq`: when every vertex has an incoming edge of some
   kind, every vertex ends walks of every length along edges of that kind.
-* `Maths.EdgeGraph.exists_source_eq`: on a strongly connected graph in which every vertex has
-  an incoming edge, every vertex has an outgoing edge.
+* `Maths.EdgeGraph.exists_source_eq`: a vertex with an incoming edge that reaches every vertex
+  has an outgoing edge.
 * `Maths.linkedTo_source_of_mem_edges` and `Maths.linkedTo_target_of_mem_edges`: a closed
   walk stays inside the strongly connected component of its base.
 * `Maths.EdgeGraph.Walk.VertexSplit.length_splice`: splicing adds lengths.
@@ -872,11 +872,12 @@ theorem exists_walk_length_eq (hin : ∀ vertex : V, ∃ e : E, G.target e = ver
     (fun vertex => (hin vertex).imp fun _ h => ⟨h, trivial⟩) count vertex
   ⟨start, walk, hlen⟩
 
-/-- **On a strongly connected graph in which every vertex has an incoming edge, every vertex has
-an outgoing edge.**  If no edge left a vertex, no walk could leave it either, so the source of one
-of its incoming edges would be the vertex itself. -/
-theorem exists_source_eq (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex)
-    (hconn : ∀ start finish : V, Nonempty (G.Walk start finish)) (vertex : V) :
+/-- **A vertex with an incoming edge that reaches every vertex has an outgoing edge.**  If no edge
+left the vertex, no walk could leave it either, so the source of its incoming edge would be the
+vertex itself.  On a strongly connected graph in which every vertex has an incoming edge, every
+vertex therefore has an outgoing edge. -/
+theorem exists_source_eq {vertex : V} (hin : ∃ e : E, G.target e = vertex)
+    (hreach : ∀ finish : V, Nonempty (G.Walk vertex finish)) :
     ∃ e : E, G.source e = vertex := by
   by_contra hcon
   have hne : ∀ e : E, G.source e ≠ vertex := fun e he => hcon ⟨e, he⟩
@@ -885,8 +886,8 @@ theorem exists_source_eq (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex)
     induction walk with
     | nil => rfl
     | concat e _ ih => exact absurd ih (hne e)
-  obtain ⟨e, he⟩ := hin vertex
-  obtain ⟨walk⟩ := hconn vertex (G.source e)
+  obtain ⟨e, he⟩ := hin
+  obtain ⟨walk⟩ := hreach (G.source e)
   exact hne e (hstay walk)
 
 end EdgeGraph
