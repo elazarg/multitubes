@@ -86,6 +86,9 @@ of a finite linear program, by `Maths.Multitubes.MaxAffine.LeastEigenvalue`.
   `Maths.TransferSummary`'s classes.
 * `Maths.MaxAffineTransport.Label.toTransferMatrix` -- affine summaries as
   `2 × 2` transfer matrices.
+* `Maths.MaxAffineTransport.Label.compList`, `Maths.MaxAffineTransport.Label.pathSlope`,
+  `Maths.MaxAffineTransport.Label.pathShift` -- the composite label of a chronological list and
+  its slope and shift coefficients.
 * `Maths.MaxAffineTransport.toTransport` -- a labelling as a transport on `ℝ`.
 * `Maths.MaxAffineTransport.IsLaxSection`, `defect` -- the lax section of that transport and
   its edgewise residual.
@@ -469,6 +472,88 @@ theorem apply_compList_append_singleton (labels : List Label) (last : Label)
     (compList (labels ++ [last])).apply point =
       last.apply ((compList labels).apply point) := by
   rw [compList_append_singleton, apply_comp hlast]
+
+/-! ### Coefficients of a composite -/
+
+/-- Product of the slopes in a chronological list. -/
+def pathSlope (labels : List Label) : ℝ :=
+  (labels.map slope).prod
+
+/-- Suffix-weighted affine shift of a chronological list. -/
+def pathShift : List Label → ℝ
+  | [] => 0
+  | first :: rest => pathShift rest + pathSlope rest * first.shift
+
+@[simp] theorem pathSlope_nil : pathSlope [] = 1 := rfl
+
+@[simp] theorem pathSlope_cons (first : Label) (rest : List Label) :
+    pathSlope (first :: rest) = first.slope * pathSlope rest := rfl
+
+@[simp] theorem pathShift_nil : pathShift [] = 0 := rfl
+
+@[simp] theorem pathShift_cons (first : Label) (rest : List Label) :
+    pathShift (first :: rest) =
+      pathShift rest + pathSlope rest * first.shift := rfl
+
+@[simp] theorem pathSlope_append (first second : List Label) :
+    pathSlope (first ++ second) = pathSlope first * pathSlope second := by
+  simp [pathSlope, List.map_append, List.prod_append]
+
+/-- Chronological concatenation composes path shifts semidirectly. -/
+theorem pathShift_append (first second : List Label) :
+    pathShift (first ++ second) =
+      pathShift second + pathSlope second * pathShift first := by
+  induction first with
+  | nil => simp
+  | cons label rest ih =>
+      simp only [List.cons_append, pathShift_cons, ih, pathSlope_append]
+      ring
+
+private theorem slope_foldl_comp : ∀ (labels : List Label) (acc : Label),
+    (labels.foldl (fun result next => next.comp result) acc).slope =
+      pathSlope labels * acc.slope
+  | [], acc => by simp
+  | first :: rest, acc => by
+      rw [List.foldl_cons, slope_foldl_comp rest (first.comp acc)]
+      simp only [pathSlope_cons, slope_comp]
+      ring
+
+private theorem shift_foldl_comp : ∀ (labels : List Label) (acc : Label),
+    (labels.foldl (fun result next => next.comp result) acc).shift =
+      pathShift labels + pathSlope labels * acc.shift
+  | [], acc => by simp
+  | first :: rest, acc => by
+      rw [List.foldl_cons, shift_foldl_comp rest (first.comp acc)]
+      simp only [pathShift_cons, pathSlope_cons, shift_comp]
+      ring
+
+/-- The slope of an arbitrary composite is the product of its slopes. -/
+theorem slope_compList_eq_pathSlope (labels : List Label) :
+    (compList labels).slope = pathSlope labels := by
+  rw [compList, slope_foldl_comp labels id, slope_id, mul_one]
+
+/-- The shift of an arbitrary composite is the suffix-weighted shift sum. -/
+theorem shift_compList_eq_pathShift (labels : List Label) :
+    (compList labels).shift = pathShift labels := by
+  rw [compList, shift_foldl_comp labels id, shift_id, mul_zero, add_zero]
+
+/-- Composition keeps the absent floor absent: the outer floor is joined with
+the inner floor pushed forward, and `Maths.MaxAffineTransport.Label.pushFloor`
+preserves `⊥`. -/
+theorem floor_foldl_comp : ∀ (l : List Label), (∀ f ∈ l, f.floor = ⊥) → ∀ acc : Label,
+    acc.floor = ⊥ → (l.foldl (fun a f => f.comp a) acc).floor = ⊥
+  | [], _, _, hacc => hacc
+  | f :: rest, hfloor, acc, hacc => by
+      have hrest (g : Label) (hg : g ∈ rest) : g.floor = ⊥ :=
+        hfloor g (List.mem_cons_of_mem _ hg)
+      have hf : f.floor = ⊥ := hfloor f (List.mem_cons_self ..)
+      refine floor_foldl_comp rest hrest (f.comp acc) ?_
+      simp [hf, hacc]
+
+/-- A composite of floorless labels is floorless. -/
+theorem floor_compList {l : List Label} (hfloor : ∀ f ∈ l, f.floor = ⊥) :
+    (compList l).floor = ⊥ :=
+  floor_foldl_comp l hfloor Label.id floor_id
 
 /-! ### The two embeddings -/
 

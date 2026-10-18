@@ -380,10 +380,6 @@ theorem exists_holonomyApply_le_self_of_one_lt_cycleProduct_of_floorless
     (hproduct : 1 < walkProd (fun edge => (label edge).slope) cycle) :
     ∃ point : ℝ, holonomyApply label cycle point ≤ point := by
   let composite := Label.compList (cycle.edges.map label)
-  have hlabelSlope (candidate : Label) (hcandidate : candidate ∈ cycle.edges.map label) :
-      0 ≤ candidate.slope := by
-    obtain ⟨edge, _, rfl⟩ := List.mem_map.mp hcandidate
-    exact hslope edge
   have hlabelFloor (candidate : Label) (hcandidate : candidate ∈ cycle.edges.map label) :
       candidate.floor = ⊥ := by
     obtain ⟨edge, _, rfl⟩ := List.mem_map.mp hcandidate
@@ -393,7 +389,7 @@ theorem exists_holonomyApply_le_self_of_one_lt_cycleProduct_of_floorless
     rw [Label.slope_compList_eq_pathSlope]
     simpa [Label.pathSlope, walkProd, List.map_map]
   have hcompositeFloor : composite.floor = ⊥ :=
-    Label.floor_compList_eq_bot_of_floorless hlabelSlope hlabelFloor
+    Label.floor_compList hlabelFloor
   obtain ⟨point, hpoint⟩ :=
     (Label.exists_apply_le_self_iff composite).mpr
       (Or.inr (Or.inr ⟨hcompositeSlope, by rw [hcompositeFloor]; exact bot_le⟩))

@@ -121,35 +121,24 @@ theorem apply_const_le {f : Label} (hslope : f.slope < 1) {C : ℝ}
 
 /-! ## Unit-slope composite labels -/
 
-theorem slope_foldl_comp : ∀ (l : List Label), (∀ f ∈ l, f.slope = 1) → ∀ acc : Label,
-    (l.foldl (fun a f => f.comp a) acc).slope = acc.slope
-  | [], _, _ => rfl
-  | f :: rest, hslope, acc => by
-      have hrest (g : Label) (hg : g ∈ rest) : g.slope = 1 :=
-        hslope g (List.mem_cons_of_mem _ hg)
-      have hf : f.slope = 1 := hslope f (List.mem_cons_self ..)
-      rw [List.foldl_cons, slope_foldl_comp rest hrest (f.comp acc), slope_comp, hf, one_mul]
-
-theorem shift_foldl_comp : ∀ (l : List Label), (∀ f ∈ l, f.slope = 1) → ∀ acc : Label,
-    (l.foldl (fun a f => f.comp a) acc).shift = acc.shift + (l.map Label.shift).sum
-  | [], _, acc => by simp
-  | f :: rest, hslope, acc => by
-      have hrest (g : Label) (hg : g ∈ rest) : g.slope = 1 :=
-        hslope g (List.mem_cons_of_mem _ hg)
-      have hf : f.slope = 1 := hslope f (List.mem_cons_self ..)
-      rw [List.foldl_cons, shift_foldl_comp rest hrest (f.comp acc)]
-      simp only [shift_comp, hf, one_mul, List.map_cons, List.sum_cons]
-      ring
-
 /-- A composite of unit-slope labels has unit slope. -/
 theorem slope_compList {l : List Label} (hslope : ∀ f ∈ l, f.slope = 1) :
     (compList l).slope = 1 := by
-  rw [compList, slope_foldl_comp l hslope Label.id, slope_id]
+  rw [slope_compList_eq_pathSlope, pathSlope, List.map_congr_left hslope, List.map_const',
+    List.prod_replicate, one_pow]
 
 /-- A composite of unit-slope labels shifts by the sum of the shifts. -/
 theorem shift_compList {l : List Label} (hslope : ∀ f ∈ l, f.slope = 1) :
     (compList l).shift = (l.map Label.shift).sum := by
-  rw [compList, shift_foldl_comp l hslope Label.id, shift_id, zero_add]
+  rw [shift_compList_eq_pathShift]
+  induction l with
+  | nil => rfl
+  | cons f rest ih =>
+      have hrest (g : Label) (hg : g ∈ rest) : g.slope = 1 :=
+        hslope g (List.mem_cons_of_mem _ hg)
+      rw [pathShift_cons, ih hrest, ← slope_compList_eq_pathSlope, slope_compList hrest,
+        List.map_cons, List.sum_cons]
+      ring
 
 /-- **A composite of unit-slope labels has a pre-fixed point exactly when its
 shift sum is nonpositive.**  This is the unit-slope branch of

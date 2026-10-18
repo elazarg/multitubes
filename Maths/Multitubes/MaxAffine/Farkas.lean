@@ -102,39 +102,6 @@ namespace Maths.MaxAffineTransport
 
 namespace Label
 
-/-! ## Coefficients of a composite of floorless labels -/
-
-/-- Composition keeps the absent floor absent: the outer floor is joined with
-the inner floor pushed forward, and `Maths.MaxAffineTransport.Label.pushFloor`
-preserves `⊥`. -/
-theorem floor_foldl_comp : ∀ (l : List Label), (∀ f ∈ l, f.floor = ⊥) → ∀ acc : Label,
-    acc.floor = ⊥ → (l.foldl (fun a f => f.comp a) acc).floor = ⊥
-  | [], _, _, hacc => hacc
-  | f :: rest, hfloor, acc, hacc => by
-      have hrest (g : Label) (hg : g ∈ rest) : g.floor = ⊥ :=
-        hfloor g (List.mem_cons_of_mem _ hg)
-      have hf : f.floor = ⊥ := hfloor f (List.mem_cons_self ..)
-      refine floor_foldl_comp rest hrest (f.comp acc) ?_
-      simp [hf, hacc]
-
-/-- A composite of floorless labels is floorless. -/
-theorem floor_compList {l : List Label} (hfloor : ∀ f ∈ l, f.floor = ⊥) :
-    (compList l).floor = ⊥ :=
-  floor_foldl_comp l hfloor Label.id floor_id
-
-theorem slope_foldl_comp_eq_prod : ∀ (l : List Label) (acc : Label),
-    (l.foldl (fun a f => f.comp a) acc).slope = (l.map Label.slope).prod * acc.slope
-  | [], acc => by simp
-  | f :: rest, acc => by
-      rw [List.foldl_cons, slope_foldl_comp_eq_prod rest (f.comp acc)]
-      simp only [List.map_cons, List.prod_cons, slope_comp]
-      ring
-
-/-- The slope of a composite is the product of the slopes. -/
-theorem slope_compList_eq_prod (l : List Label) :
-    (compList l).slope = (l.map Label.slope).prod := by
-  rw [compList, slope_foldl_comp_eq_prod l Label.id, slope_id, mul_one]
-
 /-- **A floorless label has a pre-fixed point unless it is a positive
 translation.**  The absent floor satisfies the expansive branch of
 `Maths.MaxAffineTransport.Label.exists_apply_le_self_iff` outright, so only the
@@ -239,7 +206,7 @@ theorem exists_apply_compList_le_self_loopLabel (base : Unit)
     obtain ⟨e, _, rfl⟩ := List.mem_map.mp hf
     exact floor_loopLabel e
   · intro hslope
-    rw [Label.slope_compList_eq_prod] at hslope
+    rw [Label.slope_compList_eq_pathSlope, Label.pathSlope] at hslope
     simp only [List.map_map, Function.comp_def] at hslope
     rcases slopeProd_loopLabel_cases cycle.edges with hzero | hgt | hnil
     · rw [hzero] at hslope

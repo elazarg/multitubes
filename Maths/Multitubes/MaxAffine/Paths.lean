@@ -25,10 +25,9 @@ branches into a nonlinear defect identity.
 
 ## Main definitions
 
-* `Maths.MaxAffineTransport.Label.pathSlope`,
-  `Maths.MaxAffineTransport.Label.pathShift`,
-  `Maths.MaxAffineTransport.Label.pathFloor`: the three composite coefficients
-  of a chronological list of labels, the floor valued in `WithBot ℝ`.
+* `Maths.MaxAffineTransport.Label.pathFloor`: the composite floor of a chronological list of
+  labels, valued in `WithBot ℝ`; with `Maths.MaxAffineTransport.Label.pathSlope` and
+  `Maths.MaxAffineTransport.Label.pathShift` it gives the three composite coefficients.
 * `Maths.MaxAffineTransport.Label.weightedShiftTerms`,
   `Maths.MaxAffineTransport.Label.resetBranches`,
   `Maths.MaxAffineTransport.Label.resetBranchSup`: the explicit finite families
@@ -64,15 +63,6 @@ namespace Label
 
 /-! ## Closed coefficient formulas -/
 
-/-- Product of the slopes in a chronological list. -/
-def pathSlope (labels : List Label) : ℝ :=
-  (labels.map slope).prod
-
-/-- Suffix-weighted affine shift of a chronological list. -/
-def pathShift : List Label → ℝ
-  | [] => 0
-  | first :: rest => pathShift rest + pathSlope rest * first.shift
-
 /-- Suffix-weighted affine terms, one for each edge position. -/
 def weightedShiftTerms : List Label → List ℝ
   | [] => []
@@ -85,31 +75,6 @@ def pathFloor : List Label → WithBot ℝ
   | [] => ⊥
   | first :: rest =>
       pathFloor rest ⊔ pushFloor (pathShift rest) (pathSlope rest) first.floor
-
-@[simp] theorem pathSlope_nil : pathSlope [] = 1 := rfl
-
-@[simp] theorem pathSlope_cons (first : Label) (rest : List Label) :
-    pathSlope (first :: rest) = first.slope * pathSlope rest := rfl
-
-@[simp] theorem pathShift_nil : pathShift [] = 0 := rfl
-
-@[simp] theorem pathShift_cons (first : Label) (rest : List Label) :
-    pathShift (first :: rest) =
-      pathShift rest + pathSlope rest * first.shift := rfl
-
-@[simp] theorem pathSlope_append (first second : List Label) :
-    pathSlope (first ++ second) = pathSlope first * pathSlope second := by
-  simp [pathSlope, List.map_append, List.prod_append]
-
-/-- Chronological concatenation composes path shifts semidirectly. -/
-theorem pathShift_append (first second : List Label) :
-    pathShift (first ++ second) =
-      pathShift second + pathSlope second * pathShift first := by
-  induction first with
-  | nil => simp
-  | cons label rest ih =>
-      simp only [List.cons_append, pathShift_cons, ih, pathSlope_append]
-      ring
 
 @[simp] theorem weightedShiftTerms_nil : weightedShiftTerms [] = [] := rfl
 
@@ -217,34 +182,6 @@ theorem pathFloor_le_iff_resetBranches (labels : List Label)
         List.mem_cons, forall_eq_or_imp]
       tauto
 
-private theorem slope_foldl_comp_general : ∀ (labels : List Label) (acc : Label),
-    (labels.foldl (fun result next => next.comp result) acc).slope =
-      pathSlope labels * acc.slope
-  | [], acc => by simp [pathSlope]
-  | first :: rest, acc => by
-      rw [List.foldl_cons, slope_foldl_comp_general rest (first.comp acc)]
-      simp only [pathSlope_cons, slope_comp]
-      ring
-
-private theorem shift_foldl_comp_general : ∀ (labels : List Label) (acc : Label),
-    (labels.foldl (fun result next => next.comp result) acc).shift =
-      pathShift labels + pathSlope labels * acc.shift
-  | [], acc => by simp [pathShift, pathSlope]
-  | first :: rest, acc => by
-      rw [List.foldl_cons, shift_foldl_comp_general rest (first.comp acc)]
-      simp only [pathShift_cons, pathSlope_cons, shift_comp]
-      ring
-
-/-- The slope of an arbitrary composite is the product of its slopes. -/
-theorem slope_compList_eq_pathSlope (labels : List Label) :
-    (compList labels).slope = pathSlope labels := by
-  rw [compList, slope_foldl_comp_general labels id, slope_id, mul_one]
-
-/-- The shift of an arbitrary composite is the suffix-weighted shift sum. -/
-theorem shift_compList_eq_pathShift (labels : List Label) :
-    (compList labels).shift = pathShift labels := by
-  rw [compList, shift_foldl_comp_general labels id, shift_id, mul_zero, add_zero]
-
 private theorem floor_foldl_comp_general : ∀ (labels : List Label),
     (∀ label ∈ labels, 0 ≤ label.slope) → ∀ acc : Label,
       (labels.foldl (fun result next => next.comp result) acc).floor =
@@ -275,14 +212,6 @@ theorem floor_compList_eq_pathFloor {labels : List Label}
     (compList labels).floor = pathFloor labels := by
   rw [compList, floor_foldl_comp_general labels hslope id, floor_id,
     pushFloor_bot, sup_bot_eq]
-
-/-- A composite of floorless nonnegative-slope labels is floorless. -/
-theorem floor_compList_eq_bot_of_floorless {labels : List Label}
-    (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
-    (hfloor : ∀ label ∈ labels, label.floor = ⊥) :
-    (compList labels).floor = ⊥ := by
-  rw [floor_compList_eq_pathFloor hslope,
-    pathFloor_eq_bot_of_floorless hfloor]
 
 /-- Exact coefficient normal form of a chronological max-affine path. -/
 theorem compList_eq_pathCoefficients {labels : List Label}
