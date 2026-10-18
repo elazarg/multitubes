@@ -170,20 +170,6 @@ def IsCritical (delta : Row → State → ℝ) (direction : State → ℝ)
     (row : Row) : Prop :=
   dotProduct (delta row) direction = 0
 
-private theorem weighted_dot_eq
-    (delta : Row → State → ℝ) (coefficient : Row → ℝ)
-    (direction : State → ℝ) :
-    (∑ row, coefficient row * dotProduct (delta row) direction) =
-      ∑ state, (∑ row, coefficient row * delta row state) * direction state := by
-  simp only [dotProduct, Finset.mul_sum]
-  rw [Finset.sum_comm]
-  apply Finset.sum_congr rfl
-  intro state _
-  rw [Finset.sum_mul]
-  apply Finset.sum_congr rfl
-  intro row _
-  ring
-
 /-- Every balanced nonnegative certificate is supported on rows critical for
 any common recession direction. -/
 theorem coefficient_eq_zero_of_not_critical
@@ -196,7 +182,7 @@ theorem coefficient_eq_zero_of_not_critical
   classical
   have hsum : ∑ candidate,
       coefficient candidate * dotProduct (delta candidate) direction = 0 := by
-    rw [weighted_dot_eq]
+    rw [sum_mul_dotProduct]
     simp [hcertificate.2]
   have hterm := (Finset.sum_eq_zero_iff_of_nonneg
     (s := Finset.univ)
@@ -241,7 +227,7 @@ theorem exists_potential_iff_exists_critical_potential
       have hzero :
           ∑ row,
               coefficient row * dotProduct (delta row) criticalPotential = 0 := by
-        rw [weighted_dot_eq]
+        rw [sum_mul_dotProduct]
         simp [hbalance]
       rw [hzero] at hweighted
       exact (not_lt_of_ge hweighted hpositive).elim

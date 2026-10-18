@@ -79,18 +79,8 @@ private theorem weighted_residual_eq
   classical
   simp only [mul_sub, Finset.sum_sub_distrib, certificateValue]
   suffices ∑ row, coefficient row * dotProduct (delta row) point = 0 by rw [this, sub_zero]
-  calc
-    (∑ row, coefficient row * dotProduct (delta row) point) =
-        ∑ state, (∑ row, coefficient row * delta row state) * point state := by
-      simp only [dotProduct, Finset.mul_sum]
-      rw [Finset.sum_comm]
-      apply Finset.sum_congr rfl
-      intro state _
-      rw [Finset.sum_mul]
-      apply Finset.sum_congr rfl
-      intro row _
-      ring
-    _ = 0 := by simp [hcertificate.2.2]
+  rw [sum_mul_dotProduct]
+  simp [hcertificate.2.2]
 
 /-- Equality in weak duality holds exactly when every row in the positive certificate support is
 tight at the feasible point. -/

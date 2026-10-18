@@ -110,11 +110,8 @@ theorem sum_dual_eq_of_mem_standardFeasibleSet
     {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {z : Col → 𝕜}
     (hz : z ∈ standardFeasibleSet A rhs) (y : Row → 𝕜) :
     ∑ i, y i * rhs i = ∑ j, (∑ i, y i * A i j) * z j := by
-  have hr (i : Row) : rhs i = ∑ j, A i j * z j := by
-    rw [← congrFun hz.2 i]
-    simp [Matrix.mulVec, dotProduct]
-  simp only [hr, Finset.mul_sum, Finset.sum_mul, mul_assoc]
-  rw [Finset.sum_comm]
+  rw [← hz.2]
+  exact Matrix.dotProduct_mulVec y A z
 
 /-- **Weak duality**: the primal objective at any feasible point is at most the dual objective
 at any dual feasible point. -/

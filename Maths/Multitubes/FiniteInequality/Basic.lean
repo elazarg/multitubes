@@ -36,6 +36,8 @@ residual inequality.
 
 ## Main results
 
+* `Maths.sum_mul_dotProduct`: weighting the pairings of the row vectors with a potential is
+  pairing the weighted row combination with it.
 * `Maths.exists_potential_or_nonnegative_incompatibility`: the theorem of
   alternatives - either one potential meets every lower bound, or a nonnegative balanced
   dependence among the rows has strictly positive weighted lower bound.
@@ -98,6 +100,14 @@ theorem finiteInequalityMatrix_rowEval [Fintype State] [Fintype Action]
           apply Finset.sum_congr rfl
           intro state _
           simp [finiteInequalityMatrix, e]
+
+/-- Weighting the pairings of the vectors `delta action` with `potential` by `coefficient` is
+pairing the `coefficient`-weighted combination of the vectors with `potential`. -/
+theorem sum_mul_dotProduct {R : Type*} [NonUnitalSemiring R] [Fintype State] [Fintype Action]
+    (delta : Action → State → R) (coefficient : Action → R) (potential : State → R) :
+    ∑ action, coefficient action * dotProduct (delta action) potential =
+      ∑ state, (∑ action, coefficient action * delta action state) * potential state :=
+  Matrix.dotProduct_mulVec coefficient (Matrix.of delta) potential
 
 /-- Feasibility after transport to `Fin` is exactly feasibility by a
 potential on the original finite state type. -/
@@ -179,15 +189,7 @@ theorem not_nonnegative_incompatibility_of_potential
               (hpotential action) (hnonnegative action)
     _ = ∑ state,
         (∑ action, coefficient action * delta action state) *
-          potential state := by
-            simp only [dotProduct, Finset.mul_sum]
-            rw [Finset.sum_comm]
-            apply Finset.sum_congr rfl
-            intro state _
-            rw [Finset.sum_mul]
-            apply Finset.sum_congr rfl
-            intro action _
-            ring
+          potential state := sum_mul_dotProduct delta coefficient potential
     _ = 0 := by simp [hbalance]
 
 /-- Potential feasibility is equivalent to the absence of a nonnegative

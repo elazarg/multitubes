@@ -12,6 +12,7 @@ public import Mathlib.Data.Fintype.Sum
 
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Algebra.BigOperators.Pi
+import Mathlib.Data.Matrix.Mul
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Tactic.FieldSimp
@@ -60,6 +61,8 @@ at the application boundary.
   `Maths.LinearProgramming.feasible_of_fm_feasible`: feasibility transfers along the
   Fourier-Motzkin reduction in both directions.
 * `Maths.LinearProgramming.fm_cert_lift`: a certificate of the reduced system lifts.
+* `Maths.LinearProgramming.sum_mul_rowEval`: weighting row evaluations is evaluating the
+  weighted row combination.
 * `Maths.LinearProgramming.theorem_of_alternative`: the theorem of the alternative.
 * `Maths.LinearProgramming.exists_rowEval_pos_iff_not_hasBalancedCertificate`:
   **Gordan's transposition theorem**, the homogeneous corollary at `b = 1`.
@@ -105,6 +108,13 @@ def HasCertificate {I : Type*} {n : ℕ} [Fintype I] (A : I → Fin n → 𝕜)
     (b : I → 𝕜) : Prop :=
   ∃ u : I → 𝕜, IsCertificate A b u
 
+omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+/-- Weighting the row evaluations by `u` is evaluating the `u`-weighted row combination. -/
+theorem sum_mul_rowEval {I : Type*} {n : ℕ} [Fintype I]
+    (A : I → Fin n → 𝕜) (u : I → 𝕜) (x : Fin n → 𝕜) :
+    ∑ i, u i * rowEval A i x = ∑ j, (∑ i, u i * A i j) * x j :=
+  Matrix.dotProduct_mulVec u (Matrix.of A) x
+
 /-! ### Disjointness: `IsFeasible` and `HasCertificate` cannot both hold -/
 
 /-- A feasible system has no Farkas certificate: pairing a certificate `u` with `A x ≥ b`
@@ -119,25 +129,8 @@ theorem feas_cert_disjoint {I : Type*} {n : ℕ} [Fintype I]
     intro i _
     exact mul_le_mul_of_nonneg_left (hx i) (hu_nn i)
   have hzero : ∑ i, u i * rowEval A i x = 0 := by
-    have h1 : ∑ i, u i * rowEval A i x = ∑ i, ∑ j, u i * (A i j * x j) := by
-      simp only [rowEval, Finset.mul_sum]
-    have h2 : (∑ i, ∑ j, u i * (A i j * x j))
-        = ∑ j, ∑ i, u i * A i j * x j := by
-      rw [Finset.sum_comm]
-      refine Finset.sum_congr rfl ?_
-      intro j _
-      refine Finset.sum_congr rfl ?_
-      intro i _
-      ring
-    have h3 : (∑ j, ∑ i, u i * A i j * x j)
-        = ∑ j, (∑ i, u i * A i j) * x j := by
-      refine Finset.sum_congr rfl ?_
-      intro j _
-      rw [← Finset.sum_mul]
-    rw [h1, h2, h3]
-    apply Finset.sum_eq_zero
-    intro j _
-    rw [hu_zero j, zero_mul]
+    rw [sum_mul_rowEval]
+    simp [hu_zero]
   linarith
 
 /-! ### Sign partition of rows by the last-column coefficient
@@ -656,13 +649,7 @@ theorem exists_rowEval_pos_iff_not_hasBalancedCertificate
   constructor
   · rintro ⟨x, hx⟩ ⟨u, hnonneg, hbalance, hne⟩
     have hzero : ∑ i, u i * rowEval A i x = 0 := by
-      have hswap : ∑ i, u i * rowEval A i x = ∑ j, (∑ i, u i * A i j) * x j := by
-        simp only [rowEval, Finset.mul_sum]
-        rw [Finset.sum_comm]
-        refine Finset.sum_congr rfl fun j _ => ?_
-        rw [Finset.sum_mul]
-        exact Finset.sum_congr rfl fun i _ => by ring
-      rw [hswap]
+      rw [sum_mul_rowEval]
       simp [hbalance]
     have hpos : ∃ i, 0 < u i := by
       by_contra hall
