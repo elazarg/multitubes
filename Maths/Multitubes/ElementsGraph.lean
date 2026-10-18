@@ -33,6 +33,11 @@ sets of points closed under lifted edges and meeting each fiber once, and switch
 gives an isomorphic graph of elements.  For relations, lifting exists but is not unique, and
 walk relations are reachability upstairs.
 
+The lifting is unique only forwards: the edges leaving a point correspond to the edges leaving
+its base vertex, so the projection is a discrete opfibration.  It is a covering, with incoming
+edges lifting uniquely too, exactly when every edge map is a bijection, as for the derived graphs,
+`k`-lifts and double covers above.
+
 ## Main definitions
 
 * `Maths.Transport.elementsGraph`: the graph of elements of a transport.
@@ -50,8 +55,8 @@ walk relations are reachability upstairs.
   lifting; every walk upstairs is the lift of its projection.
 * `Maths.Transport.holonomy_eq_iff_exists_closed_lift`: holonomy fixes a point exactly when
   the closed walk lifts to a closed walk there.
-* `Maths.hasTrivialCycleLabels_iff_forall_closed_lift`: balance is triviality of the cover at
-  the identity.
+* `Maths.hasTrivialCycleLabels_iff_forall_closed_lift`: balance is triviality of the graph of
+  elements at the identity.
 * `Maths.Transport.isSection_iff_target_elementsGraph`: sections are sheets.
 * `Maths.RelationTransport.mem_walkRelation_iff_exists_walk`: walk relations are reachability
   in the graph of elements.
@@ -62,7 +67,8 @@ walk relations are reachability upstairs.
 
 ## Tags
 
-graph of elements, derived graph, voltage graph, covering graph, lift, monodromy, holonomy
+graph of elements, derived graph, voltage graph, covering graph, discrete opfibration, lift,
+monodromy, holonomy
 -/
 
 @[expose] public section
@@ -197,8 +203,8 @@ section Gain
 
 variable {M : Type uM} [Monoid M]
 
-/-- **Balance is triviality of the cover.**  A monoid-valued gain is balanced exactly when
-every closed walk lifts to a closed walk from the identity in the graph of elements of the
+/-- **Balance is triviality of the graph of elements.**  A monoid-valued gain is balanced exactly
+when every closed walk lifts to a closed walk from the identity in the graph of elements of the
 left-multiplication transport.  No inverses are needed. -/
 theorem hasTrivialCycleLabels_iff_forall_closed_lift (label : E → M) :
     HasTrivialCycleLabels G label ↔
