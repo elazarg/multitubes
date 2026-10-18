@@ -75,24 +75,8 @@ private theorem sum_supportSubtype (coefficient value : Row → ℝ) :
       coefficient row.1 * value row.1) =
         ∑ row, coefficient row * value row := by
   classical
-  let selected := Finset.univ.filter fun row => coefficient row ≠ 0
-  change (∑ row : {row : Row // row ∈ selected},
-    coefficient row.1 * value row.1) = _
-  calc
-    (∑ row : {row // row ∈ selected},
-        coefficient row.1 * value row.1) =
-        ∑ row ∈ selected.attach,
-          coefficient row.1 * value row.1 := by
-            rw [Finset.attach_eq_univ]
-    _ = ∑ row ∈ selected, coefficient row * value row := by
-      simpa using Finset.sum_attach selected
-        (fun row => coefficient row * value row)
-    _ = ∑ row ∈ Finset.univ, coefficient row * value row := by
-      apply Finset.sum_filter_of_ne
-      intro row _ hproduct
-      contrapose! hproduct
-      simp [hproduct]
-    _ = ∑ row, coefficient row * value row := by rfl
+  rw [Finset.sum_coe_sort _ fun row => coefficient row * value row, Finset.sum_filter_of_ne]
+  exact fun _ _ => left_ne_zero_of_mul
 
 /-- Balance matrix with states as rows and inequalities as columns. -/
 def balanceMatrix (delta : Row → State → ℝ) : Matrix State Row ℝ :=
@@ -122,26 +106,10 @@ theorem mem_normalizedFarkasCertificateSet_iff
     coefficient ∈ LinearProgramming.normalizedFarkasCertificateSet
         (balanceMatrix delta) (fun _ => 1) ↔
       IsNormalizedCertificate delta coefficient := by
-  classical
-  constructor
-  · intro hmem
-    refine ⟨hmem.1, ?_, ?_⟩
-    · have hmass := congrFun hmem.2 (Sum.inr ())
-      change (∑ row, 1 * coefficient row) = 1 at hmass
-      simpa using hmass
-    · intro state
-      have hbalance := congrFun hmem.2 (Sum.inl state)
-      change (∑ row, delta row state * coefficient row) = 0 at hbalance
-      simpa only [mul_comm] using hbalance
-  · intro hcertificate
-    refine ⟨hcertificate.1, funext fun index => ?_⟩
-    cases index with
-    | inl state =>
-        change (∑ row, delta row state * coefficient row) = 0
-        simpa only [mul_comm] using hcertificate.2.2 state
-    | inr _ =>
-        change (∑ row, 1 * coefficient row) = 1
-        simpa using hcertificate.2.1
+  simp only [LinearProgramming.mem_normalizedFarkasCertificateSet, IsNormalizedCertificate,
+    funext_iff, Matrix.mulVec, dotProduct, balanceMatrix, Pi.zero_apply, one_mul,
+    mul_comm (delta _ _)]
+  exact and_congr_right fun _ => and_comm
 
 omit [Fintype State] in
 /-- The normalized certificate polytope is compact. -/
@@ -149,31 +117,14 @@ theorem normalizedCertificateSet_isCompact
     (delta : Row → State → ℝ) :
     IsCompact (LinearProgramming.normalizedFarkasCertificateSet
       (balanceMatrix delta) (fun _ => 1)) := by
-  classical
-  let feasible := LinearProgramming.normalizedFarkasCertificateSet
-    (balanceMatrix delta) (fun _ => 1)
-  have hclosed : IsClosed feasible :=
-    LinearProgramming.isClosed_standardFeasibleSet _ _
-  have hsubset : feasible ⊆ Set.Icc (0 : Row → ℝ) 1 := by
-    intro coefficient hcoefficient
-    have hnormalized :=
-      (mem_normalizedFarkasCertificateSet_iff delta coefficient).mp hcoefficient
-    constructor
-    · exact hnormalized.1
-    · intro row
-      have hsingle := Finset.single_le_sum
-        (fun candidate _ => hnormalized.1 candidate)
-        (Finset.mem_univ row)
-      simpa [hnormalized.2.1] using hsingle
-  have heq : feasible = feasible ∩ Set.Icc (0 : Row → ℝ) 1 := by
-    ext coefficient
-    constructor
-    · intro hmem
-      exact ⟨hmem, hsubset hmem⟩
-    · exact fun hmem => hmem.1
-  change IsCompact feasible
-  rw [heq]
-  simpa [Set.inter_comm] using isCompact_Icc.inter_right hclosed
+  refine (isCompact_Icc (a := (0 : Row → ℝ)) (b := 1)).of_isClosed_subset
+    (LinearProgramming.isClosed_normalizedFarkasCertificateSet _ _)
+    fun coefficient hcoefficient => ?_
+  have hnormalized :=
+    (mem_normalizedFarkasCertificateSet_iff delta coefficient).mp hcoefficient
+  refine ⟨hnormalized.1, fun row => ?_⟩
+  simpa [hnormalized.2.1] using
+    Finset.single_le_sum (fun candidate _ => hnormalized.1 candidate) (Finset.mem_univ row)
 
 omit [Fintype State] in
 /-- Some normalized certificate maximizes the objective among all normalized certificates, as
