@@ -60,11 +60,11 @@ products of slopes.
 * `Maths.Transport.HasTrivialHolonomyAt` and `Maths.Transport.HasTrivialHolonomy` - every
   closed-walk map at one base, or at every base, is the identity.
 * `Maths.Transport.unit` - the terminal transport, with one-point fibers.
-* `Maths.Transport.Simulation` - a fiberwise map comparing the edge maps of two transports
+* `Maths.Transport.HomFor` - a fiberwise map comparing the edge maps of two transports
   through an edge-indexed relation.
-* `Maths.Transport.IsSectionFor` - a family related along every edge, by an
-  edge-indexed relation, from the transported source value to the target value: a simulation
-  out of the terminal transport.
+* `Maths.Transport.IsSectionFor` - a family related along every edge, by an edge-indexed relation,
+  from the transported source value to the target value: a relational morphism out of the terminal
+  transport.
 * `Maths.Transport.IsSection`, `Maths.Transport.IsLaxSection`, and
   `Maths.Transport.IsOplaxSection` - the cases `=`, `≤`, and `≥`.
 * `Maths.Transport.IsMonotone` - every edge map is monotone.
@@ -79,9 +79,9 @@ products of slopes.
   endpoint reindexing commutes with transport.
 * `Maths.Transport.walkMap_append` - path composition.
 * `Maths.Transport.walkMap_injective` - walks of injective edge maps transport injectively.
-* `Maths.Transport.Simulation.walkMap_rel_of_forall_mem_edges` - walk propagation of a
-  simulation, for a transitive relation preserved by the target edge maps.
-* `Maths.Transport.isSectionFor_iff_exists_simulation` - sections are simulations out of the
+* `Maths.Transport.HomFor.walkMap_rel_of_forall_mem_edges` - walk propagation of a
+  relational morphism, for a transitive relation preserved by the target edge maps.
+* `Maths.Transport.isSectionFor_iff_exists_homFor` - sections are relational morphisms out of the
   terminal transport.
 * `Maths.Transport.walkMap_rel_of_forall_mem_edges` and
   `Maths.Transport.IsSectionFor.walkMap_rel` - walk propagation for sections, its instance.
@@ -294,21 +294,22 @@ theorem HasTrivialHolonomy.holonomy_eq_self (hflat : T.HasTrivialHolonomy)
     T.holonomy cycle point = point :=
   (hflat base).holonomy_eq_self cycle point
 
-/-! ### Simulations -/
+/-! ### Relational morphisms -/
 
 variable {Other : V → Type uH}
 
 /-- The **terminal transport**: a one-point fiber over every vertex.  A section of a transport
-is a simulation out of it (`Maths.Transport.IsSectionFor.toSimulation`). -/
+is a relational morphism out of it (`Maths.Transport.IsSectionFor.toHomFor`). -/
 def unit (G : EdgeGraph V E) : Transport G (fun _ : V => Unit) where
   edgeMap _ := id
 
-/-- A fiberwise map comparing the edge maps of two transports through an edge-indexed relation
-on the target fiber: along every edge, transport in `S` after mapping is `relation`-related to
-mapping after transport in `T`.  A morphism, `Maths.Transport.Hom`, is the case of equality;
-lax and oplax morphisms are the cases `≤` and `≥`; a section is a simulation out of the
+/-- A **relational morphism** for `relation`: a fiberwise map comparing the edge maps of two
+transports through an edge-indexed relation on the target fiber.  Along every edge, transport in `S`
+after mapping is `relation`-related to mapping after transport in `T`, the transported value first
+as in `Maths.Transport.IsSectionFor`.  A morphism, `Maths.Transport.Hom`, is the case of equality;
+lax and oplax morphisms are the cases `≤` and `≥`; a section is a relational morphism out of the
 terminal transport `Maths.Transport.unit`. -/
-structure Simulation (T : Transport G Fiber) (S : Transport G Other)
+structure HomFor (T : Transport G Fiber) (S : Transport G Other)
     (relation : ∀ edge : E, Other (G.target edge) → Other (G.target edge) → Prop) where
   /-- The map on the fiber over each vertex. -/
   app : (vertex : V) → Fiber vertex → Other vertex
@@ -317,22 +318,22 @@ structure Simulation (T : Transport G Fiber) (S : Transport G Other)
     relation edge (S.edgeMap edge (app (G.source edge) point))
       (app (G.target edge) (T.edgeMap edge point))
 
-namespace Simulation
+namespace HomFor
 
 variable {S : Transport G Other}
 variable {relation : ∀ edge : E, Other (G.target edge) → Other (G.target edge) → Prop}
 
-/-- Apply a simulation to a vertex-indexed family. -/
-def mapFamily (f : Simulation T S relation) (family : ∀ vertex, Fiber vertex) :
+/-- Apply a relational morphism to a vertex-indexed family. -/
+def mapFamily (f : HomFor T S relation) (family : ∀ vertex, Fiber vertex) :
     ∀ vertex, Other vertex :=
   fun vertex => f.app vertex (family vertex)
 
-/-- **Walk propagation.**  Let `R` be a fiberwise relation, transitive, reflexive on the image
-of a simulation, and preserved by the edge maps of `S` along a walk.  If on every edge of the
-walk `relation` implies `R` against the image of the simulation, then transport in `S` after
-mapping is `R`-related to mapping after transport in `T` along the whole walk.  Only the edges
+/-- **Walk propagation.**  Let `R` be a fiberwise relation, transitive, reflexive on the image of a
+relational morphism, and preserved by the edge maps of `S` along a walk.  If on every edge of the
+walk `relation` implies `R` against the image of the relational morphism, then transport in `S`
+after mapping is `R`-related to mapping after transport in `T` along the whole walk.  Only the edges
 of the walk are consulted. -/
-theorem walkMap_rel_of_forall_mem_edges (f : Simulation T S relation)
+theorem walkMap_rel_of_forall_mem_edges (f : HomFor T S relation)
     {R : ∀ vertex, Other vertex → Other vertex → Prop}
     (hrefl : ∀ vertex point, R vertex (f.app vertex point) (f.app vertex point))
     (htrans : ∀ vertex {x y z}, R vertex x y → R vertex y z → R vertex x z)
@@ -351,9 +352,9 @@ theorem walkMap_rel_of_forall_mem_edges (f : Simulation T S relation)
       exact htrans _ (hpreserve edge (by simp) hprefix)
         (hedge edge (by simp) _ _ (f.edge_rel edge _))
 
-/-- A simulation extends from edges to walks when `relation` implies a fiberwise relation that
-is reflexive on its image, transitive, and preserved by the edge maps of `S`. -/
-theorem walkMap_rel (f : Simulation T S relation)
+/-- A relational morphism extends from edges to walks when `relation` implies a fiberwise relation
+that is reflexive on its image, transitive, and preserved by the edge maps of `S`. -/
+theorem walkMap_rel (f : HomFor T S relation)
     {R : ∀ vertex, Other vertex → Other vertex → Prop}
     (hrefl : ∀ vertex point, R vertex (f.app vertex point) (f.app vertex point))
     (htrans : ∀ vertex {x y z}, R vertex x y → R vertex y z → R vertex x z)
@@ -366,29 +367,29 @@ theorem walkMap_rel (f : Simulation T S relation)
   f.walkMap_rel_of_forall_mem_edges hrefl htrans walk (fun edge _ => hpreserve edge)
     (fun edge _ => hedge edge) point
 
-/-- Weaken the comparison relation of a simulation. -/
-def mono (f : Simulation T S relation)
+/-- Weaken the comparison relation of a relational morphism. -/
+def mono (f : HomFor T S relation)
     {relation' : ∀ edge : E, Other (G.target edge) → Other (G.target edge) → Prop}
     (hrelation : ∀ edge {x y}, relation edge x y → relation' edge x y) :
-    Simulation T S relation' where
+    HomFor T S relation' where
   app := f.app
   edge_rel edge point := hrelation edge (f.edge_rel edge point)
 
-@[simp] theorem mono_app (f : Simulation T S relation)
+@[simp] theorem mono_app (f : HomFor T S relation)
     {relation' : ∀ edge : E, Other (G.target edge) → Other (G.target edge) → Prop}
     (hrelation : ∀ edge {x y}, relation edge x y → relation' edge x y) :
     (f.mono hrelation).app = f.app :=
   rfl
 
-end Simulation
+end HomFor
 
 /-! ### Sections -/
 
 /-- A family of fiber points related along every edge, by an edge-indexed relation on the
 target fiber, from the transported source value to the target value.  Exact, lax, and oplax
 sections are the cases `=`, `≤`, and `≥`; a mixed section chooses among them edge by edge.
-Equivalently, a simulation out of the terminal transport
-(`Maths.Transport.isSectionFor_iff_exists_simulation`). -/
+Equivalently, a relational morphism out of the terminal transport
+(`Maths.Transport.isSectionFor_iff_exists_homFor`). -/
 def IsSectionFor (T : Transport G Fiber)
     (relation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop)
     (family : ∀ vertex, Fiber vertex) : Prop :=
@@ -397,22 +398,22 @@ def IsSectionFor (T : Transport G Fiber)
 variable {family : ∀ vertex, Fiber vertex}
 variable {relation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop}
 
-/-- A section, read as the simulation out of the terminal transport constant at the family. -/
-def IsSectionFor.toSimulation (hfamily : T.IsSectionFor relation family) :
-    Simulation (unit G) T relation where
+/-- A section, read as a relational morphism out of the terminal transport. -/
+def IsSectionFor.toHomFor (hfamily : T.IsSectionFor relation family) :
+    HomFor (unit G) T relation where
   app vertex _ := family vertex
   edge_rel edge _ := hfamily edge
 
-/-- A simulation out of the terminal transport is a section. -/
-theorem Simulation.isSectionFor (f : Simulation (unit G) T relation) :
+/-- A relational morphism out of the terminal transport is a section. -/
+theorem HomFor.isSectionFor (f : HomFor (unit G) T relation) :
     T.IsSectionFor relation fun vertex => f.app vertex () :=
   fun edge => f.edge_rel edge ()
 
-/-- **Sections are simulations out of the terminal transport.** -/
-theorem isSectionFor_iff_exists_simulation :
+/-- **Sections are relational morphisms out of the terminal transport.** -/
+theorem isSectionFor_iff_exists_homFor :
     T.IsSectionFor relation family ↔
-      ∃ f : Simulation (unit G) T relation, ∀ vertex, f.app vertex () = family vertex :=
-  ⟨fun hfamily => ⟨hfamily.toSimulation, fun _ => rfl⟩, fun ⟨f, hf⟩ => by
+      ∃ f : HomFor (unit G) T relation, ∀ vertex, f.app vertex () = family vertex :=
+  ⟨fun hfamily => ⟨hfamily.toHomFor, fun _ => rfl⟩, fun ⟨f, hf⟩ => by
     simpa only [hf] using f.isSectionFor⟩
 
 /-- **Walk propagation of an edgewise relation.**  Let `R` be a fiberwise relation, transitive,
@@ -428,7 +429,7 @@ theorem walkMap_rel_of_forall_mem_edges {R : ∀ vertex, Fiber vertex → Fiber 
     (hedge : ∀ edge ∈ walk.edges,
       R (G.target edge) (T.edgeMap edge (family (G.source edge))) (family (G.target edge))) :
     R finish (T.walkMap walk (family start)) (family finish) :=
-  IsSectionFor.toSimulation (relation := fun edge x y => edge ∈ walk.edges → R _ x y)
+  IsSectionFor.toHomFor (relation := fun edge x y => edge ∈ walk.edges → R _ x y)
     (fun edge hmem => hedge edge hmem) |>.walkMap_rel_of_forall_mem_edges
     (fun vertex _ => hrefl vertex) htrans walk hpreserve (fun _ hmem _ _ h => h hmem) ()
 
@@ -437,7 +438,7 @@ at the family, and preserved by the edge maps.  If every edge of a walk relates 
 family value only when `R` does, then the family value at the start is transported along the
 walk to a point `R`-related to the family value at the end.
 
-This is `Maths.Transport.Simulation.walkMap_rel_of_forall_mem_edges` for the simulation out of
+This is `Maths.Transport.HomFor.walkMap_rel_of_forall_mem_edges` for the relational morphism out of
 the terminal transport.  Every propagation statement for sections is an instance: exact sections
 with `R` equality, lax sections with `≤`, oplax sections with `≥`, and mixed sections with the
 relation their edge modes select. -/
@@ -450,7 +451,7 @@ theorem IsSectionFor.walkMap_rel {R : ∀ vertex, Fiber vertex → Fiber vertex 
     (hedge : ∀ edge ∈ walk.edges, ∀ x, relation edge x (family (G.target edge)) →
       R (G.target edge) x (family (G.target edge))) :
     R finish (T.walkMap walk (family start)) (family finish) :=
-  hfamily.toSimulation.walkMap_rel_of_forall_mem_edges (fun vertex _ => hrefl vertex) htrans
+  hfamily.toHomFor.walkMap_rel_of_forall_mem_edges (fun vertex _ => hrefl vertex) htrans
     walk (fun edge _ => hpreserve edge) (fun edge hmem _ _ h => hedge edge hmem _ h) ()
 
 /-- A family carried by every edge map to the family's value at the target: the case `=` of

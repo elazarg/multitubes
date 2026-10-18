@@ -10,9 +10,9 @@ public import Maths.Multitubes.Basic
 /-!
 # Morphisms and lax morphisms of transports
 
-A simulation `Maths.Transport.Simulation` compares the edge maps of two transports through a
-relation; a section is a simulation out of the terminal transport.  This file composes
-simulations and specializes them to three relations.
+A relational morphism, `Maths.Transport.HomFor`, compares the edge maps of two transports through a
+relation; a section is a relational morphism out of the terminal transport.  This file composes
+relational morphisms and specializes them to three relations.
 
 * A **morphism** commutes with every edge map: the case of equality.
 * A **lax morphism** satisfies `S.edgeMap edge (h point) ≤ h (T.edgeMap edge point)`, the
@@ -26,9 +26,10 @@ sections forward.
 
 ## Main definitions
 
-* `Maths.Transport.Simulation.comp` - the composite of two simulations.
+* `Maths.Transport.HomFor.comp` - the composite of two relational morphisms.
 * `Maths.Transport.Hom` - a fiberwise map commuting with edge transport.
-* `Maths.Transport.LaxHom` and `Maths.Transport.OplaxHom` - the simulations for `≤` and `≥`.
+* `Maths.Transport.LaxHom` and `Maths.Transport.OplaxHom` - the relational morphisms for `≤` and
+  `≥`.
 * `Maths.Transport.Hom.toLaxHom` and `Maths.Transport.Hom.toOplaxHom` - a morphism is both.
 
 ## Main results
@@ -37,7 +38,7 @@ sections forward.
 * `Maths.Transport.Hom.ext`, `Maths.Transport.Hom.id_comp`,
   `Maths.Transport.Hom.comp_id`, and `Maths.Transport.Hom.comp_assoc` - extensionality and
   composition laws.
-* `Maths.Transport.Simulation.map_isSectionFor` - a simulation carries sections forward.
+* `Maths.Transport.HomFor.map_isSectionFor` - a relational morphism carries sections forward.
 * `Maths.Transport.Hom.map_isSection` - morphisms carry exact sections forward.
 * `Maths.Transport.Hom.map_isLaxSection` and
   `Maths.Transport.Hom.map_isOplaxSection` - monotone morphisms preserve ordered sections.
@@ -62,42 +63,42 @@ namespace Transport
 variable {T : Transport G Fiber} {S : Transport G Other} {R : Transport G Third}
 variable {Q : Transport G Fourth}
 
-/-! ### Composition of simulations -/
+/-! ### Composition of relational morphisms -/
 
-namespace Simulation
+namespace HomFor
 
 variable {relation : ∀ edge : E, Other (G.target edge) → Other (G.target edge) → Prop}
 variable {relation' : ∀ edge : E, Third (G.target edge) → Third (G.target edge) → Prop}
 
-/-- The composite of two simulations, when the second carries the comparison relation of the
-first into its own, and its own relation is transitive. -/
-def comp (g : Simulation S R relation') (f : Simulation T S relation)
+/-- The composite of two relational morphisms, when the second carries the comparison relation of
+the first into its own, and its own relation is transitive. -/
+def comp (g : HomFor S R relation') (f : HomFor T S relation)
     (hmap : ∀ edge {x y}, relation edge x y →
       relation' edge (g.app (G.target edge) x) (g.app (G.target edge) y))
     (htrans : ∀ edge {x y z}, relation' edge x y → relation' edge y z → relation' edge x z) :
-    Simulation T R relation' where
+    HomFor T R relation' where
   app vertex := g.app vertex ∘ f.app vertex
   edge_rel edge point := htrans edge (g.edge_rel edge _) (hmap edge (f.edge_rel edge point))
 
-/-- **Simulations carry sections forward.**  Composing a section, a simulation out of the
-terminal transport, with a simulation gives a section. -/
-theorem map_isSectionFor (g : Simulation T S relation)
+/-- **Relational morphisms carry sections forward.**  Composing a section, a relational morphism out
+of the terminal transport, with a relational morphism gives a section. -/
+theorem map_isSectionFor (g : HomFor T S relation)
     {sectionRelation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop}
     (hmap : ∀ edge {x y}, sectionRelation edge x y →
       relation edge (g.app (G.target edge) x) (g.app (G.target edge) y))
     (htrans : ∀ edge {x y z}, relation edge x y → relation edge y z → relation edge x z)
     {family : ∀ vertex, Fiber vertex} (hfamily : T.IsSectionFor sectionRelation family) :
     S.IsSectionFor relation (g.mapFamily family) :=
-  (g.comp hfamily.toSimulation hmap htrans).isSectionFor
+  (g.comp hfamily.toHomFor hmap htrans).isSectionFor
 
-end Simulation
+end HomFor
 
 /-! ### Morphisms -/
 
-/-- A fiberwise map intertwining the edge maps of two transports: a simulation for equality.
-Its edge comparison is `Maths.Transport.Hom.naturality`. -/
+/-- A fiberwise map intertwining the edge maps of two transports: a relational morphism for
+equality.  Its edge comparison is `Maths.Transport.Hom.naturality`. -/
 abbrev Hom (T : Transport G Fiber) (S : Transport G Other) :=
-  Simulation T S fun _ => Eq
+  HomFor T S fun _ => Eq
 
 namespace Hom
 
@@ -113,7 +114,7 @@ def id (T : Transport G Fiber) : Hom T T where
 
 /-- The composite of two transport morphisms. -/
 def comp (g : Hom S R) (f : Hom T S) : Hom T R :=
-  Simulation.comp g f (fun _ _ _ => congrArg _) fun _ => Eq.trans
+  HomFor.comp g f (fun _ _ _ => congrArg _) fun _ => Eq.trans
 
 /-- Two transport morphisms are equal when all their fiber maps agree. -/
 @[ext] theorem ext {f g : Hom T S} (happ : ∀ vertex point,
@@ -154,7 +155,7 @@ theorem walkMap_naturality (f : Hom T S) {start finish : V}
     (walk : G.Walk start finish) (point : Fiber start) :
     f.app finish (T.walkMap walk point) =
       S.walkMap walk (f.app start point) :=
-  (Simulation.walkMap_rel f (R := fun _ => Eq) (fun _ _ => rfl) (fun _ => Eq.trans)
+  (HomFor.walkMap_rel f (R := fun _ => Eq) (fun _ _ => rfl) (fun _ => Eq.trans)
     (fun _ => congrArg _) (fun _ _ _ => _root_.id) walk point).symm
 
 /-- A transport morphism intertwines the holonomy of every closed walk. -/
@@ -166,7 +167,7 @@ theorem holonomy_naturality (f : Hom T S) {base : V} (cycle : G.Walk base base)
 /-- A transport morphism carries exact sections to exact sections. -/
 theorem map_isSection (f : Hom T S) {family : ∀ vertex, Fiber vertex}
     (hfamily : T.IsSection family) : S.IsSection (f.mapFamily family) :=
-  Simulation.map_isSectionFor f (fun _ _ _ => congrArg _) (fun _ => Eq.trans) hfamily
+  HomFor.map_isSectionFor f (fun _ _ _ => congrArg _) (fun _ => Eq.trans) hfamily
 
 end Hom
 
@@ -176,16 +177,16 @@ section Ordered
 
 variable [∀ vertex : V, Preorder (Other vertex)]
 
-/-- A fiberwise map satisfying `S.edgeMap edge (h point) ≤ h (T.edgeMap edge point)` on every
-edge: the simulation for `≤`.  A lax section is a lax morphism out of the terminal transport. -/
+/-- A fiberwise map satisfying `S.edgeMap edge (h point) ≤ h (T.edgeMap edge point)` on every edge:
+the relational morphism for `≤`.  A lax section is a lax morphism out of the terminal transport. -/
 abbrev LaxHom (T : Transport G Fiber) (S : Transport G Other) :=
-  Simulation T S fun _ => (· ≤ ·)
+  HomFor T S fun _ => (· ≤ ·)
 
 /-- A fiberwise map satisfying `h (T.edgeMap edge point) ≤ S.edgeMap edge (h point)` on every
-edge: the simulation for `≥`.  An oplax section is an oplax morphism out of the terminal
+edge: the relational morphism for `≥`.  An oplax section is an oplax morphism out of the terminal
 transport. -/
 abbrev OplaxHom (T : Transport G Fiber) (S : Transport G Other) :=
-  Simulation T S fun _ => (· ≥ ·)
+  HomFor T S fun _ => (· ≥ ·)
 
 /-- A morphism is a lax morphism. -/
 def Hom.toLaxHom (f : Hom T S) : LaxHom T S :=
@@ -199,14 +200,14 @@ def Hom.toOplaxHom (f : Hom T S) : OplaxHom T S :=
 theorem LaxHom.walkMap_le (f : LaxHom T S) (hmono : S.IsMonotone)
     {start finish : V} (walk : G.Walk start finish) (point : Fiber start) :
     S.walkMap walk (f.app start point) ≤ f.app finish (T.walkMap walk point) :=
-  Simulation.walkMap_rel f (fun _ _ => le_rfl) (fun _ => le_trans)
+  HomFor.walkMap_rel f (fun _ _ => le_rfl) (fun _ => le_trans)
     (fun edge _ _ hxy => hmono edge hxy) (fun _ _ _ => _root_.id) walk point
 
 /-- An oplax morphism extends from edges to walks when the edge maps of `S` are monotone. -/
 theorem OplaxHom.le_walkMap (f : OplaxHom T S) (hmono : S.IsMonotone)
     {start finish : V} (walk : G.Walk start finish) (point : Fiber start) :
     f.app finish (T.walkMap walk point) ≤ S.walkMap walk (f.app start point) :=
-  Simulation.walkMap_rel f (R := fun _ => (· ≥ ·)) (fun _ _ => le_rfl)
+  HomFor.walkMap_rel f (R := fun _ => (· ≥ ·)) (fun _ _ => le_rfl)
     (fun _ _ _ _ hxy hyz => le_trans hyz hxy) (fun edge _ _ hxy => hmono edge hxy)
     (fun _ _ _ => _root_.id) walk point
 
@@ -216,13 +217,13 @@ variable [∀ vertex : V, Preorder (Fiber vertex)]
 theorem LaxHom.map_isLaxSection (f : LaxHom T S) (hmono : ∀ vertex, Monotone (f.app vertex))
     {family : ∀ vertex, Fiber vertex} (hfamily : T.IsLaxSection family) :
     S.IsLaxSection (f.mapFamily family) :=
-  Simulation.map_isSectionFor f (fun _ _ _ hxy => hmono _ hxy) (fun _ => le_trans) hfamily
+  HomFor.map_isSectionFor f (fun _ _ _ hxy => hmono _ hxy) (fun _ => le_trans) hfamily
 
 /-- A monotone oplax morphism carries oplax sections to oplax sections. -/
 theorem OplaxHom.map_isOplaxSection (f : OplaxHom T S) (hmono : ∀ vertex, Monotone (f.app vertex))
     {family : ∀ vertex, Fiber vertex} (hfamily : T.IsOplaxSection family) :
     S.IsOplaxSection (f.mapFamily family) :=
-  Simulation.map_isSectionFor f (sectionRelation := fun _ => (· ≥ ·))
+  HomFor.map_isSectionFor f (sectionRelation := fun _ => (· ≥ ·))
     (fun _ _ _ hxy => hmono _ hxy) (fun _ _ _ _ hxy hyz => le_trans hyz hxy) hfamily
 
 /-- A monotone transport morphism carries lax sections to lax sections. -/
