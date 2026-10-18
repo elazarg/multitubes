@@ -25,8 +25,6 @@ slack mean is the normalized shift sum divided by the reciprocal-target mass.
 
 * `Maths.MaxAffineTransport.gaugeCriticalLabelList`: the original max-affine labels along a
   critical walk.
-* `Maths.MaxAffineTransport.walkReciprocalTargetMass`: the sum of reciprocal target
-  gauges along a critical walk, the quantity `S_C` of the raw formulas.
 * `Maths.MaxAffineTransport.HasPrefixedCycleHolonomies`: every original cycle holonomy
   has a pre-fixed point.
 
@@ -86,32 +84,6 @@ def gaugeCriticalLabelList {start finish : V}
     gaugeCriticalLabelList (walk.concat edge) =
       gaugeCriticalLabelList walk ++ [label edge.1] := by
   simp [gaugeCriticalLabelList]
-
-/-- Sum of reciprocal target gauges along a critical path. -/
-def walkReciprocalTargetMass {start finish : V}
-    (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) : ℝ :=
-  (walk.edges.map fun edge => 1 / gauge (G.target edge.1)).sum
-
-@[simp] theorem walkReciprocalTargetMass_nil (vertex : V) :
-    walkReciprocalTargetMass
-      (.nil : (gaugeCriticalGraph (G := G) label gauge).Walk vertex vertex) = 0 :=
-  rfl
-
-@[simp] theorem walkReciprocalTargetMass_concat {start : V}
-    (edge : GaugeCriticalEdge (G := G) label gauge)
-    (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start (G.source edge.1)) :
-    walkReciprocalTargetMass (walk.concat edge) =
-      walkReciprocalTargetMass walk + 1 / gauge (G.target edge.1) := by
-  simp [walkReciprocalTargetMass]
-
-/-- The local reciprocal-mass sum is the additive walk weight used by the
-gauge-feasibility API. -/
-@[simp] theorem walkReciprocalTargetMass_eq_walkSum_gaugeCriticalMass
-    {start finish : V}
-    (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
-    walkReciprocalTargetMass walk =
-      walkSum (gaugeCriticalMass gauge) walk := by
-  rfl
 
 private theorem slope_eq_gauge_ratio
     (hgauge : ∀ vertex, 0 < gauge vertex)
@@ -194,34 +166,34 @@ theorem pathRelaxationMass_gaugeCriticalLabelList
     {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
     Label.pathRelaxationMass (gaugeCriticalLabelList walk) =
-      gauge finish * walkReciprocalTargetMass walk := by
+      gauge finish * walkSum (gaugeCriticalMass gauge) walk := by
   induction walk with
   | nil => simp
   | concat edge walk ih =>
       change Label.pathRelaxationMass (gaugeCriticalLabelList walk) =
-        gauge (G.source edge.1) * walkReciprocalTargetMass walk at ih
+        gauge (G.source edge.1) * walkSum (gaugeCriticalMass gauge) walk at ih
       change Label.pathRelaxationMass
           (gaugeCriticalLabelList (walk.concat edge)) =
         gauge (G.target edge.1) *
-          walkReciprocalTargetMass (walk.concat edge)
+          walkSum (gaugeCriticalMass gauge) (walk.concat edge)
       rw [gaugeCriticalLabelList_concat,
         Label.pathRelaxationMass_append]
       simp only [Label.pathRelaxationMass_cons,
         Label.pathRelaxationMass_nil, Label.pathSlope_cons,
         Label.pathSlope_nil, mul_one, zero_add,
-        walkReciprocalTargetMass_concat]
+        walkSum_concat, gaugeCriticalMass]
       rw [ih]
       have hcritical := edge.2
       have htarget : gauge (G.target edge.1) ≠ 0 :=
         (hgauge (G.target edge.1)).ne'
       calc
         1 + (label edge.1).slope *
-            (gauge (G.source edge.1) * walkReciprocalTargetMass walk) =
+            (gauge (G.source edge.1) * walkSum (gaugeCriticalMass gauge) walk) =
             1 + gauge (G.target edge.1) *
-              walkReciprocalTargetMass walk := by
+              walkSum (gaugeCriticalMass gauge) walk := by
           rw [← mul_assoc, hcritical]
         _ = gauge (G.target edge.1) *
-            (walkReciprocalTargetMass walk +
+            (walkSum (gaugeCriticalMass gauge) walk +
               1 / gauge (G.target edge.1)) := by
           field_simp
           ring
@@ -237,48 +209,19 @@ theorem walkSum_gaugeCriticalShift_eq_pathShift_div
   field_simp [(hgauge finish).ne']
 
 /-- Division form of the relaxation-mass bridge. -/
-theorem walkReciprocalTargetMass_eq_pathRelaxationMass_div
+theorem walkSum_gaugeCriticalMass_eq_pathRelaxationMass_div
     (hgauge : ∀ vertex, 0 < gauge vertex)
     {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
-    walkReciprocalTargetMass walk =
+    walkSum (gaugeCriticalMass gauge) walk =
       Label.pathRelaxationMass (gaugeCriticalLabelList walk) / gauge finish := by
   rw [pathRelaxationMass_gaugeCriticalLabelList hgauge]
   field_simp [(hgauge finish).ne']
 
-/-- Reciprocal target mass is positive on every nonempty critical walk. -/
-theorem walkReciprocalTargetMass_pos
-    (hgauge : ∀ vertex, 0 < gauge vertex)
-    {start finish : V}
-    (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish)
-    (hwalk : 0 < walk.length) :
-    0 < walkReciprocalTargetMass walk := by
-  unfold walkReciprocalTargetMass
-  apply List.sum_pos
-  · intro value hvalue
-    obtain ⟨edge, _, rfl⟩ := List.mem_map.mp hvalue
-    exact one_div_pos.mpr (hgauge (G.target edge.1))
-  · apply List.length_pos_iff.mp
-    simpa only [List.length_map, EdgeGraph.Walk.edges_length] using hwalk
-
-/-- On a critical cycle, the exact raw uniform-slack mean is the normalized
-critical shift sum divided by reciprocal target mass.  Both sides are `0` on
-the empty cycle by totalized division. -/
-theorem rawCycleMean_eq_gaugeCriticalMean
-    (hgauge : ∀ vertex, 0 < gauge vertex)
-    {base : V}
-    (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base) :
-    Label.pathShift (gaugeCriticalLabelList cycle) /
-        Label.pathRelaxationMass (gaugeCriticalLabelList cycle) =
-      walkSum (gaugeCriticalShift label gauge) cycle /
-        walkReciprocalTargetMass cycle := by
-  rw [pathShift_gaugeCriticalLabelList hgauge,
-    pathRelaxationMass_gaugeCriticalLabelList hgauge]
-  field_simp [(hgauge base).ne']
-
 /-- The raw max-affine cycle mean is the gauge-critical ratio used by the
-quantitative feasibility theorems.  Both sides use the value `0` on the empty
-cycle; semantic threshold criteria impose positive length. -/
+quantitative feasibility theorems: the normalized critical shift sum divided by
+the reciprocal target mass.  Both sides use the value `0` on the empty cycle;
+semantic threshold criteria impose positive length. -/
 theorem rawCycleMean_eq_gaugeCriticalCycleRatio
     (hgauge : ∀ vertex, 0 < gauge vertex)
     {base : V}
@@ -286,21 +229,20 @@ theorem rawCycleMean_eq_gaugeCriticalCycleRatio
     Label.pathShift (gaugeCriticalLabelList cycle) /
         Label.pathRelaxationMass (gaugeCriticalLabelList cycle) =
       gaugeCriticalCycleRatio label gauge cycle := by
-  rw [rawCycleMean_eq_gaugeCriticalMean hgauge cycle,
-    walkReciprocalTargetMass_eq_walkSum_gaugeCriticalMass]
-  rfl
+  rw [gaugeCriticalCycleRatio, pathShift_gaugeCriticalLabelList hgauge,
+    pathRelaxationMass_gaugeCriticalLabelList hgauge]
+  field_simp [(hgauge base).ne']
 
 /-- Exact original max-affine slack criterion on a nonempty gauge-critical
 cycle.  Floors remain arbitrary: at raw product one they do not affect the
 threshold. -/
-theorem hasCyclicSlack_gaugeCriticalCycle_iff
+theorem hasCyclicSlack_gaugeCriticalCycle_iff_cycleRatio_le
     (hgauge : ∀ vertex, 0 < gauge vertex)
     {base : V}
     (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base)
     (hcycle : 0 < cycle.length) (level : ℝ) :
     Label.HasCyclicSlack (gaugeCriticalLabelList cycle) level ↔
-      walkSum (gaugeCriticalShift label gauge) cycle /
-        walkReciprocalTargetMass cycle ≤ level := by
+      gaugeCriticalCycleRatio label gauge cycle ≤ level := by
   have hne : gaugeCriticalLabelList cycle ≠ [] := by
     intro hnil
     have hlength := congrArg List.length hnil
@@ -317,19 +259,7 @@ theorem hasCyclicSlack_gaugeCriticalCycle_iff
       div_self (hgauge base).ne']
   rw [Label.hasCyclicSlack_iff_cycleMean_le_of_pathSlope_eq_one
     hne hslope hproduct]
-  rw [rawCycleMean_eq_gaugeCriticalMean hgauge cycle]
-
-/-- Existing-ratio form of the exact original max-affine slack criterion. -/
-theorem hasCyclicSlack_gaugeCriticalCycle_iff_cycleRatio_le
-    (hgauge : ∀ vertex, 0 < gauge vertex)
-    {base : V}
-    (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base)
-    (hcycle : 0 < cycle.length) (level : ℝ) :
-    Label.HasCyclicSlack (gaugeCriticalLabelList cycle) level ↔
-      gaugeCriticalCycleRatio label gauge cycle ≤ level := by
-  rw [hasCyclicSlack_gaugeCriticalCycle_iff hgauge cycle hcycle,
-    walkReciprocalTargetMass_eq_walkSum_gaugeCriticalMass]
-  rfl
+  rw [rawCycleMean_eq_gaugeCriticalCycleRatio hgauge cycle]
 
 /-- Coefficient-level bridge to the original max-affine holonomy. -/
 theorem compList_gaugeCriticalCycle
