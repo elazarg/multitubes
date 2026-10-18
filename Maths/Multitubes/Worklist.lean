@@ -149,7 +149,7 @@ theorem monotone_scheduledRelaxation (schedule : ℕ → Option E)
 /-- Every scheduled state remains below a lax majorant of the seed. -/
 theorem scheduledRelaxation_le_of_le {schedule : ℕ → Option E}
     {seed majorant : ∀ vertex, Fiber vertex} (hseed : seed ≤ majorant)
-    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hmono : T.IsMonotone)
     (hmaj : T.IsLaxSection majorant) (n : ℕ) :
     T.scheduledRelaxation schedule seed n ≤ majorant := by
   induction n with
@@ -187,11 +187,11 @@ variable [DecidableEq V] [∀ vertex : V, CompleteLattice (Fiber vertex)]
 /-- Under ACC, a fair scheduled relaxation eventually equals the least lax majorant. -/
 theorem exists_scheduledRelaxation_eq_leastLaxMajorant
     [WellFoundedGT (∀ vertex, Fiber vertex)]
-    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hmono : T.IsMonotone)
     {schedule : ℕ → Option E} (hfair : IsFairSchedule schedule)
     (seed : ∀ vertex, Fiber vertex) :
     ∃ n, ∀ m, n ≤ m →
-      T.scheduledRelaxation schedule seed m = T.leastLaxMajorant hmono seed := by
+      T.scheduledRelaxation schedule seed m = T.leastLaxMajorant seed := by
   let run : ℕ →o (∀ vertex, Fiber vertex) :=
     ⟨T.scheduledRelaxation schedule seed, T.monotone_scheduledRelaxation schedule seed⟩
   obtain ⟨n, hstable⟩ := WellFoundedGT.monotone_chain_condition run
@@ -199,11 +199,11 @@ theorem exists_scheduledRelaxation_eq_leastLaxMajorant
     T.isLaxSection_of_scheduledRelaxation_stable hfair seed hstable
   have hseed : seed ≤ T.scheduledRelaxation schedule seed n :=
     T.monotone_scheduledRelaxation schedule seed (Nat.zero_le n)
-  have hn : T.scheduledRelaxation schedule seed n = T.leastLaxMajorant hmono seed :=
+  have hn : T.scheduledRelaxation schedule seed n = T.leastLaxMajorant seed :=
     le_antisymm
-      (T.scheduledRelaxation_le_of_le (T.le_leastLaxMajorant hmono seed) hmono
-        (T.isLaxSection_leastLaxMajorant hmono seed) n)
-      (T.leastLaxMajorant_le hmono hseed hlax)
+      (T.scheduledRelaxation_le_of_le (le_leastLaxMajorant seed) hmono
+        (isLaxSection_leastLaxMajorant hmono seed) n)
+      (leastLaxMajorant_le hseed hlax)
   exact ⟨n, fun m hnm ↦ (hstable m hnm).symm.trans hn⟩
 
 end LeastMajorant
@@ -239,7 +239,7 @@ theorem le_relaxSweep (edges : List E) (family : ∀ vertex, Fiber vertex) :
 
 /-- A sweep stays below every lax majorant that bounds its input. -/
 theorem relaxSweep_le_of_le {family majorant : ∀ vertex, Fiber vertex}
-    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hmono : T.IsMonotone)
     (edges : List E) (hle : family ≤ majorant) (hmaj : T.IsLaxSection majorant) :
     T.relaxSweep edges family ≤ majorant := by
   induction edges generalizing family with
@@ -309,7 +309,7 @@ theorem monotone_sweepRelaxation (edges : List E) (seed : ∀ vertex, Fiber vert
 
 /-- Every sweep iterate stays below a lax majorant of the seed. -/
 theorem sweepRelaxation_le_of_le {seed majorant : ∀ vertex, Fiber vertex}
-    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hmono : T.IsMonotone)
     (edges : List E) (hseed : seed ≤ majorant) (hmaj : T.IsLaxSection majorant) (n : ℕ) :
     T.sweepRelaxation edges seed n ≤ majorant := by
   induction n with
@@ -321,7 +321,7 @@ theorem sweepRelaxation_le_of_le {seed majorant : ∀ vertex, Fiber vertex}
 /-- An observed fixed iterate of a covering monotone sweep is the least lax section above its
 seed, without any ascending-chain hypothesis. -/
 theorem sweepRelaxation_isLeast_of_relaxSweep_eq
-    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hmono : T.IsMonotone)
     {edges : List E} (hcover : ∀ edge : E, edge ∈ edges)
     (seed : ∀ vertex, Fiber vertex) (n : ℕ)
     (hfixed : T.relaxSweep edges (T.sweepRelaxation edges seed n) =
@@ -342,23 +342,23 @@ variable [DecidableEq V] [∀ vertex : V, CompleteLattice (Fiber vertex)]
 This is the stopping-correctness theorem for an observed finite computation; it requires no
 ascending-chain hypothesis. -/
 theorem sweepRelaxation_eq_leastLaxMajorant_of_relaxSweep_eq
-    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hmono : T.IsMonotone)
     {edges : List E} (hcover : ∀ edge : E, edge ∈ edges)
     (seed : ∀ vertex, Fiber vertex) (n : ℕ)
     (hfixed : T.relaxSweep edges (T.sweepRelaxation edges seed n) =
       T.sweepRelaxation edges seed n) :
-    T.sweepRelaxation edges seed n = T.leastLaxMajorant hmono seed :=
+    T.sweepRelaxation edges seed n = T.leastLaxMajorant seed :=
   (T.sweepRelaxation_isLeast_of_relaxSweep_eq hmono hcover seed n hfixed).unique
-    (T.leastLaxMajorant_isLeast hmono seed)
+    (leastLaxMajorant_isLeast hmono seed)
 
 /-- Under ACC, repeated sweeps over a covering list eventually equal the least lax majorant. -/
 theorem exists_sweepRelaxation_eq_leastLaxMajorant
     [WellFoundedGT (∀ vertex, Fiber vertex)]
-    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hmono : T.IsMonotone)
     {edges : List E} (hcover : ∀ edge : E, edge ∈ edges)
     (seed : ∀ vertex, Fiber vertex) :
     ∃ n, ∀ m, n ≤ m →
-      T.sweepRelaxation edges seed m = T.leastLaxMajorant hmono seed := by
+      T.sweepRelaxation edges seed m = T.leastLaxMajorant seed := by
   let run : ℕ →o (∀ vertex, Fiber vertex) :=
     ⟨T.sweepRelaxation edges seed, T.monotone_sweepRelaxation edges seed⟩
   obtain ⟨n, hstable⟩ := WellFoundedGT.monotone_chain_condition run

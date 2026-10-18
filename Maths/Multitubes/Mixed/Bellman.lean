@@ -5,34 +5,26 @@ Authors: Elazar Gershuni
 -/
 module
 
+public import Maths.Multitubes.Closure
 public import Maths.Multitubes.Mixed.Order
-public import Mathlib.Order.CompleteLattice.Basic
 
 /-!
 # Bellman intervals for mixed-polarity transport
 
-On complete-lattice fibers, the incoming constraints of a mixed-polarity
-section have two canonical aggregations.  Lower demand joins the transported
-values supplied by lax and exact edges, while upper demand meets the values
-supplied by oplax and exact edges.  Exact edges occur in both aggregations;
-the resulting two inequalities are precisely equality on such an edge.
-
-The definitions use subtypes of incoming edges.  Thus no finiteness or
-decidable equality on vertices is required, and an empty incoming family has
-the expected value `⊥` for lower demand and `⊤` for upper demand.
+On complete-lattice fibers, the incoming constraints of a mixed-polarity section have two
+canonical aggregations.  Lower demand is the incoming join of the transport restricted to its lax
+and exact edges, and upper demand is the incoming meet of the transport restricted to its oplax
+and exact edges.  Exact edges occur in both aggregations; the resulting two inequalities are
+precisely equality on such an edge.
 
 ## Main definitions
 
-* `Maths.Transport.IncomingLowerAt` and `Maths.Transport.IncomingUpperAt` -
-  the subtypes of incoming edges contributing to each demand.
-* `Maths.Transport.lowerDemand` - the join of incoming lower-compatible
-  transported values.
-* `Maths.Transport.upperDemand` - the meet of incoming upper-compatible
-  transported values.
+* `Maths.Transport.lowerDemand` - the incoming join over the lax and exact edges.
+* `Maths.Transport.upperDemand` - the incoming meet over the oplax and exact edges.
 
 ## Main results
 
-* `Maths.Transport.le_lowerDemand` and `Maths.Transport.upperDemand_le` - an
+* `Maths.Transport.edgeMap_le_lowerDemand` and `Maths.Transport.upperDemand_le_edgeMap` - an
   incoming compatible edge lies on the appropriate side of its demand.
 * `Maths.Transport.lowerDemand_le_iff` and
   `Maths.Transport.le_upperDemand_iff` - the function-order forms of the
@@ -64,73 +56,39 @@ section CompleteLattice
 
 variable [∀ vertex : V, CompleteLattice (Fiber vertex)]
 
-/-- Incoming edges whose mode supplies a lower constraint. -/
-abbrev IncomingLowerAt (mode : E → EdgeMode) (vertex : V) :=
-  {edge : E // G.target edge = vertex ∧
-    EdgeMode.IsLaxOrExact (mode edge)}
+/-- The join of the values transported into each vertex along its lax and exact edges: the
+incoming join of the restriction to those edges. -/
+def lowerDemand (mode : E → EdgeMode) : (∀ vertex : V, Fiber vertex) → ∀ vertex : V, Fiber vertex :=
+  (T.restrictEdges {edge | (mode edge).IsLaxOrExact}).incomingSup
 
-/-- Incoming edges whose mode supplies an upper constraint. -/
-abbrev IncomingUpperAt (mode : E → EdgeMode) (vertex : V) :=
-  {edge : E // G.target edge = vertex ∧
-    EdgeMode.IsOplaxOrExact (mode edge)}
+/-- The meet of the values transported into each vertex along its oplax and exact edges: the
+incoming meet of the restriction to those edges. -/
+def upperDemand (mode : E → EdgeMode) : (∀ vertex : V, Fiber vertex) → ∀ vertex : V, Fiber vertex :=
+  (T.restrictEdges {edge | (mode edge).IsOplaxOrExact}).incomingInf
 
-/-- The join of transported values contributed by incoming lax or exact edges. -/
-def lowerDemand (mode : E → EdgeMode) (family : ∀ vertex : V, Fiber vertex)
-    (vertex : V) : Fiber vertex :=
-  ⨆ edge : IncomingLowerAt (G := G) mode vertex,
-    fiberCast Fiber edge.property.1
-      (T.edgeMap edge.1 (family (G.source edge.1)))
-
-/-- The meet of transported values contributed by incoming oplax or exact edges. -/
-def upperDemand (mode : E → EdgeMode) (family : ∀ vertex : V, Fiber vertex)
-    (vertex : V) : Fiber vertex :=
-  ⨅ edge : IncomingUpperAt (G := G) mode vertex,
-    fiberCast Fiber edge.property.1
-      (T.edgeMap edge.1 (family (G.source edge.1)))
-
-/-- Lower demand is monotone when every edge transport is monotone. -/
-theorem monotone_lowerDemand
-    (mode : E → EdgeMode)
+/-- Lower demand is monotone when every lax or exact edge transport is monotone. -/
+theorem monotone_lowerDemand (mode : E → EdgeMode)
     (hmono : ∀ edge : E, (mode edge).IsLaxOrExact → Monotone (T.edgeMap edge)) :
-    Monotone (T.lowerDemand mode) := by
-  intro first second hle vertex
-  refine iSup_mono fun edge ↦ ?_
-  exact fiberCast_le_fiberCast edge.property.1
-    (hmono edge.1 edge.property.2 (hle _))
+    Monotone (T.lowerDemand mode) :=
+  IsMonotone.monotone_incomingSup fun edge => hmono edge.1 edge.2
 
-/-- Upper demand is monotone when every edge transport is monotone. -/
-theorem monotone_upperDemand
-    (mode : E → EdgeMode)
+/-- Upper demand is monotone when every oplax or exact edge transport is monotone. -/
+theorem monotone_upperDemand (mode : E → EdgeMode)
     (hmono : ∀ edge : E, (mode edge).IsOplaxOrExact → Monotone (T.edgeMap edge)) :
-    Monotone (T.upperDemand mode) := by
-  intro first second hle vertex
-  refine iInf_mono fun edge ↦ ?_
-  exact fiberCast_le_fiberCast edge.property.1
-    (hmono edge.1 edge.property.2 (hle _))
+    Monotone (T.upperDemand mode) :=
+  IsMonotone.monotone_incomingInf fun edge => hmono edge.1 edge.2
 
-/-- A lower-compatible incoming edge is below the lower demand at its target. -/
-theorem le_lowerDemand {mode : E → EdgeMode}
-    {family : ∀ vertex : V, Fiber vertex} {vertex : V}
-    {edge : E} (htarget : G.target edge = vertex)
-    (hmode : EdgeMode.IsLaxOrExact (mode edge)) :
-    fiberCast Fiber htarget (T.edgeMap edge (family (G.source edge))) ≤
-      T.lowerDemand mode family vertex := by
-  exact le_iSup (fun incoming : IncomingLowerAt (G := G) mode vertex ↦
-    fiberCast Fiber incoming.property.1
-      (T.edgeMap incoming.1 (family (G.source incoming.1))))
-    ⟨edge, htarget, hmode⟩
+/-- A lax or exact edge transports below the lower demand at its target. -/
+theorem edgeMap_le_lowerDemand {mode : E → EdgeMode} (family : ∀ vertex : V, Fiber vertex)
+    {edge : E} (hmode : (mode edge).IsLaxOrExact) :
+    T.edgeMap edge (family (G.source edge)) ≤ T.lowerDemand mode family (G.target edge) :=
+  edgeMap_le_incomingSup (T := T.restrictEdges _) family ⟨edge, hmode⟩
 
-/-- The upper demand at a target is below every upper-compatible incoming edge. -/
-theorem upperDemand_le {mode : E → EdgeMode}
-    {family : ∀ vertex : V, Fiber vertex} {vertex : V}
-    {edge : E} (htarget : G.target edge = vertex)
-    (hmode : EdgeMode.IsOplaxOrExact (mode edge)) :
-    T.upperDemand mode family vertex ≤
-      fiberCast Fiber htarget (T.edgeMap edge (family (G.source edge))) := by
-  exact iInf_le (fun incoming : IncomingUpperAt (G := G) mode vertex ↦
-    fiberCast Fiber incoming.property.1
-      (T.edgeMap incoming.1 (family (G.source incoming.1))))
-    ⟨edge, htarget, hmode⟩
+/-- The upper demand at its target is below the transport along an oplax or exact edge. -/
+theorem upperDemand_le_edgeMap {mode : E → EdgeMode} (family : ∀ vertex : V, Fiber vertex)
+    {edge : E} (hmode : (mode edge).IsOplaxOrExact) :
+    T.upperDemand mode family (G.target edge) ≤ T.edgeMap edge (family (G.source edge)) :=
+  incomingInf_le_edgeMap (T := T.restrictEdges _) family ⟨edge, hmode⟩
 
 /-- The lower-demand inequality is equivalent to every lower-compatible edge
 constraint, stated as an inequality in the edge's target fiber. -/
@@ -138,15 +96,8 @@ theorem lowerDemand_le_iff
     {mode : E → EdgeMode} {family : ∀ vertex : V, Fiber vertex} :
     T.lowerDemand mode family ≤ family ↔
       ∀ edge, EdgeMode.IsLaxOrExact (mode edge) →
-        T.edgeMap edge (family (G.source edge)) ≤ family (G.target edge) := by
-  constructor
-  · intro h edge hmode
-    exact (le_lowerDemand T rfl hmode).trans (h (G.target edge))
-  · intro h vertex
-    refine iSup_le fun incoming ↦ ?_
-    rcases incoming with ⟨edge, htarget, hmode⟩
-    simpa only [fiberCast_family] using
-      fiberCast_le_fiberCast htarget (h edge hmode)
+        T.edgeMap edge (family (G.source edge)) ≤ family (G.target edge) :=
+  incomingSup_le_iff.trans Subtype.forall
 
 /-- The upper-demand inequality is equivalent to every upper-compatible edge
 constraint, stated as an inequality in the edge's target fiber. -/
@@ -154,15 +105,8 @@ theorem le_upperDemand_iff
     {mode : E → EdgeMode} {family : ∀ vertex : V, Fiber vertex} :
     family ≤ T.upperDemand mode family ↔
       ∀ edge, EdgeMode.IsOplaxOrExact (mode edge) →
-        family (G.target edge) ≤ T.edgeMap edge (family (G.source edge)) := by
-  constructor
-  · intro h edge hmode
-    exact (h (G.target edge)).trans (upperDemand_le T rfl hmode)
-  · intro h vertex
-    refine le_iInf fun incoming ↦ ?_
-    rcases incoming with ⟨edge, htarget, hmode⟩
-    simpa only [fiberCast_family] using
-      fiberCast_le_fiberCast htarget (h edge hmode)
+        family (G.target edge) ≤ T.edgeMap edge (family (G.source edge)) :=
+  le_incomingInf_iff.trans Subtype.forall
 
 /-- An ordered mixed section is exactly a pointwise interval between its lower
 and upper incoming demands.  Exact edges are included in both demands. -/

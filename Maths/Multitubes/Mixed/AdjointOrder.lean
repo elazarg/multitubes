@@ -121,8 +121,7 @@ theorem monotone_laxification_of_galoisConnection
     (hlax : ∀ edge : E, mode edge = .lax → Monotone (T.edgeMap edge))
     (hresidual : ∀ edge : LaxificationReverseEdge mode,
       GaloisConnection (residual edge) (T.edgeMap edge.1)) :
-    ∀ edge : LaxificationEdge mode,
-      Monotone ((T.laxification mode residual).edgeMap edge) := by
+    (T.laxification mode residual).IsMonotone := by
   rintro (edge | edge)
   · rcases edge.property with hmode | hmode
     · exact hlax edge.1 hmode

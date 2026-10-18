@@ -180,7 +180,7 @@ def Transport.IsLaxPathSection (T : Transport G Fiber)
 /-- Under monotone edge maps, edgewise lax sections are equivalent to ordered
 naturality along every morphism of the path category. -/
 theorem Transport.isLaxSection_iff_isLaxPathSection
-    (T : Transport G Fiber) (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (T : Transport G Fiber) (hmono : T.IsMonotone)
     (family : ∀ vertex, Fiber vertex) :
     T.IsLaxSection family ↔ T.IsLaxPathSection family := by
   constructor

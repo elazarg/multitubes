@@ -49,7 +49,7 @@ Several dossiers contain standalone Lake packages with checked end-to-end exampl
 - [Program semantics](ProgramSemantics/) computes finite-state reachability by bounded
   saturation and proves agreement with typed-walk execution and least path closure. It assumes
   finite control locations, edges, and a common finite state space for exact saturation. A finite
-  abstraction can also analyze infinite concrete states: an upper simulation carries the computed
+  abstraction can also analyze infinite concrete states: a lax morphism carries the computed
   abstract closure to a concrete all-walk guarantee. The parity analyzer verifies natural-number
   executions with addition by two and reset to zero. Octagon constraints over a field are
   decided by closed walks of a doubled literal graph, with a checked integer counterexample.

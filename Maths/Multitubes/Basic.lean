@@ -56,12 +56,18 @@ products of slopes.
 * `Maths.Transport` - vertex-indexed fibers with edge maps.
 * `Maths.Transport.walkMap` - transport along a typed walk.
 * `Maths.Transport.holonomy` - transport around a closed walk.
-* `Maths.Transport.HasTrivialHolonomy` - every closed-walk
-  map is the identity.
+* `Maths.Transport.restrictEdges` - the restriction to an edge subgraph.
+* `Maths.Transport.HasTrivialHolonomyAt` and `Maths.Transport.HasTrivialHolonomy` - every
+  closed-walk map at one base, or at every base, is the identity.
+* `Maths.Transport.unit` - the terminal transport, with one-point fibers.
+* `Maths.Transport.Simulation` - a fiberwise map comparing the edge maps of two transports
+  through an edge-indexed relation.
 * `Maths.Transport.IsSectionFor` - a family related along every edge, by an
-  edge-indexed relation, from the transported source value to the target value.
+  edge-indexed relation, from the transported source value to the target value: a simulation
+  out of the terminal transport.
 * `Maths.Transport.IsSection`, `Maths.Transport.IsLaxSection`, and
   `Maths.Transport.IsOplaxSection` - the cases `=`, `≤`, and `≥`.
+* `Maths.Transport.IsMonotone` - every edge map is monotone.
 * `Maths.ofEdgeAct` - the constant-fiber case.
 * `Maths.ofSMul` - the constant-fiber transport of a monoid labelling acting
   on a common fiber, whose walk maps are the actions of the walk labels
@@ -73,9 +79,12 @@ products of slopes.
   endpoint reindexing commutes with transport.
 * `Maths.Transport.walkMap_append` - path composition.
 * `Maths.Transport.walkMap_injective` - walks of injective edge maps transport injectively.
-* `Maths.Transport.walkMap_rel_of_forall_mem_edges` - walk propagation of an edgewise
-  relation along one walk, for a transitive relation preserved by its edge maps.
-* `Maths.Transport.IsSectionFor.walkMap_rel` - its form for sections.
+* `Maths.Transport.Simulation.walkMap_rel_of_forall_mem_edges` - walk propagation of a
+  simulation, for a transitive relation preserved by the target edge maps.
+* `Maths.Transport.isSectionFor_iff_exists_simulation` - sections are simulations out of the
+  terminal transport.
+* `Maths.Transport.walkMap_rel_of_forall_mem_edges` and
+  `Maths.Transport.IsSectionFor.walkMap_rel` - walk propagation for sections, its instance.
 * `Maths.Transport.IsSection.walkMap_eq`, `Maths.Transport.IsLaxSection.walkMap_le`, and
   `Maths.Transport.IsOplaxSection.le_walkMap` - its exact, lax, and oplax instances.
 * `Maths.Transport.IsSection.isLaxSection` and `Maths.Transport.IsSection.isOplaxSection` -
@@ -234,6 +243,22 @@ theorem walkMap_injective (hinjective : ∀ edge, Function.Injective (T.edgeMap 
       simp only [walkMap_concat] at hequal
       exact ih (hinjective edge hequal)
 
+/-- The restriction of a transport to the edge subgraph on a set of edges. -/
+def restrictEdges (T : Transport G Fiber) (S : Set E) : Transport (G.restrictEdges S) Fiber where
+  edgeMap edge := T.edgeMap edge.1
+
+@[simp] theorem restrictEdges_edgeMap (S : Set E) (edge : S) :
+    (T.restrictEdges S).edgeMap edge = T.edgeMap edge.1 := rfl
+
+/-- Transport along a walk of an edge subgraph is transport along the same walk read in the
+ambient graph. -/
+@[simp] theorem walkMap_restrictEdges {S : Set E} (walk : (G.restrictEdges S).Walk start finish)
+    (point : Fiber start) :
+    (T.restrictEdges S).walkMap walk point = T.walkMap walk.ofRestrictEdges point := by
+  induction walk with
+  | nil => rfl
+  | concat edge walk ih => exact congrArg (T.edgeMap edge.1) ih
+
 /-- Transport around a closed walk, an endomorphism of the fiber over its base
 vertex. -/
 def holonomy (T : Transport G Fiber) {base : V} (cycle : G.Walk base base) :
@@ -248,33 +273,154 @@ theorem holonomy_append (first second : G.Walk base base) (point : Fiber base) :
     T.holonomy (first.append second) point = T.holonomy second (T.holonomy first point) :=
   walkMap_append first second point
 
+/-- Every closed-walk holonomy at one base vertex is the identity map on its fiber. -/
+def HasTrivialHolonomyAt (T : Transport G Fiber) (base : V) : Prop :=
+  ∀ cycle : G.Walk base base, T.holonomy cycle = id
+
 /-- Every closed-walk holonomy is the identity map on its base fiber. -/
 def HasTrivialHolonomy (T : Transport G Fiber) : Prop :=
-  ∀ (base : V) (cycle : G.Walk base base), T.holonomy cycle = id
+  ∀ base : V, T.HasTrivialHolonomyAt base
+
+/-- Trivial holonomy at a base fixes every point of the base fiber. -/
+theorem HasTrivialHolonomyAt.holonomy_eq_self (hflat : T.HasTrivialHolonomyAt base)
+    (cycle : G.Walk base base) (point : Fiber base) :
+    T.holonomy cycle point = point := by
+  rw [hflat cycle]
+  rfl
 
 /-- Trivial holonomy fixes every point of every base fiber. -/
 theorem HasTrivialHolonomy.holonomy_eq_self (hflat : T.HasTrivialHolonomy)
     (cycle : G.Walk base base) (point : Fiber base) :
-    T.holonomy cycle point = point := by
-  rw [hflat base cycle]
+    T.holonomy cycle point = point :=
+  (hflat base).holonomy_eq_self cycle point
+
+/-! ### Simulations -/
+
+universe uH
+
+variable {Other : V → Type uH}
+
+/-- The **terminal transport**: a one-point fiber over every vertex.  A section of a transport
+is a simulation out of it (`Maths.Transport.IsSectionFor.toSimulation`). -/
+def unit (G : EdgeGraph V E) : Transport G (fun _ : V => Unit) where
+  edgeMap _ := id
+
+/-- A fiberwise map comparing the edge maps of two transports through an edge-indexed relation
+on the target fiber: along every edge, transport in `S` after mapping is `relation`-related to
+mapping after transport in `T`.  A morphism, `Maths.Transport.Hom`, is the case of equality;
+lax and oplax morphisms are the cases `≤` and `≥`; a section is a simulation out of the
+terminal transport `Maths.Transport.unit`. -/
+structure Simulation (T : Transport G Fiber) (S : Transport G Other)
+    (relation : ∀ edge : E, Other (G.target edge) → Other (G.target edge) → Prop) where
+  /-- The map on the fiber over each vertex. -/
+  app : (vertex : V) → Fiber vertex → Other vertex
+  /-- The edgewise comparison of the two transports. -/
+  edge_rel : ∀ (edge : E) (point : Fiber (G.source edge)),
+    relation edge (S.edgeMap edge (app (G.source edge) point))
+      (app (G.target edge) (T.edgeMap edge point))
+
+namespace Simulation
+
+variable {S : Transport G Other}
+variable {relation : ∀ edge : E, Other (G.target edge) → Other (G.target edge) → Prop}
+
+/-- Apply a simulation to a vertex-indexed family. -/
+def mapFamily (f : Simulation T S relation) (family : ∀ vertex, Fiber vertex) :
+    ∀ vertex, Other vertex :=
+  fun vertex => f.app vertex (family vertex)
+
+/-- **Walk propagation.**  Let `R` be a fiberwise relation, transitive, reflexive on the image
+of a simulation, and preserved by the edge maps of `S` along a walk.  If on every edge of the
+walk `relation` implies `R` against the image of the simulation, then transport in `S` after
+mapping is `R`-related to mapping after transport in `T` along the whole walk.  Only the edges
+of the walk are consulted. -/
+theorem walkMap_rel_of_forall_mem_edges (f : Simulation T S relation)
+    {R : ∀ vertex, Other vertex → Other vertex → Prop}
+    (hrefl : ∀ vertex point, R vertex (f.app vertex point) (f.app vertex point))
+    (htrans : ∀ vertex {x y z}, R vertex x y → R vertex y z → R vertex x z)
+    (walk : G.Walk start finish)
+    (hpreserve : ∀ edge ∈ walk.edges, ∀ {x y}, R (G.source edge) x y →
+      R (G.target edge) (S.edgeMap edge x) (S.edgeMap edge y))
+    (hedge : ∀ edge ∈ walk.edges, ∀ x point, relation edge x (f.app (G.target edge) point) →
+      R (G.target edge) x (f.app (G.target edge) point))
+    (point : Fiber start) :
+    R finish (S.walkMap walk (f.app start point)) (f.app finish (T.walkMap walk point)) := by
+  induction walk with
+  | nil => exact hrefl start point
+  | concat edge walk ih =>
+      have hprefix := ih (fun edge' hedge' => hpreserve edge' (by simp [hedge']))
+        fun edge' hedge' => hedge edge' (by simp [hedge'])
+      exact htrans _ (hpreserve edge (by simp) hprefix)
+        (hedge edge (by simp) _ _ (f.edge_rel edge _))
+
+/-- A simulation extends from edges to walks when `relation` implies a fiberwise relation that
+is reflexive on its image, transitive, and preserved by the edge maps of `S`. -/
+theorem walkMap_rel (f : Simulation T S relation)
+    {R : ∀ vertex, Other vertex → Other vertex → Prop}
+    (hrefl : ∀ vertex point, R vertex (f.app vertex point) (f.app vertex point))
+    (htrans : ∀ vertex {x y z}, R vertex x y → R vertex y z → R vertex x z)
+    (hpreserve : ∀ edge {x y}, R (G.source edge) x y →
+      R (G.target edge) (S.edgeMap edge x) (S.edgeMap edge y))
+    (hedge : ∀ edge x point, relation edge x (f.app (G.target edge) point) →
+      R (G.target edge) x (f.app (G.target edge) point))
+    (walk : G.Walk start finish) (point : Fiber start) :
+    R finish (S.walkMap walk (f.app start point)) (f.app finish (T.walkMap walk point)) :=
+  f.walkMap_rel_of_forall_mem_edges hrefl htrans walk (fun edge _ => hpreserve edge)
+    (fun edge _ => hedge edge) point
+
+/-- Weaken the comparison relation of a simulation. -/
+def mono (f : Simulation T S relation)
+    {relation' : ∀ edge : E, Other (G.target edge) → Other (G.target edge) → Prop}
+    (hrelation : ∀ edge {x y}, relation edge x y → relation' edge x y) :
+    Simulation T S relation' where
+  app := f.app
+  edge_rel edge point := hrelation edge (f.edge_rel edge point)
+
+@[simp] theorem mono_app (f : Simulation T S relation)
+    {relation' : ∀ edge : E, Other (G.target edge) → Other (G.target edge) → Prop}
+    (hrelation : ∀ edge {x y}, relation edge x y → relation' edge x y) :
+    (f.mono hrelation).app = f.app :=
   rfl
+
+end Simulation
 
 /-! ### Sections -/
 
 /-- A family of fiber points related along every edge, by an edge-indexed relation on the
 target fiber, from the transported source value to the target value.  Exact, lax, and oplax
-sections are the cases `=`, `≤`, and `≥`; a mixed section chooses among them edge by edge. -/
+sections are the cases `=`, `≤`, and `≥`; a mixed section chooses among them edge by edge.
+Equivalently, a simulation out of the terminal transport
+(`Maths.Transport.isSectionFor_iff_exists_simulation`). -/
 def IsSectionFor (T : Transport G Fiber)
     (relation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop)
     (family : ∀ vertex, Fiber vertex) : Prop :=
   ∀ edge : E, relation edge (T.edgeMap edge (family (G.source edge))) (family (G.target edge))
 
 variable {family : ∀ vertex, Fiber vertex}
+variable {relation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop}
 
-/-- **Walk propagation.**  Let `R` be a fiberwise relation, transitive, reflexive at a family,
-and preserved by the edge maps along a walk.  If every edge of the walk relates the transported
-source value to the target value, then so does the whole walk.  Only the edges of the walk are
-consulted. -/
+/-- A section, read as the simulation out of the terminal transport constant at the family. -/
+def IsSectionFor.toSimulation (hfamily : T.IsSectionFor relation family) :
+    Simulation (unit G) T relation where
+  app vertex _ := family vertex
+  edge_rel edge _ := hfamily edge
+
+/-- A simulation out of the terminal transport is a section. -/
+theorem Simulation.isSectionFor (f : Simulation (unit G) T relation) :
+    T.IsSectionFor relation fun vertex => f.app vertex () :=
+  fun edge => f.edge_rel edge ()
+
+/-- **Sections are simulations out of the terminal transport.** -/
+theorem isSectionFor_iff_exists_simulation :
+    T.IsSectionFor relation family ↔
+      ∃ f : Simulation (unit G) T relation, ∀ vertex, f.app vertex () = family vertex :=
+  ⟨fun hfamily => ⟨hfamily.toSimulation, fun _ => rfl⟩, fun ⟨f, hf⟩ => by
+    simpa only [hf] using f.isSectionFor⟩
+
+/-- **Walk propagation of an edgewise relation.**  Let `R` be a fiberwise relation, transitive,
+reflexive at a family, and preserved by the edge maps along a walk.  If every edge of the walk
+relates the transported source value to the target value, then so does the whole walk.  Only
+the edges of the walk are consulted. -/
 theorem walkMap_rel_of_forall_mem_edges {R : ∀ vertex, Fiber vertex → Fiber vertex → Prop}
     (hrefl : ∀ vertex, R vertex (family vertex) (family vertex))
     (htrans : ∀ vertex {x y z}, R vertex x y → R vertex y z → R vertex x z)
@@ -283,25 +429,21 @@ theorem walkMap_rel_of_forall_mem_edges {R : ∀ vertex, Fiber vertex → Fiber 
       R (G.target edge) (T.edgeMap edge x) (T.edgeMap edge y))
     (hedge : ∀ edge ∈ walk.edges,
       R (G.target edge) (T.edgeMap edge (family (G.source edge))) (family (G.target edge))) :
-    R finish (T.walkMap walk (family start)) (family finish) := by
-  induction walk with
-  | nil => exact hrefl start
-  | concat edge walk ih =>
-      have hprefix := ih (fun edge' hedge' => hpreserve edge' (by simp [hedge']))
-        fun edge' hedge' => hedge edge' (by simp [hedge'])
-      exact htrans _ (hpreserve edge (by simp) hprefix) (hedge edge (by simp))
+    R finish (T.walkMap walk (family start)) (family finish) :=
+  IsSectionFor.toSimulation (relation := fun edge x y => edge ∈ walk.edges → R _ x y)
+    (fun edge hmem => hedge edge hmem) |>.walkMap_rel_of_forall_mem_edges
+    (fun vertex _ => hrefl vertex) htrans walk hpreserve (fun _ hmem _ _ h => h hmem) ()
 
 /-- **Walk propagation of sections.**  Let `R` be a fiberwise relation, transitive, reflexive
 at the family, and preserved by the edge maps.  If every edge of a walk relates a point to the
 family value only when `R` does, then the family value at the start is transported along the
 walk to a point `R`-related to the family value at the end.
 
-Every propagation statement for sections is an instance: exact sections with `R` equality, lax
-sections with `≤`, oplax sections with `≥`, and mixed sections with the relation their edge
-modes select. -/
-theorem IsSectionFor.walkMap_rel
-    {relation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop}
-    {R : ∀ vertex, Fiber vertex → Fiber vertex → Prop}
+This is `Maths.Transport.Simulation.walkMap_rel_of_forall_mem_edges` for the simulation out of
+the terminal transport.  Every propagation statement for sections is an instance: exact sections
+with `R` equality, lax sections with `≤`, oplax sections with `≥`, and mixed sections with the
+relation their edge modes select. -/
+theorem IsSectionFor.walkMap_rel {R : ∀ vertex, Fiber vertex → Fiber vertex → Prop}
     (hrefl : ∀ vertex, R vertex (family vertex) (family vertex))
     (htrans : ∀ vertex {x y z}, R vertex x y → R vertex y z → R vertex x z)
     (hpreserve : ∀ edge {x y}, R (G.source edge) x y →
@@ -310,8 +452,8 @@ theorem IsSectionFor.walkMap_rel
     (hedge : ∀ edge ∈ walk.edges, ∀ x, relation edge x (family (G.target edge)) →
       R (G.target edge) x (family (G.target edge))) :
     R finish (T.walkMap walk (family start)) (family finish) :=
-  walkMap_rel_of_forall_mem_edges hrefl htrans walk (fun edge _ => hpreserve edge)
-    fun edge hmem => hedge edge hmem _ (hfamily edge)
+  hfamily.toSimulation.walkMap_rel_of_forall_mem_edges (fun vertex _ => hrefl vertex) htrans
+    walk (fun edge _ => hpreserve edge) (fun edge hmem _ _ h => hedge edge hmem _ h) ()
 
 /-- A family carried by every edge map to the family's value at the target: the case `=` of
 `Maths.Transport.IsSectionFor`. -/
@@ -354,6 +496,17 @@ section Ordered
 
 variable [∀ vertex : V, Preorder (Fiber vertex)]
 
+/-- Every edge map is monotone. -/
+def IsMonotone (T : Transport G Fiber) : Prop :=
+  ∀ edge : E, Monotone (T.edgeMap edge)
+
+/-- Transport along a walk is monotone when every edge map is. -/
+theorem IsMonotone.walkMap (hmono : T.IsMonotone) (walk : G.Walk start finish) :
+    Monotone (T.walkMap walk) := by
+  induction walk with
+  | nil => exact monotone_id
+  | concat edge walk ih => exact (hmono edge).comp ih
+
 /-- An exact section is a lax section. -/
 theorem IsSection.isLaxSection (hfamily : T.IsSection family) : T.IsLaxSection family :=
   fun edge => (hfamily edge).le
@@ -364,21 +517,21 @@ theorem IsSection.isOplaxSection (hfamily : T.IsSection family) : T.IsOplaxSecti
 
 /-- With monotone edge maps, a lax section is transported below its value at the
 terminal vertex of every walk. -/
-theorem IsLaxSection.walkMap_le (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+theorem IsLaxSection.walkMap_le (hmono : T.IsMonotone)
     (hfamily : T.IsLaxSection family) (walk : G.Walk start finish) :
     T.walkMap walk (family start) ≤ family finish :=
   IsSectionFor.walkMap_rel (R := fun _ => (· ≤ ·)) (fun _ => le_rfl) (fun _ => le_trans)
     (fun edge _ _ hxy => hmono edge hxy) hfamily walk fun _ _ _ => id
 
 /-- A lax section marks a pre-fixed point of every closed-walk holonomy. -/
-theorem IsLaxSection.holonomy_le (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+theorem IsLaxSection.holonomy_le (hmono : T.IsMonotone)
     (hfamily : T.IsLaxSection family) (cycle : G.Walk base base) :
     T.holonomy cycle (family base) ≤ family base :=
   hfamily.walkMap_le hmono cycle
 
 /-- With monotone edge maps, an oplax section is transported above its value at
 the terminal vertex of every walk. -/
-theorem IsOplaxSection.le_walkMap (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+theorem IsOplaxSection.le_walkMap (hmono : T.IsMonotone)
     (hfamily : T.IsOplaxSection family) (walk : G.Walk start finish) :
     family finish ≤ T.walkMap walk (family start) :=
   IsSectionFor.walkMap_rel (relation := fun _ => (· ≥ ·)) (R := fun _ => (· ≥ ·))
@@ -387,7 +540,7 @@ theorem IsOplaxSection.le_walkMap (hmono : ∀ edge : E, Monotone (T.edgeMap edg
     fun _ _ _ => id
 
 /-- An oplax section marks a post-fixed point of every closed-walk holonomy. -/
-theorem IsOplaxSection.le_holonomy (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+theorem IsOplaxSection.le_holonomy (hmono : T.IsMonotone)
     (hfamily : T.IsOplaxSection family) (cycle : G.Walk base base) :
     family base ≤ T.holonomy cycle (family base) :=
   hfamily.le_walkMap hmono cycle

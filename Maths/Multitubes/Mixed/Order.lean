@@ -121,7 +121,7 @@ variable [∀ vertex : V, Preorder (Fiber vertex)]
 /-- A mixed section is transported below its terminal value along a walk whose
 edges are all lax or exact. -/
 theorem IsMixedSection.walkMap_le_of_lax_or_exact
-    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hmono : T.IsMonotone)
     (hfamily : T.IsMixedSection mode family)
     (walk : G.Walk start finish)
     (hmode : ∀ edge ∈ walk.edges, (mode edge).IsLaxOrExact) :
@@ -136,7 +136,7 @@ theorem IsMixedSection.walkMap_le_of_lax_or_exact
 /-- A mixed section is transported above its terminal value along a walk whose
 edges are all oplax or exact. -/
 theorem IsMixedSection.le_walkMap_of_oplax_or_exact
-    (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hmono : T.IsMonotone)
     (hfamily : T.IsMixedSection mode family)
     (walk : G.Walk start finish)
     (hmode : ∀ edge ∈ walk.edges, (mode edge).IsOplaxOrExact) :

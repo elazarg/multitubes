@@ -112,7 +112,7 @@ theorem seedEvidence_le_along (G : EdgeGraph V E)
     (evidenceTransport G transfer).walkMap walk seed ⊆ assignment finish := by
   let T := evidenceTransport G transfer
   have hmono := evidenceTransport_edgeMap_monotone G transfer
-  exact (T.monotone_walkMap hmono walk hseed).trans
+  exact (Transport.IsMonotone.walkMap hmono walk hseed).trans
     (chainEvidence_le_of_isSound G transfer assignment hsound walk)
 
 /-- The family of all evidence generated from seeds along typed endorsement chains. -/

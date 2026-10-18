@@ -14,7 +14,7 @@ import Mathlib.Tactic.FinCases
 # Executable abstract reachability analysis
 
 A finite abstract state space can analyze an infinite concrete state space when concretization
-forms an upper simulation of forward predicate transports. The general least-lax-majorant
+forms a lax morphism of forward predicate transports. The general least-lax-majorant
 comparison theorem then turns local transition soundness into global reachability soundness.
 
 The worked analyzer tracks parity for natural-number states. Its two instructions add two and
@@ -24,7 +24,7 @@ that no odd concrete state is reachable. The reset is deliberately noninjective.
 ## Main definitions
 
 * `ProgramSemantics.AbstractDomain.concretizeSet`: concretization of abstract-state sets.
-* `ProgramSemantics.AbstractDomain.upperSimulation`: the generic predicate simulation.
+* `ProgramSemantics.AbstractDomain.concretization`: concretization as a lax morphism of predicate transports.
 * `ProgramSemantics.parityReachable`: executable saturation of the parity abstraction.
 
 ## Main results
@@ -41,7 +41,7 @@ that no odd concrete state is reachable. The reset is deliberately noninjective.
 
 ## Tags
 
-abstract interpretation, finite-state analysis, reachability, upper simulation, parity
+abstract interpretation, finite-state analysis, reachability, lax morphism, simulation, parity
 -/
 
 @[expose] public section
@@ -85,11 +85,9 @@ private theorem walkMap_le_leastLaxMajorant
     (lower : ∀ vertex, Set (Concrete vertex)) {start finish : V}
     (walk : G.Walk start finish) :
     (forwardPredicateTransport G step).walkMap walk (lower start) ⊆
-      (forwardPredicateTransport G step).leastLaxMajorant
-        (monotone_forwardPredicateTransport step) lower finish := by
-  have hlower := (forwardPredicateTransport G step).le_leastLaxMajorant
-    (monotone_forwardPredicateTransport step) lower
-  have hlax := (forwardPredicateTransport G step).isLaxSection_leastLaxMajorant
+      (forwardPredicateTransport G step).leastLaxMajorant lower finish := by
+  have hlower := Transport.le_leastLaxMajorant (T := forwardPredicateTransport G step) lower
+  have hlax := Transport.isLaxSection_leastLaxMajorant
     (monotone_forwardPredicateTransport step) lower
   induction walk with
   | nil => exact hlower _
@@ -104,9 +102,9 @@ def concretizeSet (domain : AbstractDomain G Concrete Abstract concreteStep abst
     (vertex : V) (states : Set Abstract) : Set (Concrete vertex) :=
   {state | ∃ abstract ∈ states, state ∈ domain.concretize vertex abstract}
 
-/-- A sound abstract domain induces an upper simulation between forward predicate transports. -/
-def upperSimulation (domain : AbstractDomain G Concrete Abstract concreteStep abstractStep) :
-    Transport.UpperSimulation
+/-- A sound abstract domain induces a lax morphism between forward predicate transports. -/
+def concretization (domain : AbstractDomain G Concrete Abstract concreteStep abstractStep) :
+    Transport.LaxHom
       (forwardPredicateTransport (State := fun _ : V => Abstract) G abstractStep)
       (forwardPredicateTransport G concreteStep) where
   app := domain.concretizeSet
@@ -129,18 +127,14 @@ theorem leastLaxMajorant_sound
     (abstractLower : V → Set Abstract) (concreteLower : ∀ vertex, Set (Concrete vertex))
     (hlower : ∀ vertex, concreteLower vertex ⊆
       domain.concretizeSet vertex (abstractLower vertex)) :
-    (forwardPredicateTransport G concreteStep).leastLaxMajorant
-        (monotone_forwardPredicateTransport concreteStep) concreteLower ≤
-      (domain.upperSimulation.mapFamily
+    (forwardPredicateTransport G concreteStep).leastLaxMajorant concreteLower ≤
+      (domain.concretization.mapFamily
         ((forwardPredicateTransport (State := fun _ : V => Abstract) G
-          abstractStep).leastLaxMajorant
-          (monotone_forwardPredicateTransport (G := G) (Concrete := fun _ => Abstract)
-            abstractStep) abstractLower)) := by
-  exact domain.upperSimulation.leastLaxMajorant_le_map
+          abstractStep).leastLaxMajorant abstractLower)) := by
+  exact domain.concretization.leastLaxMajorant_le_map
     (domain.monotone_concretizeSet)
       (monotone_forwardPredicateTransport (G := G) (Concrete := fun _ => Abstract)
         abstractStep)
-      (monotone_forwardPredicateTransport (G := G) concreteStep)
       abstractLower concreteLower hlower
 
 section Finite
@@ -153,8 +147,6 @@ theorem reachableStates_eq_leastLaxMajorant
     (abstractStep : E → Abstract → Abstract) (initial : V → Finset Abstract) :
     (fun vertex => (reachableStates G abstractStep initial vertex : Set Abstract)) =
       (forwardPredicateTransport G abstractStep).leastLaxMajorant
-        (monotone_forwardPredicateTransport (G := G) (Concrete := fun _ => Abstract)
-          abstractStep)
         (fun vertex => (initial vertex : Set Abstract)) := by
   have heq := Transport.pathClosure_eq_leastLaxMajorant
     (preservesSSup_forwardPredicateTransport (State := fun _ : V => Abstract) G abstractStep)
@@ -173,8 +165,7 @@ theorem computedReachability_sound
     (concreteLower : ∀ vertex, Set (Concrete vertex))
     (hlower : ∀ vertex, concreteLower vertex ⊆
       domain.concretizeSet vertex (abstractInitial vertex : Set Abstract)) :
-    (forwardPredicateTransport G concreteStep).leastLaxMajorant
-        (monotone_forwardPredicateTransport concreteStep) concreteLower ≤
+    (forwardPredicateTransport G concreteStep).leastLaxMajorant concreteLower ≤
       fun vertex => domain.concretizeSet vertex
         (reachableStates G abstractStep abstractInitial vertex : Set Abstract) := by
   have hsound := domain.leastLaxMajorant_sound
