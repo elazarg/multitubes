@@ -212,22 +212,6 @@ theorem stepValue_sub_const [Finite E]
     rw [walkSum_sub_const, nsmul_eq_mul, hlen, hwt] at hmem
     linarith
 
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
-/-- Iterating a closed walk multiplies both its length and its weight. -/
-theorem exists_closedWalk_length_mul (weight : E → 𝕜) {base : V}
-    (cycle : G.Walk base base) (times : ℕ) :
-    ∃ iterated : G.Walk base base,
-      iterated.length = times * cycle.length ∧
-        walkSum weight iterated = times * walkSum weight cycle := by
-  induction times with
-  | zero => exact ⟨.nil, by simp, by simp⟩
-  | succ times ih =>
-      obtain ⟨iterated, hlen, hwt⟩ := ih
-      refine ⟨iterated.append cycle, by simp [hlen]; ring, ?_⟩
-      rw [walkSum_append, hwt]
-      push_cast
-      ring
-
 /-! ### The two halves of Karp's formula -/
 
 /-- **Upper half of Karp's formula.**  If every closed walk has mean weight at most `lam`,
@@ -298,13 +282,11 @@ theorem exists_le_stepValue_sub [Fintype V] [Finite E]
   have hgreatest := isGreatest_incomingWeights (G := G) (weight := shifted) hnonpos base
   obtain ⟨prefixStart, prefixWalk, -, hprefixWt⟩ :=
     maxIncomingWeight_mem (G := G) shifted base
-  obtain ⟨iterated, hiterLen, hiterWt⟩ :=
-    exists_closedWalk_length_mul (G := G) shifted best (Fintype.card V)
-  set long := prefixWalk.append iterated with hlong
+  set long := prefixWalk.append (best.iterate (Fintype.card V)) with hlong
   have hlongLen : Fintype.card V ≤ long.length := by
     have : Fintype.card V * 1 ≤ Fintype.card V * best.length := by
       exact Nat.mul_le_mul_left _ hpos
-    simp only [hlong, EdgeGraph.Walk.length_append, hiterLen]
+    simp only [hlong, EdgeGraph.Walk.length_append, EdgeGraph.Walk.length_iterate]
     omega
   obtain ⟨vertex, front, back, hfrontLen, hedges⟩ :=
     long.exists_split_of_length_le hlongLen
@@ -312,8 +294,7 @@ theorem exists_le_stepValue_sub [Fintype V] [Finite E]
   have hfrontBack : walkSum shifted front + walkSum shifted back
       = maxIncomingWeight G shifted base := by
     have hlongWt : walkSum shifted long = maxIncomingWeight G shifted base := by
-      rw [hlong, walkSum_append, hprefixWt, hiterWt, hbestZero]
-      ring
+      rw [hlong, walkSum_append, hprefixWt, walkSum_iterate, hbestZero, smul_zero, add_zero]
     rw [← hlongWt]
     simp only [walkSum, hedges, List.map_append, List.sum_append]
   have hfrontLe : walkSum shifted front
