@@ -6,38 +6,45 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.Basic
+public import Maths.Graph.PathCategory
+public import Maths.Multitubes.Relational
+public import Mathlib.CategoryTheory.Category.RelCat
 public import Mathlib.CategoryTheory.SingleObj
 public import Mathlib.CategoryTheory.Types.Basic
 
 /-!
-# The path-category presentation of transport
+# Transport as a representation of the path category
 
-The typed walks of an edge graph form a path category: vertices are objects,
-walks are morphisms, and walk append is categorical composition.
-Transport is a functor from this category to types, while a monoid
-labelling is a functor to the associated one-object category.
+The typed walks of an edge graph form its path category `Maths.PathCategory`, the free
+category on the graph.  A transport is a functor from the path category to types, and a monoid
+labelling is a functor to the one-object category of the monoid, and a relation-labelled
+transport is a functor to the category of types and relations.  By the universal property of
+the path category each is the unique extension of its values on edges
+(`Maths.Transport.toPathFunctor_eq_lift` and `Maths.labelFunctor_eq_lift`), and conversely every
+type-valued functor on the path category is the walk transport of its edge maps.
 
-The category interface is an adapter.  The inductive walk and transport
-definitions form the computational interface for walk recursion, endpoint
-typing, and ordered lax-section arguments.  No universal property of this
-presentation is asserted here.
+The inductive walk and transport definitions remain the computational interface for walk
+recursion, endpoint typing, and ordered lax-section arguments; this file identifies them with
+the categorical ones.
 
 ## Main definitions
 
-* `Maths.PathCategory`: the objects of the path category of an edge graph,
-  together with `Maths.PathCategory.ofVertex` and
-  `Maths.PathCategory.vertex` translating between vertices and objects.
-* `Maths.PathCategory.instCategory`: walks as morphisms, with append as
-  composition, and `Maths.PathCategory.edge` for the generating morphisms.
 * `Maths.Transport.toPathFunctor` and
   `Maths.pathFunctorToTransport`: the translation between transport
   and type-valued functors on the path category.
 * `Maths.Transport.IsLaxPathSection`: ordered naturality along every walk.
 * `Maths.labelFunctor`: a monoid edge labelling as a functor to the associated
   one-object category.
+* `Maths.RelationTransport.toPathFunctor`: a relation-labelled transport as a functor to the
+  category of types and relations.
 
 ## Main results
 
+* `Maths.Transport.toPathFunctor_eq_lift`, `Maths.labelFunctor_eq_lift`, and
+  `Maths.RelationTransport.toPathFunctor_eq_lift`: walk transport, walk labels, and walk
+  relations are the extensions of edge data along the universal property.
+* `Maths.RelationTransport.ofTransport_toPathFunctor`: function-graph transport is ordinary
+  transport followed by the embedding of functions into relations.
 * `Maths.Transport.toPathFunctor_toTransport` and
   `Maths.pathFunctorToTransport_toPathFunctor`: the two interfaces carry the
   same data.
@@ -61,63 +68,6 @@ universe uV uE uF uM
 
 variable {V : Type uV} {E : Type uE}
 
-/-- Objects of the path category of `G`.  The graph parameter keeps category
-instances for different edge graphs on the same vertex type distinct. -/
-def PathCategory (_G : EdgeGraph V E) := V
-
-namespace PathCategory
-
-variable {G : EdgeGraph V E}
-
-/-- Regard a vertex as an object of the path category. -/
-@[reducible] def ofVertex (G : EdgeGraph V E) (vertex : V) : PathCategory G := vertex
-
-/-- The vertex underlying a path-category object. -/
-@[reducible] def vertex (object : PathCategory G) : V := object
-
-/-- Appending a walk to the empty walk returns the walk. -/
-theorem nil_append {start finish : V}
-    (walk : G.Walk start finish) :
-    (EdgeGraph.Walk.nil : G.Walk start start).append walk = walk := by
-  induction walk with
-  | nil => rfl
-  | concat walk edge legal ih =>
-      rw [EdgeGraph.Walk.append_concat, ih]
-
-/-- Walk append is associative. -/
-theorem append_assoc {first second third fourth : V}
-    (front : G.Walk first second) (middle : G.Walk second third)
-    (back : G.Walk third fourth) :
-    (front.append middle).append back = front.append (middle.append back) := by
-  induction back with
-  | nil => rfl
-  | concat back edge legal ih =>
-      rw [EdgeGraph.Walk.append_concat, EdgeGraph.Walk.append_concat,
-        EdgeGraph.Walk.append_concat, ih]
-
-/-- The category of typed walks in the directed multigraph `G`. -/
-instance instCategory : Category (PathCategory G) where
-  Hom start finish := G.Walk start.vertex finish.vertex
-  id _ := .nil
-  comp front back := front.append back
-  comp_id front := EdgeGraph.Walk.append_nil front
-  id_comp back := nil_append back
-  assoc front middle back := append_assoc front middle back
-
-@[simp] theorem id_eq_nil (object : PathCategory G) :
-    (𝟙 object : G.Walk object.vertex object.vertex) = .nil := rfl
-
-@[simp] theorem comp_eq_append {first second third : PathCategory G}
-    (front : first ⟶ second) (back : second ⟶ third) :
-    front ≫ back = front.append back := rfl
-
-/-- The generating morphism represented by one edge. -/
-def edge (candidate : E) :
-    ofVertex G (G.source candidate) ⟶ ofVertex G (G.target candidate) :=
-  EdgeGraph.Walk.singleton candidate
-
-end PathCategory
-
 variable {G : EdgeGraph V E} {Fiber : V → Type uF}
 
 /-- A transport viewed as a representation of the path category in
@@ -137,6 +87,12 @@ def Transport.toPathFunctor (T : Transport G Fiber) :
     {start finish : PathCategory G} (walk : start ⟶ finish)
     (point : Fiber start.vertex) :
     T.toPathFunctor.map walk point = T.walkMap walk point := rfl
+
+/-- **Walk transport is the extension of the edge maps.**  The path functor of a transport is
+the unique functor out of the path category taking each edge to its edge map. -/
+theorem Transport.toPathFunctor_eq_lift (T : Transport G Fiber) :
+    T.toPathFunctor = PathCategory.lift Fiber fun edge => ↾(T.edgeMap edge) :=
+  PathCategory.eq_lift_of_map_edge _ fun _ => rfl
 
 /-- Recover edge transport from a type-valued functor on the path category by
 restricting it to the generating edge morphisms. -/
@@ -178,16 +134,12 @@ original transport definitionally. -/
     pathFunctorToTransport T.toPathFunctor = T := rfl
 
 /-- Extending reconstructed edge transport along walks recovers the original
-path functor.  Thus the two interfaces carry the same data. -/
+path functor: both are the extension of the same edge data.  Thus the two interfaces carry the
+same data. -/
 @[simp] theorem pathFunctorToTransport_toPathFunctor
     (F : PathCategory G ⥤ Type uF) :
-    (pathFunctorToTransport F).toPathFunctor = F := by
-  fapply CategoryTheory.Functor.ext
-  · intro object
-    rfl
-  · intro start finish walk
-    ext point
-    exact pathFunctorToTransport_walkMap F walk point
+    (pathFunctorToTransport F).toPathFunctor = F :=
+  (pathFunctorToTransport F).toPathFunctor_eq_lift.trans (PathCategory.eq_lift F).symm
 
 /-- A vertex-indexed family regarded as a family over path-category objects. -/
 def pathFunctorFamily (T : Transport G Fiber)
@@ -259,6 +211,14 @@ def labelFunctor [Monoid M] (label : E → M) :
     {start finish : PathCategory G} (walk : start ⟶ finish) :
     (labelFunctor (G := G) label).map walk = walkLabel label walk := rfl
 
+/-- **Walk labels are the extension of the edge labels.**  The label functor is the unique
+functor into the one-object category of the monoid taking each edge to its label. -/
+theorem labelFunctor_eq_lift [Monoid M] (label : E → M) :
+    labelFunctor (G := G) label =
+      PathCategory.lift (fun _ => SingleObj.star M)
+        fun edge => (label edge : SingleObj.star M ⟶ SingleObj.star M) :=
+  PathCategory.eq_lift_of_map_edge _ fun _ => walkLabel_singleton _
+
 /-- Trivial cycle labels say exactly that the label functor sends every
 endomorphism to the identity of the one-object category. -/
 theorem hasTrivialCycleLabels_iff_labelFunctor_end_eq_id [Monoid M]
@@ -267,6 +227,39 @@ theorem hasTrivialCycleLabels_iff_labelFunctor_end_eq_id [Monoid M]
       ∀ (object : PathCategory G) (cycle : object ⟶ object),
         (labelFunctor (G := G) label).map cycle = 𝟙 (SingleObj.star M) := by
   rfl
+
+/-! ### Relation-labelled transport -/
+
+namespace RelationTransport
+
+variable (R : RelationTransport G Fiber)
+
+/-- A relation-labelled transport viewed as a functor from the path category to the category
+of types and relations. -/
+def toPathFunctor : PathCategory G ⥤ RelCat.{uF} where
+  obj object := Fiber object.vertex
+  map walk := .ofRel (R.walkRelation walk)
+  map_id _ := rfl
+  map_comp front back := RelCat.Hom.ext _ _ (R.walkRelation_append front back)
+
+/-- **Walk relations are the extension of the edge relations.** -/
+theorem toPathFunctor_eq_lift :
+    R.toPathFunctor = PathCategory.lift (C := RelCat.{uF}) Fiber
+      fun edge => RelCat.Hom.ofRel (R.edgeRelation edge) :=
+  PathCategory.eq_lift_of_map_edge _ fun edge => RelCat.Hom.ext _ _ <| by
+    ext ⟨source, target⟩
+    simp [toPathFunctor, PathCategory.edge, EdgeGraph.Walk.singleton, walkRelation]
+
+/-- **Function-graph transport is ordinary transport followed by the graph embedding.**  The
+relational path functor of the function graphs of a transport is its type-valued path functor
+composed with the embedding of functions into relations. -/
+theorem ofTransport_toPathFunctor (T : Transport G Fiber) :
+    (ofTransport T).toPathFunctor = T.toPathFunctor ⋙ RelCat.graphFunctor := by
+  rw [toPathFunctor_eq_lift]
+  exact (PathCategory.eq_lift_of_map_edge (T.toPathFunctor ⋙ RelCat.graphFunctor)
+    fun _ => rfl).symm
+
+end RelationTransport
 
 end Maths
 

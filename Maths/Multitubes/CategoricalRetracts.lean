@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.Category
+public import Maths.Graph.PathCategory
 
 /-!
 # Categorical retract normal forms for transport

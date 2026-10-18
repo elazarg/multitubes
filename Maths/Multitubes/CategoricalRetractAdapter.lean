@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.CategoricalRetracts
+public import Maths.Multitubes.Category
 public import Maths.Multitubes.Exact
 public import Mathlib.CategoryTheory.Retract
 
