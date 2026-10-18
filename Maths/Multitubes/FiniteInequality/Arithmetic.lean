@@ -38,6 +38,8 @@ finitely many coefficient denominators gives an integral certificate.
   reals gains nothing.
 * `Maths.FiniteInequality.exists_rationalCertificate_of_real_infeasible`: real
   infeasibility of a rational system is witnessed by a rational certificate.
+* `Maths.FiniteInequality.exists_integralCoefficientCertificate_of_rationalCertificate`:
+  clearing the denominators of a rational certificate gives an integer-valued one.
 * `Maths.FiniteInequality.exists_integralCertificate_of_real_infeasible`: for
   integral data the certificate can be taken integer-valued.  Note only the certificate's
   denominators are cleared - the intermediate
@@ -211,6 +213,35 @@ private theorem cast_integralMultiple (coefficient : Row → ℚ) (row : Row) :
             coefficient row := by ring
     _ = commonDenominator coefficient * coefficient row := by rw [hdenQ]
 
+omit [Fintype State] in
+/-- **Clearing denominators.**  Scaling a rational certificate by the common denominator of its
+coefficients gives an integer-valued certificate of the same system.  Only the certificate
+denominators are cleared; the balance and objective remain statements over `ℚ`. -/
+theorem exists_integralCoefficientCertificate_of_rationalCertificate
+    {delta : Row → State → ℚ} {base : Row → ℚ} {rational : Row → ℚ}
+    (hnonneg : ∀ row, 0 ≤ rational row)
+    (hbalance : ∀ state, ∑ row, rational row * delta row state = 0)
+    (hpositive : 0 < ∑ row, rational row * base row) :
+    ∃ coefficient : Row → ℤ,
+      (∀ row, 0 ≤ coefficient row) ∧
+      (∀ state,
+        ∑ row, (coefficient row : ℚ) * delta row state = 0) ∧
+      0 < ∑ row, (coefficient row : ℚ) * base row := by
+  have hscalePos : (0 : ℚ) < commonDenominator rational := by
+    exact_mod_cast commonDenominator_pos rational
+  have hsum (value : Row → ℚ) :
+      ∑ row, (integralMultiple rational row : ℚ) * value row =
+        commonDenominator rational * ∑ row, rational row * value row := by
+    simp_rw [cast_integralMultiple, Finset.mul_sum, mul_assoc]
+  refine ⟨integralMultiple rational, fun row => ?_, fun state => ?_, ?_⟩
+  · have hnonnegQ : (0 : ℚ) ≤ integralMultiple rational row := by
+      rw [cast_integralMultiple]
+      exact mul_nonneg hscalePos.le (hnonneg row)
+    exact_mod_cast hnonnegQ
+  · rw [hsum, hbalance state, mul_zero]
+  · rw [hsum]
+    exact mul_pos hscalePos hpositive
+
 /-- Rational row data admit an integer-valued certificate whenever they are
 real-infeasible.  Only the certificate denominators are cleared; the balance
 and objective remain equalities and inequalities over `ℚ`. -/
@@ -226,39 +257,7 @@ theorem exists_integralCoefficientCertificate_of_real_infeasible
       0 < ∑ row, (coefficient row : ℚ) * base row := by
   obtain ⟨rational, hnonneg, hbalance, hpositive⟩ :=
     exists_rationalCertificate_of_real_infeasible delta base hinfeasible
-  let coefficient : Row → ℤ := integralMultiple rational
-  have hscalePos : (0 : ℚ) < commonDenominator rational := by
-    exact_mod_cast commonDenominator_pos rational
-  refine ⟨coefficient, fun row => ?_, fun state => ?_, ?_⟩
-  · have hcast := cast_integralMultiple rational row
-    have hnonnegQ : (0 : ℚ) ≤ coefficient row := by
-      rw [hcast]
-      exact mul_nonneg hscalePos.le (hnonneg row)
-    exact_mod_cast hnonnegQ
-  · change ∑ row,
-      (integralMultiple rational row : ℚ) * delta row state = 0
-    simp_rw [cast_integralMultiple]
-    calc
-      (∑ row, commonDenominator rational * rational row * delta row state) =
-          commonDenominator rational *
-            ∑ row, rational row * delta row state := by
-        rw [Finset.mul_sum]
-        apply Finset.sum_congr rfl
-        intro row _
-        ring
-      _ = 0 := by rw [hbalance state, mul_zero]
-  · change 0 < ∑ row,
-      (integralMultiple rational row : ℚ) * base row
-    simp_rw [cast_integralMultiple]
-    rw [show (∑ row,
-        commonDenominator rational * rational row * base row) =
-        commonDenominator rational *
-          ∑ row, rational row * base row by
-      rw [Finset.mul_sum]
-      apply Finset.sum_congr rfl
-      intro row _
-      ring]
-    exact mul_pos hscalePos hpositive
+  exact exists_integralCoefficientCertificate_of_rationalCertificate hnonneg hbalance hpositive
 
 /-- Integral data with no real feasible potential admit a nonnegative integral
 Farkas certificate with strictly positive objective. -/
@@ -271,60 +270,12 @@ theorem exists_integralCertificate_of_real_infeasible
       (∀ row, 0 ≤ coefficient row) ∧
       (∀ state, ∑ row, coefficient row * delta row state = 0) ∧
       0 < ∑ row, coefficient row * base row := by
-  let deltaQ : Row → State → ℚ := fun row state => delta row state
-  let baseQ : Row → ℚ := fun row => base row
-  have hinfeasibleQ : ¬∃ potential : State → ℝ,
-      ∀ row, (baseQ row : ℝ) ≤
-        ∑ state, (deltaQ row state : ℝ) * potential state := by
-    simpa [deltaQ, baseQ] using hinfeasible
-  obtain ⟨rational, hnonneg, hbalance, hpositive⟩ :=
-    exists_rationalCertificate_of_real_infeasible deltaQ baseQ hinfeasibleQ
-  let coefficient : Row → ℤ := integralMultiple rational
-  have hscalePos : (0 : ℚ) < commonDenominator rational := by
-    exact_mod_cast commonDenominator_pos rational
-  refine ⟨coefficient, fun row => ?_, fun state => ?_, ?_⟩
-  · have hcast := cast_integralMultiple rational row
-    have : (0 : ℚ) ≤ coefficient row := by
-      rw [hcast]
-      exact mul_nonneg hscalePos.le (hnonneg row)
-    exact_mod_cast this
-  · have hbalanceQ :
-        (∑ row, (coefficient row : ℚ) * (delta row state : ℚ)) = 0 := by
-      change (∑ row,
-        (integralMultiple rational row : ℚ) * (delta row state : ℚ)) = 0
-      simp_rw [cast_integralMultiple]
-      change (∑ row,
-        commonDenominator rational * rational row * deltaQ row state) = 0
-      calc
-        (∑ row, commonDenominator rational * rational row *
-            deltaQ row state) =
-            commonDenominator rational *
-              ∑ row, rational row * deltaQ row state := by
-          rw [Finset.mul_sum]
-          apply Finset.sum_congr rfl
-          intro row _
-          ring
-        _ = 0 := by rw [hbalance state, mul_zero]
-    exact_mod_cast hbalanceQ
-  · have hobjectiveQ : (0 : ℚ) <
-        ∑ row, (coefficient row : ℚ) * baseQ row := by
-      change (0 : ℚ) < ∑ row,
-        (integralMultiple rational row : ℚ) * baseQ row
-      simp_rw [cast_integralMultiple]
-      have heq : (∑ row,
-          commonDenominator rational * rational row * baseQ row) =
-          commonDenominator rational *
-            ∑ row, rational row * baseQ row := by
-        rw [Finset.mul_sum]
-        apply Finset.sum_congr rfl
-        intro row _
-        ring
-      rw [heq]
-      exact mul_pos hscalePos hpositive
-    have hobjectiveQ' : (0 : ℚ) <
-        ∑ row, (coefficient row : ℚ) * (base row : ℚ) := by
-      simpa [baseQ] using hobjectiveQ
-    exact_mod_cast hobjectiveQ'
+  obtain ⟨coefficient, hnonneg, hbalance, hpositive⟩ :=
+    exists_integralCoefficientCertificate_of_real_infeasible
+      (fun row state => (delta row state : ℚ)) (fun row => (base row : ℚ))
+      (by simpa using hinfeasible)
+  exact ⟨coefficient, hnonneg, fun state => by exact_mod_cast hbalance state,
+    by exact_mod_cast hpositive⟩
 
 end FiniteInequality
 

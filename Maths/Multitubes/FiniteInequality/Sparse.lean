@@ -454,44 +454,13 @@ theorem exists_rankSparse_integralCoefficientCertificate_of_real_infeasible
       (∀ state,
         ∑ row, (coefficient row : ℚ) * delta row.1 state = 0) ∧
       0 < ∑ row, (coefficient row : ℚ) * base row.1 := by
-  classical
   obtain ⟨selected, rational, hcard, hnonnegative, hbalance, hpositive⟩ :=
     exists_rankSparse_rationalCertificate_of_real_infeasible
       delta base hinfeasible
-  let selectedDelta : {row // row ∈ selected} → State → ℚ :=
-    fun row => delta row.1
-  let selectedBase : {row // row ∈ selected} → ℚ :=
-    fun row => base row.1
-  have hselectedInfeasible : ¬∃ potential : State → ℝ,
-      ∀ row, (selectedBase row : ℝ) ≤
-        ∑ state, (selectedDelta row state : ℝ) * potential state := by
-    rintro ⟨potential, hpotential⟩
-    let coefficientR : {row // row ∈ selected} → ℝ :=
-      fun row => rational row
-    have hnonnegativeR (row) : 0 ≤ coefficientR row :=
-      Rat.cast_nonneg.mpr (hnonnegative row)
-    have hbalanceR (state) :
-        ∑ row, coefficientR row * (selectedDelta row state : ℝ) = 0 := by
-      have hcast := congrArg (fun value : ℚ => (value : ℝ))
-        (hbalance state)
-      simpa only [Rat.cast_sum, Rat.cast_mul, Rat.cast_zero,
-        coefficientR, selectedDelta] using hcast
-    have hpositiveR : 0 <
-        ∑ row, coefficientR row * (selectedBase row : ℝ) := by
-      have hcast : (0 : ℝ) <
-          ((∑ row, rational row * base row.1 : ℚ) : ℝ) :=
-        Rat.cast_pos.mpr hpositive
-      simpa only [Rat.cast_sum, Rat.cast_mul, coefficientR,
-        selectedBase] using hcast
-    have hweak := Maths.not_nonnegative_incompatibility_of_potential
-      (fun row => by simpa only [dotProduct] using hpotential row)
-      hnonnegativeR hbalanceR
-    linarith
-  obtain ⟨coefficient, hnonnegativeZ, hbalanceZ, hpositiveZ⟩ :=
-    exists_integralCoefficientCertificate_of_real_infeasible
-      selectedDelta selectedBase hselectedInfeasible
-  exact ⟨selected, coefficient, hcard, hnonnegativeZ,
-    hbalanceZ, hpositiveZ⟩
+  obtain ⟨coefficient, hcertificate⟩ :=
+    exists_integralCoefficientCertificate_of_rationalCertificate
+      hnonnegative hbalance hpositive
+  exact ⟨selected, coefficient, hcard, hcertificate⟩
 
 /-- The support size is bounded by the rank of the augmented balance columns. -/
 theorem exists_positive_normalizedCertificate_support_card_le_rank
