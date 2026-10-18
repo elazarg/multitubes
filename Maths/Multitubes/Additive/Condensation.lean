@@ -37,10 +37,6 @@ condition holds vacuously.
 
 ## Main definitions
 
-* `Maths.EdgeGraph.induce`: the induced subgraph on a set of vertices; an
-  edge belongs to it exactly when both of its endpoints do.
-* `Maths.sccSet`: the vertex set of a strongly connected component, as the
-  fiber of `Maths.toSCC` over it.
 * `Maths.MaxPlusPotential.HasSCCPotentialAt` and
   `Maths.MaxPlusPotential.HasSCCPotentials`: a potential on one strongly
   connected component, respectively on every component.
@@ -54,9 +50,6 @@ condition holds vacuously.
   same decomposition phrased through componentwise constrained potentials.
 * `Maths.MaxPlusPotential.hasSCCPotentialAt_iff_exists_isPotential_induce`:
   the two componentwise phrasings agree, without any finiteness hypothesis.
-* `Maths.source_mem_sccSet_of_mem_edges` and
-  `Maths.target_mem_sccSet_of_mem_edges`: a closed walk stays inside the
-  strongly connected component of its base vertex.
 -/
 
 @[expose] public section
@@ -65,70 +58,7 @@ namespace Maths
 
 universe uV uE
 
-variable {V : Type uV} {E : Type uE}
-
-/-! ## Induced subgraphs -/
-
-namespace EdgeGraph
-
-/-- The induced subgraph on a set of vertices: its vertices are the members of the set,
-and its edges are the ambient edges whose endpoints both belong to the set. -/
-def induce (G : EdgeGraph V E) (S : Set V) :
-    EdgeGraph S {edge : E // G.source edge ∈ S ∧ G.target edge ∈ S} where
-  source edge := ⟨G.source edge.1, edge.2.1⟩
-  target edge := ⟨G.target edge.1, edge.2.2⟩
-
-/-- The source map of an induced subgraph restricts the ambient source map. -/
-@[simp] theorem induce_source (G : EdgeGraph V E) (S : Set V)
-    (edge : {edge : E // G.source edge ∈ S ∧ G.target edge ∈ S}) :
-    (G.induce S).source edge = ⟨G.source edge.1, edge.2.1⟩ := rfl
-
-/-- The target map of an induced subgraph restricts the ambient target map. -/
-@[simp] theorem induce_target (G : EdgeGraph V E) (S : Set V)
-    (edge : {edge : E // G.source edge ∈ S ∧ G.target edge ∈ S}) :
-    (G.induce S).target edge = ⟨G.target edge.1, edge.2.2⟩ := rfl
-
-end EdgeGraph
-
-/-! ## The vertex set of a component -/
-
-variable {G : EdgeGraph V E}
-
-/-- The vertex set of a strongly connected component: the fiber of
-`Maths.toSCC` over it. -/
-def sccSet (G : EdgeGraph V E) (component : SCC G) : Set V :=
-  {vertex | toSCC G vertex = component}
-
-/-- Membership in the vertex set of a component is membership in the fiber of
-`Maths.toSCC`. -/
-@[simp] theorem mem_sccSet {component : SCC G} {vertex : V} :
-    vertex ∈ sccSet G component ↔ toSCC G vertex = component :=
-  Iff.rfl
-
-/-- The component of a marked vertex consists of the vertices mutually reachable
-with it. -/
-theorem mem_sccSet_toSCC_iff_linkedTo {base vertex : V} :
-    vertex ∈ sccSet G (toSCC G base) ↔ LinkedTo G base vertex := by
-  rw [mem_sccSet, toSCC_eq_toSCC_iff_linkedTo]
-  exact ⟨fun hlinked => ⟨hlinked.2, hlinked.1⟩, fun hlinked => ⟨hlinked.2, hlinked.1⟩⟩
-
-/-- A closed walk stays inside the strongly connected component of its base vertex:
-the source of every traversed edge lies in that component. -/
-theorem source_mem_sccSet_of_mem_edges {base : V} (cycle : G.Walk base base)
-    {edge : E} (hmem : edge ∈ cycle.edges) :
-    G.source edge ∈ sccSet G (toSCC G base) := by
-  rw [mem_sccSet_toSCC_iff_linkedTo]
-  let split := cycle.vertexSplitAtSource edge hmem
-  exact ⟨⟨split.before⟩, ⟨split.after⟩⟩
-
-/-- A closed walk stays inside the strongly connected component of its base vertex:
-the target of every traversed edge lies in that component. -/
-theorem target_mem_sccSet_of_mem_edges {base : V} (cycle : G.Walk base base)
-    {edge : E} (hmem : edge ∈ cycle.edges) :
-    G.target edge ∈ sccSet G (toSCC G base) := by
-  rw [mem_sccSet_toSCC_iff_linkedTo]
-  let split := cycle.vertexSplitAtTarget edge hmem
-  exact ⟨⟨split.before⟩, ⟨split.after⟩⟩
+variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 
 /-! ## Componentwise potentials -/
 

@@ -44,10 +44,6 @@ the two roots to be opposite, which happens only inside a single component.
 
 ## Main definitions
 
-* `Maths.EdgeGraph.restrictEdges`: the subgraph on a set of edges, the edge-indexed
-  analogue of `Maths.EdgeGraph.induce`.
-* `Maths.EdgeGraph.Walk.ofRestrictEdges`: a walk of an edge subgraph read as a walk
-  of the ambient graph.
 * `Maths.MaxPlusPotential.IsCriticalEdge`,
   `Maths.MaxPlusPotential.criticalEdges`: an edge lying on a closed walk of mean
   weight `lam`, and the set of these.
@@ -107,11 +103,6 @@ the two roots to be opposite, which happens only inside a single component.
 
 ## Implementation notes
 
-`Maths.EdgeGraph.restrictEdges` is placed here, beside its only use, exactly as
-`Maths.EdgeGraph.induce` is placed beside its own in
-`Maths.Multitubes.Additive.Condensation`; both are one-line reindexings of an ambient graph
-along a subtype of its edges or vertices.
-
 The hypothesis carried through the critical-graph results is that `lam` bounds every cycle mean,
 `walkSum weight cycle ≤ cycle.length * lam`, and never that `lam` is *attained*.  With no
 critical cycle the critical graph is empty and the statements are vacuous, which is the correct
@@ -168,73 +159,10 @@ variable {V : Type uV} {E : Type uE}
 
 /-! ### Edge subgraphs -/
 
-namespace EdgeGraph
-
-namespace Walk
-
-variable {G : EdgeGraph V E}
-
-/-- A walk of an edge subgraph read as a walk of the ambient graph, by forgetting the membership
-proof carried by each edge. -/
-def ofRestrictEdges {S : Set E} {start : V} :
-    {finish : V} → (G.restrictEdges S).Walk start finish → G.Walk start finish
-  | _, .nil => .nil
-  | _, .concat walkSoFar edge legal => (ofRestrictEdges walkSoFar).concat edge.1 legal
-
-@[simp] theorem ofRestrictEdges_nil {S : Set E} {start : V} :
-    ofRestrictEdges (G := G) (S := S) (.nil : (G.restrictEdges S).Walk start start) = .nil := rfl
-
-/-- Reading a walk of an edge subgraph in the ambient graph forgets the membership proofs of its
-edges and nothing else. -/
-@[simp] theorem edges_ofRestrictEdges {S : Set E} {start finish : V}
-    (walk : (G.restrictEdges S).Walk start finish) :
-    (ofRestrictEdges walk).edges = walk.edges.map Subtype.val := by
-  induction walk with
-  | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      have hunfold : ofRestrictEdges (walkSoFar.concat edge legal)
-          = (ofRestrictEdges walkSoFar).concat edge.1 legal := rfl
-      have hstep := edges_concat (G := G) (ofRestrictEdges walkSoFar) edge.1 legal
-      have htail : (ofRestrictEdges walkSoFar).edges ++ [edge.1]
-          = List.map Subtype.val (walkSoFar.concat edge legal).edges := by
-        rw [ih, edges_concat]
-        simp
-      rw [hunfold]
-      exact hstep.trans htail
-
-/-- The converse reading: a walk of the ambient graph all of whose edges belong to the set is a
-walk of the edge subgraph.  It is stated as an existence because the walk of the subgraph carries
-the membership proofs, which the ambient walk does not determine. -/
-theorem nonempty_restrictEdges_of_forall_mem {S : Set E} {start finish : V}
-    (walk : G.Walk start finish) (hmem : ∀ e ∈ walk.edges, e ∈ S) :
-    Nonempty ((G.restrictEdges S).Walk start finish) := by
-  induction walk with
-  | nil => exact ⟨.nil⟩
-  | concat walkSoFar edge legal ih =>
-      obtain ⟨before⟩ := ih fun e he => hmem e (by simp [he])
-      exact ⟨before.concat ⟨edge, hmem edge (by simp)⟩ legal⟩
-
-/-- Reading a walk of an edge subgraph in the ambient graph preserves its length. -/
-@[simp] theorem length_ofRestrictEdges {S : Set E} {start finish : V}
-    (walk : (G.restrictEdges S).Walk start finish) :
-    (ofRestrictEdges walk).length = walk.length := by
-  rw [← edges_length, ← edges_length, edges_ofRestrictEdges, List.length_map]
-
-end Walk
-
-end EdgeGraph
-
 namespace MaxPlusPotential
 
 variable {𝕜 : Type*} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
 variable {G : EdgeGraph V E}
-
-omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
-/-- Reading a walk of an edge subgraph in the ambient graph preserves its weight. -/
-@[simp] theorem walkSum_ofRestrictEdges {weight : E → 𝕜} {S : Set E} {start finish : V}
-    (walk : (G.restrictEdges S).Walk start finish) :
-    walkSum weight walk.ofRestrictEdges = walkSum (fun edge => weight edge.1) walk := by
-  simp [walkSum]
 
 /-! ### The critical graph -/
 

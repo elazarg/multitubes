@@ -35,7 +35,10 @@ circulations, and application-specific semantics belong in files that import thi
   and `target` maps.
 * `Maths.EdgeGraph.reverse`: the graph obtained by reversing every edge while
   retaining its identity.
-* `Maths.EdgeGraph.restrictEdges`: the subgraph on a set of edges.
+* `Maths.EdgeGraph.restrictEdges` and `Maths.EdgeGraph.induce`: the subgraphs on a set of
+  edges and on a set of vertices.
+* `Maths.EdgeGraph.Walk.ofRestrictEdges`: a walk of an edge subgraph read in the ambient
+  graph.
 * `Maths.EdgeGraph.symmetrization`: the graph carrying both orientations of every edge.
 * `Maths.EdgeGraph.Walk`: an endpoint-indexed finite walk.
 * `Maths.EdgeGraph.Walk.edges`, `length`, `visited`, `edgeMultiplicity`: the
@@ -64,6 +67,8 @@ circulations, and application-specific semantics belong in files that import thi
   it visits.
 * `Maths.EdgeGraph.Walk.exists_closedSubwalk_of_not_nodup`: a walk revisiting a
   vertex contains a nonempty closed subwalk.
+* `Maths.linkedTo_source_of_mem_edges` and `Maths.linkedTo_target_of_mem_edges`: a closed
+  walk stays inside the strongly connected component of its base.
 * `Maths.EdgeGraph.Walk.VertexSplit.length_splice`: splicing adds lengths.
 * `Maths.EdgeGraph.reverse_reverse`: reversing every edge twice recovers the
   original graph.
@@ -124,6 +129,23 @@ def restrictEdges (S : Set E) : EdgeGraph V S where
 /-- The target map of an edge subgraph restricts the ambient target map. -/
 @[simp] theorem restrictEdges_target (S : Set E) (edge : S) :
     (G.restrictEdges S).target edge = G.target edge.1 := rfl
+
+/-- The induced subgraph on a set of vertices: its vertices are the members of the set,
+and its edges are the ambient edges whose endpoints both belong to the set. -/
+def induce (G : EdgeGraph V E) (S : Set V) :
+    EdgeGraph S {edge : E // G.source edge ∈ S ∧ G.target edge ∈ S} where
+  source edge := ⟨G.source edge.1, edge.2.1⟩
+  target edge := ⟨G.target edge.1, edge.2.2⟩
+
+/-- The source map of an induced subgraph restricts the ambient source map. -/
+@[simp] theorem induce_source (G : EdgeGraph V E) (S : Set V)
+    (edge : {edge : E // G.source edge ∈ S ∧ G.target edge ∈ S}) :
+    (G.induce S).source edge = ⟨G.source edge.1, edge.2.1⟩ := rfl
+
+/-- The target map of an induced subgraph restricts the ambient target map. -/
+@[simp] theorem induce_target (G : EdgeGraph V E) (S : Set V)
+    (edge : {edge : E // G.source edge ∈ S ∧ G.target edge ∈ S}) :
+    (G.induce S).target edge = ⟨G.target edge.1, edge.2.2⟩ := rfl
 
 /-- The graph carrying both orientations of every edge identity: `(edge, false)` runs
 forward and `(edge, true)` runs backward.  Directed walks in it are the undirected walks
@@ -683,6 +705,52 @@ theorem edges_splice_perm {walk : G.Walk start finish} {vertex : V}
 
 end VertexSplit
 
+/-- A walk of an edge subgraph read as a walk of the ambient graph, by forgetting the membership
+proof carried by each edge. -/
+def ofRestrictEdges {S : Set E} {start : V} :
+    {finish : V} → (G.restrictEdges S).Walk start finish → G.Walk start finish
+  | _, .nil => .nil
+  | _, .concat walkSoFar edge legal => (ofRestrictEdges walkSoFar).concat edge.1 legal
+
+@[simp] theorem ofRestrictEdges_nil {S : Set E} {start : V} :
+    ofRestrictEdges (G := G) (S := S) (.nil : (G.restrictEdges S).Walk start start) = .nil := rfl
+
+/-- Reading a walk of an edge subgraph in the ambient graph forgets the membership proofs of its
+edges and nothing else. -/
+@[simp] theorem edges_ofRestrictEdges {S : Set E} {start finish : V}
+    (walk : (G.restrictEdges S).Walk start finish) :
+    (ofRestrictEdges walk).edges = walk.edges.map Subtype.val := by
+  induction walk with
+  | nil => rfl
+  | concat walkSoFar edge legal ih =>
+      have hunfold : ofRestrictEdges (walkSoFar.concat edge legal)
+          = (ofRestrictEdges walkSoFar).concat edge.1 legal := rfl
+      have hstep := edges_concat (G := G) (ofRestrictEdges walkSoFar) edge.1 legal
+      have htail : (ofRestrictEdges walkSoFar).edges ++ [edge.1]
+          = List.map Subtype.val (walkSoFar.concat edge legal).edges := by
+        rw [ih, edges_concat]
+        simp
+      rw [hunfold]
+      exact hstep.trans htail
+
+/-- The converse reading: a walk of the ambient graph all of whose edges belong to the set is a
+walk of the edge subgraph.  It is stated as an existence because the walk of the subgraph carries
+the membership proofs, which the ambient walk does not determine. -/
+theorem nonempty_restrictEdges_of_forall_mem {S : Set E} {start finish : V}
+    (walk : G.Walk start finish) (hmem : ∀ e ∈ walk.edges, e ∈ S) :
+    Nonempty ((G.restrictEdges S).Walk start finish) := by
+  induction walk with
+  | nil => exact ⟨.nil⟩
+  | concat walkSoFar edge legal ih =>
+      obtain ⟨before⟩ := ih fun e he => hmem e (by simp [he])
+      exact ⟨before.concat ⟨edge, hmem edge (by simp)⟩ legal⟩
+
+/-- Reading a walk of an edge subgraph in the ambient graph preserves its length. -/
+@[simp] theorem length_ofRestrictEdges {S : Set E} {start finish : V}
+    (walk : (G.restrictEdges S).Walk start finish) :
+    (ofRestrictEdges walk).length = walk.length := by
+  rw [← edges_length, ← edges_length, edges_ofRestrictEdges, List.length_map]
+
 end Walk
 
 end EdgeGraph
@@ -736,6 +804,20 @@ theorem LinkedTo.symm {first second : V} (h : LinkedTo G first second) :
 theorem LinkedTo.trans {first second third : V} (h₁ : LinkedTo G first second)
     (h₂ : LinkedTo G second third) : LinkedTo G first third :=
   ⟨⟨h₁.1.some.append h₂.1.some⟩, ⟨h₂.2.some.append h₁.2.some⟩⟩
+
+/-- A closed walk stays inside the strongly connected component of its base: the source of
+every traversed edge is linked to the base. -/
+theorem linkedTo_source_of_mem_edges {base : V} (cycle : G.Walk base base) {edge : E}
+    (hmem : edge ∈ cycle.edges) : LinkedTo G base (G.source edge) :=
+  let split := cycle.vertexSplitAtSource edge hmem
+  ⟨⟨split.before⟩, ⟨split.after⟩⟩
+
+/-- A closed walk stays inside the strongly connected component of its base: the target of
+every traversed edge is linked to the base. -/
+theorem linkedTo_target_of_mem_edges {base : V} (cycle : G.Walk base base) {edge : E}
+    (hmem : edge ∈ cycle.edges) : LinkedTo G base (G.target edge) :=
+  let split := cycle.vertexSplitAtTarget edge hmem
+  ⟨⟨split.before⟩, ⟨split.after⟩⟩
 
 /-- Every edge lies on a closed walk: its target walks back to its source.  This is the
 local reachability that component-wise coboundary reconstruction consumes; it imposes no

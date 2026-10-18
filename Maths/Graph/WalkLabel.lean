@@ -175,6 +175,13 @@ theorem walkProd_iterate {base : V} (cycle : G.Walk base base) (n : ℕ) :
   | zero => simp
   | succ n ih => rw [EdgeGraph.Walk.iterate_succ, walkProd_append, ih, pow_succ]
 
+/-- Reading a walk of an edge subgraph in the ambient graph preserves its product. -/
+@[to_additive (attr := simp) /-- Reading a walk of an edge subgraph in the ambient graph
+preserves its sum. -/]
+theorem walkProd_ofRestrictEdges {S : Set E} (walk : (G.restrictEdges S).Walk start finish) :
+    walkProd w walk.ofRestrictEdges = walkProd (fun edge => w edge.1) walk := by
+  simp [walkProd]
+
 @[to_additive (attr := simp)]
 theorem walkProd_one (walk : G.Walk start finish) : walkProd (fun _ => (1 : M)) walk = 1 := by
   simp [walkProd]

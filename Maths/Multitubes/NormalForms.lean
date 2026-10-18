@@ -68,18 +68,6 @@ def HasSCCUnitPotentialAt (G : EdgeGraph V E) (label : E → M)
 def HasSCCUnitPotentials (G : EdgeGraph V E) (label : E → M) : Prop :=
   ∀ base : V, HasSCCUnitPotentialAt G label base
 
-private theorem linkedTo_of_mem_cycle_source {base : V}
-    (cycle : G.Walk base base) {edge : E} (hedge : edge ∈ cycle.edges) :
-    LinkedTo G base (G.source edge) := by
-  let split := cycle.vertexSplitAtSource edge hedge
-  exact ⟨⟨split.before⟩, ⟨split.after⟩⟩
-
-private theorem linkedTo_of_mem_cycle_target {base : V}
-    (cycle : G.Walk base base) {edge : E} (hedge : edge ∈ cycle.edges) :
-    LinkedTo G base (G.target edge) := by
-  let split := cycle.vertexSplitAtTarget edge hedge
-  exact ⟨⟨split.before⟩, ⟨split.after⟩⟩
-
 /-- **SCC normal form.**  A monoid labelling is flat exactly when it is a
 unit-valued coboundary separately on every strongly connected component.
 No condition is imposed on inter-component edges. -/
@@ -94,8 +82,8 @@ theorem hasTrivialCycleLabels_iff_hasSCCUnitPotentials :
           (potential (G.target edge) *
             (potential (G.source edge))⁻¹ : Mˣ) :=
       hpotential edge
-        (linkedTo_of_mem_cycle_source cycle hmem)
-        (linkedTo_of_mem_cycle_target cycle hmem)
+        (linkedTo_source_of_mem_edges cycle hmem)
+        (linkedTo_target_of_mem_edges cycle hmem)
     rw [walkLabel_eq_of_forall_mem_edges potential cycle hedge]
     simp
 

@@ -87,18 +87,6 @@ theorem Transport.sccTrivialization_edgeMap
       (hsource.2.some.append htarget.1.some)
       (htarget.2.some.append hsource.1.some)) point
 
-private theorem linkedTo_of_mem_cycle_source {base : V}
-    (cycle : G.Walk base base) {edge : E} (hedge : edge ∈ cycle.edges) :
-    LinkedTo G base (G.source edge) := by
-  let split := cycle.vertexSplitAtSource edge hedge
-  exact ⟨⟨split.before⟩, ⟨split.after⟩⟩
-
-private theorem linkedTo_of_mem_cycle_target {base : V}
-    (cycle : G.Walk base base) {edge : E} (hedge : edge ∈ cycle.edges) :
-    LinkedTo G base (G.target edge) := by
-  let split := cycle.vertexSplitAtTarget edge hedge
-  exact ⟨⟨split.before⟩, ⟨split.after⟩⟩
-
 private theorem Transport.walkMap_eq_of_edgeTrivializations
     {base start finish : V}
     (trivialization :
@@ -156,8 +144,8 @@ theorem Transport.hasTrivialHolonomy_iff_hasSCCTrivializations :
             (trivialization (G.target edge) htarget :
                 Fiber base → Fiber (G.target edge)) ∘
               (trivialization (G.source edge) hsource).symm := by
-      let hsource := linkedTo_of_mem_cycle_source cycle hmem
-      let htarget := linkedTo_of_mem_cycle_target cycle hmem
+      let hsource := linkedTo_source_of_mem_edges cycle hmem
+      let htarget := linkedTo_target_of_mem_edges cycle hmem
       exact ⟨hsource, htarget, htrivialization edge hsource htarget⟩
     have hwalk := T.walkMap_eq_of_edgeTrivializations
       trivialization cycle hbase hbase hedge

@@ -22,6 +22,8 @@ walk in it strictly increases the component order.
 * `Maths.SCC` and `Maths.toSCC`: the strongly connected components as the
   antisymmetrization of that preorder, and the quotient map.
 * `Maths.InterSCCEdge` and `Maths.sccCondensation`: the condensation graph on components.
+* `Maths.sccSet`: the vertex set of a strongly connected component, as the fiber of
+  `Maths.toSCC` over it.
 
 ## Main results
 
@@ -29,6 +31,8 @@ walk in it strictly increases the component order.
   are mutually reachable.
 * `Maths.sccCondensation_edge_strict` and `Maths.sccCondensation_no_nonempty_closedWalk`:
   the condensation is acyclic.
+* `Maths.source_mem_sccSet_of_mem_edges` and `Maths.target_mem_sccSet_of_mem_edges`: a
+  closed walk stays inside the strongly connected component of its base vertex.
 
 ## Tags
 
@@ -132,5 +136,39 @@ theorem sccCondensation_no_nonempty_closedWalk
   by_contra hnonzero
   have hpositive : 0 < cycle.length := Nat.pos_of_ne_zero hnonzero
   exact (lt_irrefl base) (sccCondensation_walk_lt_of_pos cycle hpositive)
+
+/-! ## The vertex set of a component -/
+
+/-- The vertex set of a strongly connected component: the fiber of
+`Maths.toSCC` over it. -/
+def sccSet (G : EdgeGraph V E) (component : SCC G) : Set V :=
+  {vertex | toSCC G vertex = component}
+
+/-- Membership in the vertex set of a component is membership in the fiber of
+`Maths.toSCC`. -/
+@[simp] theorem mem_sccSet {component : SCC G} {vertex : V} :
+    vertex ∈ sccSet G component ↔ toSCC G vertex = component :=
+  Iff.rfl
+
+/-- The component of a marked vertex consists of the vertices mutually reachable
+with it. -/
+theorem mem_sccSet_toSCC_iff_linkedTo {base vertex : V} :
+    vertex ∈ sccSet G (toSCC G base) ↔ LinkedTo G base vertex := by
+  rw [mem_sccSet, toSCC_eq_toSCC_iff_linkedTo]
+  exact ⟨fun hlinked => ⟨hlinked.2, hlinked.1⟩, fun hlinked => ⟨hlinked.2, hlinked.1⟩⟩
+
+/-- A closed walk stays inside the strongly connected component of its base vertex:
+the source of every traversed edge lies in that component. -/
+theorem source_mem_sccSet_of_mem_edges {base : V} (cycle : G.Walk base base)
+    {edge : E} (hmem : edge ∈ cycle.edges) :
+    G.source edge ∈ sccSet G (toSCC G base) :=
+  mem_sccSet_toSCC_iff_linkedTo.2 (linkedTo_source_of_mem_edges cycle hmem)
+
+/-- A closed walk stays inside the strongly connected component of its base vertex:
+the target of every traversed edge lies in that component. -/
+theorem target_mem_sccSet_of_mem_edges {base : V} (cycle : G.Walk base base)
+    {edge : E} (hmem : edge ∈ cycle.edges) :
+    G.target edge ∈ sccSet G (toSCC G base) :=
+  mem_sccSet_toSCC_iff_linkedTo.2 (linkedTo_target_of_mem_edges cycle hmem)
 
 end Maths
