@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.Additive.Quantitative
+public import Maths.Multitubes.Additive.Cycles
 public import Mathlib.Data.Set.Finite.Lemmas
 
 import Mathlib.Data.Set.Finite.List
@@ -14,10 +14,10 @@ import Mathlib.Data.Set.Finite.List
 # Short-cycle completeness for additive transport
 
 On a finite vertex set, checking additive closed-walk inequalities only up to
-the number of vertices is complete.  The proof removes a nonempty closed
-subwalk from the prefix of any longer cycle and inducts on length.  It does not
-require finite edge type, decidable equality, or a pre-existing simple-cycle
-datatype.
+the number of vertices is complete.  A violated bound is already violated on a simple cycle
+(`Maths.AdditiveTransport.exists_simpleCycle_mean_gt_of_closedWalk`), and a simple cycle has
+at most one edge per vertex (`Maths.EdgeGraph.Walk.IsSimpleCycle.length_le_card`).  Neither
+step requires a finite edge type or decidable equality.
 
 Applied to uniformly shifted weights, this gives a bounded-cycle version of
 the exact one-sided residual threshold.  Thus every obstruction has a closed
@@ -63,69 +63,6 @@ variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 
 open MaxPlusPotential
 
-/-- If every nonempty closed walk of length at most the number of vertices has
-nonpositive weight, then every closed walk has nonpositive weight. -/
-theorem closedWalk_nonpos_of_short [Fintype V] (weight : E → ℝ)
-    (hshort : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      0 < cycle.length → cycle.length ≤ Fintype.card V →
-        walkSum weight cycle ≤ 0) :
-    ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      walkSum weight cycle ≤ 0 := by
-  intro vertex cycle
-  suffices hbounded : ∀ bound : ℕ, cycle.length ≤ bound →
-      walkSum weight cycle ≤ 0 by
-    exact hbounded cycle.length le_rfl
-  intro bound
-  induction bound generalizing vertex cycle with
-  | zero =>
-      intro hlength
-      have hzero : cycle.length = 0 := Nat.eq_zero_of_le_zero hlength
-      cases cycle with
-      | nil => simp [walkSum]
-      | concat edge before => simp at hzero
-  | succ bound ih =>
-      intro hlength
-      by_cases hcard : cycle.length ≤ Fintype.card V
-      · by_cases hnil : cycle.length = 0
-        · cases cycle with
-          | nil => simp [walkSum]
-          | concat edge before => simp at hnil
-        · exact hshort vertex cycle (Nat.pos_of_ne_zero hnil) hcard
-      · cases cycle with
-        | nil => simp [walkSum]
-        | concat edge initial =>
-            have hinitialDup : ¬initial.visited.Nodup := by
-              intro hnodup
-              have hlengthCard := hnodup.length_le_card
-              rw [EdgeGraph.Walk.length_visited] at hlengthCard
-              simp only [EdgeGraph.Walk.length_concat] at hcard
-              exact hcard hlengthCard
-            obtain ⟨middle, before, inner, after, hinnerPos, hedges⟩ :=
-              initial.exists_closedSubwalk_of_not_nodup hinitialDup
-            let remainder : G.Walk (G.target edge) (G.target edge) :=
-              (before.append after).concat edge
-            have hlengthEq : (initial.concat edge).length =
-                inner.length + remainder.length := by
-              have hedgeLength := congrArg List.length hedges
-              simp only [List.length_append, EdgeGraph.Walk.edges_length] at hedgeLength
-              simp only [EdgeGraph.Walk.length_concat,
-                EdgeGraph.Walk.length_append, remainder]
-              omega
-            have hremainderPos : 0 < remainder.length := by
-              simp [remainder]
-            have hinnerLe : inner.length ≤ bound := by omega
-            have hremainderLe : remainder.length ≤ bound := by omega
-            have hinnerWeight := ih middle inner hinnerLe
-            have hremainderWeight := ih (G.target edge) remainder hremainderLe
-            have hweightEq : walkSum weight (initial.concat edge) =
-                walkSum weight inner + walkSum weight remainder := by
-              simp only [walkSum, EdgeGraph.Walk.edges_concat,
-                EdgeGraph.Walk.edges_append, remainder, hedges,
-                List.map_append, List.sum_append]
-              ring
-            rw [hweightEq]
-            linarith
-
 /-- It is enough to check closed-walk affine bounds on cycles of length at
 most the number of vertices. -/
 theorem closedWalk_le_length_mul_of_short [Fintype V]
@@ -135,16 +72,22 @@ theorem closedWalk_le_length_mul_of_short [Fintype V]
         walkSum weight cycle ≤ cycle.length * level) :
     ∀ (vertex : V) (cycle : G.Walk vertex vertex),
       walkSum weight cycle ≤ cycle.length * level := by
-  have hnonpos := closedWalk_nonpos_of_short
-    (G := G) (fun edge => weight edge - level) (by
-      intro vertex cycle hpos hcard
-      rw [walkSum_sub_const, nsmul_eq_mul]
-      have hbound := hshort vertex cycle hpos hcard
-      linarith)
   intro vertex cycle
-  have hbound := hnonpos vertex cycle
-  rw [walkSum_sub_const, nsmul_eq_mul] at hbound
-  linarith
+  by_contra hnot
+  obtain ⟨base, simple, hsimple, hgt⟩ :=
+    exists_simpleCycle_mean_gt_of_closedWalk weight level cycle (lt_of_not_ge hnot)
+  exact (hshort base simple hsimple.1 hsimple.length_le_card).not_gt hgt
+
+/-- If every nonempty closed walk of length at most the number of vertices has
+nonpositive weight, then every closed walk has nonpositive weight. -/
+theorem closedWalk_nonpos_of_short [Fintype V] (weight : E → ℝ)
+    (hshort : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      0 < cycle.length → cycle.length ≤ Fintype.card V →
+        walkSum weight cycle ≤ 0) :
+    ∀ (vertex : V) (cycle : G.Walk vertex vertex),
+      walkSum weight cycle ≤ 0 := fun vertex cycle => by
+  simpa using closedWalk_le_length_mul_of_short weight 0
+    (fun vertex cycle hpos hcard => by simpa using hshort vertex cycle hpos hcard) vertex cycle
 
 /-- **Short-cycle exact threshold.**  On a finite graph, every obstruction to
 a one-sided residual threshold occurs on a nonempty closed walk of
@@ -179,19 +122,9 @@ theorem exists_short_closedWalk_of_nonempty [Fintype V]
     {vertex : V} (cycle : G.Walk vertex vertex) (hcycle : 0 < cycle.length) :
     ∃ (middle : V) (short : G.Walk middle middle),
       0 < short.length ∧ short.length ≤ Fintype.card V := by
-  by_contra hnone
-  have hnonpos := closedWalk_nonpos_of_short
-    (G := G) (fun _ : E => (1 : ℝ)) (by
-      intro middle short hpos hcard
-      exfalso
-      apply hnone
-      exact ⟨middle, short, hpos, hcard⟩)
-  have himpossible := hnonpos vertex cycle
-  have hweight : walkSum (fun _ : E => (1 : ℝ)) cycle = cycle.length := by
-    simp [walkSum, EdgeGraph.Walk.edges_length, nsmul_eq_mul]
-  rw [hweight] at himpossible
-  have hpositive : (0 : ℝ) < cycle.length := by exact_mod_cast hcycle
-  linarith
+  obtain ⟨middle, short, hsimple, -⟩ :=
+    exists_simpleCycle_cycleMeanDominates (fun _ => 0) cycle hcycle
+  exact ⟨middle, short, hsimple.1, hsimple.length_le_card⟩
 
 /-- Edge lists realized by nonempty closed walks no longer than the number of
 vertices. -/
