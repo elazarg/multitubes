@@ -77,20 +77,12 @@ theorem leastMixedMajorant_isLeast
     (hresidual : ∀ edge : LaxificationReverseEdge mode,
       GaloisConnection (residual edge) (T.edgeMap edge.1))
     (lower : ∀ vertex : V, Fiber vertex) :
-    (∀ vertex, lower vertex ≤ T.leastMixedMajorant hlax hresidual lower vertex) ∧
-      T.IsMixedSection mode (T.leastMixedMajorant hlax hresidual lower) ∧
-      ∀ family : ∀ vertex, Fiber vertex,
-        (∀ vertex, lower vertex ≤ family vertex) →
-        T.IsMixedSection mode family →
-        T.leastMixedMajorant hlax hresidual lower ≤ family := by
-  have hmono := T.monotone_laxification_of_galoisConnection hlax hresidual
-  have hleast := (T.laxification mode residual).leastLaxMajorant_isLeast hmono lower
-  refine ⟨hleast.1, ?_, ?_⟩
-  · apply (T.isMixedSection_iff_laxification_of_galoisConnection hresidual).mpr
-    exact hleast.2.1
-  · intro family hlower hfamily
-    apply hleast.2.2 family hlower
-    exact (T.isMixedSection_iff_laxification_of_galoisConnection hresidual).mp hfamily
+    IsLeast {family | lower ≤ family ∧ T.IsMixedSection mode family}
+      (T.leastMixedMajorant hlax hresidual lower) := by
+  unfold leastMixedMajorant
+  simpa only [T.isMixedSection_iff_laxification_of_galoisConnection hresidual] using
+    (T.laxification mode residual).leastLaxMajorant_isLeast
+      (T.monotone_laxification_of_galoisConnection hlax hresidual) lower
 
 /-- Least mixed majorant as a closure operator.  Its closed points are defined
 to be the mixed sections. -/
@@ -101,11 +93,10 @@ def leastMixedMajorantClosure
     ClosureOperator (∀ vertex : V, Fiber vertex) :=
   ClosureOperator.ofPred (T.leastMixedMajorant hlax hresidual)
     (T.IsMixedSection mode)
-    (fun lower ↦ (T.leastMixedMajorant_isLeast hlax hresidual lower).1)
-    (fun lower ↦ (T.leastMixedMajorant_isLeast hlax hresidual lower).2.1)
-    (fun {lower family} hlower hfamily ↦
-      (T.leastMixedMajorant_isLeast hlax hresidual lower).2.2 family
-        (fun vertex ↦ hlower vertex) hfamily)
+    (fun lower ↦ (T.leastMixedMajorant_isLeast hlax hresidual lower).1.1)
+    (fun lower ↦ (T.leastMixedMajorant_isLeast hlax hresidual lower).1.2)
+    (fun _ _ hlower hfamily ↦
+      (T.leastMixedMajorant_isLeast hlax hresidual _).2 ⟨hlower, hfamily⟩)
 
 /-- Applying the bundled closure operator computes the least mixed majorant. -/
 @[simp] theorem leastMixedMajorantClosure_apply
@@ -136,8 +127,7 @@ theorem leastMixedMajorant_bot_isLeast
     IsLeast {family | T.IsMixedSection mode family}
       (T.leastMixedMajorant hlax hresidual ⊥) := by
   have hleast := T.leastMixedMajorant_isLeast hlax hresidual (⊥ : ∀ vertex, Fiber vertex)
-  exact ⟨hleast.2.1, fun family hfamily ↦
-    hleast.2.2 family (fun _ ↦ bot_le) hfamily⟩
+  exact ⟨hleast.1.2, fun _ hfamily ↦ hleast.2 ⟨bot_le, hfamily⟩⟩
 
 /-- Complete-lattice mixed transport with the supplied residuals has a mixed
 section. -/
@@ -161,10 +151,9 @@ theorem exists_isMixedSection_between_iff_leastMixedMajorant_le
   have hleast := T.leastMixedMajorant_isLeast hlax hresidual lower
   constructor
   · rintro ⟨family, hfamily, hlower, hupper⟩
-    exact (hleast.2.2 family (fun vertex ↦ hlower vertex) hfamily).trans hupper
+    exact (hleast.2 ⟨hlower, hfamily⟩).trans hupper
   · intro hupper
-    refine ⟨T.leastMixedMajorant hlax hresidual lower, hleast.2.1,
-      fun vertex ↦ hleast.1 vertex, hupper⟩
+    exact ⟨T.leastMixedMajorant hlax hresidual lower, hleast.1.2, hleast.1.1, hupper⟩
 
 end CompleteLattice
 

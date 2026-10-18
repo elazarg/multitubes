@@ -148,31 +148,20 @@ theorem preimage_image_eq_self_iff
       exact (h hxy.symm).mpr hy
     · exact Set.subset_preimage_image step P
 
-/-- The forward predicate transport has the arbitrary-supremum homomorphisms needed by path
-closure. -/
-def forwardPredicateSupHom (step : (edge : E) →
-    State (G.source edge) → State (G.target edge)) (edge : E) :
-    sSupHom (Set (State (G.source edge))) (Set (State (G.target edge))) :=
-  sSupHom.setImage (step edge)
+/-- Direct image preserves arbitrary unions, as path closure requires. -/
+theorem preservesSSup_forwardPredicateTransport (G : EdgeGraph V E)
+    (step : (edge : E) → State (G.source edge) → State (G.target edge)) :
+    (forwardPredicateTransport G step).PreservesSSup :=
+  Transport.preservesSSup_of_sSupHom (fun edge => sSupHom.setImage (step edge)) fun _ => rfl
 
 /-- The path closure of lower predicates is the least inductive family containing them. -/
 theorem leastReachablePredicate
     (G : EdgeGraph V E)
     (step : (edge : E) → State (G.source edge) → State (G.target edge))
     (lower : ∀ vertex, Set (State vertex)) :
-    (forwardPredicateTransport G step).IsLaxSection
-        ((forwardPredicateTransport G step).pathClosure lower) ∧
-      (∀ vertex, lower vertex ≤
-        (forwardPredicateTransport G step).pathClosure lower vertex) ∧
-      ∀ family : ∀ vertex, Set (State vertex),
-        (forwardPredicateTransport G step).IsLaxSection family →
-        (∀ vertex, lower vertex ≤ family vertex) →
-        ∀ vertex,
-          (forwardPredicateTransport G step).pathClosure lower vertex ≤ family vertex := by
-  apply (forwardPredicateTransport G step).pathClosure_isLeast_of_sSupHom
-    (fun edge => forwardPredicateSupHom step edge)
-  intro edge point
-  rfl
+    IsLeast {family | lower ≤ family ∧ (forwardPredicateTransport G step).IsLaxSection family}
+      ((forwardPredicateTransport G step).pathClosure lower) :=
+  Transport.pathClosure_isLeast (preservesSSup_forwardPredicateTransport G step) lower
 
 /-! ## A noninjective state transition -/
 

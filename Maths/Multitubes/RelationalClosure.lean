@@ -17,12 +17,10 @@ relation-labelled transport admits path closure: starting from prescribed subset
 it collects exactly the elements reachable along some typed walk. This closure is the least lax
 section containing the prescribed subsets.
 
-## Main definitions
-
-* `Maths.RelationTransport.edgeImageSupHom` - existential image as a supremum-preserving map.
-
 ## Main results
 
+* `Maths.RelationTransport.preservesSSup_powersetTransport` - existential image preserves
+  arbitrary unions.
 * `Maths.RelationTransport.mem_pathClosure_iff` - membership in path closure is relational
   reachability along some walk.
 * `Maths.RelationTransport.pathClosure_isLeast` - relational path closure is the least attainable
@@ -47,16 +45,11 @@ variable {V : Type uV} {E : Type uE}
 variable {G : EdgeGraph V E} {Fiber : V → Type uF}
 variable (T : RelationTransport G Fiber)
 
-/-- An existential-image edge map regarded as a map preserving arbitrary suprema. -/
-def edgeImageSupHom (edge : E) :
-    sSupHom (Set (Fiber (G.source edge))) (Set (Fiber (G.target edge))) where
-  toFun := (T.edgeRelation edge).image
-  map_sSup' := by
-    intro sets
-    change (T.edgeRelation edge).image (⋃₀ sets) =
-      ⋃₀ ((T.edgeRelation edge).image '' sets)
-    rw [SetRel.image_sUnion]
-    simp only [Set.sUnion_image]
+/-- Existential image preserves arbitrary unions. -/
+theorem preservesSSup_powersetTransport : T.powersetTransport.PreservesSSup := by
+  intro edge sets
+  change (T.edgeRelation edge).image (⋃₀ sets) = ⋃₀ ((T.edgeRelation edge).image '' sets)
+  rw [SetRel.image_sUnion, Set.sUnion_image]
 
 /-- Path closure contains exactly the values related to initial data along some typed walk. -/
 theorem mem_pathClosure_iff (lower : ∀ vertex, Set (Fiber vertex))
@@ -80,15 +73,8 @@ theorem mem_pathClosure_iff (lower : ∀ vertex, Set (Fiber vertex))
 
 /-- Path closure is the least lax section containing the prescribed fiber subsets. -/
 theorem pathClosure_isLeast (lower : ∀ vertex, Set (Fiber vertex)) :
-    T.powersetTransport.IsLaxSection (T.powersetTransport.pathClosure lower) ∧
-      (∀ vertex, lower vertex ⊆ T.powersetTransport.pathClosure lower vertex) ∧
-      ∀ family : ∀ vertex, Set (Fiber vertex),
-        T.powersetTransport.IsLaxSection family →
-        (∀ vertex, lower vertex ⊆ family vertex) →
-        ∀ vertex, T.powersetTransport.pathClosure lower vertex ⊆ family vertex := by
-  apply T.powersetTransport.pathClosure_isLeast_of_sSupHom
-    (fun edge ↦ T.edgeImageSupHom edge)
-  intro edge point
-  rfl
+    IsLeast {family | lower ≤ family ∧ T.powersetTransport.IsLaxSection family}
+      (T.powersetTransport.pathClosure lower) :=
+  Transport.pathClosure_isLeast T.preservesSSup_powersetTransport lower
 
 end Maths.RelationTransport

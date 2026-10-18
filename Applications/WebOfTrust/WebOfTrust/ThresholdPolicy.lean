@@ -133,12 +133,8 @@ theorem thresholdExpected_isLax : thresholdTransport.IsLaxSection thresholdExpec
 
 /-- Two reverse-ordered sweeps compute the least sound assignment containing the seeds. -/
 theorem thresholdSweep_two_isLeast :
-    thresholdSeed ≤ thresholdTransport.sweepRelaxation thresholdSweep thresholdSeed 2 ∧
-      thresholdTransport.IsLaxSection
-        (thresholdTransport.sweepRelaxation thresholdSweep thresholdSeed 2) ∧
-      ∀ majorant : Fin 4 → Finset (Fin 3),
-        thresholdSeed ≤ majorant → thresholdTransport.IsLaxSection majorant →
-          thresholdTransport.sweepRelaxation thresholdSweep thresholdSeed 2 ≤ majorant := by
+    IsLeast {majorant | thresholdSeed ≤ majorant ∧ thresholdTransport.IsLaxSection majorant}
+      (thresholdTransport.sweepRelaxation thresholdSweep thresholdSeed 2) := by
   apply thresholdTransport.sweepRelaxation_isLeast_of_relaxSweep_eq
     monotone_thresholdEdgeMap mem_thresholdSweep
   rw [thresholdSweep_two]

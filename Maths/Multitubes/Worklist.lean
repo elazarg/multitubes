@@ -199,17 +199,11 @@ theorem exists_scheduledRelaxation_eq_leastLaxMajorant
     T.isLaxSection_of_scheduledRelaxation_stable hfair seed hstable
   have hseed : seed ≤ T.scheduledRelaxation schedule seed n :=
     T.monotone_scheduledRelaxation schedule seed (Nat.zero_le n)
-  have hleast_le : T.leastLaxMajorant hmono seed ≤
-      T.scheduledRelaxation schedule seed n :=
-    (T.leastLaxMajorant_isLeast hmono seed).2.2 _ hseed hlax
-  have hrun_le : T.scheduledRelaxation schedule seed n ≤
-      T.leastLaxMajorant hmono seed :=
-    T.scheduledRelaxation_le_of_le
-      (T.leastLaxMajorant_isLeast hmono seed).1
-      hmono
-      (T.leastLaxMajorant_isLeast hmono seed).2.1 n
   have hn : T.scheduledRelaxation schedule seed n = T.leastLaxMajorant hmono seed :=
-    le_antisymm hrun_le hleast_le
+    le_antisymm
+      (T.scheduledRelaxation_le_of_le (T.le_leastLaxMajorant hmono seed) hmono
+        (T.isLaxSection_leastLaxMajorant hmono seed) n)
+      (T.leastLaxMajorant_le hmono hseed hlax)
   exact ⟨n, fun m hnm ↦ (hstable m hnm).symm.trans hn⟩
 
 end LeastMajorant
@@ -332,15 +326,11 @@ theorem sweepRelaxation_isLeast_of_relaxSweep_eq
     (seed : ∀ vertex, Fiber vertex) (n : ℕ)
     (hfixed : T.relaxSweep edges (T.sweepRelaxation edges seed n) =
       T.sweepRelaxation edges seed n) :
-    seed ≤ T.sweepRelaxation edges seed n ∧
-      T.IsLaxSection (T.sweepRelaxation edges seed n) ∧
-      ∀ majorant : ∀ vertex, Fiber vertex,
-        seed ≤ majorant → T.IsLaxSection majorant →
-          T.sweepRelaxation edges seed n ≤ majorant := by
-  refine ⟨T.monotone_sweepRelaxation edges seed (Nat.zero_le n),
-    T.isLaxSection_of_relaxSweep_eq hcover hfixed, ?_⟩
-  intro majorant hseed hmaj
-  exact T.sweepRelaxation_le_of_le hmono edges hseed hmaj n
+    IsLeast {majorant | seed ≤ majorant ∧ T.IsLaxSection majorant}
+      (T.sweepRelaxation edges seed n) :=
+  ⟨⟨T.monotone_sweepRelaxation edges seed (Nat.zero_le n),
+      T.isLaxSection_of_relaxSweep_eq hcover hfixed⟩,
+    fun _ hmajorant ↦ T.sweepRelaxation_le_of_le hmono edges hmajorant.1 hmajorant.2 n⟩
 
 end Sweep
 
@@ -357,16 +347,9 @@ theorem sweepRelaxation_eq_leastLaxMajorant_of_relaxSweep_eq
     (seed : ∀ vertex, Fiber vertex) (n : ℕ)
     (hfixed : T.relaxSweep edges (T.sweepRelaxation edges seed n) =
       T.sweepRelaxation edges seed n) :
-    T.sweepRelaxation edges seed n = T.leastLaxMajorant hmono seed := by
-  have hlax : T.IsLaxSection (T.sweepRelaxation edges seed n) :=
-    T.isLaxSection_of_relaxSweep_eq hcover hfixed
-  have hseed : seed ≤ T.sweepRelaxation edges seed n :=
-    T.monotone_sweepRelaxation edges seed (Nat.zero_le n)
-  apply le_antisymm
-  · exact T.sweepRelaxation_le_of_le hmono edges
-      (T.leastLaxMajorant_isLeast hmono seed).1
-      (T.leastLaxMajorant_isLeast hmono seed).2.1 n
-  · exact (T.leastLaxMajorant_isLeast hmono seed).2.2 _ hseed hlax
+    T.sweepRelaxation edges seed n = T.leastLaxMajorant hmono seed :=
+  (T.sweepRelaxation_isLeast_of_relaxSweep_eq hmono hcover seed n hfixed).unique
+    (T.leastLaxMajorant_isLeast hmono seed)
 
 /-- Under ACC, repeated sweeps over a covering list eventually equal the least lax majorant. -/
 theorem exists_sweepRelaxation_eq_leastLaxMajorant
@@ -383,19 +366,8 @@ theorem exists_sweepRelaxation_eq_leastLaxMajorant
       T.sweepRelaxation edges seed n := by
     rw [← T.sweepRelaxation_succ]
     exact (hstable (n + 1) (Nat.le_succ n)).symm
-  have hlax : T.IsLaxSection (T.sweepRelaxation edges seed n) :=
-    T.isLaxSection_of_relaxSweep_eq hcover hfixed
-  have hseed : seed ≤ T.sweepRelaxation edges seed n :=
-    T.monotone_sweepRelaxation edges seed (Nat.zero_le n)
-  have hleast_le : T.leastLaxMajorant hmono seed ≤ T.sweepRelaxation edges seed n :=
-    (T.leastLaxMajorant_isLeast hmono seed).2.2 _ hseed hlax
-  have hrun_le : T.sweepRelaxation edges seed n ≤ T.leastLaxMajorant hmono seed :=
-    T.sweepRelaxation_le_of_le hmono edges
-      (T.leastLaxMajorant_isLeast hmono seed).1
-      (T.leastLaxMajorant_isLeast hmono seed).2.1 n
-  have hn : T.sweepRelaxation edges seed n = T.leastLaxMajorant hmono seed :=
-    le_antisymm hrun_le hleast_le
-  exact ⟨n, fun m hnm ↦ (hstable m hnm).symm.trans hn⟩
+  exact ⟨n, fun m hnm ↦ (hstable m hnm).symm.trans
+    (T.sweepRelaxation_eq_leastLaxMajorant_of_relaxSweep_eq hmono hcover seed n hfixed)⟩
 
 end SweepLeastMajorant
 

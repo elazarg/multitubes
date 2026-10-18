@@ -293,15 +293,12 @@ theorem leastLaxMajorant_le_map (f : UpperSimulation T S)
     (hTmono : ∀ edge : E, Monotone (T.edgeMap edge))
     (hSmono : ∀ edge : E, Monotone (S.edgeMap edge))
     (lowerT : ∀ vertex, Fiber vertex) (lowerS : ∀ vertex, Other vertex)
-    (hlower : ∀ vertex, lowerS vertex ≤ f.app vertex (lowerT vertex)) :
+    (hlower : lowerS ≤ f.mapFamily lowerT) :
     S.leastLaxMajorant hSmono lowerS ≤
-      f.mapFamily (T.leastLaxMajorant hTmono lowerT) := by
-  apply (S.leastLaxMajorant_isLeast hSmono lowerS).2.2
-  · intro vertex
-    exact (hlower vertex).trans <| hfmono vertex
-      ((T.leastLaxMajorant_isLeast hTmono lowerT).1 vertex)
-  · exact f.map_isLaxSection hfmono
-      (T.leastLaxMajorant_isLeast hTmono lowerT).2.1
+      f.mapFamily (T.leastLaxMajorant hTmono lowerT) :=
+  S.leastLaxMajorant_le hSmono
+    (fun vertex ↦ (hlower vertex).trans <| hfmono vertex (T.le_leastLaxMajorant hTmono _ vertex))
+    (f.map_isLaxSection hfmono (T.isLaxSection_leastLaxMajorant hTmono lowerT))
 
 end UpperSimulation
 

@@ -87,10 +87,10 @@ private theorem walkMap_le_leastLaxMajorant
     (forwardPredicateTransport G step).walkMap walk (lower start) ⊆
       (forwardPredicateTransport G step).leastLaxMajorant
         (monotone_forwardPredicateTransport step) lower finish := by
-  have hlower := ((forwardPredicateTransport G step).leastLaxMajorant_isLeast
-    (monotone_forwardPredicateTransport step) lower).1
-  have hlax := ((forwardPredicateTransport G step).leastLaxMajorant_isLeast
-    (monotone_forwardPredicateTransport step) lower).2.1
+  have hlower := (forwardPredicateTransport G step).le_leastLaxMajorant
+    (monotone_forwardPredicateTransport step) lower
+  have hlax := (forwardPredicateTransport G step).isLaxSection_leastLaxMajorant
+    (monotone_forwardPredicateTransport step) lower
   induction walk with
   | nil => exact hlower _
   | concat edge walk ih =>
@@ -156,19 +156,9 @@ theorem reachableStates_eq_leastLaxMajorant
         (monotone_forwardPredicateTransport (G := G) (Concrete := fun _ => Abstract)
           abstractStep)
         (fun vertex => (initial vertex : Set Abstract)) := by
-  let transport := forwardPredicateTransport (State := fun _ : V => Abstract) G abstractStep
-  let lower := fun vertex => (initial vertex : Set Abstract)
-  have hpath := leastReachablePredicate (State := fun _ : V => Abstract) G abstractStep lower
-  have hleast := transport.leastLaxMajorant_isLeast
-    (monotone_forwardPredicateTransport (G := G) (Concrete := fun _ => Abstract)
-      abstractStep) lower
-  have heq : transport.pathClosure lower =
-      transport.leastLaxMajorant
-        (monotone_forwardPredicateTransport (G := G) (Concrete := fun _ => Abstract)
-          abstractStep) lower := by
-    apply le_antisymm
-    · exact hpath.2.2 _ hleast.2.1 hleast.1
-    · exact hleast.2.2 _ hpath.2.1 hpath.1
+  have heq := Transport.pathClosure_eq_leastLaxMajorant
+    (preservesSSup_forwardPredicateTransport (State := fun _ : V => Abstract) G abstractStep)
+    (fun vertex => (initial vertex : Set Abstract))
   funext vertex
   ext abstract
   change abstract ∈ reachableStates G abstractStep initial vertex ↔ _

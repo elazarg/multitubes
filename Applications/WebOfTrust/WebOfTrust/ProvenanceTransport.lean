@@ -138,14 +138,9 @@ theorem soundClosure_isLeast (G : EdgeGraph V E)
     (transfer : (edge : E) →
       sSupHom (Set (Evidence (G.source edge))) (Set (Evidence (G.target edge))))
     (seed : ∀ vertex, Set (Evidence vertex)) :
-    IsSoundAssignment G transfer (soundClosure G transfer seed) ∧
-      (∀ vertex, seed vertex ⊆ soundClosure G transfer seed vertex) ∧
-      ∀ assignment : ∀ vertex, Set (Evidence vertex),
-        IsSoundAssignment G transfer assignment →
-        (∀ vertex, seed vertex ⊆ assignment vertex) →
-        ∀ vertex, soundClosure G transfer seed vertex ⊆ assignment vertex := by
-  exact (evidenceTransport G transfer).pathClosure_isLeast_of_sSupHom transfer
-    (fun _edge _evidence ↦ rfl) seed
+    IsLeast {assignment | seed ≤ assignment ∧ IsSoundAssignment G transfer assignment}
+      (soundClosure G transfer seed) :=
+  Transport.pathClosure_isLeast (Transport.preservesSSup_of_sSupHom transfer fun _ ↦ rfl) seed
 
 end WebOfTrust
 

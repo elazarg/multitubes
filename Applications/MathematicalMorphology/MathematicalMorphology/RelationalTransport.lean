@@ -118,19 +118,11 @@ theorem leastDilationEnvelope
     (relation : (edge : E) →
       SetRel (Signal (G.source edge)) (Signal (G.target edge)))
     (lower : ∀ vertex, Set (Signal vertex)) :
-    (dilationTransport G relation).IsLaxSection
-        ((dilationTransport G relation).pathClosure lower) ∧
-      (∀ vertex, lower vertex ≤
-        (dilationTransport G relation).pathClosure lower vertex) ∧
-      ∀ family : ∀ vertex, Set (Signal vertex),
-        (dilationTransport G relation).IsLaxSection family →
-        (∀ vertex, lower vertex ≤ family vertex) →
-        ∀ vertex,
-          (dilationTransport G relation).pathClosure lower vertex ≤ family vertex := by
-  apply (dilationTransport G relation).pathClosure_isLeast_of_sSupHom
-    (fun edge => dilationSupHom (relation edge))
-  intro edge point
-  rfl
+    IsLeast {family | lower ≤ family ∧ (dilationTransport G relation).IsLaxSection family}
+      ((dilationTransport G relation).pathClosure lower) :=
+  Transport.pathClosure_isLeast (T := dilationTransport G relation)
+    (Transport.preservesSSup_of_sSupHom (fun edge => dilationSupHom (relation edge))
+      fun _ => rfl) lower
 
 /-! ## A nonfunctional relational example -/
 
