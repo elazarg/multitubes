@@ -140,15 +140,6 @@ theorem mem_normalizedFarkasCertificateSet_iff
         change (∑ row, 1 * coefficient row) = 1
         simpa using hcertificate.2.1
 
-private theorem coefficient_eq_zero_of_sum_eq_zero
-    (coefficient : Row → ℝ) (hnonneg : ∀ row, 0 ≤ coefficient row)
-    (hsum : ∑ row, coefficient row = 0) :
-    ∀ row, coefficient row = 0 := by
-  intro row
-  have hall := (Finset.sum_eq_zero_iff_of_nonneg
-    (s := Finset.univ) (fun index _ => hnonneg index)).mp hsum
-  exact hall row (Finset.mem_univ row)
-
 /-- Infeasibility produces a normalized certificate with positive objective. -/
 theorem exists_positive_normalizedCertificate_of_infeasible
     (delta : Row → State → ℝ) (base : Row → ℝ)
@@ -167,8 +158,7 @@ theorem exists_positive_normalizedCertificate_of_infeasible
       by_contra hnot
       have hmassZero : ∑ row, coefficient row = 0 :=
         le_antisymm (le_of_not_gt hnot) hmassNonneg
-      have hzero := coefficient_eq_zero_of_sum_eq_zero
-        coefficient hnonneg hmassZero
+      have hzero := (Fintype.sum_eq_zero_iff_of_nonneg hnonneg).1 hmassZero
       have : ∑ row, coefficient row * base row = 0 := by simp [hzero]
       linarith
     let mass := ∑ row, coefficient row

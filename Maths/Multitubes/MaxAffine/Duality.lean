@@ -260,16 +260,6 @@ theorem branchCertificateValue_le_of_worstResidualAtMost
   rw [weighted_shiftedBase_eq, hcertificate.2.1] at hweak
   linarith
 
-private theorem coefficient_eq_zero_of_sum_eq_zero
-    (coefficient : Branch label → ℝ)
-    (hnonneg : ∀ branch, 0 ≤ coefficient branch)
-    (hsum : ∑ branch, coefficient branch = 0) :
-    ∀ branch, coefficient branch = 0 := by
-  intro branch
-  have hall := (Finset.sum_eq_zero_iff_of_nonneg
-    (s := Finset.univ) (fun index _ ↦ hnonneg index)).mp hsum
-  exact hall branch (Finset.mem_univ branch)
-
 /-- **Exact normalized threshold duality.**  A candidate with worst genuine
 branch residual at most `level` exists exactly when every balanced mass-one
 certificate has value at most `level`.  This statement is meaningful in

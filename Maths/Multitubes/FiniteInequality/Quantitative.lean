@@ -90,15 +90,6 @@ private theorem weighted_shiftedBase_eq (base : Row → ℝ)
   rw [Finset.sum_sub_distrib, ← Finset.sum_mul]
   ring
 
-private theorem coefficient_eq_zero_of_sum_eq_zero
-    (coefficient : Row → ℝ) (hnonneg : ∀ row, 0 ≤ coefficient row)
-    (hsum : ∑ row, coefficient row = 0) :
-    ∀ row, coefficient row = 0 := by
-  intro row
-  have hall := (Finset.sum_eq_zero_iff_of_nonneg
-    (s := Finset.univ) (fun index _ => hnonneg index)).mp hsum
-  exact hall row (Finset.mem_univ row)
-
 /-- Weak normalized duality. -/
 theorem certificateValue_le_of_worstResidualAtMost
     {delta : Row → State → ℝ} {base : Row → ℝ} {level : ℝ}
@@ -140,8 +131,7 @@ theorem worstResidualAtMost_iff_normalizedDual_le
         by_contra hnot
         have hmassZero : ∑ row, coefficient row = 0 :=
           le_antisymm (le_of_not_gt hnot) hmassNonneg
-        have hzero := coefficient_eq_zero_of_sum_eq_zero
-          coefficient hnonneg hmassZero
+        have hzero := (Fintype.sum_eq_zero_iff_of_nonneg hnonneg).1 hmassZero
         have : ∑ row, coefficient row * (base row - level) = 0 := by
           simp [hzero]
         linarith

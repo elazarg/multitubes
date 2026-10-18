@@ -52,16 +52,6 @@ open Finset
 namespace Maths
 namespace LinearProgramming
 
-/-- A list fold over all elements of `Fin n` agrees with the corresponding finite sum. -/
-theorem list_sum_ofFn {n : ℕ} (f : Fin n → ℚ) :
-    (List.ofFn f).sum = ∑ i, f i := by
-  induction n with
-  | zero => simp
-  | succ n ih =>
-      rw [Fin.sum_univ_succ]
-      simp only [List.ofFn_succ, List.sum_cons]
-      rw [ih]
-
 /-- Evaluate a rational row using a list fold.  This computational presentation agrees with
 `Maths.LinearProgramming.rowEval` but does not require compiled multiset internals. -/
 def rationalRowEval {m n : ℕ} (A : Fin m → Fin n → ℚ) (i : Fin m)
@@ -71,7 +61,7 @@ def rationalRowEval {m n : ℕ} (A : Fin m → Fin n → ℚ) (i : Fin m)
 /-- The list-based rational row evaluator agrees with the mathematical finite sum. -/
 @[simp] theorem rationalRowEval_eq_rowEval {m n : ℕ} (A : Fin m → Fin n → ℚ)
     (i : Fin m) (x : Fin n → ℚ) : rationalRowEval A i x = rowEval A i x := by
-  exact list_sum_ofFn _
+  exact Fin.sum_ofFn _
 
 /-- Check whether a proposed rational point satisfies every row of `A x ≥ b`. -/
 def checkRationalPoint {m n : ℕ} (A : Fin m → Fin n → ℚ) (b : Fin m → ℚ)
@@ -122,7 +112,7 @@ theorem checkRationalCertificate_eq_true_iff {m n : ℕ} (A : Fin m → Fin n �
     (∀ j : Fin n, (List.ofFn fun i => u i * A i j).sum = 0) ∧
     (0 < (List.ofFn fun i => u i * b i).sum)) = true ↔ _
   rw [decide_eq_true_eq]
-  simp only [IsCertificate, list_sum_ofFn]
+  simp only [IsCertificate, Fin.sum_ofFn]
 
 /-- A successful rational certificate check rules out rational primal feasibility. -/
 theorem not_isFeasible_of_checkRationalCertificate {m n : ℕ}
