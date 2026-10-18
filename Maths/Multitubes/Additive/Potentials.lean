@@ -100,9 +100,8 @@ component in question reaches the whole graph.
 The increment orientation `φ (source e) + weight e ≤ φ (target e)` is used
 throughout.  The opposite decrement orientation
 `φ (target e) + weight e ≤ φ (source e)` is the same notion applied to the
-reversed graph, and is the convention of `Maths.ChargedPathBudget`, which studies
-nonnegative charges and the *oscillation* of a bounded potential, not
-signed weights and cycles.
+reversed graph.  `Maths.Multitubes.Additive.Budget` studies the potentials of
+bounded range, whose existence needs no finiteness of the edge type.
 
 The predicates `IsPotential` and `IsSubeigenvector` themselves need only
 addition and a comparison relation. Walk propagation uses an ordered additive

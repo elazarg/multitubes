@@ -166,7 +166,8 @@ The library includes the following theorem families.
 - **Graphs, walks, and flows.** Typed finite walks retain edge identities and encode endpoint
   compatibility. Their edge multiplicities satisfy endpoint-corrected flow conservation; closed
   walks produce circulations. The graph layer also includes Eulerian realization, infinite
-  walks, zero-charge lassos, and charged relations.
+  walks, and zero-charge lassos. Bounded potentials and walk budgets belong to the additive
+  specialization.
 - **Additive potentials.** For finite edge types, potential feasibility is characterized by
   closed-walk weights under the stated ordered-cancellation assumptions. There are circulation
   duals, strongly connected decompositions, shortest cycle witnesses, quantitative defect
@@ -221,7 +222,7 @@ The library includes the following theorem families.
   with an incoming edge at every vertex, the spectrum is represented as a finite union of closed
   convex policy-level sets.
 - **Related foundations.** Independent modules cover Eulerian trails, circulations, infinite
-  walks, zero-charge lassos, charged relations, join-semidirect labels, reflected recurrences,
+  walks, zero-charge lassos, join-semidirect labels, reflected recurrences,
   Fourier–Motzkin elimination, and standard-form linear-programming duality.
 
 Every source file begins with a module docstring listing its main definitions, results,
@@ -315,7 +316,7 @@ mathlib; the Multitubes layer consumes them.
 
 | Directory | Contents |
 | --- | --- |
-| `Maths/Graph/` | Directed multigraphs, typed walks, graph morphisms, circulations, Eulerian trails, infinite walks, zero-charge lassos, and charged relations |
+| `Maths/Graph/` | Directed multigraphs, typed walks, graph morphisms, circulations, Eulerian trails, infinite walks, and zero-charge lassos |
 | `Maths/Recursion/` | Affine, max-affine, and clamped-affine summaries, fixed points, and one-sided and two-sided reflections |
 | `Maths/LinearProgramming/` | Fourier–Motzkin elimination, alternatives, standard-form LP, sparsity, and duality |
 | `Maths/Algebra/` | The join-semidirect label algebra |

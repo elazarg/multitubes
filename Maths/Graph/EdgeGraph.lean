@@ -40,8 +40,8 @@ circulations, and application-specific semantics belong in files that import thi
 * `Maths.EdgeGraph.Walk`: an endpoint-indexed finite walk.
 * `Maths.EdgeGraph.Walk.edges`, `length`, `visited`, `edgeMultiplicity`: the
   basic measurements of a walk.
-* `Maths.EdgeGraph.Walk.append`, `singleton`, `castStart`, `castFinish`, `reverse`:
-  walk constructors.
+* `Maths.EdgeGraph.Walk.append`, `singleton`, `iterate`, `castStart`, `castFinish`,
+  `reverse`: walk constructors.
 * `Maths.EdgeGraph.Walk.VertexSplit`: a witness that a walk visits a vertex,
   together with `splice` for inserting a closed walk there.
 * `Maths.RootReaches`, `Maths.LinkedTo`, `Maths.IsStronglyConnectedAt`,
@@ -477,6 +477,23 @@ theorem append_assoc {finish' : V} (first : G.Walk start middle) (second : G.Wal
   induction second with
   | nil => simp
   | concat second edge legal ih => simp [ih, Nat.add_assoc]
+
+/-- Traverse a closed walk `n` times. -/
+def iterate {base : V} (cycle : G.Walk base base) : ℕ → G.Walk base base
+  | 0 => .nil
+  | n + 1 => (cycle.iterate n).append cycle
+
+@[simp] theorem iterate_zero {base : V} (cycle : G.Walk base base) : cycle.iterate 0 = .nil :=
+  rfl
+
+@[simp] theorem iterate_succ {base : V} (cycle : G.Walk base base) (n : ℕ) :
+    cycle.iterate (n + 1) = (cycle.iterate n).append cycle := rfl
+
+@[simp] theorem length_iterate {base : V} (cycle : G.Walk base base) (n : ℕ) :
+    (cycle.iterate n).length = n * cycle.length := by
+  induction n with
+  | zero => simp
+  | succ n ih => simp [ih, Nat.succ_mul]
 
 /-- The one-edge walk carrying a prescribed edge identity. -/
 def singleton (edge : E) : G.Walk (G.source edge) (G.target edge) :=

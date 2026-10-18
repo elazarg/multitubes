@@ -60,10 +60,9 @@ The closure and Bellman constructions require complete-lattice fibers, whereas
 the real-valued walk-supremum potentials have suprema only under the
 boundedness that finiteness hypotheses supply.
 `Maths.MaxPlusPotential.maxIncomingWeight` and
-`Maths.ChargedPathBudget.ChargedRelation.value` are the
-conditionally complete counterparts of `Maths.Transport.pathClosure`
-(the latter on the reversed orientation), and their least-solution theorems
-are proved in their own files directly from `csSup` bounds.
+`Maths.MaxPlusPotential.supIncomingWeight` are the conditionally complete
+counterparts of `Maths.Transport.pathClosure`, and their least-solution theorems
+are proved in their own files directly from maximum and `csSup` bounds.
 -/
 
 @[expose] public section

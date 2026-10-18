@@ -8,6 +8,7 @@ module
 public import Maths.Graph.EdgeGraph
 public import Mathlib.Algebra.BigOperators.Group.List.Defs
 public import Mathlib.Algebra.Group.Defs
+public import Mathlib.Algebra.Order.Monoid.Defs
 
 import Mathlib.Algebra.BigOperators.Group.List.Basic
 
@@ -41,6 +42,8 @@ The two agree in a commutative monoid (`Maths.walkLabel_eq_walkProd`).  A labell
 * `Maths.walkProd_append` and `Maths.walkSum_append` - chronological products and sums are
   multiplicative and additive under concatenation.
 * `Maths.walkLabel_eq_walkProd` - the two orders agree in a commutative monoid.
+* `Maths.countP_nsmul_le_walkSum` - a lower bound per marked traversal bounds the walk sum of
+  nonnegative data.
 
 ## Tags
 
@@ -153,6 +156,15 @@ theorem walkProd_castStart {start' : V} (walk : G.Walk start finish)
     walkProd w (walk.castStart hstart) = walkProd w walk := by
   simp [walkProd]
 
+/-- Traversing a closed walk `n` times raises its product to the `n`-th power. -/
+@[to_additive (attr := simp) /-- Traversing a closed walk `n` times multiplies its sum by
+`n`. -/]
+theorem walkProd_iterate {base : V} (cycle : G.Walk base base) (n : ℕ) :
+    walkProd w (cycle.iterate n) = walkProd w cycle ^ n := by
+  induction n with
+  | zero => simp
+  | succ n ih => rw [EdgeGraph.Walk.iterate_succ, walkProd_append, ih, pow_succ]
+
 @[to_additive (attr := simp)]
 theorem walkProd_one (walk : G.Walk start finish) : walkProd (fun _ => (1 : M)) walk = 1 := by
   simp [walkProd]
@@ -210,5 +222,26 @@ theorem walkProd_div_const (w : E → M) (c : M) (walk : G.Walk start finish) :
         div_mul_div_comm]
 
 end CommGroup
+
+section Ordered
+
+variable {A : Type*} [AddCommMonoid A] [PartialOrder A] [IsOrderedAddMonoid A]
+
+/-- If every edge with property `P` carries at least `threshold` and every edge carries a
+nonnegative datum, then `threshold` times the number of traversals of `P`-edges is at most the
+walk sum.  A repeated edge is counted once per traversal. -/
+theorem countP_nsmul_le_walkSum (w : E → A) (hw : ∀ edge, 0 ≤ w edge) (P : E → Prop)
+    [DecidablePred P] (threshold : A) (hthreshold : ∀ edge, P edge → threshold ≤ w edge)
+    (walk : G.Walk start finish) :
+    walk.edges.countP (fun edge => P edge) • threshold ≤ walkSum w walk := by
+  induction walk with
+  | nil => simp
+  | concat walkSoFar edge legal ih =>
+      rw [EdgeGraph.Walk.edges_concat, List.countP_append, walkSum_concat, add_nsmul]
+      by_cases hedge : P edge
+      · simpa [hedge, one_nsmul] using add_le_add ih (hthreshold edge hedge)
+      · simpa [hedge] using add_le_add ih (hw edge)
+
+end Ordered
 
 end Maths

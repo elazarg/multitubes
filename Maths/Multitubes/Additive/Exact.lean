@@ -7,7 +7,6 @@ module
 
 public import Maths.Multitubes.Additive.Potentials
 public import Maths.Multitubes.Basic
-public import Maths.Graph.ChargedRelation
 public import Maths.Graph.EdgeGraph
 public import Mathlib.Algebra.Group.TypeTags.Basic
 public import Mathlib.Algebra.Order.BigOperators.Group.List
@@ -47,8 +46,8 @@ opens them where the translation specialization needs them.
 
 `Maths.Multitubes.Additive.Potentials` develops the one-sided inequality
 `φ (source e) + w e ≤ φ (target e)` and its positive-cycle duality.  Exactness
-is its zero-defect case.  `Maths.Graph.ChargedRelation` uses the opposite decrement
-orientation for nonnegative charges and bounded path budgets.
+is its zero-defect case, and `Maths.Multitubes.Additive.Budget` characterizes the potentials of
+bounded range.
 
 ## Main definitions
 
@@ -469,53 +468,24 @@ theorem isCoboundary_iff_hasTrivialCycleLabels {base : V}
 
 end Translation
 
-/-! ### Bridge to the inequality form
-`Maths.Graph.ChargedRelation` characterises finiteness of the path budget of
-nonnegative edge data by existence of a **bounded** potential obeying the
-one-sided decrement `Φ (tgt e) + w e ≤ Φ (src e)`.  With the sign convention
-there, that inequality says exactly that the coboundary of `-Φ` dominates the
-edge data.  An exact potential is the equality case. -/
-section ChargedBridge
+/-! ### The inequality form
+A potential in the sense of `Maths.MaxPlusPotential.IsPotential` is a vertex function whose
+coboundary dominates the edge data; an exact potential is the equality case. -/
+section Inequality
 
-open Maths.ChargedPathBudget
+variable {A : Type*} [AddCommGroup A] [PartialOrder A] [IsOrderedAddMonoid A] {w : E → A}
 
-/-- Nonnegative real edge data on an edge graph, read as a charged relation. -/
-def chargedRelation (G : EdgeGraph V E) (w : E → ℝ) (hw : ∀ edge, 0 ≤ w edge) :
-    ChargedRelation V E where
-  src := G.source
-  tgt := G.target
-  charge := w
-  charge_nonneg := hw
+/-- A potential is a vertex function whose coboundary dominates the edge data. -/
+theorem isPotential_iff_le_coboundary (φ : V → A) :
+    MaxPlusPotential.IsPotential G w φ ↔ ∀ edge : E, w edge ≤ coboundary G φ edge :=
+  forall_congr' fun _ => by rw [coboundary_apply, le_sub_iff_add_le']
 
-variable {w : E → ℝ} {hw : ∀ edge, 0 ≤ w edge}
+/-- A potential difference is a potential, with equality on every edge. -/
+theorem isPotential_of_eq_coboundary {φ : V → A} (hφ : ∀ edge : E, w edge = coboundary G φ edge) :
+    MaxPlusPotential.IsPotential G w φ :=
+  (isPotential_iff_le_coboundary φ).2 fun edge => (hφ edge).le
 
-/-- The decrement inequality of `ChargedPathBudget` is domination of the edge
-data by a coboundary.  Its sign convention is the reverse of
-`Maths.MaxPlusPotential.IsPotential`, hence the negation. -/
-theorem chargedIsPotential_iff_le_coboundary (Φ : V → ℝ) :
-    (chargedRelation G w hw).IsPotential Φ ↔
-      ∀ edge : E, w edge ≤ coboundary G (fun vertex => -Φ vertex) edge := by
-  constructor
-  · intro hΦ edge
-    have h : Φ (G.target edge) + w edge ≤ Φ (G.source edge) := hΦ edge
-    change w edge ≤ -Φ (G.target edge) - -Φ (G.source edge)
-    linarith
-  · intro hΦ edge
-    have h : w edge ≤ -Φ (G.target edge) - -Φ (G.source edge) := hΦ edge
-    change Φ (G.target edge) + w edge ≤ Φ (G.source edge)
-    linarith
-
-/-- An exact potential is a charged-relation potential, with equality on every
-edge. -/
-theorem chargedIsPotential_neg_of_isCoboundary {φ : V → ℝ}
-    (hφ : ∀ edge : E, w edge = coboundary G φ edge) :
-    (chargedRelation G w hw).IsPotential (fun vertex => -φ vertex) := by
-  intro edge
-  have h : w edge = φ (G.target edge) - φ (G.source edge) := hφ edge
-  change -φ (G.target edge) + w edge ≤ -φ (G.source edge)
-  linarith
-
-end ChargedBridge
+end Inequality
 
 end CycleCoboundary
 

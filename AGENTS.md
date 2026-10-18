@@ -11,7 +11,7 @@ join-semidirect, and max-affine specializations. Five groups sit under the umbre
 
   ```
   Maths/Graph/             typed walks, circulations, Eulerian trails, infinite walks,
-                           zero-charge lassos, charged relations
+                           zero-charge lassos, walk labels, condensation
   Maths/Recursion/         affine and max-affine transfer summaries, fixed points,
                            the Loynes and two-sided reflections
   Maths/LinearProgramming/ Fourier-Motzkin elimination and standard-form LP duality
