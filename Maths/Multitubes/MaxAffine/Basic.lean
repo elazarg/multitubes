@@ -749,11 +749,6 @@ theorem slopeProd_nonneg {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label
   | [] => zero_le_one
   | e :: rest => mul_nonneg (hslope e) (slopeProd_nonneg hslope rest)
 
-theorem slopeProd_pos {label : E → Label} (hslope : ∀ e : E, 0 < (label e).slope) :
-    ∀ l : List E, 0 < slopeProd label l
-  | [] => zero_lt_one
-  | e :: rest => mul_pos (hslope e) (slopeProd_pos hslope rest)
-
 /-- The **suffix weight** at a position of an edge list: the product of the
 slopes of the edges strictly after that position.  This is the abstract form of
 the survival weighting that a later slope applies to an earlier discrepancy. -/
@@ -848,14 +843,16 @@ theorem suffixWeightSum_nonneg {label : E → Label} (hslope : ∀ e : E, 0 ≤ 
   | _ :: rest =>
       add_nonneg (slopeProd_nonneg hslope rest) (suffixWeightSum_nonneg hslope rest)
 
-theorem suffixWeightSum_pos {label : E → Label} (hslope : ∀ e : E, 0 < (label e).slope) :
+/-- Nonnegative slopes already make every nonempty suffix-weight sum positive:
+the final edge always has suffix weight one. -/
+theorem suffixWeightSum_pos {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope) :
     ∀ l : List E, l ≠ [] → 0 < suffixWeightSum label l
-  | [], hne => absurd rfl hne
-  | _ :: rest, _ => by
-      have hprod := slopeProd_pos hslope rest
-      have hrest := suffixWeightSum_nonneg (fun e => (hslope e).le) rest
+  | [], hne => (hne rfl).elim
+  | [_], _ => by simp
+  | _ :: next :: rest, _ => by
       rw [suffixWeightSum_cons]
-      linarith
+      exact add_pos_of_nonneg_of_pos (slopeProd_nonneg hslope _)
+        (suffixWeightSum_pos hslope (next :: rest) (by simp))
 
 theorem weightedDefect_nonneg {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (φ : V → ℝ) : ∀ l : List E, 0 ≤ weightedDefect G label φ l
@@ -869,24 +866,24 @@ theorem weightedDefect_nonneg {label : E → Label} (hslope : ∀ e : E, 0 ≤ (
       linarith
 
 /-- A uniform strict bound on the positive parts of the residuals caps the
-weighted sum by that bound times the total suffix weight. -/
-theorem weightedDefect_lt {label : E → Label} (hslope : ∀ e : E, 0 < (label e).slope)
+weighted sum by that bound times the total suffix weight.  Zero slopes are allowed:
+strictness survives because the last suffix weight is one. -/
+theorem weightedDefect_lt {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (φ : V → ℝ) {c : ℝ} : ∀ l : List E, l ≠ [] →
       (∀ e ∈ l, max 0 (defect G label φ e) < c) →
       weightedDefect G label φ l < c * suffixWeightSum label l
-  | [], hne, _ => absurd rfl hne
-  | [e], _, hbound => by
-      have he := hbound e (List.mem_cons_self ..)
-      simp only [weightedDefect_cons, weightedDefect_nil, suffixWeightSum_cons,
-        suffixWeightSum_nil, slopeProd_nil]
-      linarith
+  | [], hne, _ => (hne rfl).elim
+  | [e], _, hbound => by simpa using hbound e (by simp)
   | e :: a :: rest, _, hbound => by
-      have he := hbound e (List.mem_cons_self ..)
-      have hprod := slopeProd_pos hslope (a :: rest)
+      have he := hbound e (by simp)
+      have hprod := slopeProd_nonneg hslope (a :: rest)
+      have hfirst : slopeProd label (a :: rest) * max 0 (defect G label φ e)
+          ≤ slopeProd label (a :: rest) * c :=
+        mul_le_mul_of_nonneg_left he.le hprod
       have hrec := weightedDefect_lt hslope φ (a :: rest) (by simp)
         fun e' he' => hbound e' (List.mem_cons_of_mem _ he')
       rw [weightedDefect_cons, suffixWeightSum_cons]
-      nlinarith [mul_lt_mul_of_pos_left he hprod]
+      nlinarith
 
 /-! ### The weighted-defect telescope -/
 
@@ -932,9 +929,9 @@ theorem holonomyApply_cycle_le {label : E → Label} (hslope : ∀ e : E, 0 ≤ 
 /-- **The quantitative obstruction.**  A closed walk whose composite action
 moves the candidate up by at least `γ > 0` forces one of its edges to fail the
 section inequality by at least `γ` divided by the total suffix weight of the
-walk.  At all slopes `1` the total suffix weight is the length of the walk, and
-the statement becomes that of `Maths.MaxPlusPotential.exists_edge_defect_ge`. -/
-theorem exists_edge_defect_ge {label : E → Label} (hslope : ∀ e : E, 0 < (label e).slope)
+walk.  Zero slopes are allowed.  At all slopes `1` the total suffix weight is the length
+of the walk, and the statement becomes that of `Maths.MaxPlusPotential.exists_edge_defect_ge`. -/
+theorem exists_edge_defect_ge {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (φ : V → ℝ) {base : V} (cycle : G.Walk base base) {γ : ℝ} (hγ : 0 < γ)
     (hcycle : φ base + γ ≤ holonomyApply label cycle (φ base)) :
     ∃ e ∈ cycle.edges, γ / suffixWeightSum label cycle.edges ≤ defect G label φ e := by
@@ -951,7 +948,7 @@ theorem exists_edge_defect_ge {label : E → Label} (hslope : ∀ e : E, 0 < (la
     exact hcon ⟨e, he, not_lt.mp hle⟩
   have hlt := weightedDefect_lt (G := G) hslope φ cycle.edges hne hstrict
   rw [div_mul_cancel₀ _ hsum.ne'] at hlt
-  have htel := holonomyApply_le_add_weightedDefect (G := G) (fun e => (hslope e).le) φ cycle
+  have htel := holonomyApply_le_add_weightedDefect (G := G) hslope φ cycle
   linarith
 
 end Graph

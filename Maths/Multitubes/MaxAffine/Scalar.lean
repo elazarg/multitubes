@@ -14,8 +14,7 @@ public import Mathlib.Data.List.Rotate
 Max-affine transport admits the following scalar and cyclic classifications:
 
 * complete descriptions of the pre-fixed and fixed sets of one label;
-* an attained/unbounded classification of the exact scalar residual margin;
-* the weighted edge obstruction for nonnegative slopes; and
+* an attained/unbounded classification of the exact scalar residual margin; and
 * forward rotation of exact and lax cyclic certificates without inverse maps.
 
 The residual-margin theorems are stated without an unsafe real-valued `sInf`:
@@ -41,8 +40,6 @@ point.  These statements determine the extended-real infimum exactly.
   `Maths.MaxAffineTransport.Label.residual_margin_of_one_lt_slope_of_floor_coe`:
   the attained/unbounded classification of the residual margin, stated without a
   real-valued `sInf`.
-* `Maths.MaxAffineTransport.exists_edge_defect_ge_of_nonnegative_slopes`: the
-  weighted edge obstruction at nonnegative slopes.
 * `Maths.MaxAffineTransport.isFixedPt_foldl_rotate` and
   `Maths.MaxAffineTransport.isPrefixed_foldl_rotate`: forward rotation of exact
   and lax cyclic certificates, using no inverse maps.
@@ -388,83 +385,6 @@ theorem residual_margin_of_one_lt_slope_of_floor_coe
     ring
 
 end Label
-
-/-! ## Nonnegative-slope quantitative telescope -/
-
-section Graph
-
-universe uV uE
-
-variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
-
-/-- Nonnegative slopes already make every nonempty suffix-weight sum positive:
-the final edge always has suffix weight one. -/
-theorem suffixWeightSum_pos_of_nonempty {label : E → Label}
-    (hslope : ∀ edge : E, 0 ≤ (label edge).slope) :
-    ∀ edges : List E, edges ≠ [] → 0 < suffixWeightSum label edges
-  | [], hne => (hne rfl).elim
-  | [_], _ => by simp
-  | edge :: next :: rest, _ => by
-      rw [suffixWeightSum_cons]
-      exact add_pos_of_nonneg_of_pos (slopeProd_nonneg hslope _)
-        (suffixWeightSum_pos_of_nonempty hslope (next :: rest) (by simp))
-
-/-- Uniform strict residual bounds control the weighted sum even when some
-suffix weights vanish.  Strictness survives because the last suffix weight is
-one. -/
-theorem weightedDefect_lt_of_nonnegative_slopes {label : E → Label}
-    (hslope : ∀ edge : E, 0 ≤ (label edge).slope)
-    (φ : V → ℝ) {bound : ℝ} :
-    ∀ edges : List E, edges ≠ [] →
-      (∀ edge ∈ edges, max 0 (defect G label φ edge) < bound) →
-      weightedDefect G label φ edges < bound * suffixWeightSum label edges
-  | [], hne, _ => (hne rfl).elim
-  | [edge], _, hbound => by
-      have hedge := hbound edge (by simp)
-      simpa using hedge
-  | edge :: next :: rest, _, hbound => by
-      have hedge := hbound edge (by simp)
-      have hprod := slopeProd_nonneg hslope (next :: rest)
-      have hfirst : slopeProd label (next :: rest) *
-          max 0 (defect G label φ edge) ≤
-        slopeProd label (next :: rest) * bound :=
-        mul_le_mul_of_nonneg_left hedge.le hprod
-      have htail := weightedDefect_lt_of_nonnegative_slopes hslope φ
-        (next :: rest) (by simp)
-        (fun candidate hmem ↦ hbound candidate (by simp [hmem]))
-      rw [weightedDefect_cons, suffixWeightSum_cons]
-      nlinarith
-
-/-- **Sharp nonnegative-slope edge obstruction.**  Zero slopes are allowed;
-only nonnegativity and nonemptiness are needed. -/
-theorem exists_edge_defect_ge_of_nonnegative_slopes
-    {label : E → Label} (hslope : ∀ edge : E, 0 ≤ (label edge).slope)
-    (φ : V → ℝ) {base : V} (cycle : G.Walk base base) {gain : ℝ}
-    (hgain : 0 < gain)
-    (hcycle : φ base + gain ≤ holonomyApply label cycle (φ base)) :
-    ∃ edge ∈ cycle.edges,
-      gain / suffixWeightSum label cycle.edges ≤ defect G label φ edge := by
-  have hne : cycle.edges ≠ [] := by
-    intro hempty
-    rw [holonomyApply_eq_foldl, hempty, List.foldl_nil] at hcycle
-    linarith
-  have hsum : 0 < suffixWeightSum label cycle.edges :=
-    suffixWeightSum_pos_of_nonempty hslope _ hne
-  by_contra hnone
-  have hstrict (edge : E) (hedge : edge ∈ cycle.edges) :
-      max 0 (defect G label φ edge) <
-        gain / suffixWeightSum label cycle.edges := by
-    refine max_lt (div_pos hgain hsum) ?_
-    by_contra hle
-    exact hnone ⟨edge, hedge, not_lt.mp hle⟩
-  have hweighted := weightedDefect_lt_of_nonnegative_slopes hslope φ
-    cycle.edges hne hstrict
-  rw [div_mul_cancel₀ _ hsum.ne'] at hweighted
-  have htelescope := holonomyApply_le_add_weightedDefect
-    (G := G) hslope φ cycle
-  linarith
-
-end Graph
 
 /-! ## Forward rotation without inverses -/
 
