@@ -10,7 +10,7 @@ public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 public import Mathlib.Topology.Instances.Real.Lemmas
 public import Mathlib.Topology.Order.MonotoneConvergence
 
-import Mathlib.Algebra.Field.GeomSum
+import Mathlib.Algebra.Order.Field.GeomSum
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 import Mathlib.Tactic.Linarith
 
@@ -209,15 +209,9 @@ theorem pastTransport_le_pow {ρ : ℝ} (ha : ∀ k, 0 ≤ a k) (hρ : ∀ k, a 
 the number of stages. -/
 theorem sum_pastTransport_le {ρ : ℝ} (ha : ∀ k, 0 ≤ a k) (hρ : ∀ k, a k ≤ ρ) (hρ1 : ρ < 1)
     (j : ℕ) : ∑ p ∈ Finset.range j, pastTransport a p ≤ 1 / (1 - ρ) := by
-  have hρ0 : 0 ≤ ρ := le_trans (ha 0) (hρ 0)
-  have hsub : 0 < 1 - ρ := by linarith
-  have hgeom : ∑ p ∈ Finset.range j, ρ ^ p = (1 - ρ ^ j) / (1 - ρ) := by
-    rw [geom_sum_eq (by linarith) j, div_eq_div_iff (by linarith) (by linarith)]
-    ring
   refine le_trans (Finset.sum_le_sum fun p _ => pastTransport_le_pow ha hρ p) ?_
-  rw [hgeom, div_le_div_iff_of_pos_right hsub]
-  have : 0 ≤ ρ ^ j := pow_nonneg hρ0 j
-  linarith
+  have h := geom_sum_Ico_le_of_lt_one (m := 0) (n := j) (le_trans (ha 0) (hρ 0)) hρ1
+  rwa [← Finset.range_eq_Ico, pow_zero] at h
 
 /-- **Geometric retention and bounded input bound the whole construction.** If every retention
 lies in `[0, ρ]` with `ρ < 1` and no stage serves less than `-C`, then every finite-horizon
