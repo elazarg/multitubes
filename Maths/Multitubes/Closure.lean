@@ -39,7 +39,6 @@ even when separate cycle witnesses are not.
 * `Maths.Transport.PreservesSSup`: every edge map preserves arbitrary suprema.
 * `Maths.Transport.pathClosure`: the join over all directed walks of the transported values of
   a given lower bound.
-* `Maths.Transport.rootedLower`: the lower bound concentrated at one root.
 
 ## Main results
 
@@ -393,50 +392,33 @@ theorem walkMap_bot (hbot : ∀ edge : E, T.edgeMap edge ⊥ = ⊥)
       rw [walkMap_concat, ih]
       exact hbot edge
 
-/-- Lower data concentrated at one base vertex. -/
-def rootedLower [DecidableEq V] (base : V) (point : Fiber base) :
-    ∀ vertex, Fiber vertex :=
-  fun vertex ↦ if h : vertex = base then fiberCast Fiber h.symm point else ⊥
-
-@[simp] theorem rootedLower_base [DecidableEq V] (base : V)
-    (point : Fiber base) : rootedLower (Fiber := Fiber) base point base = point := by
-  simp [rootedLower]
-
-/-- Lower data concentrated at a base lies below a family exactly when the base point does. -/
-theorem rootedLower_le_iff [DecidableEq V] {base : V} {point : Fiber base}
-    {family : ∀ vertex, Fiber vertex} :
-    rootedLower base point ≤ family ↔ point ≤ family base := by
-  refine ⟨fun hle ↦ by simpa using hle base, fun hle vertex ↦ ?_⟩
-  by_cases hvertex : vertex = base
-  · subst vertex
-    simpa using hle
-  · simp [rootedLower, hvertex]
-
-/-- **Synchronized-loop closure.**  If one point is pre-fixed by every loop at
-the root, path closure returns exactly that point at the root.  Separate
-cycle-dependent witnesses would not suffice for this argument. -/
-theorem pathClosure_rootedLower_eq_base
+/-- **Synchronized-loop closure.**  If one point is pre-fixed by every loop at the root, path
+closure of the lower data concentrated at the root, `Function.update ⊥ base point`, returns
+exactly that point at the root.  Separate cycle-dependent witnesses would not suffice for this
+argument. -/
+theorem pathClosure_update_bot_self
     [DecidableEq V] (hsup : T.PreservesSSup)
     (base : V) (point : Fiber base)
     (hcycle : ∀ cycle : G.Walk base base, T.holonomy cycle point ≤ point) :
-    T.pathClosure (rootedLower (Fiber := Fiber) base point) base = point := by
+    T.pathClosure (Function.update ⊥ base point) base = point := by
   apply le_antisymm
   · refine iSup_le fun source ↦ iSup_le fun walk ↦ ?_
     by_cases hsource : source = base
     · subst source
-      rw [rootedLower, dite_eq_left rfl, fiberCast_rfl]
+      rw [Function.update_self]
       exact hcycle walk
-    · rw [rootedLower, dite_eq_right hsource, T.walkMap_bot hsup.map_bot walk]
+    · rw [Function.update_of_ne hsource, Pi.bot_apply, T.walkMap_bot hsup.map_bot walk]
       exact bot_le
-  · simpa using T.le_pathClosure (rootedLower (Fiber := Fiber) base point) base
+  · simpa using T.le_pathClosure (Function.update ⊥ base point) base
 
 /-- The synchronized closure is the least lax section whose base value dominates the selected
 common cycle witness. -/
 theorem rooted_pathClosure_isLeast
     [DecidableEq V] (hsup : T.PreservesSSup) (base : V) (point : Fiber base) :
     IsLeast {family | point ≤ family base ∧ T.IsLaxSection family}
-      (T.pathClosure (rootedLower (Fiber := Fiber) base point)) := by
-  simpa only [rootedLower_le_iff] using pathClosure_isLeast hsup (rootedLower base point)
+      (T.pathClosure (Function.update ⊥ base point)) := by
+  simpa only [update_le_iff, Pi.bot_apply, bot_le, implies_true, and_true] using
+    pathClosure_isLeast hsup (Function.update ⊥ base point)
 
 end CompleteLattice
 
