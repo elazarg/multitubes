@@ -97,10 +97,10 @@ theorem exists_contractiveGauge_iff_shortCycleProduct_lt_one [Fintype V] [Finite
           (fun edge : PositiveSlopeEdge gain => Real.log (gain edge.1)) cycle < 0 := by
       apply Real.exp_lt_exp.mp
       rw [Real.exp_zero, exp_walkSum_log_eq_walkProd,
-        ← walkProd_forgetPositiveWalk]
-      have hlength := congrArg List.length (edges_forgetPositiveWalk gain cycle)
+        ← walkProd_ofRestrictEdges]
+      have hlength := congrArg List.length (EdgeGraph.Walk.edges_ofRestrictEdges cycle)
       simp only [List.length_map, EdgeGraph.Walk.edges_length] at hlength
-      exact hcycles vertex (forgetPositiveWalk gain cycle)
+      exact hcycles vertex cycle.ofRestrictEdges
         (hlength.symm ▸ hcycle) (hlength.symm ▸ hcard)
     obtain ⟨level, hlevel, potential, hpotential⟩ :=
       AdditiveTransport.exists_negative_residual_bound_of_short

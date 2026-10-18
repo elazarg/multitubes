@@ -120,7 +120,7 @@ abbrev reverse : EdgeGraph V E where
 /-- The subgraph on a set of edges: the vertices are those of the ambient graph and the edges are
 the members of the set, with the ambient endpoints.  This is the edge-indexed analogue of
 `Maths.EdgeGraph.induce`, which selects a set of vertices instead. -/
-def restrictEdges (S : Set E) : EdgeGraph V S where
+abbrev restrictEdges (S : Set E) : EdgeGraph V S where
   source edge := G.source edge.1
   target edge := G.target edge.1
 

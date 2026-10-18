@@ -391,35 +391,11 @@ theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_nonexpansiveGauge
 
 /-- Positive-slope edges, used to take logarithms without imposing positivity
 on zero-slope edges. -/
-abbrev PositiveSlopeEdge := {edge : E // 0 < slope edge}
+abbrev PositiveSlopeEdge := ↥{edge : E | 0 < slope edge}
 
-abbrev positiveSlopeGraph : EdgeGraph V (PositiveSlopeEdge slope) where
-  source edge := G.source edge.1
-  target edge := G.target edge.1
-
-/-- Forget positivity proofs on a walk. -/
-def forgetPositiveWalk {start : V} :
-    {finish : V} → (positiveSlopeGraph (G := G) slope).Walk start finish →
-      G.Walk start finish
-  | _, .nil => .nil
-  | _, .concat edge walk =>
-      (forgetPositiveWalk walk).concat edge.1
-
-@[simp] theorem edges_forgetPositiveWalk {start finish : V}
-    (walk : (positiveSlopeGraph (G := G) slope).Walk start finish) :
-    (forgetPositiveWalk slope walk).edges = walk.edges.map Subtype.val := by
-  induction walk with
-  | nil => rfl
-  | concat edge walk ih =>
-      rw [forgetPositiveWalk]
-      simp only [EdgeGraph.Walk.edges_concat, List.map_append, List.map_singleton]
-      rw [ih]
-
-@[simp] theorem walkProd_forgetPositiveWalk {start finish : V}
-    (walk : (positiveSlopeGraph (G := G) slope).Walk start finish) :
-    walkProd slope (forgetPositiveWalk slope walk) =
-      walkProd (fun edge : PositiveSlopeEdge slope ↦ slope edge.1) walk := by
-  simp [walkProd]
+/-- The subgraph of positive-slope edges. -/
+abbrev positiveSlopeGraph : EdgeGraph V (PositiveSlopeEdge slope) :=
+  G.restrictEdges {edge | 0 < slope edge}
 
 /-- Exponentiating the log-weight of a positive-edge walk recovers its slope
 product. -/
@@ -453,8 +429,8 @@ theorem exists_nonexpansiveGauge_iff_cycleProduct_le_one
           (fun edge : PositiveSlopeEdge slope ↦ Real.log (slope edge.1)) cycle ≤ 0 := by
       apply Real.exp_le_exp.mp
       rw [Real.exp_zero, exp_walkSum_log_eq_walkProd]
-      rw [← walkProd_forgetPositiveWalk]
-      exact hcycle base (forgetPositiveWalk slope cycle)
+      rw [← walkProd_ofRestrictEdges]
+      exact hcycle base cycle.ofRestrictEdges
     obtain ⟨potential, hpotential⟩ :=
       (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
         (G := positiveSlopeGraph (G := G) slope)

@@ -23,9 +23,8 @@ slack mean is the normalized shift sum divided by the reciprocal-target mass.
 
 ## Main definitions
 
-* `Maths.MaxAffineTransport.forgetGaugeCriticalWalk`,
-  `Maths.MaxAffineTransport.gaugeCriticalLabelList`: a critical walk read back as a walk
-  of the original graph, and the original max-affine labels along it.
+* `Maths.MaxAffineTransport.gaugeCriticalLabelList`: the original max-affine labels along a
+  critical walk.
 * `Maths.MaxAffineTransport.walkReciprocalTargetMass`: the sum of reciprocal target
   gauges along a critical walk, the quantity `S_C` of the raw formulas.
 * `Maths.MaxAffineTransport.HasPrefixedCycleHolonomies`: every original cycle holonomy
@@ -64,35 +63,15 @@ universe uV uE
 variable {V : Type uV} {E : Type uE}
 variable {G : EdgeGraph V E} {label : E → Label} {gauge : V → ℝ}
 
-/-- Forget the criticality proof on every edge of a critical walk. -/
-def forgetGaugeCriticalWalk {start : V} :
-    {finish : V} →
-      (gaugeCriticalGraph (G := G) label gauge).Walk start finish →
-        G.Walk start finish
-  | _, .nil => .nil
-  | _, .concat edge walk =>
-      (forgetGaugeCriticalWalk walk).concat edge.1
-
-@[simp] theorem edges_forgetGaugeCriticalWalk {start finish : V}
-    (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
-    (forgetGaugeCriticalWalk walk).edges = walk.edges.map Subtype.val := by
-  induction walk with
-  | nil => rfl
-  | concat edge walk ih =>
-      rw [forgetGaugeCriticalWalk]
-      simp only [EdgeGraph.Walk.edges_concat, List.map_append,
-        List.map_singleton]
-      rw [ih]
-
 /-- Original max-affine labels along a critical walk. -/
 def gaugeCriticalLabelList {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
     List Label :=
   walk.edges.map fun edge => label edge.1
 
-@[simp] theorem edgeLabels_forgetGaugeCriticalWalk {start finish : V}
+@[simp] theorem edgeLabels_ofRestrictEdges {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
-    (forgetGaugeCriticalWalk walk).edges.map label =
+    (walk.ofRestrictEdges).edges.map label =
       gaugeCriticalLabelList walk := by
   simp [gaugeCriticalLabelList]
 
@@ -497,8 +476,8 @@ theorem exists_isLaxSection_iff_prefixedCycleHolonomies_of_nonexpansiveGauge
         gauge hgauge).mpr
     intro base cycle
     obtain ⟨point, hpoint⟩ :=
-      hprefixed base (forgetGaugeCriticalWalk cycle)
-    rw [← apply_compList_edges hslope, edgeLabels_forgetGaugeCriticalWalk,
+      hprefixed base (cycle.ofRestrictEdges)
+    rw [← apply_compList_edges hslope, edgeLabels_ofRestrictEdges,
       compList_gaugeCriticalCycle hgauge.1 cycle] at hpoint
     rw [Label.apply_le_self_iff_of_slope_eq_one _ rfl] at hpoint
     nlinarith [hgauge.1 base]
@@ -527,8 +506,8 @@ theorem exists_isLaxSection_iff_prefixedCycleHolonomies_of_expansiveGauge
         gauge hgauge hfloor).mpr
     intro base cycle
     obtain ⟨point, hpoint⟩ :=
-      hprefixed base (forgetGaugeCriticalWalk cycle)
-    rw [← apply_compList_edges hslope, edgeLabels_forgetGaugeCriticalWalk,
+      hprefixed base (cycle.ofRestrictEdges)
+    rw [← apply_compList_edges hslope, edgeLabels_ofRestrictEdges,
       compList_gaugeCriticalCycle hgauge.1 cycle] at hpoint
     rw [Label.apply_le_self_iff_of_slope_eq_one _ rfl] at hpoint
     nlinarith [hgauge.1 base]

@@ -94,14 +94,12 @@ theorem dotProduct_branchDelta_direction (direction : V → ℝ)
 
 /-- Edges on which a positive gauge makes the normalized slope exactly one. -/
 abbrev GaugeCriticalEdge (label : E → Label) (gauge : V → ℝ) :=
-  {edge : E //
-    (label edge).slope * gauge (G.source edge) = gauge (G.target edge)}
+  ↥{edge : E | (label edge).slope * gauge (G.source edge) = gauge (G.target edge)}
 
 /-- Gauge-critical edge subgraph. -/
 abbrev gaugeCriticalGraph (label : E → Label) (gauge : V → ℝ) :
-    EdgeGraph V (GaugeCriticalEdge (G := G) label gauge) where
-  source edge := G.source edge.1
-  target edge := G.target edge.1
+    EdgeGraph V (GaugeCriticalEdge (G := G) label gauge) :=
+  G.restrictEdges {edge | (label edge).slope * gauge (G.source edge) = gauge (G.target edge)}
 
 /-- Shift after rescaling the target coordinate by the gauge. -/
 def gaugeCriticalShift (label : E → Label) (gauge : V → ℝ)
