@@ -23,10 +23,9 @@ identities.
 `EdgeGraph.Walk G start finish` is an endpoint-indexed finite walk. It stores the edge
 identities in chronological order and makes endpoint compatibility part of the type: an edge
 extends a walk ending at its source, and the extension ends at its target, so reading a walk
-never requires an endpoint coercion. This
-file supplies the reusable finite-walk calculus: length, edge and visited-vertex lists,
-endpoint facts, concatenation, singleton walks, edge multiplicity, splitting at an edge,
-and splicing at a visited vertex.
+never requires an endpoint coercion. This file supplies the reusable finite-walk calculus:
+length, edge and visited-vertex lists, endpoint facts, concatenation, singleton walks, edge
+multiplicity, splitting at an edge, and splicing at a visited vertex.
 
 The file deliberately assigns no labels or weights to edges. Transport, charges, discrepancy,
 circulations, and application-specific semantics belong in files that import this one.
