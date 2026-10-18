@@ -142,7 +142,7 @@ labelled transition system
 
 namespace Maths
 
-universe uV uE uF uX uM
+universe uV uE uF uH uX uM
 
 variable {V : Type uV} {E : Type uE}
 
@@ -295,8 +295,6 @@ theorem HasTrivialHolonomy.holonomy_eq_self (hflat : T.HasTrivialHolonomy)
   (hflat base).holonomy_eq_self cycle point
 
 /-! ### Simulations -/
-
-universe uH
 
 variable {Other : V → Type uH}
 
