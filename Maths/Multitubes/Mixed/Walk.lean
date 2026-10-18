@@ -15,7 +15,8 @@ exact walk transports the marked value by equality.  A walk whose edges are
 only lax or exact transports it below the marked terminal value, while a walk
 whose edges are only oplax or exact transports it above that value.  The
 relations on the fibers need only be reflexive and transitive, and edge maps
-need only preserve those relations.
+need only preserve those relations.  Each statement is an instance of
+`Maths.Transport.IsSectionFor.walkMap_rel`.
 
 The polarity restriction is essential: with arbitrary relations there is no
 endpoint comparison across a change from lax to oplax, or from oplax to lax.
@@ -104,36 +105,6 @@ variable {T : Transport G Fiber}
 variable {relation : ∀ vertex : V, Fiber vertex → Fiber vertex → Prop}
 variable {mode : E → EdgeMode} {family : ∀ vertex : V, Fiber vertex}
 
-private theorem relation_of_edge_lax_or_exact
-    (hfamily : T.IsMixedSectionFor relation mode family)
-    {edge : E} (hmode : (mode edge).IsLaxOrExact)
-    {point : Fiber (G.source edge)}
-    (hpoint : relation (G.source edge) point (family (G.source edge)))
-    (htrans : ∀ vertex : V, ∀ {x y z}, relation vertex x y →
-      relation vertex y z → relation vertex x z)
-    (hpreserve : ∀ edge : E, ∀ {x y}, relation (G.source edge) x y →
-      relation (G.target edge) (T.edgeMap edge x) (T.edgeMap edge y)) :
-    relation (G.target edge) (T.edgeMap edge point) (family (G.target edge)) := by
-  rcases hmode with hmode | hmode
-  · exact htrans (G.target edge) (hpreserve edge hpoint) (hfamily.lax hmode)
-  · rw [← hfamily.exact hmode]
-    exact hpreserve edge hpoint
-
-private theorem relation_of_edge_oplax_or_exact
-    (hfamily : T.IsMixedSectionFor relation mode family)
-    {edge : E} (hmode : (mode edge).IsOplaxOrExact)
-    {point : Fiber (G.source edge)}
-    (hpoint : relation (G.source edge) (family (G.source edge)) point)
-    (htrans : ∀ vertex : V, ∀ {x y z}, relation vertex x y →
-      relation vertex y z → relation vertex x z)
-    (hpreserve : ∀ edge : E, ∀ {x y}, relation (G.source edge) x y →
-      relation (G.target edge) (T.edgeMap edge x) (T.edgeMap edge y)) :
-    relation (G.target edge) (family (G.target edge)) (T.edgeMap edge point) := by
-  rcases hmode with hmode | hmode
-  · exact htrans (G.target edge) (hfamily.oplax hmode) (hpreserve edge hpoint)
-  · rw [← hfamily.exact hmode]
-    exact hpreserve edge hpoint
-
 variable {start finish : V}
 
 /-- An exact mixed section is transported by equality along an exact walk.
@@ -144,20 +115,10 @@ theorem IsMixedSectionFor.walkMap_eq_of_exact
     (hfamily : T.IsMixedSectionFor relation mode family)
     (walk : G.Walk start finish)
     (hmode : ∀ edge ∈ walk.edges, (mode edge).IsExact) :
-    T.walkMap walk (family start) = family finish := by
-  induction walk with
-  | nil => rfl
-  | concat walk edge legal ih =>
-      cases legal
-      rw [T.walkMap_concat]
-      have hprefix : ∀ edge' ∈ walk.edges, (mode edge').IsExact := by
-        intro edge' hedge'
-        exact hmode edge' (by simp [EdgeGraph.Walk.edges_concat, hedge'])
-      have hedge : (mode edge).IsExact := by
-        exact hmode edge (by simp [EdgeGraph.Walk.edges_concat])
-      simp only [fiberCast]
-      rw [ih hprefix]
-      exact hfamily.exact hedge
+    T.walkMap walk (family start) = family finish :=
+  IsSectionFor.walkMap_rel (R := fun _ => Eq) (fun _ => rfl) (fun _ => Eq.trans)
+    (fun _ => congrArg _) hfamily walk fun edge hedge _ hrel => by
+      simpa [show mode edge = .exact from hmode edge hedge] using hrel
 
 /-- A mixed section is transported below its terminal value along a walk whose
 edges are all lax or exact.
@@ -174,20 +135,13 @@ theorem IsMixedSectionFor.walkMap_rel_of_lax_or_exact
     (hfamily : T.IsMixedSectionFor relation mode family)
     (walk : G.Walk start finish)
     (hmode : ∀ edge ∈ walk.edges, (mode edge).IsLaxOrExact) :
-    relation finish (T.walkMap walk (family start)) (family finish) := by
-  induction walk with
-  | nil => exact hrefl start
-  | concat walk edge legal ih =>
-      cases legal
-      rw [T.walkMap_concat]
-      have hprefix : ∀ edge' ∈ walk.edges, (mode edge').IsLaxOrExact := by
-        intro edge' hedge'
-        exact hmode edge' (by simp [EdgeGraph.Walk.edges_concat, hedge'])
-      have hedge : (mode edge).IsLaxOrExact := by
-        exact hmode edge (by simp [EdgeGraph.Walk.edges_concat])
-      have hpoint : relation _ (T.walkMap walk (family start)) (family _) := ih hprefix
-      have hstep := relation_of_edge_lax_or_exact hfamily hedge hpoint htrans hpreserve
-      simpa [fiberCast] using hstep
+    relation finish (T.walkMap walk (family start)) (family finish) :=
+  IsSectionFor.walkMap_rel hrefl htrans hpreserve hfamily walk fun edge hedge _ hrel => by
+    rcases hmode edge hedge with hmode | hmode
+    · simpa [hmode] using hrel
+    · simp only [hmode, EdgeMode.satisfies_exact] at hrel
+      rw [hrel]
+      exact hrefl _
 
 /-- A mixed section is transported above its terminal value along a walk whose
 edges are all oplax or exact.
@@ -204,20 +158,15 @@ theorem IsMixedSectionFor.walkMap_rel_of_oplax_or_exact
     (hfamily : T.IsMixedSectionFor relation mode family)
     (walk : G.Walk start finish)
     (hmode : ∀ edge ∈ walk.edges, (mode edge).IsOplaxOrExact) :
-    relation finish (family finish) (T.walkMap walk (family start)) := by
-  induction walk with
-  | nil => exact hrefl start
-  | concat walk edge legal ih =>
-      cases legal
-      rw [T.walkMap_concat]
-      have hprefix : ∀ edge' ∈ walk.edges, (mode edge').IsOplaxOrExact := by
-        intro edge' hedge'
-        exact hmode edge' (by simp [EdgeGraph.Walk.edges_concat, hedge'])
-      have hedge : (mode edge).IsOplaxOrExact := by
-        exact hmode edge (by simp [EdgeGraph.Walk.edges_concat])
-      have hpoint : relation _ (family _) (T.walkMap walk (family start)) := ih hprefix
-      have hstep := relation_of_edge_oplax_or_exact hfamily hedge hpoint htrans hpreserve
-      simpa [fiberCast] using hstep
+    relation finish (family finish) (T.walkMap walk (family start)) :=
+  IsSectionFor.walkMap_rel (R := fun vertex x y => relation vertex y x) hrefl
+    (fun vertex _ _ _ hxy hyz => htrans vertex hyz hxy) (fun edge _ _ hxy => hpreserve edge hxy)
+    hfamily walk fun edge hedge _ hrel => by
+      rcases hmode edge hedge with hmode | hmode
+      · simpa [hmode] using hrel
+      · simp only [hmode, EdgeMode.satisfies_exact] at hrel
+        rw [hrel]
+        exact hrefl _
 
 /-- A mixed section propagates along every walk when the fiberwise relation is
 symmetric.  In this setting lax and oplax constraints have the same content,
@@ -231,19 +180,15 @@ theorem IsMixedSectionFor.walkMap_rel_of_symmetric
       relation (G.target edge) (T.edgeMap edge x) (T.edgeMap edge y))
     (hfamily : T.IsMixedSectionFor relation mode family)
     (walk : G.Walk start finish) :
-    relation finish (T.walkMap walk (family start)) (family finish) := by
-  have hlax : T.IsMixedSectionFor relation (fun _ ↦ .lax) family := by
-    intro edge
-    simp only [EdgeMode.satisfies_lax]
+    relation finish (T.walkMap walk (family start)) (family finish) :=
+  IsSectionFor.walkMap_rel hrefl htrans hpreserve hfamily walk fun edge _ _ hrel => by
     cases hmode : mode edge with
-    | lax => exact hfamily.lax hmode
+    | lax => simpa [hmode] using hrel
     | exact =>
-        rw [hfamily.exact hmode]
-        exact hrefl (G.target edge)
-    | oplax => exact hsymm (G.target edge) (hfamily.oplax hmode)
-  apply hlax.walkMap_rel_of_lax_or_exact hrefl htrans hpreserve walk
-  intro edge _
-  exact EdgeMode.isLaxOrExact_lax
+        simp only [hmode, EdgeMode.satisfies_exact] at hrel
+        rw [hrel]
+        exact hrefl _
+    | oplax => exact hsymm _ (by simpa [hmode] using hrel)
 
 end Transport
 

@@ -58,8 +58,10 @@ products of slopes.
 * `Maths.Transport.holonomy` - transport around a closed walk.
 * `Maths.Transport.HasTrivialHolonomy` - every closed-walk
   map is the identity.
+* `Maths.Transport.IsSectionFor` - a family related along every edge, by an
+  edge-indexed relation, from the transported source value to the target value.
 * `Maths.Transport.IsSection`, `Maths.Transport.IsLaxSection`, and
-  `Maths.Transport.IsOplaxSection`.
+  `Maths.Transport.IsOplaxSection` - the cases `=`, `≤`, and `≥`.
 * `Maths.ofEdgeAct` and `Maths.transport` -
   the constant-fiber case.
 * `Maths.ofSMul` - the constant-fiber transport of a monoid labelling acting
@@ -72,13 +74,12 @@ products of slopes.
   endpoint reindexing commutes with transport.
 * `Maths.Transport.walkMap_append` - path composition.
 * `Maths.Transport.walkMap_injective` - walks of injective edge maps transport injectively.
-* `Maths.Transport.IsSection.walkMap_eq` - exact transport of
-  sections.
-* `Maths.Transport.IsLaxSection.walkMap_le` - monotone
-  transport of lax sections.
-* `Maths.Transport.IsSection.isOplaxSection` - exact sections are oplax.
-* `Maths.Transport.IsOplaxSection.le_walkMap` - monotone transport of
-  oplax sections.
+* `Maths.Transport.IsSectionFor.walkMap_rel` - walk propagation of sections, for a
+  transitive relation preserved by the edge maps.
+* `Maths.Transport.IsSection.walkMap_eq`, `Maths.Transport.IsLaxSection.walkMap_le`, and
+  `Maths.Transport.IsOplaxSection.le_walkMap` - its exact, lax, and oplax instances.
+* `Maths.Transport.IsSection.isLaxSection` and `Maths.Transport.IsSection.isOplaxSection` -
+  exact sections are lax and oplax.
 * `Maths.walkMap_ofEdgeAct` - the dependent and constant-fiber
   semantics agree.
 * `Maths.transport_eq_smul` and
@@ -278,20 +279,51 @@ theorem HasTrivialHolonomy.holonomy_eq_self (hflat : T.HasTrivialHolonomy)
 
 /-! ### Sections -/
 
-/-- A family of fiber points carried by every edge map to the family's value at
-the target. -/
-def IsSection (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
-  ∀ edge : E, T.edgeMap edge (family (G.source edge)) = family (G.target edge)
+/-- A family of fiber points related along every edge, by an edge-indexed relation on the
+target fiber, from the transported source value to the target value.  Exact, lax, and oplax
+sections are the cases `=`, `≤`, and `≥`; a mixed section chooses among them edge by edge. -/
+def IsSectionFor (T : Transport G Fiber)
+    (relation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop)
+    (family : ∀ vertex, Fiber vertex) : Prop :=
+  ∀ edge : E, relation edge (T.edgeMap edge (family (G.source edge))) (family (G.target edge))
 
 variable {family : ∀ vertex, Fiber vertex}
 
+/-- **Walk propagation of sections.**  Let `R` be a fiberwise relation, transitive, reflexive
+at the family, and preserved by the edge maps.  If every edge of a walk relates a point to the
+family value only when `R` does, then the family value at the start is transported along the
+walk to a point `R`-related to the family value at the end.
+
+Every propagation statement for sections is an instance: exact sections with `R` equality, lax
+sections with `≤`, oplax sections with `≥`, and mixed sections with the relation their edge
+modes select. -/
+theorem IsSectionFor.walkMap_rel
+    {relation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop}
+    {R : ∀ vertex, Fiber vertex → Fiber vertex → Prop}
+    (hrefl : ∀ vertex, R vertex (family vertex) (family vertex))
+    (htrans : ∀ vertex {x y z}, R vertex x y → R vertex y z → R vertex x z)
+    (hpreserve : ∀ edge {x y}, R (G.source edge) x y →
+      R (G.target edge) (T.edgeMap edge x) (T.edgeMap edge y))
+    (hfamily : T.IsSectionFor relation family) (walk : G.Walk start finish)
+    (hedge : ∀ edge ∈ walk.edges, ∀ x, relation edge x (family (G.target edge)) →
+      R (G.target edge) x (family (G.target edge))) :
+    R finish (T.walkMap walk (family start)) (family finish) := by
+  induction walk with
+  | nil => exact hrefl start
+  | concat walk edge legal ih =>
+      cases legal
+      have hprefix := ih fun edge' hedge' => hedge edge' (by simp [hedge'])
+      exact htrans _ (hpreserve edge hprefix) (hedge edge (by simp) _ (hfamily edge))
+
+/-- A family carried by every edge map to the family's value at the target. -/
+def IsSection (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
+  T.IsSectionFor (fun _ => Eq) family
+
 /-- A section is transported exactly along every walk. -/
 theorem IsSection.walkMap_eq (hfamily : T.IsSection family) (walk : G.Walk start finish) :
-    T.walkMap walk (family start) = family finish := by
-  induction walk with
-  | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      rw [walkMap_concat, ih, fiberCast_family, hfamily edge]
+    T.walkMap walk (family start) = family finish :=
+  IsSectionFor.walkMap_rel (R := fun _ => Eq) (fun _ => rfl) (fun _ => Eq.trans)
+    (fun _ => congrArg _) hfamily walk fun _ _ _ => id
 
 /-- Every closed-walk holonomy fixes the point marked by a section. -/
 theorem IsSection.holonomy_eq (hfamily : T.IsSection family)
@@ -301,22 +333,23 @@ theorem IsSection.holonomy_eq (hfamily : T.IsSection family)
 
 /-! ### Lax and oplax sections -/
 
-/-- A family of fiber points whose target value dominates the transported source
-value on every edge.  Only a fiberwise `LE` is needed to state this predicate. -/
+/-- A family whose target value dominates the transported source value on every
+edge.  Only a fiberwise `LE` is needed to state this predicate. -/
 def IsLaxSection [∀ vertex : V, LE (Fiber vertex)]
     (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
-  ∀ edge : E, T.edgeMap edge (family (G.source edge)) ≤ family (G.target edge)
+  T.IsSectionFor (fun _ => (· ≤ ·)) family
 
 /-- A family whose target value is below its transported source value on every
 edge.  Only a fiberwise `LE` is needed to state this predicate. -/
 def IsOplaxSection [∀ vertex : V, LE (Fiber vertex)]
     (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
-  ∀ edge : E, family (G.target edge) ≤ T.edgeMap edge (family (G.source edge))
+  T.IsSectionFor (fun _ => (· ≥ ·)) family
 
 section Ordered
 
 variable [∀ vertex : V, Preorder (Fiber vertex)]
 
+/-- An exact section is a lax section. -/
 theorem IsSection.isLaxSection (hfamily : T.IsSection family) : T.IsLaxSection family :=
   fun edge => (hfamily edge).le
 
@@ -328,14 +361,9 @@ theorem IsSection.isOplaxSection (hfamily : T.IsSection family) : T.IsOplaxSecti
 terminal vertex of every walk. -/
 theorem IsLaxSection.walkMap_le (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
     (hfamily : T.IsLaxSection family) (walk : G.Walk start finish) :
-    T.walkMap walk (family start) ≤ family finish := by
-  induction walk with
-  | nil => exact le_rfl
-  | concat walkSoFar edge legal ih =>
-      rw [walkMap_concat]
-      refine le_trans (hmono edge ?_) (hfamily edge)
-      have hcast := fiberCast_le_fiberCast (Fiber := Fiber) legal.symm ih
-      rwa [fiberCast_family] at hcast
+    T.walkMap walk (family start) ≤ family finish :=
+  IsSectionFor.walkMap_rel (R := fun _ => (· ≤ ·)) (fun _ => le_rfl) (fun _ => le_trans)
+    (fun edge _ _ hxy => hmono edge hxy) hfamily walk fun _ _ _ => id
 
 /-- A lax section marks a pre-fixed point of every closed-walk holonomy. -/
 theorem IsLaxSection.holonomy_le (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
@@ -347,14 +375,10 @@ theorem IsLaxSection.holonomy_le (hmono : ∀ edge : E, Monotone (T.edgeMap edge
 the terminal vertex of every walk. -/
 theorem IsOplaxSection.le_walkMap (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
     (hfamily : T.IsOplaxSection family) (walk : G.Walk start finish) :
-    family finish ≤ T.walkMap walk (family start) := by
-  induction walk with
-  | nil => exact le_rfl
-  | concat walkSoFar edge legal ih =>
-      rw [walkMap_concat]
-      have hcast := fiberCast_le_fiberCast (Fiber := Fiber) legal.symm ih
-      rw [fiberCast_family] at hcast
-      exact le_trans (hfamily edge) (hmono edge hcast)
+    family finish ≤ T.walkMap walk (family start) :=
+  IsSectionFor.walkMap_rel (R := fun _ => (· ≥ ·)) (fun _ => le_rfl)
+    (fun _ _ _ _ hxy hyz => le_trans hyz hxy) (fun edge _ _ hxy => hmono edge hxy) hfamily walk
+    fun _ _ _ => id
 
 /-- An oplax section marks a post-fixed point of every closed-walk holonomy. -/
 theorem IsOplaxSection.le_holonomy (hmono : ∀ edge : E, Monotone (T.edgeMap edge))

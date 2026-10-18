@@ -15,20 +15,25 @@ commuting with every edge map.  Edgewise commutation extends to every walk,
 so morphisms carry exact sections to exact sections.  Monotone morphisms also
 carry lax and oplax sections to sections of the same kind.
 
-The two directed weakenings of commutation have different uses.  A lower
-simulation satisfies `h (T.edgeMap edge point) ≤ S.edgeMap edge (h point)` and
-carries oplax sections forward.  An upper simulation satisfies the reverse
-inequality and carries lax sections forward.  If the target edge maps are
-monotone, either edgewise inequality extends along every walk.
+A simulation weakens commutation to a fiberwise relation between mapping after
+transport and transport after mapping.  If the relation is reflexive, transitive,
+and preserved by the target edge maps, the edgewise comparison extends along every
+walk; commutation along walks is the case of equality.  The two order-theoretic
+cases have different uses.  A lower simulation satisfies
+`h (T.edgeMap edge point) ≤ S.edgeMap edge (h point)` and carries oplax sections
+forward.  An upper simulation satisfies the reverse inequality and carries lax
+sections forward.
 
 ## Main definitions
 
+* `Maths.Transport.Simulation` - a fiberwise map comparing edge maps through a relation.
 * `Maths.Transport.Hom` - a fiberwise map commuting with edge transport.
-* `Maths.Transport.LowerSimulation` - a fiberwise lower comparison of edge maps.
-* `Maths.Transport.UpperSimulation` - a fiberwise upper comparison of edge maps.
+* `Maths.Transport.LowerSimulation` and `Maths.Transport.UpperSimulation` - the
+  simulations for `≤` and `≥`.
 
 ## Main results
 
+* `Maths.Transport.Simulation.walkMap_rel` - edgewise comparison extends along walks.
 * `Maths.Transport.Hom.walkMap_naturality` - commutation extends along walks.
 * `Maths.Transport.Hom.ext`, `Maths.Transport.Hom.id_comp`,
   `Maths.Transport.Hom.comp_id`, and `Maths.Transport.Hom.comp_assoc` - extensionality and
@@ -58,6 +63,47 @@ namespace Transport
 variable {T : Transport G Fiber} {S : Transport G Other} {R : Transport G Third}
 variable {Q : Transport G Fourth}
 
+/-! ### Simulations -/
+
+/-- A fiberwise map comparing the edge maps of two transports through a fiberwise relation on
+the second: along every edge, mapping after transport in `T` is `relation`-related to transport
+in `S` after mapping.  A morphism, `Maths.Transport.Hom`, gives the case of equality; lower
+and upper simulations are the cases `≤` and `≥`. -/
+structure Simulation (T : Transport G Fiber) (S : Transport G Other)
+    (relation : ∀ vertex, Other vertex → Other vertex → Prop) where
+  /-- The map on the fiber over each vertex. -/
+  app : (vertex : V) → Fiber vertex → Other vertex
+  /-- The edgewise comparison of the two transports. -/
+  edge_rel : ∀ (edge : E) (point : Fiber (G.source edge)),
+    relation (G.target edge) (app (G.target edge) (T.edgeMap edge point))
+      (S.edgeMap edge (app (G.source edge) point))
+
+namespace Simulation
+
+variable {relation : ∀ vertex, Other vertex → Other vertex → Prop}
+
+/-- Apply a simulation to a vertex-indexed family. -/
+def mapFamily (f : Simulation T S relation) (family : ∀ vertex, Fiber vertex) :
+    ∀ vertex, Other vertex :=
+  fun vertex => f.app vertex (family vertex)
+
+/-- A simulation extends from edges to walks when its relation is reflexive and transitive and
+preserved by the edge maps of `S`. -/
+theorem walkMap_rel (f : Simulation T S relation)
+    (hrefl : ∀ vertex x, relation vertex x x)
+    (htrans : ∀ vertex {x y z}, relation vertex x y → relation vertex y z → relation vertex x z)
+    (hpreserve : ∀ edge {x y}, relation (G.source edge) x y →
+      relation (G.target edge) (S.edgeMap edge x) (S.edgeMap edge y))
+    {start finish : V} (walk : G.Walk start finish) (point : Fiber start) :
+    relation finish (f.app finish (T.walkMap walk point)) (S.walkMap walk (f.app start point)) := by
+  induction walk with
+  | nil => exact hrefl _ _
+  | concat walk edge legal ih =>
+      cases legal
+      exact htrans _ (f.edge_rel edge _) (hpreserve edge ih)
+
+end Simulation
+
 /-- A fiberwise map intertwining the edge maps of two transports. -/
 structure Hom (T : Transport G Fiber) (S : Transport G Other) where
   /-- The map on the fiber over each vertex. -/
@@ -66,6 +112,17 @@ structure Hom (T : Transport G Fiber) (S : Transport G Other) where
   naturality : ∀ (edge : E) (point : Fiber (G.source edge)),
     app (G.target edge) (T.edgeMap edge point) =
       S.edgeMap edge (app (G.source edge) point)
+
+/-- A transport morphism is a simulation for every reflexive relation. -/
+def Hom.toSimulation (f : Hom T S) {relation : ∀ vertex, Other vertex → Other vertex → Prop}
+    (hrefl : ∀ vertex x, relation vertex x x) : Simulation T S relation where
+  app := f.app
+  edge_rel edge point := f.naturality edge point ▸ hrefl _ _
+
+@[simp] theorem Hom.toSimulation_app (f : Hom T S)
+    {relation : ∀ vertex, Other vertex → Other vertex → Prop}
+    (hrefl : ∀ vertex x, relation vertex x x) (vertex : V) (point : Fiber vertex) :
+    (f.toSimulation hrefl).app vertex point = f.app vertex point := rfl
 
 namespace Hom
 
@@ -116,24 +173,13 @@ def comp (g : Hom S R) (f : Hom T S) : Hom T R where
     (point : Fiber vertex) :
     (g.comp f).app vertex point = g.app vertex (f.app vertex point) := rfl
 
-/-- A fiberwise map commutes with casts of its vertex index. -/
-theorem app_fiberCast (f : Hom T S) {first second : V} (hvertex : first = second)
-    (point : Fiber first) :
-    f.app second (fiberCast Fiber hvertex point) =
-      fiberCast Other hvertex (f.app first point) := by
-  subst hvertex
-  rfl
-
 /-- A transport morphism intertwines transport along every walk. -/
 theorem walkMap_naturality (f : Hom T S) {start finish : V}
     (walk : G.Walk start finish) (point : Fiber start) :
     f.app finish (T.walkMap walk point) =
-      S.walkMap walk (f.app start point) := by
-  induction walk with
-  | nil => rfl
-  | concat walk edge legal ih =>
-      rw [Transport.walkMap_concat, Transport.walkMap_concat, f.naturality]
-      rw [f.app_fiberCast, ih]
+      S.walkMap walk (f.app start point) :=
+  (f.toSimulation (relation := fun _ => Eq) fun _ _ => rfl).walkMap_rel (fun _ _ => rfl)
+    (fun _ => Eq.trans) (fun _ => congrArg _) walk point
 
 /-- A transport morphism intertwines the holonomy of every closed walk. -/
 theorem holonomy_naturality (f : Hom T S) {base : V} (cycle : G.Walk base base)
@@ -182,154 +228,53 @@ end Ordered
 
 end Hom
 
-section Lower
+section Ordered
 
 variable [∀ vertex : V, Preorder (Other vertex)]
 
 /-- A fiberwise comparison satisfying
 `h (T.edgeMap edge point) ≤ S.edgeMap edge (h point)` on every edge. -/
-structure LowerSimulation (T : Transport G Fiber) (S : Transport G Other) where
-  /-- The map on the fiber over each vertex. -/
-  app : (vertex : V) → Fiber vertex → Other vertex
-  /-- Transport in the source, followed by comparison, is below transport in the target. -/
-  edge_le : ∀ (edge : E) (point : Fiber (G.source edge)),
-    app (G.target edge) (T.edgeMap edge point) ≤
-      S.edgeMap edge (app (G.source edge) point)
+abbrev LowerSimulation (T : Transport G Fiber) (S : Transport G Other) :=
+  Simulation T S fun _ => (· ≤ ·)
 
-namespace LowerSimulation
+/-- A fiberwise comparison satisfying
+`S.edgeMap edge (h point) ≤ h (T.edgeMap edge point)` on every edge. -/
+abbrev UpperSimulation (T : Transport G Fiber) (S : Transport G Other) :=
+  Simulation T S fun _ => (· ≥ ·)
 
-/-- Apply a lower simulation to a vertex-indexed family. -/
-def mapFamily (f : LowerSimulation T S) (family : ∀ vertex, Fiber vertex) :
-    ∀ vertex, Other vertex :=
-  fun vertex => f.app vertex (family vertex)
-
-/-- A lower simulation commutes with casts of its vertex index. -/
-theorem app_fiberCast (f : LowerSimulation T S) {first second : V}
-    (hvertex : first = second) (point : Fiber first) :
-    f.app second (fiberCast Fiber hvertex point) =
-      fiberCast Other hvertex (f.app first point) := by
-  subst hvertex
-  rfl
-
-section Ordered
-
-/-- A lower simulation extends from edges to walks when target edge maps are monotone. -/
-theorem walkMap_le (f : LowerSimulation T S)
+/-- A lower simulation extends from edges to walks when the edge maps of `S` are monotone. -/
+theorem LowerSimulation.walkMap_le (f : LowerSimulation T S)
     (hmono : ∀ edge : E, Monotone (S.edgeMap edge))
     {start finish : V} (walk : G.Walk start finish) (point : Fiber start) :
-    f.app finish (T.walkMap walk point) ≤ S.walkMap walk (f.app start point) := by
-  induction walk with
-  | nil => exact le_rfl
-  | concat walk edge legal ih =>
-      rw [Transport.walkMap_concat, Transport.walkMap_concat]
-      refine le_trans (f.edge_le edge _) (hmono edge ?_)
-      rw [f.app_fiberCast]
-      exact fiberCast_le_fiberCast legal.symm ih
+    f.app finish (T.walkMap walk point) ≤ S.walkMap walk (f.app start point) :=
+  Simulation.walkMap_rel f (fun _ => le_refl) (fun _ => le_trans)
+    (fun edge _ _ hxy => hmono edge hxy) walk point
+
+/-- An upper simulation extends from edges to walks when the edge maps of `S` are monotone. -/
+theorem UpperSimulation.walkMap_le (f : UpperSimulation T S)
+    (hmono : ∀ edge : E, Monotone (S.edgeMap edge))
+    {start finish : V} (walk : G.Walk start finish) (point : Fiber start) :
+    S.walkMap walk (f.app start point) ≤ f.app finish (T.walkMap walk point) :=
+  Simulation.walkMap_rel f (fun _ => le_refl) (fun _ _ _ _ hxy hyz => le_trans hyz hxy)
+    (fun edge _ _ hxy => hmono edge hxy) walk point
 
 variable [∀ vertex : V, Preorder (Fiber vertex)]
 
 /-- A monotone lower simulation carries oplax sections to oplax sections. -/
-theorem map_isOplaxSection (f : LowerSimulation T S)
+theorem LowerSimulation.map_isOplaxSection (f : LowerSimulation T S)
     (hmono : ∀ vertex, Monotone (f.app vertex))
     {family : ∀ vertex, Fiber vertex} (hfamily : T.IsOplaxSection family) :
-    S.IsOplaxSection (f.mapFamily family) := by
-  intro edge
-  exact le_trans (hmono _ (hfamily edge)) (f.edge_le edge _)
-
-end Ordered
-
-end LowerSimulation
-
-end Lower
-
-section Upper
-
-variable [∀ vertex : V, Preorder (Other vertex)]
-
-/-- A fiberwise comparison satisfying
-`S.edgeMap edge (h point) ≤ h (T.edgeMap edge point)` on every edge. -/
-structure UpperSimulation (T : Transport G Fiber) (S : Transport G Other) where
-  /-- The map on the fiber over each vertex. -/
-  app : (vertex : V) → Fiber vertex → Other vertex
-  /-- Transport in the target is below source transport followed by comparison. -/
-  edge_le : ∀ (edge : E) (point : Fiber (G.source edge)),
-    S.edgeMap edge (app (G.source edge) point) ≤
-      app (G.target edge) (T.edgeMap edge point)
-
-namespace UpperSimulation
-
-/-- Apply an upper simulation to a vertex-indexed family. -/
-def mapFamily (f : UpperSimulation T S) (family : ∀ vertex, Fiber vertex) :
-    ∀ vertex, Other vertex :=
-  fun vertex => f.app vertex (family vertex)
-
-/-- An upper simulation commutes with casts of its vertex index. -/
-theorem app_fiberCast (f : UpperSimulation T S) {first second : V}
-    (hvertex : first = second) (point : Fiber first) :
-    f.app second (fiberCast Fiber hvertex point) =
-      fiberCast Other hvertex (f.app first point) := by
-  subst hvertex
-  rfl
-
-section Ordered
-
-/-- An upper simulation extends from edges to walks when target edge maps are monotone. -/
-theorem walkMap_le (f : UpperSimulation T S)
-    (hmono : ∀ edge : E, Monotone (S.edgeMap edge))
-    {start finish : V} (walk : G.Walk start finish) (point : Fiber start) :
-    S.walkMap walk (f.app start point) ≤ f.app finish (T.walkMap walk point) := by
-  induction walk with
-  | nil => exact le_rfl
-  | concat walk edge legal ih =>
-      rw [Transport.walkMap_concat, Transport.walkMap_concat]
-      refine le_trans (hmono edge ?_) (f.edge_le edge _)
-      rw [f.app_fiberCast]
-      exact fiberCast_le_fiberCast legal.symm ih
-
-variable [∀ vertex : V, Preorder (Fiber vertex)]
+    S.IsOplaxSection (f.mapFamily family) :=
+  fun edge => le_trans (hmono _ (hfamily edge)) (f.edge_rel edge _)
 
 /-- A monotone upper simulation carries lax sections to lax sections. -/
-theorem map_isLaxSection (f : UpperSimulation T S)
+theorem UpperSimulation.map_isLaxSection (f : UpperSimulation T S)
     (hmono : ∀ vertex, Monotone (f.app vertex))
     {family : ∀ vertex, Fiber vertex} (hfamily : T.IsLaxSection family) :
-    S.IsLaxSection (f.mapFamily family) := by
-  intro edge
-  exact le_trans (f.edge_le edge _) (hmono _ (hfamily edge))
+    S.IsLaxSection (f.mapFamily family) :=
+  fun edge => le_trans (f.edge_rel edge _) (hmono _ (hfamily edge))
 
 end Ordered
-
-end UpperSimulation
-
-
-end Upper
-
-section HomSimulations
-
-variable [∀ vertex : V, Preorder (Other vertex)]
-
-namespace Hom
-
-/-- An exact transport morphism is a lower simulation. -/
-def toLowerSimulation (f : Hom T S) : LowerSimulation T S where
-  app := f.app
-  edge_le edge point := (f.naturality edge point).le
-
-/-- An exact transport morphism is an upper simulation. -/
-def toUpperSimulation (f : Hom T S) : UpperSimulation T S where
-  app := f.app
-  edge_le edge point := (f.naturality edge point).ge
-
-/-- The lower simulation underlying a morphism has the same fiber maps. -/
-@[simp] theorem toLowerSimulation_app (f : Hom T S) (vertex : V) (point : Fiber vertex) :
-    f.toLowerSimulation.app vertex point = f.app vertex point := rfl
-
-/-- The upper simulation underlying a morphism has the same fiber maps. -/
-@[simp] theorem toUpperSimulation_app (f : Hom T S) (vertex : V) (point : Fiber vertex) :
-    f.toUpperSimulation.app vertex point = f.app vertex point := rfl
-
-end Hom
-
-end HomSimulations
 
 section UpperClosure
 

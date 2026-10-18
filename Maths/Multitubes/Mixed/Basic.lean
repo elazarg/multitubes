@@ -13,7 +13,8 @@ public import Maths.Multitubes.Basic
 An edge of a transport can impose a lower constraint, an equality, or
 an upper constraint.  `Maths.EdgeMode` records this choice, while
 `Maths.Transport.IsMixedSectionFor` applies it to an arbitrary relation on each
-fiber.  Thus this layer needs neither order laws nor algebraic structure on the
+fiber, as the instance of `Maths.Transport.IsSectionFor` whose edge relation is the one
+selected by the mode.  Thus this layer needs neither order laws nor algebraic structure on the
 edge maps.
 
 ## Main definitions
@@ -119,8 +120,7 @@ equality. -/
 def IsMixedSectionFor (T : Transport G Fiber)
     (relation : ∀ vertex : V, Fiber vertex → Fiber vertex → Prop)
     (mode : E → EdgeMode) (family : ∀ vertex, Fiber vertex) : Prop :=
-  ∀ edge : E, (mode edge).satisfies (relation (G.target edge))
-    (T.edgeMap edge (family (G.source edge))) (family (G.target edge))
+  T.IsSectionFor (fun edge => (mode edge).satisfies (relation (G.target edge))) family
 
 variable {relation : ∀ vertex : V, Fiber vertex → Fiber vertex → Prop}
 variable {mode : E → EdgeMode} {family : ∀ vertex, Fiber vertex}

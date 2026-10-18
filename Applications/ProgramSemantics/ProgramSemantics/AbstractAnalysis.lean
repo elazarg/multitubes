@@ -111,7 +111,7 @@ def upperSimulation (domain : AbstractDomain G Concrete Abstract concreteStep ab
       (forwardPredicateTransport (State := fun _ : V => Abstract) G abstractStep)
       (forwardPredicateTransport G concreteStep) where
   app := domain.concretizeSet
-  edge_le edge states := by
+  edge_rel edge states := by
     rintro state ⟨source, ⟨abstract, habstract, hsource⟩, rfl⟩
     exact ⟨abstractStep edge abstract, ⟨abstract, habstract, rfl⟩,
       domain.step_mem edge abstract source hsource⟩
