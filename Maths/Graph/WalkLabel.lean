@@ -8,6 +8,7 @@ module
 public import Maths.Graph.EdgeGraph
 public import Mathlib.Algebra.BigOperators.Group.List.Defs
 public import Mathlib.Algebra.Group.Defs
+public import Mathlib.Algebra.Group.TypeTags.Basic
 public import Mathlib.Algebra.Order.Monoid.Defs
 
 import Mathlib.Algebra.BigOperators.Group.List.Basic
@@ -33,6 +34,7 @@ The two agree in a commutative monoid (`Maths.walkLabel_eq_walkProd`).  A labell
 
 * `Maths.walkLabel` - the composite label of a walk in action order.
 * `Maths.HasTrivialCycleLabels` - every closed walk has identity label.
+* `Maths.HasZeroCycleSums` - every closed walk has zero sum.
 * `Maths.walkProd` and `Maths.walkSum` - the chronological product and sum of edge data
   along a walk.
 
@@ -42,6 +44,8 @@ The two agree in a commutative monoid (`Maths.walkLabel_eq_walkProd`).  A labell
 * `Maths.walkProd_append` and `Maths.walkSum_append` - chronological products and sums are
   multiplicative and additive under concatenation.
 * `Maths.walkLabel_eq_walkProd` - the two orders agree in a commutative monoid.
+* `Maths.hasTrivialCycleLabels_ofAdd_iff` - zero cycle sums are trivial cycle labels of the
+  multiplicative reading, so additive statements follow from multiplicative ones.
 * `Maths.countP_nsmul_le_walkSum` - a lower bound per marked traversal bounds the walk sum of
   nonnegative data.
 
@@ -103,6 +107,12 @@ variable {label : E → M}
     walkLabel label (walk.castStart hstart) = walkLabel label walk := by
   subst hstart
   rfl
+
+/-- The constant labelling by the identity gives every walk the identity label. -/
+@[simp] theorem walkLabel_one (walk : G.Walk start finish) : walkLabel (1 : E → M) walk = 1 := by
+  induction walk with
+  | nil => rfl
+  | concat walkSoFar edge legal ih => simp [ih]
 
 /-- Every closed walk has identity composite label.  For group-labelled gain graphs this is
 balance; for a transport it is flatness. -/
@@ -171,6 +181,11 @@ theorem walkProd_one (walk : G.Walk start finish) : walkProd (fun _ => (1 : M)) 
 
 end Product
 
+/-- Every closed walk has zero sum: Kirchhoff's voltage law, or path independence of the walk
+sum. -/
+def HasZeroCycleSums {A : Type*} [AddMonoid A] (G : EdgeGraph V E) (w : E → A) : Prop :=
+  ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum w cycle = 0
+
 section CommMonoid
 
 variable {M : Type uM} [CommMonoid M]
@@ -189,6 +204,25 @@ theorem walkProd_mul (w₁ w₂ : E → M) (walk : G.Walk start finish) :
   simp [walkProd, List.prod_map_mul]
 
 end CommMonoid
+
+section Additive
+
+variable {A : Type*} [AddCommMonoid A] {w : E → A}
+
+/-- Additive edge data, read multiplicatively through the type tag `Multiplicative.ofAdd`, has
+the walk sum as its walk label. -/
+@[simp] theorem walkLabel_ofAdd (walk : G.Walk start finish) :
+    walkLabel (fun edge => Multiplicative.ofAdd (w edge)) walk =
+      Multiplicative.ofAdd (walkSum w walk) := by
+  rw [walkLabel_eq_walkProd]
+  rfl
+
+/-- Zero cycle sums are trivial cycle labels of the multiplicative reading. -/
+theorem hasTrivialCycleLabels_ofAdd_iff :
+    HasTrivialCycleLabels G (fun edge => Multiplicative.ofAdd (w edge)) ↔ HasZeroCycleSums G w :=
+  forall₂_congr fun _ _ => by rw [walkLabel_ofAdd, ofAdd_eq_one]
+
+end Additive
 
 section CommGroup
 

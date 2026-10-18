@@ -699,7 +699,7 @@ theorem exists_slopeGauge_of_cycleProduct_eq_one_of_stronglyConnected
   have hpos : ∀ edge, 0 < slope edge :=
     slope_pos_of_cycleProduct_eq_one_of_stronglyConnected slope hconnected
       hnonneg hflat
-  have hzero : CycleCoboundary.HasZeroCycleSums G (fun edge ↦ Real.log (slope edge)) := by
+  have hzero : HasZeroCycleSums G (fun edge ↦ Real.log (slope edge)) := by
     have hexp {start finish : V} (walk : G.Walk start finish) :
         Real.exp (walkSum
           (fun edge ↦ Real.log (slope edge)) walk) =

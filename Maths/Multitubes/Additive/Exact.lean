@@ -53,7 +53,6 @@ bounded range.
 
 * `Maths.CycleCoboundary.coboundary` and
   `Maths.CycleCoboundary.IsCoboundary`.
-* `Maths.CycleCoboundary.HasZeroCycleSums`.
 * `Maths.CycleCoboundary.translationTransport` - the direct additive reading as
   a `Maths.Transport`.
 
@@ -134,11 +133,6 @@ def coboundary (G : EdgeGraph V E) (φ : V → A) : E → A :=
 /-- Edge data is **exact** when it is the coboundary of some vertex potential. -/
 def IsCoboundary (G : EdgeGraph V E) (w : E → A) : Prop :=
   ∃ φ : V → A, ∀ edge : E, w edge = coboundary G φ edge
-
-/-- Every closed walk has cycle sum zero.  This is Kirchhoff's voltage law, or
-path independence of the walk sum. -/
-def HasZeroCycleSums (G : EdgeGraph V E) (w : E → A) : Prop :=
-  ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum w cycle = 0
 
 variable {start finish : V}
 
@@ -429,32 +423,6 @@ section Translation
 open Maths
 
 variable {w : E → ℝ} {start finish : V}
-
-/-- Real edge data labels the graph by translations of the line: the walk's
-composite label is its walk sum, carried into the multiplicative encoding by
-the type tag `Multiplicative.ofAdd` (no exponential is applied).  Translations
-invert, so this labelling is a genuine gain graph. -/
-@[simp] theorem walkLabel_ofAdd (walk : G.Walk start finish) :
-    walkLabel (fun edge => Multiplicative.ofAdd (w edge)) walk =
-      Multiplicative.ofAdd (walkSum w walk) := by
-  induction walk with
-  | nil => simp
-  | concat walkSoFar edge legal ih =>
-      rw [walkLabel_concat, ih, walkSum_concat, ← ofAdd_add, add_comm]
-
-/-- Vanishing cycle sums is triviality of the cycle holonomy for the
-translation labelling. -/
-theorem hasTrivialCycleLabels_ofAdd_iff :
-    HasTrivialCycleLabels G (fun edge => Multiplicative.ofAdd (w edge)) ↔
-      HasZeroCycleSums G w := by
-  constructor
-  · intro hflat vertex cycle
-    have := hflat vertex cycle
-    rw [walkLabel_ofAdd] at this
-    simpa using this
-  · intro hzero vertex cycle
-    rw [walkLabel_ofAdd, hzero vertex cycle]
-    rfl
 
 /-- **Exactness as flatness.**  On a strongly connected graph, real edge data is
 a potential difference exactly when the translation labelling it defines has

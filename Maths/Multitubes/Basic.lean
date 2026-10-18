@@ -87,6 +87,8 @@ products of slopes.
   walk acts by its composite label.
 * `Maths.hasTrivialHolonomy_ofSMul` - trivial cycle labels
   imply trivial holonomy of the induced transport.
+* `Maths.hasTrivialCycleLabels_iff_hasTrivialHolonomy_ofSMul` - for the regular
+  representation, by left multiplication on the monoid itself, the converse holds.
 
 ## Implementation notes
 
@@ -493,5 +495,14 @@ theorem hasTrivialHolonomy_ofSMul {X : Type uX} {M : Type uM}
   intro base cycle
   funext point
   exact holonomy_ofSMul_eq_self hflat cycle point
+
+/-- **Flatness is trivial holonomy of the regular representation.**  A monoid labelling has
+trivial cycle labels exactly when the transport by left multiplication on the monoid itself
+has trivial holonomy.  So statements about flat labels are statements about flat transport. -/
+theorem hasTrivialCycleLabels_iff_hasTrivialHolonomy_ofSMul {M : Type uM} [Monoid M]
+    {label : E → M} :
+    HasTrivialCycleLabels G label ↔ (ofSMul G M label).HasTrivialHolonomy := by
+  refine ⟨hasTrivialHolonomy_ofSMul, fun hflat base cycle => ?_⟩
+  simpa [holonomy_ofSMul_eq_walkLabel_smul] using hflat.holonomy_eq_self cycle 1
 
 end Maths

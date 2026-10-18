@@ -23,8 +23,6 @@ even though the ambient labels live in an arbitrary monoid.
   over a reachable root.
 * `Maths.hasTrivialCycleLabels_iff_exists_unitPotential`: flatness is exactly
   the existence of a unit-valued coboundary potential.
-* `Maths.isUnit_edge_of_trivialCycleLabels`: every edge label is a unit as
-  soon as its endpoints are linked to a base vertex.
 * `Maths.unitPotential_ratio_eq_of_rootReaches`: **the ratio of two potentials for
   the same labelling is constant** on the vertices reachable from the base.
 * `Maths.unitPotential_eq_mul_constant_of_rootReaches`: two potentials for the
@@ -90,23 +88,9 @@ to existence of a unit-valued coboundary potential. -/
 theorem hasTrivialCycleLabels_iff_exists_unitPotential {base : V}
     (hlinked : EdgeEndpointsLinkedTo G base) :
     HasTrivialCycleLabels G label ↔
-      ∃ potential : V → Mˣ, ∀ edge : E,
-        label edge =
-          (potential (G.target edge) *
-            (potential (G.source edge))⁻¹ : Mˣ) := by
-  exact ⟨exists_unitPotential_of_trivialCycleLabels hlinked,
+      ∃ potential : V → Mˣ, IsUnitPotential G label potential :=
+  ⟨exists_unitPotential_of_trivialCycleLabels hlinked,
     fun ⟨potential, hpotential⟩ => hasTrivialCycleLabels_of_unitPotential potential hpotential⟩
-
-/-- Every recurrent edge label is a unit under global flatness. -/
-theorem isUnit_edge_of_trivialCycleLabels {base : V}
-    (hlinked : EdgeEndpointsLinkedTo G base)
-    (hflat : HasTrivialCycleLabels G label) (edge : E) :
-    IsUnit (label edge) := by
-  obtain ⟨potential, hpotential⟩ :=
-    exists_unitPotential_of_trivialCycleLabels hlinked hflat
-  refine ⟨potential (G.target edge) *
-    (potential (G.source edge))⁻¹, ?_⟩
-  exact (hpotential edge).symm
 
 private theorem unit_ratio_eq_of_edge
     (first second : V → Mˣ)

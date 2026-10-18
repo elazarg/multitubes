@@ -123,13 +123,6 @@ theorem walkLabel_switch (η : V → Mˣ) {start finish : V} (walk : G.Walk star
 
 /-! ### The trivial gain -/
 
-/-- The trivial gain gives every walk the trivial label. -/
-@[simp] theorem walkLabel_one {start finish : V} (walk : G.Walk start finish) :
-    walkLabel (1 : E → M) walk = 1 := by
-  induction walk with
-  | nil => rfl
-  | concat walkSoFar edge legal ih => simp [ih]
-
 /-- The trivial gain is balanced. -/
 theorem hasTrivialCycleLabels_one : HasTrivialCycleLabels G (1 : E → M) :=
   fun _ cycle => walkLabel_one cycle
