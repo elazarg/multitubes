@@ -82,18 +82,18 @@ theorem closedWalk_nonpos_of_short [Fintype V] (weight : E → ℝ)
       have hzero : cycle.length = 0 := Nat.eq_zero_of_le_zero hlength
       cases cycle with
       | nil => simp [walkSum]
-      | concat before edge legal => simp at hzero
+      | concat edge before => simp at hzero
   | succ bound ih =>
       intro hlength
       by_cases hcard : cycle.length ≤ Fintype.card V
       · by_cases hnil : cycle.length = 0
         · cases cycle with
           | nil => simp [walkSum]
-          | concat before edge legal => simp at hnil
+          | concat edge before => simp at hnil
         · exact hshort vertex cycle (Nat.pos_of_ne_zero hnil) hcard
       · cases cycle with
         | nil => simp [walkSum]
-        | concat initial edge legal =>
+        | concat edge initial =>
             have hinitialDup : ¬initial.visited.Nodup := by
               intro hnodup
               have hlengthCard := hnodup.length_le_card
@@ -103,8 +103,8 @@ theorem closedWalk_nonpos_of_short [Fintype V] (weight : E → ℝ)
             obtain ⟨middle, before, inner, after, hinnerPos, hedges⟩ :=
               initial.exists_closedSubwalk_of_not_nodup hinitialDup
             let remainder : G.Walk (G.target edge) (G.target edge) :=
-              (before.append after).concat edge legal
-            have hlengthEq : (initial.concat edge legal).length =
+              (before.append after).concat edge
+            have hlengthEq : (initial.concat edge).length =
                 inner.length + remainder.length := by
               have hedgeLength := congrArg List.length hedges
               simp only [List.length_append, EdgeGraph.Walk.edges_length] at hedgeLength
@@ -117,7 +117,7 @@ theorem closedWalk_nonpos_of_short [Fintype V] (weight : E → ℝ)
             have hremainderLe : remainder.length ≤ bound := by omega
             have hinnerWeight := ih middle inner hinnerLe
             have hremainderWeight := ih (G.target edge) remainder hremainderLe
-            have hweightEq : walkSum weight (initial.concat edge legal) =
+            have hweightEq : walkSum weight (initial.concat edge) =
                 walkSum weight inner + walkSum weight remainder := by
               simp only [walkSum, EdgeGraph.Walk.edges_concat,
                 EdgeGraph.Walk.edges_append, remainder, hedges,
@@ -280,7 +280,7 @@ theorem exists_short_closedWalk_realizing_residual_threshold
     by_cases hotherZero : other.length = 0
     · cases other with
       | nil => simp [walkSum]
-      | concat initial edge legal => simp at hotherZero
+      | concat edge initial => simp at hotherZero
     · have hotherPos : 0 < other.length := Nat.pos_of_ne_zero hotherZero
       have hmean := (hbest otherVertex other hotherPos).trans hlevel
       have hlengthPos : (0 : ℝ) < other.length := by
@@ -306,8 +306,8 @@ theorem exists_negative_residual_bound_of_short [Fintype V] [Finite E]
     intro vertex cycle
     cases cycle with
     | nil => simp [walkSum]
-    | concat walk edge legal =>
-        exact (hexists ⟨G.target edge, walk.concat edge legal, by simp⟩).elim
+    | concat edge walk =>
+        exact (hexists ⟨G.target edge, walk.concat edge, by simp⟩).elim
 
 /-- On a finite graph, strict negativity on every nonempty closed walk gives a potential
 whose edge residuals have one strictly negative upper bound. Acyclic graphs are included. -/

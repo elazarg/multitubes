@@ -93,7 +93,8 @@ theorem mem_reachableWithin_iff (initial : Finset (V × State))
     (rounds : ℕ) (target : V × State) :
     target ∈ reachableWithin G step initial rounds ↔
       ∃ (source : V × State) (walk : G.Walk source.1 target.1),
-        source ∈ initial ∧ walk.length ≤ rounds ∧ target.2 = transport step walk source.2 := by
+        source ∈ initial ∧ walk.length ≤ rounds ∧
+          target.2 = (ofEdgeAct G State step).walkMap walk source.2 := by
   induction rounds generalizing target with
   | zero =>
       rcases target with ⟨targetVertex, targetState⟩
@@ -108,7 +109,7 @@ theorem mem_reachableWithin_iff (initial : Finset (V × State))
             change targetState = sourceState at hstate
             subst targetState
             exact hsource
-        | concat walk edge legal => simp at hlength
+        | concat edge walk => simp at hlength
   | succ rounds ih =>
       rcases target with ⟨targetVertex, targetState⟩
       rw [reachableWithin, Function.iterate_succ_apply']
@@ -122,23 +123,26 @@ theorem mem_reachableWithin_iff (initial : Finset (V × State))
           obtain ⟨edge, legal, htarget⟩ :=
             (mem_successors_iff G step middle (targetVertex, targetState)).mp hnext
           obtain ⟨rfl, rfl⟩ := Prod.mk.inj htarget
-          refine ⟨source, walk.concat edge legal, hsource, by simpa, ?_⟩
-          simp [transport_concat, hstate]
+          obtain ⟨middleVertex, middleState⟩ := middle
+          obtain rfl : G.source edge = middleVertex := legal
+          refine ⟨source, walk.concat edge, hsource, by simpa, ?_⟩
+          exact congrArg (step edge) hstate
       · rintro ⟨source, walk, hsource, hlength, hstate⟩
         by_cases hshort : walk.length ≤ rounds
         · exact Or.inl
             ((ih (targetVertex, targetState)).mpr ⟨source, walk, hsource, hshort, hstate⟩)
         · cases walk with
           | nil => simp at hshort
-          | @concat middle walk edge legal =>
+          | concat edge walk =>
               apply Or.inr
-              let before : V × State := (middle, transport step walk source.2)
+              let before : V × State :=
+                (G.source edge, (ofEdgeAct G State step).walkMap walk source.2)
               have hbefore : walk.length ≤ rounds := by simpa using hlength
               refine ⟨before, (ih before).mpr ⟨source, walk, hsource, hbefore, rfl⟩, ?_⟩
               apply (mem_successors_iff G step before (G.target edge, targetState)).mpr
-              refine ⟨edge, legal, Prod.ext rfl ?_⟩
-              change targetState = step edge (transport step walk source.2)
-              simpa [transport_concat] using hstate
+              refine ⟨edge, rfl, Prod.ext rfl ?_⟩
+              change targetState = step edge ((ofEdgeAct G State step).walkMap walk source.2)
+              simpa [Transport.walkMap_concat, ofEdgeAct_edgeMap] using hstate
 
 omit [Fintype V] [Fintype State] in
 private theorem reachableWithin_mono (initial : Finset (V × State)) :
@@ -201,7 +205,7 @@ theorem mem_reachableConfigurations_iff (initial : Finset (V × State))
     (target : V × State) :
     target ∈ reachableConfigurations G step initial ↔
       ∃ (source : V × State) (walk : G.Walk source.1 target.1),
-        source ∈ initial ∧ target.2 = transport step walk source.2 := by
+        source ∈ initial ∧ target.2 = (ofEdgeAct G State step).walkMap walk source.2 := by
   constructor
   · rw [reachableConfigurations, mem_reachableWithin_iff]
     rintro ⟨source, walk, hsource, -, hstate⟩
@@ -231,20 +235,19 @@ private theorem mem_walkMap_forwardPredicateTransport_iff {start finish : V}
     (walk : G.Walk start finish) (initial : Set State) (target : State) :
     target ∈ (forwardPredicateTransport (State := fun _ : V => State) G step).walkMap
       walk initial ↔
-      ∃ source ∈ initial, target = transport step walk source := by
+      ∃ source ∈ initial, target = (ofEdgeAct G State step).walkMap walk source := by
   induction walk generalizing target with
   | nil => simp
-  | concat walk edge legal ih =>
-      simp only [Transport.walkMap_concat, forwardPredicateTransport, fiberCast_const,
-        Set.mem_image]
+  | concat edge walk ih =>
+      simp only [Transport.walkMap_concat, forwardPredicateTransport, Set.mem_image]
       constructor
       · rintro ⟨middle, hmiddle, rfl⟩
         obtain ⟨source, hsource, rfl⟩ := (ih middle).mp hmiddle
-        exact ⟨source, hsource, by simp [transport_concat]⟩
+        exact ⟨source, hsource, by simp [ofEdgeAct_edgeMap]⟩
       · rintro ⟨source, hsource, rfl⟩
-        exact ⟨transport step walk source,
-          (ih (transport step walk source)).mpr ⟨source, hsource, rfl⟩,
-          by simp [transport_concat]⟩
+        exact ⟨(ofEdgeAct G State step).walkMap walk source,
+          (ih ((ofEdgeAct G State step).walkMap walk source)).mpr ⟨source, hsource, rfl⟩,
+          by simp [ofEdgeAct_edgeMap]⟩
 
 /-- Projected finite reachability agrees with membership in the existing least path closure. -/
 theorem mem_reachableStates_iff_pathClosure (initial : V → Finset State)
@@ -256,13 +259,14 @@ theorem mem_reachableStates_iff_pathClosure (initial : V → Finset State)
   simp only [Finset.mem_univ, true_and, Finset.mem_biUnion, Finset.mem_image]
   change (∃ source walk, (∃ (control : V) (initialState : State),
       initialState ∈ initial control ∧ (control, initialState) = source) ∧
-      state = transport step walk source.2) ↔ _
+      state = (ofEdgeAct G State step).walkMap walk source.2) ↔ _
   have hleft : (∃ (source : V × State) (walk : G.Walk source.1 vertex),
       (∃ (control : V) (initialState : State),
       initialState ∈ initial control ∧ (control, initialState) = source) ∧
-      state = transport step walk source.2) ↔
+      state = (ofEdgeAct G State step).walkMap walk source.2) ↔
       ∃ (source : V) (walk : G.Walk source vertex) (initialState : State),
-        initialState ∈ initial source ∧ state = transport step walk initialState := by
+        initialState ∈ initial source ∧
+          state = (ofEdgeAct G State step).walkMap walk initialState := by
     constructor
     · rintro ⟨source, walk, ⟨control, initialState, hinitial, rfl⟩, hstate⟩
       exact ⟨control, walk, initialState, hinitial, hstate⟩

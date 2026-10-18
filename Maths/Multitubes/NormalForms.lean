@@ -95,7 +95,7 @@ end Monoid
 chosen walk to its source extended by the edge.  No acyclicity, simplicity, or arborescence
 condition is imposed on the family. -/
 def IsGeneratedEdge {base : V} (paths : ∀ vertex, G.Walk base vertex) (edge : E) : Prop :=
-  paths (G.target edge) = (paths (G.source edge)).concat edge rfl
+  paths (G.target edge) = (paths (G.source edge)).concat edge
 
 /-- Generated edges satisfy the path-potential equation definitionally. -/
 theorem label_mul_walkLabel_eq_of_isGeneratedEdge [Monoid M] {base : V}
@@ -118,7 +118,7 @@ theorem hasTrivialCycleLabels_iff_nonGeneratedEdges {base : V}
         label edge * walkLabel label (paths (G.source edge)) =
           walkLabel label (paths (G.target edge)) := by
   refine ⟨fun hflat edge _ => (hasTrivialCycleLabels_iff_parallelLabels hconnected).mp hflat
-    ((paths (G.source edge)).concat edge rfl) (paths (G.target edge)), fun hnongenerated => ?_⟩
+    ((paths (G.source edge)).concat edge) (paths (G.target edge)), fun hnongenerated => ?_⟩
   refine hasTrivialCycleLabels_of_unitPotential (fun vertex => toUnits
     (walkLabel label (paths vertex))) fun edge => ?_
   have hedge : label edge * walkLabel label (paths (G.source edge)) =
@@ -151,7 +151,7 @@ theorem hasTrivialCycleLabels_iff_chosen_return_nonGeneratedEdges {base : V}
     refine ⟨fun vertex => ?_, fun edge _ => ?_⟩
     · simpa using hflat base ((paths vertex).append (returns vertex))
     · simpa [mul_assoc] using hflat base
-        (((paths (G.source edge)).concat edge rfl).append (returns (G.target edge)))
+        (((paths (G.source edge)).concat edge).append (returns (G.target edge)))
   · rintro ⟨hreturn, hnongenerated⟩
     apply hasTrivialCycleLabels_of_chosen_tests paths returns hreturn
     intro edge

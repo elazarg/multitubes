@@ -162,8 +162,8 @@ def translationTransport [Add A] (G : EdgeGraph V E) (w : E → A) :
     (translationTransport G w).walkMap walk point = point + walkSum w walk := by
   induction walk with
   | nil => simp
-  | concat walkSoFar edge legal ih =>
-      rw [Transport.walkMap_concat, fiberCast_const, ih, walkSum_concat,
+  | concat edge walkSoFar ih =>
+      rw [Transport.walkMap_concat, ih, walkSum_concat,
         translationTransport_edgeMap, add_assoc]
 
 /-- Every edge map of an ordered translation transport is monotone. -/
@@ -228,8 +228,7 @@ theorem sum_defect_eq (weight : E → 𝕜g) (φ : V → 𝕜g) {start finish : 
       = walkSum weight walk + φ start - φ finish := by
   induction walk with
   | nil => simp
-  | concat walkSoFar edge legal ih =>
-      subst legal
+  | concat edge walkSoFar ih =>
       simp only [EdgeGraph.Walk.edges_concat, List.map_append, List.sum_append,
         List.map_cons, List.map_nil, List.sum_cons, List.sum_nil, ih, defect,
         walkSum_concat]
@@ -334,7 +333,7 @@ theorem exists_nodup_visited_walkSum_le {weight : E → 𝕜}
       intro start finish walk hlen
       cases walk with
       | nil => exact ⟨.nil, by simp, le_rfl⟩
-      | concat walkSoFar edge legal => simp at hlen
+      | concat edge walkSoFar => simp at hlen
   | succ bound ih =>
       intro start finish walk hlen
       by_cases hnd : walk.visited.Nodup
@@ -466,7 +465,7 @@ theorem maxIncomingWeight_isPotential {weight : E → 𝕜}
     IsPotential G weight (maxIncomingWeight G weight) := by
   intro e
   obtain ⟨start, walk, -, hwalk⟩ := maxIncomingWeight_mem weight (G.source e)
-  have hle := walkSum_le_maxIncomingWeight hcyc (walk.concat e rfl)
+  have hle := walkSum_le_maxIncomingWeight hcyc (walk.concat e)
   rwa [walkSum_concat, hwalk] at hle
 
 /-- The incoming path envelope is the least nonnegative potential.  Thus its

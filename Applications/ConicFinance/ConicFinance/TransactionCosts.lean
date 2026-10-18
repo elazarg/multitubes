@@ -134,7 +134,7 @@ def relationTransport [AddCommGroup Portfolio] :
 def walkIncrement [Zero Portfolio] [Add Portfolio] {start : V} :
     {finish : V} → G.Walk start finish → Set Portfolio
   | _, .nil => {0}
-  | _, .concat walk edge _ => walkIncrement walk + market.increment edge
+  | _, .concat edge walk => walkIncrement walk + market.increment edge
 
 /-- Native transaction feasibility is membership of the net change in the pathwise Minkowski
 sum. -/
@@ -146,8 +146,7 @@ theorem walkRelation_iff_sub_mem_walkIncrement [AddCommGroup Portfolio]
   | nil =>
       simpa [RelationTransport.walkRelation, walkIncrement, sub_eq_zero] using
         (eq_comm : source = target ↔ target = source)
-  | @concat middle walk edge legal ih =>
-      subst middle
+  | concat edge walk ih =>
       constructor
       · rintro ⟨middle, hprefix, hedge⟩
         have hsum := Set.add_mem_add ((ih source middle).mp hprefix) hedge
@@ -175,7 +174,7 @@ theorem walkIncrement_append [AddCommMonoid Portfolio]
       market.walkIncrement first + market.walkIncrement second := by
   induction second with
   | nil => simp [walkIncrement]
-  | concat walk edge _ ih =>
+  | concat edge walk ih =>
       rw [EdgeGraph.Walk.append_concat]
       simp only [walkIncrement, ih, add_assoc]
 
@@ -205,7 +204,7 @@ theorem convex_walkIncrement {Scalar : Type uR}
   | nil =>
       change Convex Scalar ({0} : Set Portfolio)
       exact convex_singleton 0
-  | concat walk edge _ ih =>
+  | concat edge walk ih =>
       simpa only [walkIncrement] using ih.add (hconvex edge)
 
 end TransactionMarket

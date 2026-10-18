@@ -113,8 +113,7 @@ private theorem sccCondensation_walk_le {start finish : SCC G}
     (walk : (sccCondensation G).Walk start finish) : start ≤ finish := by
   induction walk with
   | nil => exact le_rfl
-  | @concat _ walk edge legal ih =>
-      subst legal
+  | concat edge walk ih =>
       exact ih.trans (sccCondensation_edge_strict edge).le
 
 /-- Every nonempty condensation walk strictly increases the component order.
@@ -124,8 +123,7 @@ theorem sccCondensation_walk_lt_of_pos {start finish : SCC G}
     (hpositive : 0 < walk.length) : start < finish := by
   cases walk with
   | nil => simp at hpositive
-  | @concat _ walk edge legal =>
-      subst legal
+  | concat edge walk =>
       exact lt_of_le_of_lt (sccCondensation_walk_le walk)
         (sccCondensation_edge_strict edge)
 

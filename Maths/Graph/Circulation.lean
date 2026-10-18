@@ -286,9 +286,8 @@ variable {G} {start finish : V}
 source. -/
 theorem outgoingMultiplicity_edgeMultiplicity_concat
     [Fintype E] [DecidableEq E] [DecidableEq V]
-    (walkSoFar : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) (vertex : V) :
-    G.outgoingMultiplicity (Walk.concat walkSoFar edge legal).edgeMultiplicity vertex =
+    (edge : E) (walkSoFar : G.Walk start (G.source edge)) (vertex : V) :
+    G.outgoingMultiplicity (Walk.concat edge walkSoFar).edgeMultiplicity vertex =
       G.outgoingMultiplicity walkSoFar.edgeMultiplicity vertex +
         if G.source edge = vertex then 1 else 0 := by
   classical
@@ -298,9 +297,8 @@ theorem outgoingMultiplicity_edgeMultiplicity_concat
 target. -/
 theorem incomingMultiplicity_edgeMultiplicity_concat
     [Fintype E] [DecidableEq E] [DecidableEq V]
-    (walkSoFar : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) (vertex : V) :
-    G.incomingMultiplicity (Walk.concat walkSoFar edge legal).edgeMultiplicity vertex =
+    (edge : E) (walkSoFar : G.Walk start (G.source edge)) (vertex : V) :
+    G.incomingMultiplicity (Walk.concat edge walkSoFar).edgeMultiplicity vertex =
       G.incomingMultiplicity walkSoFar.edgeMultiplicity vertex +
         if G.target edge = vertex then 1 else 0 := by
   classical
@@ -314,7 +312,7 @@ theorem multiplicityCharge_edgeMultiplicity
       walkSum edgeCharge walk := by
   induction walk with
   | nil => simp [multiplicityCharge]
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       funext coordinate
       simp only [multiplicityCharge, edgeMultiplicity, walkSum_concat,
         Pi.add_apply, Finset.sum_apply, nsmul_eq_mul]
@@ -335,9 +333,9 @@ theorem edgeMultiplicity_flow_with_endpoints
         (if start = vertex then 1 else 0) := by
   induction walk with
   | nil => simp
-  | @concat middle walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [outgoingMultiplicity_edgeMultiplicity_concat,
-        incomingMultiplicity_edgeMultiplicity_concat, legal]
+        incomingMultiplicity_edgeMultiplicity_concat]
       omega
 
 /-- Edge multiplicities of a closed typed walk are balanced at every vertex. -/

@@ -273,7 +273,7 @@ theorem monotone_refinementTransport_edgeMap
 /-- The loop walk representing `steps` finite relation unfoldings. -/
 def refinementWalk : ℕ → refinementGraph.Walk () ()
   | 0 => .nil
-  | steps + 1 => (refinementWalk steps).concat () rfl
+  | steps + 1 => (refinementWalk steps).concat ()
 
 /-- Every simulation is contained in each of its finite relation unfoldings. -/
 theorem simulation_le_walkMap

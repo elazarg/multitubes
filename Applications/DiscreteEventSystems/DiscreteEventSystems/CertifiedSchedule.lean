@@ -177,7 +177,7 @@ end TimedNetwork
 
 /-- The second event's self-dependency, viewed as a one-edge closed walk. -/
 def exampleBottleneckCycle : exampleNetwork.graph.Walk .second .second :=
-  (.nil : exampleNetwork.graph.Walk .second .second).concat .secondSelf rfl
+  (.nil : exampleNetwork.graph.Walk .second .second).concat ExampleDependency.secondSelf
 
 /-- The bottleneck cycle has length one. -/
 @[simp] theorem exampleBottleneckCycle_length : exampleBottleneckCycle.length = 1 := rfl
@@ -189,8 +189,7 @@ def exampleBottleneckCycle : exampleNetwork.graph.Walk .second .second :=
     _ = walkSum exampleNetwork.delay
           (.nil : exampleNetwork.graph.Walk .second .second) +
         exampleNetwork.delay .secondSelf := walkSum_concat (w := exampleNetwork.delay)
-          (.nil : exampleNetwork.graph.Walk .second .second)
-            .secondSelf rfl
+          ExampleDependency.secondSelf (.nil : exampleNetwork.graph.Walk .second .second)
     _ = 3 := by norm_num [walkSum, exampleNetwork]
 
 /-- Every event is reachable from the bottleneck event. -/
@@ -198,7 +197,8 @@ theorem example_reachable_from_second (vertex : ExampleEvent) :
     Nonempty (exampleNetwork.graph.Walk .second vertex) := by
   cases vertex with
   | first =>
-      exact ⟨(.nil : exampleNetwork.graph.Walk .second .second).concat .secondToFirst rfl⟩
+      exact ⟨EdgeGraph.Walk.singleton (G := exampleNetwork.graph)
+        ExampleDependency.secondToFirst⟩
   | second => exact ⟨.nil⟩
 
 /-- The explicit shifted phase used to calculate the rooted construction. -/
@@ -245,7 +245,8 @@ theorem example_rootedPhase_eq :
         rw [TimedNetwork.rootedPhase, ← hwalk]
         simpa [exampleShiftedPhase] using exampleShiftedPhase_isPotential.walkSum_le walk
       · refine le_maxRootedWeight ⟨
-          (.nil : exampleNetwork.graph.Walk .second .second).concat .secondToFirst rfl, ?_, ?_⟩
+          EdgeGraph.Walk.singleton (G := exampleNetwork.graph) ExampleDependency.secondToFirst,
+          ?_, ?_⟩
         · change [ExampleDependency.secondToFirst].Nodup
           simp
         · calc
@@ -253,7 +254,7 @@ theorem example_rootedPhase_eq :
                   (.nil : exampleNetwork.graph.Walk .second .second) +
                 (exampleNetwork.delay .secondToFirst - 3) := walkSum_concat
                   (w := fun edge => exampleNetwork.delay edge - 3)
-                  (.nil : exampleNetwork.graph.Walk .second .second) .secondToFirst rfl
+                  ExampleDependency.secondToFirst (.nil : exampleNetwork.graph.Walk .second .second)
             _ = -2 := by norm_num [walkSum, exampleNetwork]
 
 /-- The maximizing-cycle construction produces a schedule of cycle time three. -/

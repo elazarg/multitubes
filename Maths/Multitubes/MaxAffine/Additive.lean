@@ -71,7 +71,7 @@ theorem holonomyApply_translationLabel
       point + walkSum weight walk := by
   induction walk with
   | nil => simp
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [holonomyApply_concat, ih, apply_translationLabel,
         walkSum_concat]
       ring

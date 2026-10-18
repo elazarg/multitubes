@@ -21,7 +21,9 @@ maps. Edges are data, not mere related vertex pairs, so parallel edges retain th
 identities.
 
 `EdgeGraph.Walk G start finish` is an endpoint-indexed finite walk. It stores the edge
-identities in chronological order and makes endpoint compatibility part of the type. This
+identities in chronological order and makes endpoint compatibility part of the type: an edge
+extends a walk ending at its source, and the extension ends at its target, so reading a walk
+never requires an endpoint coercion. This
 file supplies the reusable finite-walk calculus: length, edge and visited-vertex lists,
 endpoint facts, concatenation, singleton walks, edge multiplicity, splitting at an edge,
 and splicing at a visited vertex.
@@ -53,6 +55,7 @@ circulations, and application-specific semantics belong in files that import thi
 
 ## Main results
 
+* `Maths.EdgeGraph.Walk.ext`: a walk is determined by its edge list.
 * `Maths.EdgeGraph.Walk.edges_isChain`: consecutive edges have matching endpoints.
 * `Maths.EdgeGraph.Walk.reverse_nil`, `reverse_concat`, and `reverse_append`: reversal
   distributes over the basic walk constructors.
@@ -99,7 +102,7 @@ namespace EdgeGraph
 variable {V : Type uV} {E : Type uE} (G : EdgeGraph V E)
 
 /-- Reverse every edge while retaining its identity. -/
-def reverse : EdgeGraph V E where
+abbrev reverse : EdgeGraph V E where
   source := G.target
   target := G.source
 
@@ -180,13 +183,14 @@ def symmetrization : EdgeGraph V (E × Bool) where
     G.symmetrization.target (edge.1, !edge.2) = G.symmetrization.source edge := by
   rcases edge with ⟨edge, _ | _⟩ <;> rfl
 
-/-- A finite directed walk, retaining the list of edge identities. -/
+/-- A finite directed walk, retaining the list of edge identities.  An edge extends a walk
+exactly when the walk ends at the edge's source, and this is enforced by the index rather than
+by a proof argument, so no endpoint coercion is ever needed to read a walk. -/
 inductive Walk (start : V) : V → Type (max uV uE)
   | /-- The empty walk at `start`. -/
     nil : Walk start start
-  | /-- Extend a walk by one edge whose source is the current endpoint. -/
-    concat {finish : V} (walkSoFar : Walk start finish) (edge : E)
-      (legal : G.source edge = finish) : Walk start (G.target edge)
+  | /-- Extend a walk ending at the source of an edge by that edge. -/
+    concat (edge : E) (walkSoFar : Walk start (G.source edge)) : Walk start (G.target edge)
 
 namespace Walk
 
@@ -195,55 +199,52 @@ variable {G} {start finish middle : V}
 /-- Number of edges in a finite walk. -/
 def length {start : V} : {finish : V} → G.Walk start finish → ℕ
   | _, .nil => 0
-  | _, .concat walkSoFar _ _ => walkSoFar.length + 1
+  | _, .concat _ walkSoFar => walkSoFar.length + 1
 
 /-- Edge identities in chronological order. -/
 def edges {start : V} : {finish : V} → G.Walk start finish → List E
   | _, .nil => []
-  | _, .concat walkSoFar edge _ => walkSoFar.edges ++ [edge]
+  | _, .concat edge walkSoFar => walkSoFar.edges ++ [edge]
 
 @[simp] theorem length_nil : (Walk.nil : G.Walk start start).length = 0 := rfl
 
-@[simp] theorem length_concat (walkSoFar : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    (Walk.concat walkSoFar edge legal).length = walkSoFar.length + 1 := rfl
+@[simp] theorem length_concat (edge : E) (walkSoFar : G.Walk start (G.source edge)) :
+    (walkSoFar.concat edge).length = walkSoFar.length + 1 := rfl
 
 @[simp] theorem edges_nil : (Walk.nil : G.Walk start start).edges = [] := rfl
 
-@[simp] theorem edges_concat (walkSoFar : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    (Walk.concat walkSoFar edge legal).edges = walkSoFar.edges ++ [edge] := rfl
+@[simp] theorem edges_concat (edge : E) (walkSoFar : G.Walk start (G.source edge)) :
+    (walkSoFar.concat edge).edges = walkSoFar.edges ++ [edge] := rfl
 
 @[simp] theorem edges_length (walk : G.Walk start finish) :
     walk.edges.length = walk.length := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih => simp [edges, length, ih]
+  | concat edge walkSoFar ih => simp [edges, length, ih]
 
 /-- The vertices visited by a typed walk, in chronological order, starting with
 its initial vertex.  A walk with `n` edges visits `n + 1` vertices. -/
 def visited {start : V} : {finish : V} → G.Walk start finish → List V
   | _, .nil => [start]
-  | _, .concat walkSoFar edge _ => walkSoFar.visited ++ [G.target edge]
+  | _, .concat edge walkSoFar => walkSoFar.visited ++ [G.target edge]
 
 @[simp] theorem visited_nil : (Walk.nil : G.Walk start start).visited = [start] := rfl
 
-@[simp] theorem visited_concat (walkSoFar : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    (Walk.concat walkSoFar edge legal).visited = walkSoFar.visited ++ [G.target edge] := rfl
+@[simp] theorem visited_concat (edge : E) (walkSoFar : G.Walk start (G.source edge)) :
+    (walkSoFar.concat edge).visited = walkSoFar.visited ++ [G.target edge] := rfl
 
 @[simp] theorem length_visited (walk : G.Walk start finish) :
     walk.visited.length = walk.length + 1 := by
   induction walk with
   | nil => simp
-  | concat walkSoFar edge legal ih => simp [ih]
+  | concat edge walkSoFar ih => simp [ih]
 
 /-- An edge used by a walk has its target among the walk's visited vertices. -/
 theorem mem_visited_of_mem_edges (walk : G.Walk start finish)
     {edge : E} (hmem : edge ∈ walk.edges) : G.target edge ∈ walk.visited := by
   induction walk with
   | nil => simp at hmem
-  | concat walkSoFar e legal ih =>
+  | concat e walkSoFar ih =>
       rw [edges_concat, List.mem_append, List.mem_singleton] at hmem
       rw [visited_concat]
       rcases hmem with hmem | rfl
@@ -257,7 +258,7 @@ theorem edges_nodup_of_visited_nodup (walk : G.Walk start finish)
     (hnd : walk.visited.Nodup) : walk.edges.Nodup := by
   induction walk with
   | nil => simp
-  | concat walkSoFar e legal ih =>
+  | concat e walkSoFar ih =>
       rw [visited_concat, List.nodup_append] at hnd
       obtain ⟨hvisited, -, hdisjoint⟩ := hnd
       rw [edges_concat, List.nodup_append]
@@ -279,14 +280,14 @@ theorem exists_split_of_mem_visited (walk : G.Walk start finish)
       rw [visited_nil, List.mem_singleton] at hmem
       subst hmem
       exact ⟨.nil, .nil, by simp⟩
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [visited_concat, List.mem_append, List.mem_singleton] at hmem
       rcases hmem with hmem | hmem
       · obtain ⟨before, after, hedges⟩ := ih hmem
-        refine ⟨before, after.concat edge legal, ?_⟩
+        refine ⟨before, after.concat edge, ?_⟩
         simp only [edges_concat, hedges, List.append_assoc]
       · subst hmem
-        exact ⟨walkSoFar.concat edge legal, .nil, by simp⟩
+        exact ⟨walkSoFar.concat edge, .nil, by simp⟩
 
 /-- A walk that revisits a vertex contains a nonempty closed subwalk. -/
 theorem exists_closedSubwalk_of_not_nodup
@@ -297,12 +298,12 @@ theorem exists_closedSubwalk_of_not_nodup
         walk.edges = before.edges ++ cycle.edges ++ after.edges := by
   induction walk with
   | nil => exact absurd (List.nodup_singleton start) hdup
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [visited_concat] at hdup
       by_cases hmem : G.target edge ∈ walkSoFar.visited
       · obtain ⟨before, after, hedges⟩ :=
           walkSoFar.exists_split_of_mem_visited hmem
-        refine ⟨G.target edge, before, after.concat edge legal, .nil, by simp, ?_⟩
+        refine ⟨G.target edge, before, after.concat edge, .nil, by simp, ?_⟩
         simp only [edges_concat, edges_nil, hedges,
           List.append_assoc, List.append_nil]
       · have hnodup : ¬ walkSoFar.visited.Nodup := by
@@ -316,38 +317,92 @@ theorem exists_closedSubwalk_of_not_nodup
           rintro rfl
           exact hmem ha
         obtain ⟨vertex, before, cycle, after, hlen, hedges⟩ := ih hnodup
-        refine ⟨vertex, before, cycle, after.concat edge legal, hlen, ?_⟩
+        refine ⟨vertex, before, cycle, after.concat edge, hlen, ?_⟩
         simp only [edges_concat, hedges, List.append_assoc]
+
+/-- A walk is determined by its start and its edge list, even across terminal indices: walks
+with equal edge lists end at the same vertex and are heterogeneously equal. -/
+theorem heq_of_edges_eq {finish' : V} (first : G.Walk start finish)
+    (second : G.Walk start finish') (hedges : first.edges = second.edges) :
+    finish = finish' ∧ first ≍ second := by
+  induction first generalizing finish' with
+  | nil =>
+      cases second with
+      | nil => exact ⟨rfl, .rfl⟩
+      | concat edge second => simp at hedges
+  | concat edge first ih =>
+      cases second with
+      | nil => simp at hedges
+      | concat edge' second =>
+          rw [edges_concat, edges_concat] at hedges
+          obtain ⟨hprefix, hlast⟩ := List.append_inj' hedges rfl
+          rw [List.singleton_inj] at hlast
+          subst hlast
+          cases eq_of_heq (ih second hprefix).2
+          exact ⟨rfl, .rfl⟩
+
+/-- **Walks are determined by their edges.** -/
+@[ext] theorem ext {first second : G.Walk start finish} (hedges : first.edges = second.edges) :
+    first = second :=
+  eq_of_heq (heq_of_edges_eq first second hedges).2
+
+/-- An empty walk has equal endpoints. -/
+theorem eq_of_length_eq_zero (walk : G.Walk start finish) (hlength : walk.length = 0) :
+    start = finish := by
+  cases walk with
+  | nil => rfl
+  | concat _ _ => simp at hlength
+
+/-- An empty closed walk is the empty walk. -/
+theorem eq_nil_of_length_eq_zero {walk : G.Walk start start} (hlength : walk.length = 0) :
+    walk = .nil :=
+  Walk.ext (List.eq_nil_of_length_eq_zero ((edges_length walk).trans hlength))
+
+/-- A nonempty walk ends with an edge, after a walk to that edge's source. -/
+theorem exists_last_edge (walk : G.Walk start finish) (hlen : 0 < walk.length) :
+    ∃ (edge : E) (before : G.Walk start (G.source edge)),
+      G.target edge = finish ∧ walk.edges = before.edges ++ [edge] := by
+  cases walk with
+  | nil => simp at hlen
+  | concat edge walkSoFar => exact ⟨edge, walkSoFar, rfl, rfl⟩
+
+/-- The last edge of a walk ending at `finish` ends at `finish`, stated for `List.getLast?` so
+that no nonemptiness proof appears in the statement. -/
+theorem target_of_mem_getLast? (walk : G.Walk start finish) {edge : E}
+    (hlast : walk.edges.getLast? = some edge) : G.target edge = finish := by
+  induction walk with
+  | nil => simp at hlast
+  | concat finalEdge walkSoFar =>
+      rw [edges_concat, List.getLast?_concat, Option.some_inj] at hlast
+      rw [hlast]
 
 /-- Consecutive edge identities in a typed walk have matching endpoints. -/
 theorem edges_isChain (walk : G.Walk start finish) :
     walk.edges.IsChain fun first second => G.target first = G.source second := by
   induction walk with
   | nil => exact List.isChain_nil
-  | @concat middle walkSoFar edge legal ih =>
-      cases walkSoFar with
-      | nil => exact List.isChain_singleton edge
-      | @concat previous walkBefore finalEdge finalLegal =>
-          rw [edges, List.isChain_append]
-          refine ⟨ih, List.isChain_singleton edge, ?_⟩
-          simp [edges, legal]
+  | concat edge walkSoFar ih =>
+      rw [edges_concat, List.isChain_append]
+      refine ⟨ih, List.isChain_singleton edge, fun last hlast first hfirst => ?_⟩
+      rw [List.head?_singleton, Option.mem_def, Option.some_inj] at hfirst
+      subst hfirst
+      exact walkSoFar.target_of_mem_getLast? hlast
 
 /-- The first edge of a nonempty typed walk starts at its initial vertex, stated for
 `List.head?` so that no nonemptiness proof appears in the statement. -/
 theorem source_of_mem_head? (walk : G.Walk start finish) {edge : E}
     (hhead : walk.edges.head? = some edge) : G.source edge = start := by
   induction walk with
-  | nil => simp [edges] at hhead
-  | @concat middle walkSoFar finalEdge legal ih =>
-      cases walkSoFar with
-      | nil =>
-          rw [edges_concat, edges_nil, List.nil_append, List.head?_cons,
-            Option.some_inj] at hhead
-          exact hhead ▸ legal
-      | @concat previous walkBefore edge' legal' =>
-          have hne : (walkBefore.concat edge' legal').edges ≠ [] := by simp [edges]
-          rw [edges_concat, List.head?_append_of_ne_nil _ hne] at hhead
-          exact ih hhead
+  | nil => simp at hhead
+  | concat finalEdge walkSoFar ih =>
+      rw [edges_concat] at hhead
+      rcases List.eq_nil_or_concat walkSoFar.edges with hnil | ⟨_, _, hsnoc⟩
+      · have hstart : walkSoFar.length = 0 := by rw [← edges_length, hnil, List.length_nil]
+        rw [hnil, List.nil_append, List.head?_cons, Option.some_inj] at hhead
+        subst hhead
+        exact (walkSoFar.eq_of_length_eq_zero hstart).symm
+      · rw [List.head?_append_of_ne_nil _ (by simp [hsnoc])] at hhead
+        exact ih hhead
 
 /-- The first edge of a nonempty typed walk starts at its initial vertex. -/
 theorem source_head (walk : G.Walk start finish) (hne : walk.edges ≠ []) :
@@ -356,25 +411,22 @@ theorem source_head (walk : G.Walk start finish) (hne : walk.edges ≠ []) :
 
 /-- The last edge of a nonempty typed walk ends at its terminal vertex. -/
 theorem target_getLast (walk : G.Walk start finish) (hne : walk.edges ≠ []) :
-    G.target (walk.edges.getLast hne) = finish := by
-  cases walk with
-  | nil => simp [edges] at hne
-  | concat walkSoFar edge legal => simp [edges]
+    G.target (walk.edges.getLast hne) = finish :=
+  target_of_mem_getLast? walk (List.getLast?_eq_some_getLast hne)
 
 /-- Multiplicity of an edge identity in a finite walk. -/
 def edgeMultiplicity [DecidableEq E] {start : V} :
     {finish : V} → G.Walk start finish → E → ℕ
   | _, .nil => fun _ => 0
-  | _, .concat walkSoFar edge _ => fun candidate =>
+  | _, .concat edge walkSoFar => fun candidate =>
       walkSoFar.edgeMultiplicity candidate + if candidate = edge then 1 else 0
 
 @[simp] theorem edgeMultiplicity_nil [DecidableEq E] (candidate : E) :
     (Walk.nil : G.Walk start start).edgeMultiplicity candidate = 0 := rfl
 
-@[simp] theorem edgeMultiplicity_concat [DecidableEq E]
-    (walkSoFar : G.Walk start finish) (edge candidate : E)
-    (legal : G.source edge = finish) :
-    (Walk.concat walkSoFar edge legal).edgeMultiplicity candidate =
+@[simp] theorem edgeMultiplicity_concat [DecidableEq E] (edge : E)
+    (walkSoFar : G.Walk start (G.source edge)) (candidate : E) :
+    (walkSoFar.concat edge).edgeMultiplicity candidate =
       walkSoFar.edgeMultiplicity candidate + if candidate = edge then 1 else 0 := rfl
 
 theorem edgeMultiplicity_pos_iff_mem_edges [DecidableEq E]
@@ -382,7 +434,7 @@ theorem edgeMultiplicity_pos_iff_mem_edges [DecidableEq E]
     0 < walk.edgeMultiplicity edge ↔ edge ∈ walk.edges := by
   induction walk with
   | nil => simp [edgeMultiplicity, edges]
-  | concat walkSoFar finalEdge legal ih =>
+  | concat finalEdge walkSoFar ih =>
       by_cases h : edge = finalEdge <;> simp [edgeMultiplicity, edges, ih, h]
 
 theorem edgeMultiplicity_eq_count [DecidableEq E]
@@ -390,7 +442,7 @@ theorem edgeMultiplicity_eq_count [DecidableEq E]
     walk.edgeMultiplicity edge = walk.edges.count edge := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar finalEdge legal ih =>
+  | concat finalEdge walkSoFar ih =>
       by_cases h : edge = finalEdge
       · subst edge
         simp [edgeMultiplicity, edges, List.count_append, ih]
@@ -412,6 +464,9 @@ def castFinish {start finish finish' : V} (walk : G.Walk start finish)
     (hfinish : finish = finish') : G.Walk start finish' :=
   hfinish ▸ walk
 
+@[simp] theorem castFinish_rfl (walk : G.Walk start finish) : walk.castFinish rfl = walk :=
+  rfl
+
 @[simp] theorem length_castFinish {start finish finish' : V}
     (walk : G.Walk start finish) (hfinish : finish = finish') :
     (walk.castFinish hfinish).length = walk.length := by
@@ -424,19 +479,17 @@ def castFinish {start finish finish' : V} (walk : G.Walk start finish)
   subst finish'
   rfl
 
-/-- Changing the terminal index of a walk leaves it heterogeneously equal. -/
-theorem castFinish_heq {start finish finish' : V} (walk : G.Walk start finish)
-    (hfinish : finish = finish') : walk.castFinish hfinish ≍ walk := by
-  subst hfinish
+@[simp] theorem castFinish_castFinish {finish' finish'' : V} (walk : G.Walk start finish)
+    (hfirst : finish = finish') (hsecond : finish' = finish'') :
+    (walk.castFinish hfirst).castFinish hsecond = walk.castFinish (hfirst.trans hsecond) := by
+  subst hfirst hsecond
   rfl
 
 /-- Extending heterogeneously equal walks by equal edges gives heterogeneously equal walks. -/
-theorem concat_heq_concat {start middle middle' : V} {first : G.Walk start middle}
-    {second : G.Walk start middle'} (hmiddle : middle = middle') (hwalk : first ≍ second)
-    {edge edge' : E} (hedge : edge = edge') (legal : G.source edge = middle)
-    (legal' : G.source edge' = middle') :
-    first.concat edge legal ≍ second.concat edge' legal' := by
-  subst hmiddle hedge
+theorem concat_heq_concat {edge edge' : E} (hedge : edge = edge')
+    {first : G.Walk start (G.source edge)} {second : G.Walk start (G.source edge')}
+    (hwalk : first ≍ second) : first.concat edge ≍ second.concat edge' := by
+  subst hedge
   cases eq_of_heq hwalk
   rfl
 
@@ -444,6 +497,9 @@ theorem concat_heq_concat {start middle middle' : V} {first : G.Walk start middl
 def castStart {start start' finish : V} (walk : G.Walk start finish)
     (hstart : start = start') : G.Walk start' finish :=
   hstart ▸ walk
+
+@[simp] theorem castStart_rfl (walk : G.Walk start finish) : walk.castStart rfl = walk :=
+  rfl
 
 /-- Changing the initial index leaves the length unchanged. -/
 @[simp] theorem length_castStart {start start' finish : V}
@@ -463,7 +519,7 @@ def castStart {start start' finish : V} (walk : G.Walk start finish)
 def append {start middle : V} (first : G.Walk start middle) :
     {finish : V} → G.Walk middle finish → G.Walk start finish
   | _, .nil => first
-  | _, .concat second edge legal => .concat (first.append second) edge legal
+  | _, .concat edge second => (first.append second).concat edge
 
 @[simp] theorem append_nil (first : G.Walk start middle) :
     first.append (.nil : G.Walk middle middle) = first := rfl
@@ -473,11 +529,11 @@ def append {start middle : V} (first : G.Walk start middle) :
     (.nil : G.Walk middle middle).append second = second := by
   induction second with
   | nil => rfl
-  | concat second edge legal ih => simp [append, ih]
+  | concat edge second ih => simp [append, ih]
 
-@[simp] theorem append_concat (first : G.Walk start middle)
-    (second : G.Walk middle finish) (edge : E) (legal : G.source edge = finish) :
-    first.append (.concat second edge legal) = .concat (first.append second) edge legal := rfl
+@[simp] theorem append_concat (first : G.Walk start middle) (edge : E)
+    (second : G.Walk middle (G.source edge)) :
+    first.append (second.concat edge) = (first.append second).concat edge := rfl
 
 /-- Associativity of typed walk concatenation. -/
 theorem append_assoc {finish' : V} (first : G.Walk start middle) (second : G.Walk middle finish)
@@ -485,20 +541,34 @@ theorem append_assoc {finish' : V} (first : G.Walk start middle) (second : G.Wal
     (first.append second).append third = first.append (second.append third) := by
   induction third with
   | nil => rfl
-  | concat third edge legal ih =>
+  | concat edge third ih =>
       simp only [append_concat, ih]
+
+/-- Appending to a walk with a retyped terminal index retypes the appended walk's start. -/
+theorem castFinish_append {finish' : V} (first : G.Walk start middle)
+    (second : G.Walk finish finish') (hmiddle : middle = finish) :
+    (first.castFinish hmiddle).append second = first.append (second.castStart hmiddle.symm) := by
+  subst hmiddle
+  rfl
+
+/-- Appending a walk with a retyped terminal index retypes the composite's terminal index. -/
+theorem append_castFinish {finish' : V} (first : G.Walk start middle)
+    (second : G.Walk middle finish) (hfinish : finish = finish') :
+    first.append (second.castFinish hfinish) = (first.append second).castFinish hfinish := by
+  subst hfinish
+  rfl
 
 @[simp] theorem edges_append (first : G.Walk start middle) (second : G.Walk middle finish) :
     (first.append second).edges = first.edges ++ second.edges := by
   induction second with
   | nil => simp
-  | concat second edge legal ih => simp [ih, List.append_assoc]
+  | concat edge second ih => simp [ih, List.append_assoc]
 
 @[simp] theorem length_append (first : G.Walk start middle) (second : G.Walk middle finish) :
     (first.append second).length = first.length + second.length := by
   induction second with
   | nil => simp
-  | concat second edge legal ih => simp [ih, Nat.add_assoc]
+  | concat edge second ih => simp [ih, Nat.add_assoc]
 
 /-- Traverse a closed walk `n` times. -/
 def iterate {base : V} (cycle : G.Walk base base) : ℕ → G.Walk base base
@@ -519,19 +589,22 @@ def iterate {base : V} (cycle : G.Walk base base) : ℕ → G.Walk base base
 
 /-- The one-edge walk carrying a prescribed edge identity. -/
 def singleton (edge : E) : G.Walk (G.source edge) (G.target edge) :=
-  .concat .nil edge rfl
+  .concat edge .nil
 
 @[simp] theorem edges_singleton (edge : E) : (singleton (G := G) edge).edges = [edge] := rfl
 
 @[simp] theorem length_singleton (edge : E) : (singleton (G := G) edge).length = 1 := rfl
 
+/-- Prepending a one-edge walk. -/
+theorem singleton_append_concat (first : E) (edge : E)
+    (walk : G.Walk (G.target first) (G.source edge)) :
+    (singleton first).append (walk.concat edge) = ((singleton first).append walk).concat edge :=
+  rfl
+
 /-- Reverse a typed walk, changing its graph orientation and endpoint order. -/
-def reverse {start finish : V} : G.Walk start finish → G.reverse.Walk finish start
-  | .nil => .nil
-  | .concat walkSoFar edge legal =>
-      let first := castStart (singleton (G := G.reverse) edge) (G.reverse_source edge)
-      let hfinish := (G.reverse_target edge).trans legal
-      (castFinish first hfinish).append (reverse walkSoFar)
+def reverse {start : V} : {finish : V} → G.Walk start finish → G.reverse.Walk finish start
+  | _, .nil => .nil
+  | _, .concat edge walkSoFar => (singleton (G := G.reverse) edge).append (reverse walkSoFar)
 
 /-- Reversal turns a change of initial index into a change of terminal index. -/
 theorem reverse_castStart {start start' finish : V} (walk : G.Walk start finish)
@@ -549,29 +622,17 @@ theorem reverse_castFinish {start finish finish' : V} (walk : G.Walk start finis
 
 /-- Reversing a one-edge walk gives the same edge in the reversed graph. -/
 @[simp] theorem reverse_singleton (edge : E) :
-    reverse (singleton (G := G) edge) = singleton (G := G.reverse) edge := by
-  cases G
-  rfl
-
-private theorem reverse_reversedSingleton (edge : E)
-    (hsource : G.reverse.source edge = G.target edge)
-    (hfinish : G.reverse.target edge = G.source edge) :
-    reverse
-        ((singleton (G := G.reverse) edge).castStart hsource |>.castFinish hfinish) =
-      singleton (G := G) edge := by
-  cases G
+    reverse (singleton (G := G) edge) = singleton (G := G.reverse) edge :=
   rfl
 
 /-- Reversal leaves an empty walk empty. -/
-@[simp] theorem reverse_nil : (reverse (G := G) (.nil : G.Walk start start)) = .nil := by
-  simp [reverse]
+@[simp] theorem reverse_nil : (reverse (G := G) (.nil : G.Walk start start)) = .nil :=
+  rfl
 
 /-- Reversal of a walk extended by an edge starts with the reversed edge. -/
-@[simp] theorem reverse_concat (walkSoFar : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    reverse (walkSoFar.concat edge legal) =
-      (castFinish (castStart (singleton (G := G.reverse) edge) (G.reverse_source edge))
-        ((G.reverse_target edge).trans legal)).append (reverse walkSoFar) := by
+@[simp] theorem reverse_concat (edge : E) (walkSoFar : G.Walk start (G.source edge)) :
+    reverse (walkSoFar.concat edge) =
+      (singleton (G := G.reverse) edge).append (reverse walkSoFar) :=
   rfl
 
 /-- Reversal preserves the number of edges in a walk. -/
@@ -579,9 +640,8 @@ private theorem reverse_reversedSingleton (edge : E)
     walk.reverse.length = walk.length := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      rw [reverse_concat, length_append, length_castFinish, length_castStart,
-        length_singleton, length_concat, ih]
+  | concat edge walkSoFar ih =>
+      rw [reverse_concat, length_append, length_singleton, length_concat, ih]
       omega
 
 /-- Reversal reverses the chronological edge list of a walk. -/
@@ -589,30 +649,25 @@ private theorem reverse_reversedSingleton (edge : E)
     walk.reverse.edges = walk.edges.reverse := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      rw [reverse_concat, edges_append, edges_castFinish, edges_castStart,
-        edges_singleton, edges_concat, ih]
+  | concat edge walkSoFar ih =>
+      rw [reverse_concat, edges_append, edges_singleton, edges_concat, ih]
       simp
 
 /-- Reversal distributes over typed walk concatenation. -/
 theorem reverse_append (first : G.Walk start middle) (second : G.Walk middle finish) :
     (first.append second).reverse = second.reverse.append first.reverse := by
   induction second with
-  | nil => simp [reverse, nil_append]
-  | concat second edge legal ih =>
-      cases legal
-      simp [reverse, ih]
-      rw [append_assoc]
+  | nil => simp [nil_append]
+  | concat edge second ih =>
+      rw [append_concat, reverse_concat, ih, reverse_concat, append_assoc]
 
 /-- Reversing a typed walk twice recovers the original walk. -/
 @[simp] theorem reverse_reverse (walk : G.Walk start finish) :
     walk.reverse.reverse = walk := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      cases legal
+  | concat edge walkSoFar ih =>
       rw [reverse_concat, reverse_append, ih]
-      rw [reverse_reversedSingleton (G := G) edge]
       rfl
 
 /-- A typed decomposition of a walk at an occurrence of an edge. -/
@@ -621,15 +676,15 @@ theorem exists_splitAtEdge (walk : G.Walk start finish) (edge : E) (hmem : edge 
       walk.edges = before.edges ++ edge :: after.edges := by
   induction walk with
   | nil => simp at hmem
-  | @concat middle walkSoFar finalEdge legal ih =>
+  | concat finalEdge walkSoFar ih =>
       simp only [edges_concat, List.mem_append, List.mem_singleton] at hmem
       rcases hmem with hmem | heq
       · obtain ⟨before, after, hsplit⟩ := ih hmem
-        refine ⟨before, after.concat finalEdge legal, ?_⟩
+        refine ⟨before, after.concat finalEdge, ?_⟩
         simp only [edges_concat, hsplit]
         simp [List.append_assoc]
       · subst finalEdge
-        exact ⟨walkSoFar.castFinish legal.symm, .nil, by simp⟩
+        exact ⟨walkSoFar, .nil, by simp⟩
 
 /-- A walk splits after any prescribed number of its edges. -/
 theorem exists_split_of_length_le {start finish : V} (walk : G.Walk start finish)
@@ -640,15 +695,15 @@ theorem exists_split_of_length_le {start finish : V} (walk : G.Walk start finish
   | nil =>
       have hzero : count = 0 := Nat.le_zero.mp hcount
       exact ⟨start, .nil, .nil, hzero.symm ▸ rfl, by simp⟩
-  | @concat middle walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rcases Nat.lt_or_ge count (walkSoFar.length + 1) with hlt | hge
       · obtain ⟨mid, before, after, hlen, hedges⟩ := ih (Nat.lt_succ_iff.mp hlt)
-        exact ⟨mid, before, after.concat edge legal, hlen, by
+        exact ⟨mid, before, after.concat edge, hlen, by
           simp only [edges_concat, hedges, List.append_assoc]⟩
       · have hEq : count = walkSoFar.length + 1 := by
           simp only [length_concat] at hcount
           omega
-        exact ⟨_, walkSoFar.concat edge legal, .nil, by simp [hEq], by simp⟩
+        exact ⟨_, walkSoFar.concat edge, .nil, by simp [hEq], by simp⟩
 
 /-- A witness that a typed walk passes through a specified vertex. -/
 structure VertexSplit (walk : G.Walk start finish) (vertex : V) where
@@ -672,7 +727,7 @@ noncomputable def vertexSplitAtTarget (walk : G.Walk start finish) (edge : E)
     (hmem : edge ∈ walk.edges) : walk.VertexSplit (G.target edge) := by
   apply Classical.choice
   obtain ⟨before, after, hsplit⟩ := walk.exists_splitAtEdge edge hmem
-  refine ⟨⟨before.append (singleton (G := G) edge), after, ?_⟩⟩
+  refine ⟨⟨before.concat edge, after, ?_⟩⟩
   simpa [List.append_assoc] using hsplit
 
 namespace VertexSplit
@@ -710,7 +765,7 @@ proof carried by each edge. -/
 def ofRestrictEdges {S : Set E} {start : V} :
     {finish : V} → (G.restrictEdges S).Walk start finish → G.Walk start finish
   | _, .nil => .nil
-  | _, .concat walkSoFar edge legal => (ofRestrictEdges walkSoFar).concat edge.1 legal
+  | _, .concat edge walkSoFar => (ofRestrictEdges walkSoFar).concat edge.1
 
 @[simp] theorem ofRestrictEdges_nil {S : Set E} {start : V} :
     ofRestrictEdges (G := G) (S := S) (.nil : (G.restrictEdges S).Walk start start) = .nil := rfl
@@ -722,16 +777,9 @@ edges and nothing else. -/
     (ofRestrictEdges walk).edges = walk.edges.map Subtype.val := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      have hunfold : ofRestrictEdges (walkSoFar.concat edge legal)
-          = (ofRestrictEdges walkSoFar).concat edge.1 legal := rfl
-      have hstep := edges_concat (G := G) (ofRestrictEdges walkSoFar) edge.1 legal
-      have htail : (ofRestrictEdges walkSoFar).edges ++ [edge.1]
-          = List.map Subtype.val (walkSoFar.concat edge legal).edges := by
-        rw [ih, edges_concat]
-        simp
-      rw [hunfold]
-      exact hstep.trans htail
+  | concat edge walkSoFar ih =>
+      change (ofRestrictEdges walkSoFar).edges ++ [edge.1] = (walkSoFar.edges ++ [edge]).map _
+      rw [ih, List.map_append, List.map_singleton]
 
 /-- The converse reading: a walk of the ambient graph all of whose edges belong to the set is a
 walk of the edge subgraph.  It is stated as an existence because the walk of the subgraph carries
@@ -741,9 +789,9 @@ theorem nonempty_restrictEdges_of_forall_mem {S : Set E} {start finish : V}
     Nonempty ((G.restrictEdges S).Walk start finish) := by
   induction walk with
   | nil => exact ⟨.nil⟩
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       obtain ⟨before⟩ := ih fun e he => hmem e (by simp [he])
-      exact ⟨before.concat ⟨edge, hmem edge (by simp)⟩ legal⟩
+      exact ⟨before.concat (G := G.restrictEdges S) ⟨edge, hmem edge (by simp)⟩⟩
 
 /-- Reading a walk of an edge subgraph in the ambient graph preserves its length. -/
 @[simp] theorem length_ofRestrictEdges {S : Set E} {start finish : V}

@@ -489,7 +489,7 @@ theorem unitSlopeCycles_loopLabel_le (lam : ℝ) (base : Unit)
     walkSum (unitSlopeShift loopLabel) cycle ≤ cycle.length * lam := by
   cases cycle with
   | nil => simp
-  | concat _ edge _ => exact (isEmpty_unitSlopeEdge_loopLabel.false edge).elim
+  | concat edge _ => exact (isEmpty_unitSlopeEdge_loopLabel.false edge).elim
 
 /-- **The unit-slope cycle bound is not the right formula at mixed slopes.**  For the two-loop
 labelling the unit-slope subgraph is empty, so the bound of

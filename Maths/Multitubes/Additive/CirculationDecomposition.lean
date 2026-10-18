@@ -104,7 +104,7 @@ theorem IsSimpleCycle.length_le_card [Fintype V] {G : EdgeGraph V E}
   by_contra hcard
   cases cycle with
   | nil => exact (Nat.not_lt_zero _ hsimple.1)
-  | concat initial edge legal =>
+  | concat edge initial =>
       have hinitialDup : ¬initial.visited.Nodup := by
         intro hnodup
         have hlengthCard := hnodup.length_le_card
@@ -114,10 +114,10 @@ theorem IsSimpleCycle.length_le_card [Fintype V] {G : EdgeGraph V E}
       obtain ⟨middle, before, inner, after, hinnerPos, hedges⟩ :=
         initial.exists_closedSubwalk_of_not_nodup hinitialDup
       have hcycleEdges :
-          (initial.concat edge legal).edges =
-            before.edges ++ inner.edges ++ (after.concat edge legal).edges := by
+          (initial.concat edge).edges =
+            before.edges ++ inner.edges ++ (after.concat edge).edges := by
         simp only [EdgeGraph.Walk.edges_concat, hedges, List.append_assoc]
-      exact hsimple.2 middle before inner (after.concat edge legal)
+      exact hsimple.2 middle before inner (after.concat edge)
         hcycleEdges hinnerPos (by simp)
 
 /-- There are only finitely many normalized coefficient vectors of simple
@@ -162,7 +162,7 @@ private theorem sum_edgeMultiplicity_mul_eq_walkSum_general
       walkSum weight walk := by
   induction walk with
   | nil => simp
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       simp only [EdgeGraph.Walk.edgeMultiplicity_concat, Nat.cast_add,
         add_mul, Finset.sum_add_distrib, ih,
         walkSum_concat]

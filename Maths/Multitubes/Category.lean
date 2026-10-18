@@ -119,11 +119,10 @@ on every typed walk. -/
             (.nil : G.Walk start start) := rfl
       rw [hnil] at hmap
       exact (ConcreteCategory.congr_hom hmap point).symm
-  | @concat finish walk edge legal ih =>
-      subst legal
+  | concat edge walk ih =>
       change F.map (PathCategory.edge (G := G) edge)
           ((pathFunctorToTransport F).walkMap walk point) =
-        F.map (walk.concat edge rfl) point
+        F.map (walk.concat edge) point
       rw [ih]
       exact (F.map_comp_apply walk
         (PathCategory.edge (G := G) edge) point).symm

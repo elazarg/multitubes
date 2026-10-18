@@ -98,56 +98,29 @@ variable {G : EdgeGraph V E} {H : EdgeGraph V' E'} {K : EdgeGraph V'' E''}
 def map (f : Hom G H) {start : V} :
     {finish : V} → G.Walk start finish → H.Walk (f.vertexMap start) (f.vertexMap finish)
   | _, .nil => .nil
-  | _, .concat walkSoFar edge legal =>
-      (Walk.concat (map f walkSoFar) (f.edgeMap edge)
-        ((f.source_edgeMap edge).trans (congrArg f.vertexMap legal))).castFinish
-        (f.target_edgeMap edge)
+  | _, .concat edge walkSoFar =>
+      (((map f walkSoFar).castFinish (f.source_edgeMap edge).symm).concat
+        (f.edgeMap edge)).castFinish (f.target_edgeMap edge)
 
 @[simp] theorem map_nil (f : Hom G H) :
     (Walk.nil : G.Walk start start).map f = .nil := rfl
 
-theorem map_concat (f : Hom G H) (walkSoFar : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    (walkSoFar.concat edge legal).map f =
-      ((walkSoFar.map f).concat (f.edgeMap edge)
-        ((f.source_edgeMap edge).trans (congrArg f.vertexMap legal))).castFinish
-        (f.target_edgeMap edge) := rfl
-
-/-- The image of a walk extended by an edge, up to the retyping of its endpoint. -/
-theorem map_concat_heq (f : Hom G H) (walkSoFar : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    (walkSoFar.concat edge legal).map f ≍
-      (walkSoFar.map f).concat (f.edgeMap edge)
-        ((f.source_edgeMap edge).trans (congrArg f.vertexMap legal)) := by
-  rw [map_concat]
-  exact castFinish_heq _ _
-
-/-- Mapping preserves the number of edges. -/
-@[simp] theorem length_map (f : Hom G H) (walk : G.Walk start finish) :
-    (walk.map f).length = walk.length := by
-  induction walk with
-  | nil => rfl
-  | concat walkSoFar edge legal ih => simp [map_concat, ih]
+theorem map_concat (f : Hom G H) (edge : E) (walkSoFar : G.Walk start (G.source edge)) :
+    (walkSoFar.concat edge).map f =
+      (((walkSoFar.map f).castFinish (f.source_edgeMap edge).symm).concat
+        (f.edgeMap edge)).castFinish (f.target_edgeMap edge) := rfl
 
 /-- Mapping applies the edge map to the chronological edge list. -/
 @[simp] theorem edges_map (f : Hom G H) (walk : G.Walk start finish) :
     (walk.map f).edges = walk.edges.map f.edgeMap := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih => simp [map_concat, ih]
+  | concat edge walkSoFar ih => simp [map_concat, ih]
 
-private theorem castFinish_append {start middle finish finish' : V}
-    (first : G.Walk start middle) (second : G.Walk middle finish)
-    (hfinish : finish = finish') :
-    first.append (second.castFinish hfinish) = (first.append second).castFinish hfinish := by
-  subst hfinish
-  rfl
-
-private theorem castFinish_castFinish {start finish finish' finish'' : V}
-    (walk : G.Walk start finish) (h₁ : finish = finish') (h₂ : finish' = finish'') :
-    (walk.castFinish h₁).castFinish h₂ = walk.castFinish (h₁.trans h₂) := by
-  subst h₁ h₂
-  rfl
+/-- Mapping preserves the number of edges. -/
+@[simp] theorem length_map (f : Hom G H) (walk : G.Walk start finish) :
+    (walk.map f).length = walk.length := by
+  rw [← edges_length, edges_map, List.length_map, edges_length]
 
 /-- Mapping commutes with a change of terminal index. -/
 theorem map_castFinish (f : Hom G H) {finish' : V} (walk : G.Walk start finish)
@@ -160,29 +133,17 @@ theorem map_castFinish (f : Hom G H) {finish' : V} (walk : G.Walk start finish)
 /-- Mapping distributes over concatenation. -/
 theorem map_append (f : Hom G H) (first : G.Walk start middle)
     (second : G.Walk middle finish) :
-    (first.append second).map f = (first.map f).append (second.map f) := by
-  induction second with
-  | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      rw [append_concat, map_concat, map_concat, ih, castFinish_append]
-      rfl
+    (first.append second).map f = (first.map f).append (second.map f) :=
+  Walk.ext (by simp)
 
 /-- Mapping along the identity morphism is the identity. -/
-@[simp] theorem map_id (walk : G.Walk start finish) : walk.map (Hom.id G) = walk := by
-  induction walk with
-  | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      rw [map_concat, ih]
-      rfl
+@[simp] theorem map_id (walk : G.Walk start finish) : walk.map (Hom.id G) = walk :=
+  Walk.ext ((edges_map _ walk).trans (List.map_id _))
 
 /-- Mapping along a composite is the composite of the mappings. -/
 theorem map_comp (g : Hom H K) (f : Hom G H) (walk : G.Walk start finish) :
-    walk.map (g.comp f) = (walk.map f).map g := by
-  induction walk with
-  | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      rw [map_concat, map_concat, ih, map_castFinish, map_concat, castFinish_castFinish]
-      rfl
+    walk.map (g.comp f) = (walk.map f).map g :=
+  Walk.ext ((edges_map _ walk).trans (by simp [Function.comp_def]))
 
 end Walk
 

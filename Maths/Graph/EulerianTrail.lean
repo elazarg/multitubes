@@ -174,18 +174,18 @@ theorem edge_mem_of_maximalTrailWithin_of_source_eq
     (hsource : G.source edge = finish) :
     edge ∈ walk.edges := by
   by_contra hedgeUnused
-  have hlongerTrail : (Walk.concat walk edge hsource).IsTrailWithin allowed := by
+  have hlongerTrail : ((walk.castFinish hsource.symm).concat edge).IsTrailWithin allowed := by
     refine ⟨?_, ?_⟩
-    · rw [edges_concat]
+    · rw [edges_concat, edges_castFinish]
       exact List.nodup_append'.2 ⟨htrail.1, List.nodup_singleton edge,
         List.disjoint_singleton.mpr hedgeUnused⟩
     · intro candidate hcandidate
-      rw [edges_concat, List.mem_append, List.mem_singleton] at hcandidate
+      rw [edges_concat, edges_castFinish, List.mem_append, List.mem_singleton] at hcandidate
       rcases hcandidate with hcandidate | rfl
       · exact htrail.2 candidate hcandidate
       · exact hedgeAllowed
-  have hle := hmaximal _ (Walk.concat walk edge hsource) hlongerTrail
-  rw [length_concat] at hle
+  have hle := hmaximal _ ((walk.castFinish hsource.symm).concat edge) hlongerTrail
+  rw [length_concat, length_castFinish] at hle
   omega
 
 /-- On outgoing edges of the terminal vertex, maximality identifies the trail multiplicity
@@ -643,9 +643,9 @@ variable {G} {start finish : V}
 def detokenize (multiplicity : E → ℕ) {start : V} : {finish : V} →
     (G.tokenGraph multiplicity).Walk start finish → G.Walk start finish
   | _, .nil => .nil
-  | _, .concat walkSoFar token legal =>
-      (Walk.concat (detokenize multiplicity walkSoFar) token.edge
-        ((G.tokenGraph_source multiplicity token).symm.trans legal)).castFinish
+  | _, .concat token walkSoFar =>
+      (((detokenize multiplicity walkSoFar).castFinish
+        (G.tokenGraph_source multiplicity token)).concat token.edge).castFinish
           (G.tokenGraph_target multiplicity token).symm
 
 @[simp] theorem edges_detokenize (multiplicity : E → ℕ)
@@ -653,8 +653,9 @@ def detokenize (multiplicity : E → ℕ) {start : V} : {finish : V} →
     (walk.detokenize multiplicity).edges = walk.edges.map MultiplicityToken.edge := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar token legal ih =>
-      rw [detokenize, edges_castFinish, edges_concat, edges_concat, ih, List.map_append]
+  | concat token walkSoFar ih =>
+      rw [detokenize, edges_castFinish, edges_concat, edges_castFinish, edges_concat, ih,
+        List.map_append]
       rfl
 
 @[simp] theorem length_detokenize (multiplicity : E → ℕ)
@@ -669,8 +670,8 @@ def detokenize (multiplicity : E → ℕ) {start : V} : {finish : V} →
       walkSum (fun token => edgeCharge token.edge) walk := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar token legal ih =>
-      rw [detokenize, walkSum_castFinish, walkSum_concat, walkSum_concat, ih]
+  | concat token walkSoFar ih =>
+      rw [detokenize, walkSum_castFinish, walkSum_concat, walkSum_castFinish, walkSum_concat, ih]
 
 /-- Counting the values of an injectively indexed list is a sum of indicators. -/
 private theorem count_map_eq_sum_toFinset_ite

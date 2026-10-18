@@ -93,10 +93,9 @@ private theorem walkMap_le_leastLaxMajorant
     (monotone_forwardPredicateTransport step) lower).2.1
   induction walk with
   | nil => exact hlower _
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       rw [Transport.walkMap_concat]
       rintro target ⟨middle, hmiddle, rfl⟩
-      cases legal
       apply hlax edge
       exact ⟨middle, ih hmiddle, rfl⟩
 

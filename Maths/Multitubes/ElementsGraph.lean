@@ -102,10 +102,8 @@ def liftWalk {start : V} (point : Fiber start) :
     {finish : V} → (walk : G.Walk start finish) →
       T.elementsGraph.Walk ⟨start, point⟩ ⟨finish, T.walkMap walk point⟩
   | _, .nil => .nil
-  | _, .concat walkSoFar edge legal =>
-      .concat (liftWalk point walkSoFar)
-        ⟨edge, fiberCast Fiber legal.symm (T.walkMap walkSoFar point)⟩
-        (sigma_mk_fiberCast legal.symm _)
+  | _, .concat edge walkSoFar =>
+      .concat (G := T.elementsGraph) ⟨edge, T.walkMap walkSoFar point⟩ (liftWalk point walkSoFar)
 
 variable {T}
 
@@ -115,9 +113,9 @@ variable {T}
     (T.liftWalk point walk).map T.elementsProjection = walk := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      exact eq_of_heq ((EdgeGraph.Walk.map_concat_heq _ _ _ _).trans
-        (EdgeGraph.Walk.concat_heq_concat rfl (heq_of_eq ih) rfl _ _))
+  | concat edge walkSoFar ih =>
+      change (((T.liftWalk point walkSoFar).map T.elementsProjection).concat edge) = _
+      rw [ih]
 
 /-- **Unique lifting of endpoints.**  A walk upstairs ends at the point obtained by
 transporting its initial point along its projection. -/
@@ -126,9 +124,8 @@ theorem finish_eq_of_walk {start : V} {point : Fiber start} {finish : Σ vertex,
     finish = ⟨finish.1, T.walkMap (walk.map T.elementsProjection) point⟩ := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       obtain ⟨edge, value⟩ := edge
-      subst legal
       have hvalue : value = T.walkMap (walkSoFar.map T.elementsProjection) point :=
         eq_of_heq (Sigma.mk.inj ih).2
       change (⟨G.target edge, T.edgeMap edge value⟩ : Σ vertex, Fiber vertex) =
@@ -136,28 +133,20 @@ theorem finish_eq_of_walk {start : V} {point : Fiber start} {finish : Σ vertex,
       exact congrArg (fun value => (⟨G.target edge, T.edgeMap edge value⟩ :
         Σ vertex, Fiber vertex)) hvalue
 
-/-- Lifting commutes with a change of terminal index, up to the induced retyping. -/
-theorem liftWalk_castFinish_heq {start finish finish' : V} (point : Fiber start)
-    (walk : G.Walk start finish) (hfinish : finish = finish') :
-    T.liftWalk point (walk.castFinish hfinish) ≍ T.liftWalk point walk := by
-  subst hfinish
-  rfl
-
 /-- **Unique path lifting.**  Every walk upstairs is the lift of its projection. -/
 theorem heq_liftWalk {start : V} {point : Fiber start} {finish : Σ vertex, Fiber vertex}
     (walk : T.elementsGraph.Walk ⟨start, point⟩ finish) :
     walk ≍ T.liftWalk point (walk.map T.elementsProjection) := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       obtain ⟨edge, value⟩ := edge
-      subst legal
       have hvalue : value = T.walkMap (walkSoFar.map T.elementsProjection) point :=
         eq_of_heq (Sigma.mk.inj (finish_eq_of_walk walkSoFar)).2
-      rw [EdgeGraph.Walk.map_concat]
-      refine HEq.trans ?_ (liftWalk_castFinish_heq _ _ _).symm
-      refine EdgeGraph.Walk.concat_heq_concat (finish_eq_of_walk walkSoFar) ih ?_ _ _
-      exact Sigma.ext_iff.mpr ⟨rfl, heq_of_eq hvalue⟩
+      exact EdgeGraph.Walk.concat_heq_concat (G := T.elementsGraph)
+        (edge := ⟨edge, value⟩)
+        (edge' := ⟨edge, T.walkMap (walkSoFar.map T.elementsProjection) point⟩)
+        (Sigma.ext rfl (heq_of_eq hvalue)) ih
 
 /-- **Holonomy is monodromy.**  The holonomy of a closed walk fixes a point exactly when the
 walk lifts to a closed walk at that point. -/
@@ -266,9 +255,8 @@ theorem mem_walkRelation_of_walk {start : V} {point : Fiber start}
     (point, finish.2) ∈ T.walkRelation (walk.map T.elementsProjection) := by
   induction walk with
   | nil => exact SetRel.mem_id.mpr rfl
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       obtain ⟨edge, ⟨first, second⟩, hpair⟩ := edge
-      subst legal
       exact ⟨first, ih, hpair⟩
 
 /-- **Walk relations are reachability upstairs.**  Two values are related along a base walk
@@ -285,11 +273,10 @@ theorem mem_walkRelation_iff_exists_walk {start finish : V} (walk : G.Walk start
         have hlast : first = last := SetRel.mem_id.mp hrelated
         subst hlast
         exact ⟨.nil, rfl⟩
-    | concat walkSoFar edge legal ih =>
+    | concat edge walkSoFar ih =>
         obtain ⟨middle, hmiddle, hedge⟩ := hrelated
         obtain ⟨lift, hlift⟩ := ih middle hmiddle
-        refine ⟨lift.concat ⟨edge, ⟨(fiberCast Fiber legal.symm middle, last), hedge⟩⟩
-          (sigma_mk_fiberCast legal.symm middle), ?_⟩
+        refine ⟨lift.concat (G := T.elementsGraph) ⟨edge, ⟨(middle, last), hedge⟩⟩, ?_⟩
         subst hlift
         rfl
   · rintro ⟨lift, rfl⟩

@@ -269,13 +269,13 @@ noncomputable def configurationCount (walk : G.InfiniteWalk start) {κ : Type u�
 /-- The first `n` edges as a finite walk. -/
 def take (walk : G.InfiniteWalk start) : (n : ℕ) → G.Walk start (walk.vertex n)
   | 0 => .nil
-  | n + 1 => .concat (take walk n) (walk.edge n) (walk.source_edge n)
+  | n + 1 => ((take walk n).castFinish (walk.source_edge n).symm).concat (walk.edge n)
 
 @[simp] theorem take_length (walk : G.InfiniteWalk start) (n : ℕ) :
     (walk.take n).length = n := by
   induction n with
   | zero => rfl
-  | succ n ih => exact congrArg (· + 1) ih
+  | succ n ih => exact congrArg (· + 1) ((Walk.length_castFinish _ _).trans ih)
 
 @[simp] theorem walkSum_take (walk : G.InfiniteWalk start) {κ : Type uκ}
     (edgeCharge : E → κ → ℤ) (n : ℕ) :
@@ -283,21 +283,22 @@ def take (walk : G.InfiniteWalk start) : (n : ℕ) → G.Walk start (walk.vertex
   induction n with
   | zero => rfl
   | succ n ih =>
-      exact (walkSum_concat (walk.take n) _ _).trans (congrArg (· + edgeCharge (walk.edge n)) ih)
+      exact (walkSum_concat _ _).trans
+        (congrArg (· + edgeCharge (walk.edge n)) ((walkSum_castFinish _ _).trans ih))
 
 /-- The next `length` edges beginning at time `startTime`. -/
 def segment (walk : G.InfiniteWalk start) (startTime : ℕ) : (length : ℕ) →
     G.Walk (walk.vertex startTime) (walk.vertex (startTime + length))
   | 0 => .nil
   | length + 1 =>
-      Walk.concat (segment walk startTime length)
-        (walk.edge (startTime + length)) (walk.source_edge _)
+      ((segment walk startTime length).castFinish (walk.source_edge _).symm).concat
+        (walk.edge (startTime + length))
 
 @[simp] theorem segment_length (walk : G.InfiniteWalk start) (startTime length : ℕ) :
     (walk.segment startTime length).length = length := by
   induction length with
   | zero => rfl
-  | succ length ih => exact congrArg (· + 1) ih
+  | succ length ih => exact congrArg (· + 1) ((Walk.length_castFinish _ _).trans ih)
 
 /-- The charge of a finite segment is the difference of the prefix charges at its
 endpoints. -/
@@ -311,7 +312,8 @@ theorem walkSum_segment (walk : G.InfiniteWalk start) {κ : Type uκ}
   | succ length ih =>
       have hstep : walkSum edgeCharge (walk.segment startTime (length + 1)) =
           walkSum edgeCharge (walk.segment startTime length) +
-            edgeCharge (walk.edge (startTime + length)) := walkSum_concat _ _ _
+            edgeCharge (walk.edge (startTime + length)) :=
+        (walkSum_concat _ _).trans (congrArg (· + _) (walkSum_castFinish _ _))
       have hnext : walk.prefixCharge edgeCharge (startTime + (length + 1)) =
           walk.prefixCharge edgeCharge (startTime + length) +
             edgeCharge (walk.edge (startTime + length)) := rfl
@@ -379,8 +381,8 @@ variable {G} {start finish : V}
 def prependInfinite {start : V} : {finish : V} →
     G.Walk start finish → G.InfiniteWalk finish → G.InfiniteWalk start
   | _, .nil, tail => tail
-  | _, .concat walkSoFar edge legal, tail =>
-      prependInfinite walkSoFar (InfiniteWalk.prependEdge _ edge legal tail)
+  | _, .concat edge walkSoFar, tail =>
+      prependInfinite walkSoFar (InfiniteWalk.prependEdge _ edge rfl tail)
 
 /-- After the finite prefix length, the prepended walk is exactly its continuation. -/
 theorem prependInfinite_edge_length_add (walk : G.Walk start finish)
@@ -388,7 +390,7 @@ theorem prependInfinite_edge_length_add (walk : G.Walk start finish)
     (walk.prependInfinite tail).edge (walk.length + n) = tail.edge n := by
   induction walk generalizing n with
   | nil => simp only [prependInfinite, length_nil, Nat.zero_add]
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [prependInfinite, length_concat,
         show walkSoFar.length + 1 + n = walkSoFar.length + (n + 1) by omega, ih]
       rfl
@@ -401,9 +403,9 @@ theorem hasBoundedDiscrepancy_prependInfinite {κ : Type uκ}
     (walk.prependInfinite tail).HasBoundedDiscrepancy edgeCharge := by
   induction walk with
   | nil => exact hbounded
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       exact ih _ (InfiniteWalk.hasBoundedDiscrepancy_prependEdge
-        edgeCharge _ edge legal tail hbounded)
+        edgeCharge _ edge rfl tail hbounded)
 
 end Walk
 

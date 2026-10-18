@@ -108,7 +108,7 @@ private theorem Transport.walkMap_eq_of_edgeTrivializations
   | nil =>
       funext point
       simp
-  | @concat middle walk edge legal ih =>
+  | concat edge walk ih =>
       have hbefore (candidate : E) (hcandidate : candidate ∈ walk.edges) :
           ∃ (hsource : LinkedTo G base (G.source candidate))
             (htarget : LinkedTo G base (G.target candidate)),
@@ -118,7 +118,6 @@ private theorem Transport.walkMap_eq_of_edgeTrivializations
                 (trivialization (G.source candidate) hsource).symm :=
         hedge candidate (by simp [hcandidate])
       obtain ⟨hmiddle, htarget, hlast⟩ := hedge edge (by simp)
-      subst legal
       funext point
       rw [T.walkMap_concat, hlast, Function.comp_apply,
         congrFun (ih hmiddle hbefore) point]

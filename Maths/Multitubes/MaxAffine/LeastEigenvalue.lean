@@ -575,12 +575,10 @@ theorem exists_lowerBound_of_walk (hslope : ∀ e : E, 0 ≤ (label e).slope) {l
     ∃ C : ℝ, ∀ n : ℕ, C ≤ iterate (n + walk.length) finish := by
   induction walk with
   | nil => exact ⟨bound, fun n => by simpa using hstart n⟩
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       obtain ⟨C, hC⟩ := ih
       refine ⟨(label edge).shift + (label edge).slope * C - lam, fun n => ?_⟩
-      have hmid : C ≤ iterate (n + walkSoFar.length) (G.source edge) := by
-        rw [legal]
-        exact hC n
+      have hmid : C ≤ iterate (n + walkSoFar.length) (G.source edge) := hC n
       have haffine := (label edge).affinePart_le_apply
         (iterate (n + walkSoFar.length) (G.source edge))
       have hedge : (label edge).apply (iterate (n + walkSoFar.length) (G.source edge))

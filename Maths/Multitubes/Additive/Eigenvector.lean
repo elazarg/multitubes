@@ -119,28 +119,6 @@ namespace Maths
 
 noncomputable section
 
-namespace EdgeGraph.Walk
-
-variable {V : Type*} {E : Type*} {G : EdgeGraph V E} {start finish : V}
-
-/-- A walk with no edges does not move. -/
-theorem eq_of_length_eq_zero (walk : G.Walk start finish) (hlen : walk.length = 0) :
-    start = finish := by
-  cases walk with
-  | nil => rfl
-  | concat walkSoFar edge legal => simp at hlen
-
-/-- A nonempty walk ends with an edge, after a walk to that edge's source. -/
-theorem exists_last_edge (walk : G.Walk start finish) (hlen : 0 < walk.length) :
-    ∃ (edge : E) (before : G.Walk start (G.source edge)),
-      G.target edge = finish ∧ walk.edges = before.edges ++ [edge] := by
-  cases walk with
-  | nil => simp at hlen
-  | concat walkSoFar edge legal =>
-      exact ⟨edge, walkSoFar.castFinish legal.symm, rfl, by simp⟩
-
-end EdgeGraph.Walk
-
 namespace MaxPlusPotential
 
 universe uV uE
@@ -247,7 +225,7 @@ theorem maxRootedWeight_isPotential {weight : E → 𝕜}
     IsPotential G weight (maxRootedWeight G weight base) := by
   intro e
   obtain ⟨walk, -, hwalk⟩ := maxRootedWeight_mem hcyc (hreach (G.source e))
-  have hle := walkSum_le_maxRootedWeight hcyc (walk.concat e rfl)
+  have hle := walkSum_le_maxRootedWeight hcyc (walk.concat e)
   rwa [walkSum_concat, hwalk] at hle
 
 /-- The weight of the base itself is zero: the empty walk realizes it, and every walk from the
@@ -404,10 +382,7 @@ theorem exists_isEigenvector {ι : Type*} [Fintype ι] [Nonempty ι] (A : ι →
   obtain ⟨i⟩ := (inferInstance : Nonempty ι)
   have hexists : ∃ (vertex : ι) (cycle : (matrixGraph ι).Walk vertex vertex),
       0 < cycle.length :=
-    ⟨i, ((EdgeGraph.Walk.nil : (matrixGraph ι).Walk i i).concat (i, i)
-      (matrixGraph_source _)).castFinish (matrixGraph_target _), by
-      rw [EdgeGraph.Walk.length_castFinish, EdgeGraph.Walk.length_concat]
-      exact Nat.succ_pos _⟩
+    ⟨i, EdgeGraph.Walk.singleton (G := matrixGraph ι) (i, i), Nat.one_pos⟩
   obtain ⟨base, best, hpos, hcard, hmax⟩ :=
     AdditiveTransport.exists_short_closedWalk_maximizing_mean
       (matrixGraph ι) (matrixWeight A) hexists

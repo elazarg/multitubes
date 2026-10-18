@@ -313,8 +313,7 @@ theorem walkProd_mul_gauge_lt_of_exists_strict
   intro hstrict
   induction walk with
   | nil => simp at hstrict
-  | @concat finish walk edge legal ih =>
-      subst legal
+  | concat edge walk ih =>
       rcases hstrict with ⟨candidate, hcandidate, hstrictCandidate⟩
       rw [EdgeGraph.Walk.edges_concat, List.mem_append] at hcandidate
       rcases hcandidate with hbefore | hlast
@@ -403,16 +402,15 @@ def forgetPositiveWalk {start : V} :
     {finish : V} → (positiveSlopeGraph (G := G) slope).Walk start finish →
       G.Walk start finish
   | _, .nil => .nil
-  | _, .concat walk edge legal =>
-      (forgetPositiveWalk walk).concat edge.1 legal
+  | _, .concat edge walk =>
+      (forgetPositiveWalk walk).concat edge.1
 
 @[simp] theorem edges_forgetPositiveWalk {start finish : V}
     (walk : (positiveSlopeGraph (G := G) slope).Walk start finish) :
     (forgetPositiveWalk slope walk).edges = walk.edges.map Subtype.val := by
   induction walk with
   | nil => rfl
-  | concat walk edge legal ih =>
-      change G.source edge.1 = _ at legal
+  | concat edge walk ih =>
       rw [forgetPositiveWalk]
       simp only [EdgeGraph.Walk.edges_concat, List.map_append, List.map_singleton]
       rw [ih]
@@ -432,7 +430,7 @@ theorem exp_walkSum_log_eq_walkProd {start finish : V}
       walkProd (fun edge : PositiveSlopeEdge slope ↦ slope edge.1) walk := by
   induction walk with
   | nil => simp [walkSum, walkProd]
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       rw [walkSum_concat, walkProd_concat,
         Real.exp_add, ih, Real.exp_log edge.2]
 
@@ -504,8 +502,7 @@ theorem gauge_lt_walkProd_mul_of_exists_strict
   intro hstrict
   induction walk with
   | nil => simp at hstrict
-  | @concat finish walk edge legal ih =>
-      subst legal
+  | concat edge walk ih =>
       rcases hstrict with ⟨candidate, hcandidate, hstrictCandidate⟩
       rw [EdgeGraph.Walk.edges_concat, List.mem_append] at hcandidate
       rcases hcandidate with hbefore | hlast
@@ -585,7 +582,7 @@ theorem exp_walkSum_log_eq_walkProd_of_pos (hpos : ∀ edge, 0 < slope edge)
       walkProd slope walk := by
   induction walk with
   | nil => simp [walkSum, walkProd]
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       rw [walkSum_concat, walkProd_concat,
         Real.exp_add, ih, Real.exp_log (hpos edge)]
 
@@ -679,7 +676,7 @@ theorem exists_slopeGauge_of_cycleProduct_eq_one_of_stronglyConnected
           walkProd slope walk := by
       induction walk with
       | nil => simp [walkSum, walkProd]
-      | concat walk edge legal ih =>
+      | concat edge walk ih =>
           rw [walkSum_concat, walkProd_concat,
             Real.exp_add, ih, Real.exp_log (hpos edge)]
     intro vertex cycle

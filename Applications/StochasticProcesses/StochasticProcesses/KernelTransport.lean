@@ -211,9 +211,9 @@ def pathKernel {V E : Type*} (G : EdgeGraph V E) (State : V → Type*)
     {start : V} : {finish : V} → G.Walk start finish →
       State start → PMF (State finish)
   | _, .nil => PMF.pure
-  | _, .concat walk edge legal => fun state =>
+  | _, .concat edge walk => fun state =>
       (pathKernel G State k walk state).bind fun middle =>
-        k edge (fiberCast State legal.symm middle)
+        k edge middle
 
 /-- The path kernel of an empty walk is the point mass at its input. -/
 @[simp] theorem pathKernel_nil {V E : Type*} (G : EdgeGraph V E) (State : V → Type*)
@@ -239,20 +239,16 @@ theorem pathKernel_append {V E : Type*} (G : EdgeGraph V E) (State : V → Type*
       (pathKernel G State k first state).bind (pathKernel G State k second) := by
   induction second with
   | nil => exact (PMF.bind_pure _).symm
-  | concat second edge legal ih =>
+  | concat edge second ih =>
       simp only [EdgeGraph.Walk.append_concat, pathKernel, ih, PMF.bind_bind]
 
 private theorem walkMap_reverseEdge_eq_expect {V E : Type*} (G : EdgeGraph V E)
     (State : V → Type*)
     (k : (edge : E) → State (G.source edge) → PMF (State (G.target edge)))
-    {middle : V} (edge : E) (legal : G.source edge = middle)
-    (f : State (G.target edge) → ℝ≥0∞) :
+    (edge : E) (f : State (G.target edge) → ℝ≥0∞) :
     (kernelPullbackTransport G State k).walkMap
-        ((EdgeGraph.Walk.singleton (G := G.reverse) edge).castStart
-            (G.reverse_source edge)
-          |>.castFinish ((G.reverse_target edge).trans legal)) f =
-      fun state => expect (k edge (fiberCast State legal.symm state)) f := by
-  cases legal
+        (EdgeGraph.Walk.singleton (G := G.reverse) edge) f =
+      fun state => expect (k edge state) f :=
   rfl
 
 /-- Pullback along a reversed walk is expectation under its forward path kernel. -/
@@ -265,13 +261,13 @@ theorem walkMap_reverse_eq_expect_pathKernel {V E : Type*} (G : EdgeGraph V E)
       expect (pathKernel G State k walk state) f := by
   induction walk with
   | nil => simp [pathKernel]
-  | @concat middle walk edge legal ih =>
-      rw [EdgeGraph.Walk.reverse_concat walk edge legal, Transport.walkMap_append]
-      rw [walkMap_reverseEdge_eq_expect G State k edge legal]
+  | concat edge walk ih =>
+      rw [EdgeGraph.Walk.reverse_concat edge walk, Transport.walkMap_append]
+      rw [walkMap_reverseEdge_eq_expect G State k edge]
       rw [ih]
       simpa only [pathKernel] using
         (expect_bind (pathKernel G State k walk state)
-          (fun middle => k edge (fiberCast State legal.symm middle)) f).symm
+          (fun middle => k edge middle) f).symm
 
 /-- The exact path consequence of harmonicity. -/
 theorem expect_pathKernel_eq_of_harmonic {V E : Type*} (G : EdgeGraph V E)
@@ -332,7 +328,7 @@ theorem le_expect_pathKernel_of_subharmonic {V E : Type*} (G : EdgeGraph V E)
 /-- The loop walk containing exactly `n` copies of the unique edge. -/
 def loopWalk : ℕ → loopGraph.reverse.Walk () ()
   | 0 => .nil
-  | n + 1 => (loopWalk n).concat () rfl
+  | n + 1 => (loopWalk n).concat ()
 
 @[simp]
 theorem loopWalk_zero : loopWalk 0 = (.nil : loopGraph.reverse.Walk () ()) :=
@@ -340,7 +336,7 @@ theorem loopWalk_zero : loopWalk 0 = (.nil : loopGraph.reverse.Walk () ()) :=
 
 @[simp]
 theorem loopWalk_succ (n : ℕ) :
-    loopWalk (n + 1) = (loopWalk n).concat () rfl :=
+    loopWalk (n + 1) = (loopWalk n).concat () :=
   rfl
 
 /-- The PMF obtained by taking `n` forward steps of a homogeneous kernel. -/
@@ -370,7 +366,7 @@ theorem walkMap_loopWalk_eq_iterate
   | zero => simp [iterateKernel, expect]
   | succ n ih =>
       rw [loopWalk_succ, Transport.walkMap_concat]
-      simp only [kernelTransport, kernelPullbackTransport, fiberCast_const]
+      simp only [kernelTransport, kernelPullbackTransport]
       change expect (k s) (fun s' =>
         (kernelTransport k).walkMap (loopWalk n) f s') = _
       rw [iterateKernel_succ, expect_bind]

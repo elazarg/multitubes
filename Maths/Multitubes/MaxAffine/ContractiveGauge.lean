@@ -53,8 +53,7 @@ theorem walkProd_mul_gauge_le_pow (gain : E → ℝ)
     walkProd gain walk * gauge start ≤ rate ^ walk.length * gauge finish := by
   induction walk with
   | nil => simp
-  | concat walk edge legal ih =>
-      cases legal
+  | concat edge walk ih =>
       rw [walkProd_concat, EdgeGraph.Walk.length_concat, pow_succ]
       calc
         walkProd gain walk * gain edge * gauge start =

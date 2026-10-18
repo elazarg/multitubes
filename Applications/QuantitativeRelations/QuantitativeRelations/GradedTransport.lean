@@ -88,8 +88,7 @@ theorem IsGradedMixedSectionFor.walkMap_rel_of_lax_or_exact
   induction walk with
   | nil =>
       simpa using hrefl start
-  | concat walk edge legal ih =>
-      cases legal
+  | concat edge walk ih =>
       rw [T.walkMap_concat, walkSum_concat]
       have hprefix : ∀ edge' ∈ walk.edges, (mode edge').IsLaxOrExact := by
         intro edge' hedge'
@@ -134,8 +133,7 @@ theorem IsGradedMixedSectionFor.walkMap_rel_of_oplax_or_exact
   induction walk with
   | nil =>
       simpa using hrefl start
-  | concat walk edge legal ih =>
-      cases legal
+  | concat edge walk ih =>
       rw [T.walkMap_concat, walkSum_concat]
       have hprefix : ∀ edge' ∈ walk.edges, (mode edge').IsOplaxOrExact := by
         intro edge' hedge'
@@ -183,8 +181,7 @@ theorem IsGradedMixedSectionFor.walkMap_rel_of_symmetric
   induction walk with
   | nil =>
       simpa using hrefl start
-  | concat walk edge legal ih =>
-      cases legal
+  | concat edge walk ih =>
       rw [T.walkMap_concat, walkSum_concat]
       have hpoint : relation _ (walkSum cost walk)
           (T.walkMap walk (family start)) (family _) := ih

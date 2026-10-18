@@ -378,10 +378,10 @@ two vertices in either direction, and a vertex returns to itself in two steps. -
 theorem nonempty_walk_flipGraph (start finish : Bool) :
     Nonempty (flipGraph.Walk start finish) := by
   cases start <;> cases finish
-  · exact ⟨.concat (.concat .nil false rfl) true rfl⟩
-  · exact ⟨.concat .nil false rfl⟩
-  · exact ⟨.concat .nil true rfl⟩
-  · exact ⟨.concat (.concat .nil true rfl) false rfl⟩
+  · exact ⟨.concat true (.concat false .nil)⟩
+  · exact ⟨.concat false .nil⟩
+  · exact ⟨.concat true .nil⟩
+  · exact ⟨.concat false (.concat true .nil)⟩
 
 /-- **The eigenvalue equation is not solvable in general once a slope is negative**, even on a
 finite strongly connected graph in which every vertex has an incoming edge.  These are exactly

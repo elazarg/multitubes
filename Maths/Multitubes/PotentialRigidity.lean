@@ -64,7 +64,7 @@ theorem trivialCycleLabels_iff_chosen_root_return_tests
     refine ⟨fun vertex => ?_, fun edge => ?_⟩
     · simpa using hflat base ((paths vertex).append (returns vertex))
     · simpa [mul_assoc] using hflat base
-        (((paths (G.source edge)).concat edge rfl).append
+        (((paths (G.source edge)).concat edge).append
           (returns (G.target edge)))
   · rintro ⟨hreturn, hedge⟩
     exact hasTrivialCycleLabels_of_chosen_tests paths returns hreturn hedge
@@ -128,8 +128,7 @@ theorem unitPotential_ratio_eq_of_rootReaches {base : V}
     (second vertex)⁻¹ * first vertex = (second base)⁻¹ * first base := by
   induction (hreaches vertex).some with
   | nil => rfl
-  | @concat finish path edge legal ih =>
-      subst legal
+  | concat edge path ih =>
       exact (unit_ratio_eq_of_edge first second hfirst hsecond edge).trans ih
 
 /-- Two potentials for the same labels differ by one global right unit on

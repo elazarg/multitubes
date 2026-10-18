@@ -230,7 +230,7 @@ theorem isPotential_supIncomingWeight (h : HasFiniteBudget G weight) :
   have key : supIncomingWeight G weight (G.source edge) ≤
       supIncomingWeight G weight (G.target edge) - weight edge := by
     refine supIncomingWeight_le (by linarith) fun walk => ?_
-    have := walkSum_le_supIncomingWeight h (walk.concat edge rfl)
+    have := walkSum_le_supIncomingWeight h (walk.concat edge)
     rw [walkSum_concat] at this
     linarith
   linarith
@@ -340,9 +340,8 @@ theorem supIncomingWeight_le_iff (h : HasFiniteBudget G weight) (vertex : V) (c 
     revert hedge
     cases walk with
     | nil => intro _; simpa using hc
-    | concat walk edge legal =>
+    | concat edge walk =>
         intro hedge
-        subst legal
         have h1 := hedge edge rfl
         have h2 := walkSum_le_supIncomingWeight h walk
         rw [walkSum_concat]

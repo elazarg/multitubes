@@ -288,7 +288,7 @@ theorem eq_or_exists_target_eq {start finish : V} (walk : G.Walk start finish) :
     start = finish ∨ ∃ e : E, G.target e = finish := by
   cases walk with
   | nil => exact Or.inl rfl
-  | concat _ e _ => exact Or.inr ⟨e, rfl⟩
+  | concat e _ => exact Or.inr ⟨e, rfl⟩
 
 /-- **On a strongly connected graph in which every vertex has an incoming edge, every vertex has
 an outgoing edge.**  If no edge left a vertex, no walk could leave it either, so the source of one
@@ -303,7 +303,7 @@ theorem exists_source_eq (G : EdgeGraph V E)
     intro finish walk
     induction walk with
     | nil => rfl
-    | concat _ e legal ih => exact absurd (legal.trans ih) (hne e)
+    | concat e _ ih => exact absurd ih (hne e)
   obtain ⟨e, he⟩ := hinEdge vertex
   obtain ⟨walk⟩ := hconn vertex (G.source e)
   exact hne e (hstay walk)
@@ -443,7 +443,7 @@ theorem coneOperator_fixedPoint_pos (G : EdgeGraph V E) (label : E → Label)
     intro finish walk
     induction walk with
     | nil => exact hu
-    | concat _ e legal ih => exact hstep e legal ih
+    | concat e _ ih => exact hstep e rfl ih
   exact hspread (hconn u vertex).some
 
 /-- **A finite strongly connected graph whose slopes are all nonnegative carries an eigenvector of

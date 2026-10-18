@@ -104,7 +104,7 @@ private theorem sum_edgeMultiplicity_eq_length [Fintype E] [DecidableEq E]
     ∑ edge, walk.edgeMultiplicity edge = walk.length := by
   induction walk with
   | nil => simp
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       simp only [EdgeGraph.Walk.edgeMultiplicity_concat,
         EdgeGraph.Walk.length_concat, Finset.sum_add_distrib, ih]
       simp
@@ -116,7 +116,7 @@ private theorem sum_edgeMultiplicity_mul_eq_walkSum
       walkSum weight walk := by
   induction walk with
   | nil => simp
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       simp only [EdgeGraph.Walk.edgeMultiplicity_concat, Nat.cast_add,
         add_mul, Finset.sum_add_distrib, ih,
         walkSum_concat]

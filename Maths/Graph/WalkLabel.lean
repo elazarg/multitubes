@@ -73,15 +73,14 @@ order in which the walk is traversed. -/
 def walkLabel (label : E → M) {start : V} :
     {finish : V} → G.Walk start finish → M
   | _, .nil => 1
-  | _, .concat walkSoFar edge _ => label edge * walkLabel label walkSoFar
+  | _, .concat edge walkSoFar => label edge * walkLabel label walkSoFar
 
 variable {label : E → M}
 
 @[simp] theorem walkLabel_nil : walkLabel label (.nil : G.Walk start start) = 1 := rfl
 
-@[simp] theorem walkLabel_concat (walk : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    walkLabel label (walk.concat edge legal) = label edge * walkLabel label walk := rfl
+@[simp] theorem walkLabel_concat (edge : E) (walk : G.Walk start (G.source edge)) :
+    walkLabel label (walk.concat edge) = label edge * walkLabel label walk := rfl
 
 @[simp] theorem walkLabel_singleton (edge : E) :
     walkLabel label (EdgeGraph.Walk.singleton (G := G) edge) = label edge :=
@@ -93,7 +92,7 @@ variable {label : E → M}
     walkLabel label (first.append second) = walkLabel label second * walkLabel label first := by
   induction second with
   | nil => simp
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [EdgeGraph.Walk.append_concat, walkLabel_concat, walkLabel_concat, ih, mul_assoc]
 
 @[simp] theorem walkLabel_castFinish {finish' : V} (walk : G.Walk start finish)
@@ -112,7 +111,7 @@ variable {label : E → M}
 @[simp] theorem walkLabel_one (walk : G.Walk start finish) : walkLabel (1 : E → M) walk = 1 := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih => simp [ih]
+  | concat edge walkSoFar ih => simp [ih]
 
 /-- Every closed walk has identity composite label.  For group-labelled gain graphs this is
 balance; for a transport it is flatness. -/
@@ -139,9 +138,8 @@ variable {w : E → M}
 theorem walkProd_nil : walkProd w (.nil : G.Walk start start) = 1 := rfl
 
 @[to_additive (attr := simp)]
-theorem walkProd_concat (walk : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    walkProd w (walk.concat edge legal) = walkProd w walk * w edge := by
+theorem walkProd_concat (edge : E) (walk : G.Walk start (G.source edge)) :
+    walkProd w (walk.concat edge) = walkProd w walk * w edge := by
   simp [walkProd]
 
 @[to_additive (attr := simp)]
@@ -202,7 +200,7 @@ theorem walkLabel_eq_walkProd (label : E → M) (walk : G.Walk start finish) :
     walkLabel label walk = walkProd label walk := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih => rw [walkLabel_concat, walkProd_concat, ih, mul_comm]
+  | concat edge walkSoFar ih => rw [walkLabel_concat, walkProd_concat, ih, mul_comm]
 
 /-- Chronological products of a pointwise product multiply. -/
 @[to_additive /-- Walk sums of a pointwise sum add. -/]
@@ -241,7 +239,7 @@ theorem walkProd_div (w₁ w₂ : E → M) (walk : G.Walk start finish) :
     walkProd (fun edge => w₁ edge / w₂ edge) walk = walkProd w₁ walk / walkProd w₂ walk := by
   induction walk with
   | nil => simp
-  | concat walkSoFar edge legal ih => rw [walkProd_concat, walkProd_concat, walkProd_concat, ih,
+  | concat edge walkSoFar ih => rw [walkProd_concat, walkProd_concat, walkProd_concat, ih,
       div_mul_div_comm]
 
 /-- Chronological products of pointwise inverses invert. -/
@@ -258,7 +256,7 @@ theorem walkProd_div_const (w : E → M) (c : M) (walk : G.Walk start finish) :
     walkProd (fun edge => w edge / c) walk = walkProd w walk / c ^ walk.length := by
   induction walk with
   | nil => simp
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [walkProd_concat, walkProd_concat, ih, EdgeGraph.Walk.length_concat, pow_succ,
         div_mul_div_comm]
 
@@ -277,7 +275,7 @@ theorem countP_nsmul_le_walkSum (w : E → A) (hw : ∀ edge, 0 ≤ w edge) (P :
     walk.edges.countP (fun edge => P edge) • threshold ≤ walkSum w walk := by
   induction walk with
   | nil => simp
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [EdgeGraph.Walk.edges_concat, List.countP_append, walkSum_concat, add_nsmul]
       by_cases hedge : P edge
       · simpa [hedge, one_nsmul] using add_le_add ih (hthreshold edge hedge)

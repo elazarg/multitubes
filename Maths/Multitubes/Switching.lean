@@ -117,8 +117,8 @@ theorem walkLabel_switch (η : V → Mˣ) {start finish : V} (walk : G.Walk star
       (η finish : M) * walkLabel label walk * Units.val (η start)⁻¹ := by
   induction walk with
   | nil => simp
-  | concat walkSoFar edge legal ih =>
-      rw [walkLabel_concat, ih, walkLabel_concat, switch_apply, legal]
+  | concat edge walkSoFar ih =>
+      rw [walkLabel_concat, ih, walkLabel_concat, switch_apply]
       simp only [mul_assoc, Units.inv_mul_cancel_left]
 
 /-! ### The trivial gain -/

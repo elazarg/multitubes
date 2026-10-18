@@ -93,8 +93,7 @@ theorem walk_error_le {concrete : Maths.Transport G Concrete}
       radius finish := by
   induction walk with
   | nil => exact hinitial
-  | concat walk edge legal ih =>
-      cases legal
+  | concat edge walk ih =>
       rw [Maths.Transport.walkMap_concat, Maths.Transport.walkMap_concat]
       calc
         comparison.error _ (concrete.edgeMap edge _) (approximate.edgeMap edge _) ≤

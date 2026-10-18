@@ -72,8 +72,7 @@ theorem walk_error_le_geometric (comparison : ErrorComparison concrete approxima
       radius finish + rate ^ walk.length * excess * gauge finish := by
   induction walk with
   | nil => simpa using hinitial
-  | concat walk edge legal ih =>
-      cases legal
+  | concat edge walk ih =>
       rw [Maths.Transport.walkMap_concat, Maths.Transport.walkMap_concat,
         Maths.EdgeGraph.Walk.length_concat, pow_succ]
       calc

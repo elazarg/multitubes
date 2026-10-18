@@ -141,8 +141,8 @@ variable {start finish : V}
     walkSum (coboundary G φ) walk = φ finish - φ start := by
   induction walk with
   | nil => simp
-  | concat walkSoFar edge legal ih =>
-      rw [walkSum_concat, ih, coboundary_apply, legal]
+  | concat edge walkSoFar ih =>
+      rw [walkSum_concat, ih, coboundary_apply]
       abel
 
 theorem walkSum_eq_sub_of_isCoboundary {w : E → A} (hw : IsCoboundary G w)
@@ -211,9 +211,9 @@ theorem exists_coboundary_of_baseCycleSums_eq_zero {w : E → A} {base : V}
     basePotential_eq_walkSum_of_baseCycleSums_eq_zero hzero hout.some hbackSource
   have htarget :
       basePotential G w base (G.target edge) =
-        walkSum w (hout.some.concat edge rfl) :=
+        walkSum w (hout.some.concat edge) :=
     basePotential_eq_walkSum_of_baseCycleSums_eq_zero hzero
-      (hout.some.concat edge rfl) hbackTarget
+      (hout.some.concat edge) hbackTarget
   rw [coboundary_apply, hsource, htarget, walkSum_concat]
   abel
 

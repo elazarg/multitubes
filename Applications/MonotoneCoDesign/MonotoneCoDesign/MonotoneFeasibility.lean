@@ -148,36 +148,25 @@ variable {T : Maths.RelationTransport G Interface}
 def HasMonotoneFeasibility (T : Maths.RelationTransport G Interface) : Prop :=
   ∀ edge, IsMonotoneFeasibility (T.edgeRelation edge)
 
-/-- Reindexing an edge relation along its endpoint equality preserves monotone feasibility. -/
-theorem HasMonotoneFeasibility.edgeRelation_cast (hT : HasMonotoneFeasibility T)
-    (edge : E) {vertex : V} (legal : G.source edge = vertex) :
-    IsMonotoneFeasibility
-      ({(source, target) |
-        Maths.fiberCast Interface legal.symm source ~[T.edgeRelation edge] target} :
-        SetRel (Interface vertex) (Interface (G.target edge))) := by
-  subst vertex
-  simpa using hT edge
-
-/-- A nonempty walk ending in one more component has monotone composite feasibility. -/
-theorem HasMonotoneFeasibility.walkRelation_concat (hT : HasMonotoneFeasibility T)
-    {start finish : V} (walk : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    IsMonotoneFeasibility (T.walkRelation (walk.concat edge legal)) := by
-  cases walk with
-  | nil =>
-      simpa [Maths.RelationTransport.walkRelation] using hT.edgeRelation_cast edge legal
-  | concat walk previous previousLegal =>
-      rw [Maths.RelationTransport.walkRelation]
-      exact (hT.walkRelation_concat walk previous previousLegal).comp
-        (hT.edgeRelation_cast edge legal)
-
 /-- Every nonempty path through a monotone co-design network has monotone feasibility. -/
 theorem HasMonotoneFeasibility.walkRelation_of_pos (hT : HasMonotoneFeasibility T)
     {start finish : V} (walk : G.Walk start finish) (hpos : 0 < walk.length) :
     IsMonotoneFeasibility (T.walkRelation walk) := by
-  cases walk with
+  induction walk with
   | nil => simp at hpos
-  | concat walk edge legal => exact hT.walkRelation_concat walk edge legal
+  | concat edge walk ih =>
+      rw [Maths.RelationTransport.walkRelation]
+      rcases Nat.eq_zero_or_pos walk.length with hzero | hwalk
+      · obtain rfl := walk.eq_of_length_eq_zero hzero
+        obtain rfl := Maths.EdgeGraph.Walk.eq_nil_of_length_eq_zero hzero
+        simpa [Maths.RelationTransport.walkRelation] using hT edge
+      · exact (ih hwalk).comp (hT edge)
+
+/-- A nonempty walk ending in one more component has monotone composite feasibility. -/
+theorem HasMonotoneFeasibility.walkRelation_concat (hT : HasMonotoneFeasibility T)
+    {start : V} (edge : E) (walk : G.Walk start (G.source edge)) :
+    IsMonotoneFeasibility (T.walkRelation (walk.concat edge)) :=
+  hT.walkRelation_of_pos _ (Nat.succ_pos _)
 
 end RelationTransport
 

@@ -460,7 +460,7 @@ theorem exists_walk_length_eq_forall_tight {weight : E → 𝕜} {lam : 𝕜} {�
   | succ count ih =>
       obtain ⟨edge, htarget, htight⟩ := hφ.2 vertex
       obtain ⟨base, walk, hlen, hall⟩ := ih (G.source edge)
-      refine ⟨base, (walk.concat edge rfl).castFinish htarget, by simp [hlen], ?_⟩
+      refine ⟨base, (walk.concat edge).castFinish htarget, by simp [hlen], ?_⟩
       intro e hmem
       rw [EdgeGraph.Walk.edges_castFinish, EdgeGraph.Walk.edges_concat, List.mem_append] at hmem
       rcases hmem with hmem | hmem

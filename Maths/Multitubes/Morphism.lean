@@ -98,8 +98,7 @@ theorem walkMap_rel (f : Simulation T S relation)
     relation finish (f.app finish (T.walkMap walk point)) (S.walkMap walk (f.app start point)) := by
   induction walk with
   | nil => exact hrefl _ _
-  | concat walk edge legal ih =>
-      cases legal
+  | concat edge walk ih =>
       exact htrans _ (f.edge_rel edge _) (hpreserve edge ih)
 
 end Simulation

@@ -133,9 +133,8 @@ theorem walk_storage_nonincrease [AddCommMonoid A] [Preorder A]
   | nil =>
       intro point
       simp
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       intro point
-      cases legal
       have hedge := hstorage edge
         (Maths.fiberCast State rfl (T.walkMap walkSoFar point))
       have hsum := add_le_add_left hedge (Maths.walkSum decrease walkSoFar)
@@ -280,8 +279,8 @@ theorem exampleReset_noninjective : ¬Function.Injective exampleReset := by
 
 /-- The closed physical cycle at `Fin 3`, with reset followed by expansion. -/
 def exampleCycle : examplePhysicalGraph.Walk .fin3 .fin3 :=
-  ((.nil : examplePhysicalGraph.Walk .fin3 .fin3).concat
-      .reset rfl).concat .expand rfl
+  ((.nil : examplePhysicalGraph.Walk .fin3 .fin3).concat ExampleEdge.reset).concat
+    ExampleEdge.expand
 
 /-- The concrete closed physical cycle strictly decreases energy at state `1`. -/
 theorem exampleCycle_strict_decrease :

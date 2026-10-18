@@ -176,11 +176,8 @@ theorem eq_true_of_walk_feedingGraph {finish : Bool}
     (walk : feedingGraph.Walk true finish) : finish = true := by
   induction walk with
   | nil => rfl
-  | concat walk edge legal ih =>
-      have hfalse : false = true := by
-        rw [feedingGraph] at legal
-        exact legal.trans ih
-      contradiction
+  | concat edge walk ih =>
+      exact absurd ih Bool.false_ne_true
 
 /-- The feeding graph is not strongly connected at its loop vertex. -/
 theorem not_isStronglyConnectedAt_feedingGraph :
@@ -284,7 +281,7 @@ theorem reachable_from_critical_feedingCoefficient (vertex : Bool) :
   refine ⟨false, hcritical, ?_⟩
   cases vertex
   · exact ⟨.nil⟩
-  · exact ⟨.concat .nil true rfl⟩
+  · exact ⟨.concat true .nil⟩
 
 /-- The potential `(0, -1)` is an eigenvector of the feeding example at level `1`. -/
 theorem isEigenvector_feedingLabel :

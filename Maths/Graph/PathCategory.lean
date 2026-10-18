@@ -90,7 +90,7 @@ def edge (candidate : E) :
 
 /-- Extending a walk by an edge is composing with that edge. -/
 theorem concat_eq_comp_edge {start : V} {candidate : E} (walk : G.Walk start (G.source candidate)) :
-    (walk.concat candidate rfl : (ofVertex G start ⟶ ofVertex G (G.target candidate))) =
+    (walk.concat candidate : (ofVertex G start ⟶ ofVertex G (G.target candidate))) =
       (walk : ofVertex G start ⟶ ofVertex G (G.source candidate)) ≫ edge candidate :=
   rfl
 
@@ -102,18 +102,16 @@ variable {C : Type u} [Category.{v} C]
 def liftMap (obj : V → C) (map : ∀ edge : E, obj (G.source edge) ⟶ obj (G.target edge))
     {start : V} : {finish : V} → G.Walk start finish → (obj start ⟶ obj finish)
   | _, .nil => 𝟙 _
-  | _, .concat walk edge legal =>
-      liftMap obj map walk ≫ eqToHom (congrArg obj legal.symm) ≫ map edge
+  | _, .concat edge walk => liftMap obj map walk ≫ map edge
 
 variable (obj : V → C) (map : ∀ edge : E, obj (G.source edge) ⟶ obj (G.target edge))
 
 @[simp] theorem liftMap_nil (start : V) : liftMap obj map (.nil : G.Walk start start) = 𝟙 _ :=
   rfl
 
-theorem liftMap_concat {start finish : V} (walk : G.Walk start finish) (candidate : E)
-    (legal : G.source candidate = finish) :
-    liftMap obj map (walk.concat candidate legal) =
-      liftMap obj map walk ≫ eqToHom (congrArg obj legal.symm) ≫ map candidate :=
+@[simp] theorem liftMap_concat {start : V} (candidate : E)
+    (walk : G.Walk start (G.source candidate)) :
+    liftMap obj map (walk.concat candidate) = liftMap obj map walk ≫ map candidate :=
   rfl
 
 theorem liftMap_append {start middle finish : V} (front : G.Walk start middle)
@@ -121,7 +119,7 @@ theorem liftMap_append {start middle finish : V} (front : G.Walk start middle)
     liftMap obj map (front.append back) = liftMap obj map front ≫ liftMap obj map back := by
   induction back with
   | nil => exact (Category.comp_id _).symm
-  | concat back edge legal ih =>
+  | concat edge back ih =>
       rw [EdgeGraph.Walk.append_concat, liftMap_concat, liftMap_concat, ih, Category.assoc]
 
 /-- The functor out of the path category extending an assignment of objects to vertices and
@@ -137,9 +135,8 @@ def lift : PathCategory G ⥤ C where
 
 /-- The extension takes the prescribed value on every edge. -/
 @[simp] theorem lift_map_edge (candidate : E) :
-    (lift obj map).map (edge candidate) = map candidate := by
-  change 𝟙 _ ≫ eqToHom rfl ≫ map candidate = map candidate
-  simp
+    (lift obj map).map (edge candidate) = map candidate :=
+  Category.id_comp _
 
 /-- A functor out of the path category maps every walk to the composite of its values on the
 edges of the walk. -/
@@ -150,12 +147,9 @@ theorem map_eq_liftMap (F : PathCategory G ⥤ C) {start finish : V}
         walk := by
   induction walk with
   | nil => exact F.map_id _
-  | concat walk candidate legal ih =>
-      subst legal
-      have hcomp : F.map (X := ofVertex G start) (Y := ofVertex G (G.target candidate))
-          (walk.concat candidate rfl) = F.map walk ≫ F.map (edge candidate) :=
-        F.map_comp (X := ofVertex G start) walk (edge candidate)
-      rw [hcomp, ih, liftMap_concat, eqToHom_refl, Category.id_comp]
+  | concat candidate walk ih =>
+      rw [concat_eq_comp_edge, F.map_comp, ih]
+      rfl
 
 /-- **Universal property.**  Every functor out of the path category is the extension of its
 values on vertices and edges. -/

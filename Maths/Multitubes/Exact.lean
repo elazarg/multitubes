@@ -115,7 +115,7 @@ theorem rootedSection_isSection (hpath : T.HasRootPathIndependence base)
   intro edge
   let sourceWalk := (hreach (G.source edge)).some
   let targetWalk := (hreach (G.target edge)).some
-  have hmaps := hpath (G.target edge) (sourceWalk.concat edge rfl) targetWalk
+  have hmaps := hpath (G.target edge) (sourceWalk.concat edge) targetWalk
   exact congrFun hmaps point
 
 theorem rootedSection_isSectionWithBase (hpath : T.HasRootPathIndependence base)
@@ -174,7 +174,7 @@ theorem existsUnique_sectionWithBase_iff_pointwise_path_independence
     have hsection : T.IsSection family := by
       intro edge
       exact hpoint (G.target edge)
-        ((hreach (G.source edge)).some.concat edge rfl)
+        ((hreach (G.source edge)).some.concat edge)
         (hreach (G.target edge)).some
     have hbase : family base = point := hpoint base (hreach base).some .nil
     refine ⟨family, ⟨hsection, hbase⟩, ?_⟩
@@ -264,7 +264,7 @@ theorem existsUnique_section_of_base_fixed_of_injective_returns
     intro edge
     apply hinjective (G.target edge)
     change T.walkMap (returns (G.target edge))
-        (T.walkMap ((paths (G.source edge)).concat edge rfl) point) =
+        (T.walkMap ((paths (G.source edge)).concat edge) point) =
       T.walkMap (returns (G.target edge))
         (T.walkMap (paths (G.target edge)) point)
     rw [← T.walkMap_append, ← T.walkMap_append]
@@ -456,7 +456,7 @@ theorem label_eq_linkedUnit (hflat : HasTrivialCycleLabels G label) {base : V} (
     label edge =
       (linkedUnit hflat htarget * (linkedUnit hflat hsource)⁻¹ : Mˣ) := by
   have hparallel := walkLabel_eq_of_trivialCycleLabels_of_return hflat
-    (hsource.1.some.concat edge rfl) htarget.1.some htarget.2.some
+    (hsource.1.some.concat edge) htarget.1.some htarget.2.some
   simp only [walkLabel_concat] at hparallel
   have hpathReturn : walkLabel label hsource.1.some * walkLabel label hsource.2.some = 1 := by
     simpa using hflat (G.source edge) (hsource.2.some.append hsource.1.some)

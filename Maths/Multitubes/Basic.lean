@@ -62,8 +62,7 @@ products of slopes.
   edge-indexed relation, from the transported source value to the target value.
 * `Maths.Transport.IsSection`, `Maths.Transport.IsLaxSection`, and
   `Maths.Transport.IsOplaxSection` - the cases `=`, `≤`, and `≥`.
-* `Maths.ofEdgeAct` and `Maths.transport` -
-  the constant-fiber case.
+* `Maths.ofEdgeAct` - the constant-fiber case.
 * `Maths.ofSMul` - the constant-fiber transport of a monoid labelling acting
   on a common fiber, whose walk maps are the actions of the walk labels
   `Maths.walkLabel`.
@@ -81,11 +80,8 @@ products of slopes.
   `Maths.Transport.IsOplaxSection.le_walkMap` - its exact, lax, and oplax instances.
 * `Maths.Transport.IsSection.isLaxSection` and `Maths.Transport.IsSection.isOplaxSection` -
   exact sections are lax and oplax.
-* `Maths.walkMap_ofEdgeAct` - the dependent and constant-fiber
-  semantics agree.
-* `Maths.transport_eq_smul` and
-  `Maths.walkMap_ofSMul_eq_walkLabel_smul` - a monoid-labelled
-  walk acts by its composite label.
+* `Maths.walkMap_ofSMul_eq_walkLabel_smul` - a monoid-labelled walk acts by its composite
+  label.
 * `Maths.hasTrivialHolonomy_ofSMul` - trivial cycle labels
   imply trivial holonomy of the induced transport.
 * `Maths.hasTrivialCycleLabels_iff_hasTrivialHolonomy_ofSMul` - for the regular
@@ -141,9 +137,7 @@ universe uV uE uF uX uM
 
 variable {V : Type uV} {E : Type uE}
 
-/-- Move a fiber point along an equality of vertices.  This is the coercion
-needed when the legality proof of `EdgeGraph.Walk.concat` identifies the source
-of the appended edge with the endpoint reached so far. -/
+/-- Move a fiber point along an equality of vertices. -/
 def fiberCast (Fiber : V → Type uF) {first second : V} (hvertex : first = second)
     (point : Fiber first) : Fiber second :=
   cast (congrArg Fiber hvertex) point
@@ -157,19 +151,6 @@ variable {Fiber : V → Type uF}
     (family : ∀ vertex, Fiber vertex) (hvertex : first = second) :
     fiberCast Fiber hvertex (family first) = family second := by
   subst hvertex
-  rfl
-
-/-- Retyping a fiber point leaves it unchanged as a point of the total space. -/
-theorem sigma_mk_fiberCast {first second : V} (hvertex : first = second) (point : Fiber first) :
-    (⟨second, fiberCast Fiber hvertex point⟩ : Σ vertex, Fiber vertex) = ⟨first, point⟩ := by
-  subst hvertex
-  rfl
-
-theorem fiberCast_fiberCast {first second third : V} (hfirst : first = second)
-    (hsecond : second = third) (point : Fiber first) :
-    fiberCast Fiber hsecond (fiberCast Fiber hfirst point) =
-      fiberCast Fiber (hfirst.trans hsecond) point := by
-  subst hfirst
   rfl
 
 /-- `fiberCast` on a constant fiber family is the identity. -/
@@ -200,9 +181,7 @@ order. -/
 def walkMap {start : V} :
     {finish : V} → G.Walk start finish → Fiber start → Fiber finish
   | _, .nil => id
-  | _, .concat walkSoFar edge legal =>
-      fun point =>
-        T.edgeMap edge (fiberCast Fiber legal.symm (walkMap walkSoFar point))
+  | _, .concat edge walkSoFar => fun point => T.edgeMap edge (walkMap walkSoFar point)
 
 variable {T}
 
@@ -211,10 +190,10 @@ variable {start finish middle finish' base : V}
 @[simp] theorem walkMap_nil (point : Fiber start) :
     T.walkMap (.nil : G.Walk start start) point = point := rfl
 
-@[simp] theorem walkMap_concat (walk : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) (point : Fiber start) :
-    T.walkMap (walk.concat edge legal) point =
-      T.edgeMap edge (fiberCast Fiber legal.symm (T.walkMap walk point)) := rfl
+@[simp] theorem walkMap_concat (edge : E) (walk : G.Walk start (G.source edge))
+    (point : Fiber start) :
+    T.walkMap (walk.concat edge) point =
+      T.edgeMap edge (T.walkMap walk point) := rfl
 
 @[simp] theorem walkMap_singleton (edge : E) (point : Fiber (G.source edge)) :
     T.walkMap (EdgeGraph.Walk.singleton (G := G) edge) point = T.edgeMap edge point := rfl
@@ -242,7 +221,7 @@ theorem walkMap_append (first : G.Walk start middle) (second : G.Walk middle fin
     T.walkMap (first.append second) point = T.walkMap second (T.walkMap first point) := by
   induction second with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [EdgeGraph.Walk.append_concat, walkMap_concat, walkMap_concat, ih]
 
 /-- Transport along a walk is injective when every edge map is. -/
@@ -250,10 +229,10 @@ theorem walkMap_injective (hinjective : ∀ edge, Function.Injective (T.edgeMap 
     (walk : G.Walk start finish) : Function.Injective (T.walkMap walk) := by
   induction walk with
   | nil => exact Function.injective_id
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       intro first second hequal
       simp only [walkMap_concat] at hequal
-      exact ih (by simpa [fiberCast] using hinjective edge hequal)
+      exact ih (hinjective edge hequal)
 
 /-- Transport around a closed walk, an endomorphism of the fiber over its base
 vertex. -/
@@ -307,8 +286,7 @@ theorem walkMap_rel_of_forall_mem_edges {R : ∀ vertex, Fiber vertex → Fiber 
     R finish (T.walkMap walk (family start)) (family finish) := by
   induction walk with
   | nil => exact hrefl start
-  | concat walk edge legal ih =>
-      cases legal
+  | concat edge walk ih =>
       have hprefix := ih (fun edge' hedge' => hpreserve edge' (by simp [hedge']))
         fun edge' hedge' => hedge edge' (by simp [hedge'])
       exact htrans _ (hpreserve edge (by simp) hprefix) (hedge edge (by simp))
@@ -427,86 +405,39 @@ def ofEdgeAct (G : EdgeGraph V E) (X : Type uX) (act : E → X → X) :
     Transport G (fun _ : V => X) where
   edgeMap edge := act edge
 
-/-- Apply edge-indexed self-maps along a walk in chronological order: the walk map of the
-constant-fiber transport `ofEdgeAct`. -/
-def transport {X : Type uX} (act : E → X → X) {start finish : V}
-    (walk : G.Walk start finish) : X → X :=
-  (ofEdgeAct G X act).walkMap walk
-
-@[simp] theorem transport_nil {X : Type uX} (act : E → X → X) :
-    transport act (.nil : G.Walk start start) = id := rfl
-
-@[simp] theorem transport_concat {X : Type uX} (act : E → X → X)
-    (walk : G.Walk start finish) (edge : E) (legal : G.source edge = finish) :
-    transport act (walk.concat edge legal) = act edge ∘ transport act walk := rfl
-
-/-- Constant-fiber walk transport is direct composition of the edge actions. -/
-theorem walkMap_ofEdgeAct {X : Type uX} (act : E → X → X)
-    (walk : G.Walk start finish) (point : X) :
-    (ofEdgeAct G X act).walkMap walk point = transport act walk point := rfl
-
-/-- Transport along concatenated constant-fiber walks is chronological
-composition. -/
-theorem transport_append {X : Type uX} (act : E → X → X)
-    (first : G.Walk start middle) (second : G.Walk middle finish) (point : X) :
-    transport act (first.append second) point =
-      transport act second (transport act first point) :=
-  (ofEdgeAct G X act).walkMap_append first second point
-
-variable {M : Type uM} [Monoid M] {label : E → M}
-
-/-- When labels act on a common fiber, the composite walk label acts exactly as
-the chronological edge transport. -/
-theorem transport_eq_smul {X : Type uX} [MulAction M X]
-    (walk : G.Walk start finish) (point : X) :
-    transport (fun edge value => label edge • value) walk point =
-      walkLabel label walk • point := by
-  induction walk with
-  | nil => simp
-  | concat walkSoFar edge legal ih =>
-      rw [transport_concat, Function.comp_apply, ih, walkLabel_concat, mul_smul]
-
-/-- Trivial cycle labels make the induced transport around every cycle the
-identity on every acted-on point. -/
-theorem transport_cycle_eq_self {X : Type uX} [MulAction M X]
-    (hflat : HasTrivialCycleLabels G label) {vertex : V}
-    (cycle : G.Walk vertex vertex) (point : X) :
-    transport (fun edge value => label edge • value) cycle point = point := by
-  rw [transport_eq_smul, hflat vertex cycle, one_smul]
+@[simp] theorem ofEdgeAct_edgeMap {X : Type uX} (act : E → X → X) (edge : E) :
+    (ofEdgeAct G X act).edgeMap edge = act edge := rfl
 
 /-- The constant-fiber transport induced by a monoid action. -/
 def ofSMul (G : EdgeGraph V E) (X : Type uX) {M : Type uM}
     [Monoid M] [MulAction M X] (label : E → M) : Transport G (fun _ : V => X) :=
   ofEdgeAct G X fun edge point => label edge • point
 
-/-- The dependent transport induced by a monoid action agrees with direct
-constant-fiber transport. -/
-theorem walkMap_ofSMul {X : Type uX} {M : Type uM} [Monoid M] [MulAction M X]
-    (label : E → M) (walk : G.Walk start finish) (point : X) :
-    (ofSMul G X label).walkMap walk point =
-      transport (fun edge value => label edge • value) walk point :=
-  walkMap_ofEdgeAct _ walk point
+variable {M : Type uM} [Monoid M] {label : E → M}
+
+@[simp] theorem ofSMul_edgeMap {X : Type uX} [MulAction M X] (edge : E) (point : X) :
+    (ofSMul G X label).edgeMap edge point = label edge • point := rfl
 
 /-- The walk map of a monoid-labelled transport is the action of the composite
 walk label. -/
-theorem walkMap_ofSMul_eq_walkLabel_smul {X : Type uX} {M : Type uM}
-    [Monoid M] [MulAction M X] (label : E → M) (walk : G.Walk start finish)
-    (point : X) :
+theorem walkMap_ofSMul_eq_walkLabel_smul {X : Type uX} [MulAction M X]
+    (label : E → M) (walk : G.Walk start finish) (point : X) :
     (ofSMul G X label).walkMap walk point = walkLabel label walk • point := by
-  rw [walkMap_ofSMul, transport_eq_smul]
+  induction walk with
+  | nil => simp
+  | concat edge walkSoFar ih =>
+      rw [Transport.walkMap_concat, ih, walkLabel_concat, mul_smul, ofSMul_edgeMap]
 
 /-- The holonomy of a monoid-labelled constant-fiber transport is the action of
 its cycle label. -/
-theorem holonomy_ofSMul_eq_walkLabel_smul {X : Type uX} {M : Type uM}
-    [Monoid M] [MulAction M X] (label : E → M) {base : V}
-    (cycle : G.Walk base base) (point : X) :
+theorem holonomy_ofSMul_eq_walkLabel_smul {X : Type uX} [MulAction M X] (label : E → M)
+    {base : V} (cycle : G.Walk base base) (point : X) :
     (ofSMul G X label).holonomy cycle point = walkLabel label cycle • point :=
   walkMap_ofSMul_eq_walkLabel_smul label cycle point
 
 /-- Trivial cycle labels make every closed-walk holonomy of the induced
 constant-fiber transport the identity. -/
-theorem holonomy_ofSMul_eq_self {X : Type uX} {M : Type uM}
-    [Monoid M] [MulAction M X] {label : E → M}
+theorem holonomy_ofSMul_eq_self {X : Type uX} [MulAction M X]
     (hflat : HasTrivialCycleLabels G label) {base : V}
     (cycle : G.Walk base base) (point : X) :
     (ofSMul G X label).holonomy cycle point = point := by
@@ -514,8 +445,7 @@ theorem holonomy_ofSMul_eq_self {X : Type uX} {M : Type uM}
 
 /-- Trivial cycle labels imply trivial holonomy of the induced constant-fiber
 transport. -/
-theorem hasTrivialHolonomy_ofSMul {X : Type uX} {M : Type uM}
-    [Monoid M] [MulAction M X] {label : E → M}
+theorem hasTrivialHolonomy_ofSMul {X : Type uX} [MulAction M X]
     (hflat : HasTrivialCycleLabels G label) :
     (ofSMul G X label).HasTrivialHolonomy := by
   intro base cycle
@@ -525,8 +455,7 @@ theorem hasTrivialHolonomy_ofSMul {X : Type uX} {M : Type uM}
 /-- **Flatness is trivial holonomy of the regular representation.**  A monoid labelling has
 trivial cycle labels exactly when the transport by left multiplication on the monoid itself
 has trivial holonomy.  So statements about flat labels are statements about flat transport. -/
-theorem hasTrivialCycleLabels_iff_hasTrivialHolonomy_ofSMul {M : Type uM} [Monoid M]
-    {label : E → M} :
+theorem hasTrivialCycleLabels_iff_hasTrivialHolonomy_ofSMul :
     HasTrivialCycleLabels G label ↔ (ofSMul G M label).HasTrivialHolonomy := by
   refine ⟨hasTrivialHolonomy_ofSMul, fun hflat base cycle => ?_⟩
   simpa [holonomy_ofSMul_eq_walkLabel_smul] using hflat.holonomy_eq_self cycle 1

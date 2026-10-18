@@ -70,16 +70,15 @@ def forgetGaugeCriticalWalk {start : V} :
       (gaugeCriticalGraph (G := G) label gauge).Walk start finish →
         G.Walk start finish
   | _, .nil => .nil
-  | _, .concat walk edge legal =>
-      (forgetGaugeCriticalWalk walk).concat edge.1 legal
+  | _, .concat edge walk =>
+      (forgetGaugeCriticalWalk walk).concat edge.1
 
 @[simp] theorem edges_forgetGaugeCriticalWalk {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
     (forgetGaugeCriticalWalk walk).edges = walk.edges.map Subtype.val := by
   induction walk with
   | nil => rfl
-  | concat walk edge legal ih =>
-      change G.source edge.1 = _ at legal
+  | concat edge walk ih =>
       rw [forgetGaugeCriticalWalk]
       simp only [EdgeGraph.Walk.edges_concat, List.map_append,
         List.map_singleton]
@@ -102,11 +101,10 @@ def gaugeCriticalLabelList {start finish : V}
       (.nil : (gaugeCriticalGraph (G := G) label gauge).Walk vertex vertex) = [] :=
   rfl
 
-@[simp] theorem gaugeCriticalLabelList_concat {start finish : V}
-    (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish)
+@[simp] theorem gaugeCriticalLabelList_concat {start : V}
     (edge : GaugeCriticalEdge (G := G) label gauge)
-    (legal : G.source edge.1 = finish) :
-    gaugeCriticalLabelList (walk.concat edge legal) =
+    (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start (G.source edge.1)) :
+    gaugeCriticalLabelList (walk.concat edge) =
       gaugeCriticalLabelList walk ++ [label edge.1] := by
   simp [gaugeCriticalLabelList]
 
@@ -120,11 +118,10 @@ def walkReciprocalTargetMass {start finish : V}
       (.nil : (gaugeCriticalGraph (G := G) label gauge).Walk vertex vertex) = 0 :=
   rfl
 
-@[simp] theorem walkReciprocalTargetMass_concat {start finish : V}
-    (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish)
+@[simp] theorem walkReciprocalTargetMass_concat {start : V}
     (edge : GaugeCriticalEdge (G := G) label gauge)
-    (legal : G.source edge.1 = finish) :
-    walkReciprocalTargetMass (walk.concat edge legal) =
+    (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start (G.source edge.1)) :
+    walkReciprocalTargetMass (walk.concat edge) =
       walkReciprocalTargetMass walk + 1 / gauge (G.target edge.1) := by
   simp [walkReciprocalTargetMass]
 
@@ -155,12 +152,10 @@ theorem pathSlope_gaugeCriticalLabelList
   | nil =>
       simp only [gaugeCriticalLabelList_nil, Label.pathSlope_nil]
       rw [div_self (hgauge _).ne']
-  | @concat finish walk edge legal ih =>
-      change G.source edge.1 = finish at legal
-      subst finish
+  | concat edge walk ih =>
       change Label.pathSlope (gaugeCriticalLabelList walk) =
         gauge (G.source edge.1) / gauge start at ih
-      change Label.pathSlope (gaugeCriticalLabelList (walk.concat edge rfl)) =
+      change Label.pathSlope (gaugeCriticalLabelList (walk.concat edge)) =
         gauge (G.target edge.1) / gauge start
       rw [gaugeCriticalLabelList_concat, Label.pathSlope_append]
       simp only [Label.pathSlope_cons, Label.pathSlope_nil, mul_one]
@@ -179,16 +174,14 @@ theorem pathShift_gaugeCriticalLabelList
         (gaugeCriticalShift label gauge) walk := by
   induction walk with
   | nil => simp [walkSum]
-  | @concat finish walk edge legal ih =>
-      change G.source edge.1 = finish at legal
-      subst finish
+  | concat edge walk ih =>
       change Label.pathShift (gaugeCriticalLabelList walk) =
         gauge (G.source edge.1) *
           walkSum (gaugeCriticalShift label gauge) walk at ih
-      change Label.pathShift (gaugeCriticalLabelList (walk.concat edge rfl)) =
+      change Label.pathShift (gaugeCriticalLabelList (walk.concat edge)) =
         gauge (G.target edge.1) *
           walkSum (gaugeCriticalShift label gauge)
-            (walk.concat edge rfl)
+            (walk.concat edge)
       rw [gaugeCriticalLabelList_concat, Label.pathShift_append]
       simp only [Label.pathShift_cons, Label.pathShift_nil,
         Label.pathSlope_cons, Label.pathSlope_nil, mul_one, one_mul, zero_add,
@@ -225,15 +218,13 @@ theorem pathRelaxationMass_gaugeCriticalLabelList
       gauge finish * walkReciprocalTargetMass walk := by
   induction walk with
   | nil => simp
-  | @concat finish walk edge legal ih =>
-      change G.source edge.1 = finish at legal
-      subst finish
+  | concat edge walk ih =>
       change Label.pathRelaxationMass (gaugeCriticalLabelList walk) =
         gauge (G.source edge.1) * walkReciprocalTargetMass walk at ih
       change Label.pathRelaxationMass
-          (gaugeCriticalLabelList (walk.concat edge rfl)) =
+          (gaugeCriticalLabelList (walk.concat edge)) =
         gauge (G.target edge.1) *
-          walkReciprocalTargetMass (walk.concat edge rfl)
+          walkReciprocalTargetMass (walk.concat edge)
       rw [gaugeCriticalLabelList_concat,
         Label.pathRelaxationMass_append]
       simp only [Label.pathRelaxationMass_cons,

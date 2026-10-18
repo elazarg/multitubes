@@ -72,10 +72,8 @@ def ofTransport (transport : Transport G Fiber) : RelationTransport G Fiber wher
 def walkRelation {start : V} :
     {finish : V} → G.Walk start finish → SetRel (Fiber start) (Fiber finish)
   | _, .nil => SetRel.id
-  | _, .concat walk edge legal =>
-      walkRelation walk ○
-        {(source, target) |
-          fiberCast Fiber legal.symm source ~[T.edgeRelation edge] target}
+  | _, .concat edge walk =>
+      walkRelation walk ○ T.edgeRelation edge
 
 /-- Existential image embeds relation-labelled edges into transport on powersets. -/
 def powersetTransport : Transport G (fun vertex ↦ Set (Fiber vertex)) where
@@ -89,8 +87,7 @@ theorem walkRelation_ofTransport {start finish : V} (transport : Transport G Fib
     (ofTransport transport).walkRelation walk = Function.graph (transport.walkMap walk) := by
   induction walk with
   | nil => exact Function.graph_id.symm
-  | @concat middle walk edge legal ih =>
-      subst middle
+  | concat edge walk ih =>
       rw [walkRelation, ih]
       exact (Function.graph_comp (transport.edgeMap edge) (transport.walkMap walk)).symm
 
@@ -108,9 +105,8 @@ theorem walkMap_eq_image_walkRelation {start finish : V}
     T.powersetTransport.walkMap walk set = (T.walkRelation walk).image set := by
   induction walk with
   | nil => simp [powersetTransport, walkRelation]
-  | @concat middle walk edge legal ih =>
-      subst middle
-      rw [Transport.walkMap_concat, fiberCast_rfl, ih]
+  | concat edge walk ih =>
+      rw [Transport.walkMap_concat, ih]
       simp only [powersetTransport, walkRelation]
       exact (SetRel.image_comp (T.walkRelation walk) (T.edgeRelation edge) set).symm
 
@@ -120,7 +116,7 @@ theorem walkRelation_append {start middle finish : V}
     T.walkRelation (first.append second) = T.walkRelation first ○ T.walkRelation second := by
   induction second with
   | nil => simp [walkRelation]
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       rw [EdgeGraph.Walk.append_concat]
       simp only [walkRelation, ih, SetRel.comp_assoc]
 
@@ -156,7 +152,7 @@ theorem IsSection.walkRelation {family : ∀ vertex, Fiber vertex}
     family start ~[T.walkRelation walk] family finish := by
   induction walk with
   | nil => rfl
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       refine ⟨family _, ih, ?_⟩
       simpa only [Set.mem_ofPred_eq, fiberCast_family] using hfamily edge
 

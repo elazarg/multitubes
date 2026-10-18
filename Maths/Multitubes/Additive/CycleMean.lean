@@ -118,7 +118,7 @@ theorem exists_walk_length_eq (hin : ∀ vertex : V, ∃ e : E, G.target e = ver
   | succ count ih =>
       obtain ⟨e, he⟩ := hin vertex
       obtain ⟨start, walk, hlen⟩ := ih (G.source e)
-      exact ⟨start, (walk.concat e rfl).castFinish he, by simp [hlen]⟩
+      exact ⟨start, (walk.concat e).castFinish he, by simp [hlen]⟩
 
 /-- Weights of the walks arriving at a vertex with a prescribed number of edges. -/
 def lengthIncomingWeights (G : EdgeGraph V E) (weight : E → 𝕜) (count : ℕ)
@@ -445,10 +445,7 @@ theorem exists_critical_cycle_subeigenvector_iff
   obtain ⟨i⟩ := (inferInstance : Nonempty ι)
   have hexists : ∃ (vertex : ι) (cycle : (matrixGraph ι).Walk vertex vertex),
       0 < cycle.length := by
-    refine ⟨i, ((EdgeGraph.Walk.nil : (matrixGraph ι).Walk i i).concat (i, i)
-      (matrixGraph_source _)).castFinish (matrixGraph_target _), ?_⟩
-    rw [EdgeGraph.Walk.length_castFinish, EdgeGraph.Walk.length_concat]
-    exact Nat.succ_pos _
+    exact ⟨i, EdgeGraph.Walk.singleton (G := matrixGraph ι) (i, i), Nat.one_pos⟩
   obtain ⟨vertex, best, hpos, hcard, hmax⟩ :=
     AdditiveTransport.exists_short_closedWalk_maximizing_mean
       (matrixGraph ι) (matrixWeight A) hexists

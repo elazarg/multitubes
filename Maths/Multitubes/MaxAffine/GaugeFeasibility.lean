@@ -285,7 +285,7 @@ private theorem walkSum_gaugeCriticalRelaxedShift
         level * walkSum (gaugeCriticalMass gauge) walk := by
   induction walk with
   | nil => simp
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       rw [walkSum_concat,
         walkSum_concat,
         walkSum_concat, ih]

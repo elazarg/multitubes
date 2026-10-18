@@ -137,7 +137,7 @@ theorem isLaxSection_pathClosure
   rw [hSup.map_walk_iSup edge source]
   refine iSup_le fun walk ↦ ?_
   exact le_iSup_of_le source <|
-    le_iSup_of_le (walk.concat edge rfl) le_rfl
+    le_iSup_of_le (walk.concat edge) le_rfl
 
 /-- Walk transport is monotone when every edge transport is monotone. -/
 theorem monotone_walkMap
@@ -147,9 +147,9 @@ theorem monotone_walkMap
   intro first second hle
   induction walk with
   | nil => exact hle
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       rw [walkMap_concat, walkMap_concat]
-      exact hmono edge (fiberCast_le_fiberCast legal.symm ih)
+      exact hmono edge ih
 
 /-- The path closure is below every lax section that dominates the lower
 data.  Only monotonicity is needed for this half. -/
@@ -210,8 +210,7 @@ theorem walkMap_bot (hbot : ∀ edge : E, T.edgeMap edge ⊥ = ⊥)
     T.walkMap walk ⊥ = ⊥ := by
   induction walk with
   | nil => rfl
-  | concat walk edge legal ih =>
-      subst legal
+  | concat edge walk ih =>
       rw [walkMap_concat, ih]
       exact hbot edge
 

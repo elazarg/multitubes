@@ -68,7 +68,7 @@ theorem holonomyApply_relax_le_iterate (hslope : ∀ edge, 0 ≤ (label edge).sl
       orbit (n + walk.length) finish := by
   induction walk with
   | nil => simp
-  | concat walk edge legal ih =>
+  | concat edge walk ih =>
       rw [holonomyApply_concat, EdgeGraph.Walk.length_concat]
       have hmono := Label.monotone_apply (f := Label.relax level (label edge))
         (by simpa using hslope edge) ih
@@ -76,7 +76,6 @@ theorem holonomyApply_relax_le_iterate (hslope : ∀ edge, 0 ≤ (label edge).sl
       have hedge : (label edge).apply (orbit (n + walk.length) (G.source edge)) ≤
           vertexOperator G label (orbit (n + walk.length)) (G.target edge) :=
         le_vertexOperator rfl
-      rw [legal] at hedge
       have hnext := hstep (n + walk.length) (G.target edge)
       have hbound := (sub_le_sub_right hedge level).trans hnext
       simpa only [Nat.add_assoc, Label.apply_relax] using hmono.trans hbound

@@ -691,9 +691,9 @@ def holonomyApply (label : E → Label) {start finish : V}
 @[simp] theorem holonomyApply_nil (label : E → Label) {start : V} (x : ℝ) :
     holonomyApply label (.nil : G.Walk start start) x = x := rfl
 
-@[simp] theorem holonomyApply_concat (label : E → Label) {start finish : V}
-    (walk : G.Walk start finish) (edge : E) (legal : G.source edge = finish) (x : ℝ) :
-    holonomyApply label (walk.concat edge legal) x
+@[simp] theorem holonomyApply_concat (label : E → Label) {start : V}
+    (edge : E) (walk : G.Walk start (G.source edge)) (x : ℝ) :
+    holonomyApply label (walk.concat edge) x
       = (label edge).apply (holonomyApply label walk x) := rfl
 
 theorem holonomyApply_eq_foldl (label : E → Label) {start finish : V}
@@ -701,7 +701,7 @@ theorem holonomyApply_eq_foldl (label : E → Label) {start finish : V}
     holonomyApply label walk x = walk.edges.foldl (fun y e => (label e).apply y) x := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [holonomyApply_concat, EdgeGraph.Walk.edges_concat, List.foldl_append, ih]
       rfl
 
@@ -728,7 +728,7 @@ theorem holonomyApply_eq_walkLabel_smul
     (walk : G.Walk start finish) (x : ℝ) :
     holonomyApply (fun e => (label e).1) walk x =
       Maths.walkLabel label walk • x :=
-  Maths.transport_eq_smul (G := G) (label := label) walk x
+  walkMap_ofSMul_eq_walkLabel_smul (G := G) label walk x
 
 /-! ### Survival-weighted accounting along an edge list -/
 
@@ -901,8 +901,7 @@ theorem holonomyApply_le_add_weightedDefect {label : E → Label}
     holonomyApply label walk (φ start) ≤ φ finish + weightedDefect G label φ walk.edges := by
   induction walk with
   | nil => simp
-  | @concat middle walkSoFar edge legal ih =>
-      subst legal
+  | concat edge walkSoFar ih =>
       have hW : 0 ≤ weightedDefect G label φ walkSoFar.edges :=
         weightedDefect_nonneg hslope φ walkSoFar.edges
       have hmono := Label.monotone_apply (f := label edge) (hslope edge) ih

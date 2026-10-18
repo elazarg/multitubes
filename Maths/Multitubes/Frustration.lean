@@ -122,7 +122,7 @@ theorem frustrationIndex_eq_sInf_deletion [Finite E] (gain : E → Mˣ) :
     · refine ⟨_, Set.univ, rfl, fun vertex cycle => ?_⟩
       cases cycle with
       | nil => rfl
-      | concat _ edge _ => exact absurd (Set.mem_univ _) edge.1.2
+      | concat edge _ => exact absurd (Set.mem_univ _) edge.1.2
     · rintro count ⟨deleted, rfl, hbalanced⟩
       obtain ⟨η, hsubset⟩ := exists_frustratedEdges_subset gain deleted hbalanced
       exact (ciInf_le (OrderBot.bddBelow _) η).trans
@@ -144,7 +144,7 @@ private theorem walkLabel_eq_one_of_forall_mem {E' : Type*} {H : EdgeGraph V E'}
     (htrivial : ∀ edge ∈ walk.edges, label edge = 1) : walkLabel label walk = 1 := by
   induction walk with
   | nil => rfl
-  | concat walkSoFar edge legal ih =>
+  | concat edge walkSoFar ih =>
       rw [walkLabel_concat, htrivial edge (by simp),
         ih fun e he => htrivial e (by simp [he]), one_mul]
 
