@@ -70,8 +70,6 @@ sharp.
   conjugate of the vertex operator** on the open cone.
 * `Maths.MaxAffineTransport.continuous_coneOperator`: the cone operator is continuous
   on all of `V → ℝ`, floors and slopes above one notwithstanding.
-* `Maths.MaxAffineTransport.exists_source_eq`: on a strongly connected graph in which
-  every vertex has an incoming edge, every vertex has an outgoing edge.
 * `Maths.MaxAffineTransport.exists_mem_stdSimplex_coneOperator_eq`: **Brouwer's
   theorem applied to the normalized cone operator**, an eigenvector of `Φ` in the closed simplex.
 * `Maths.MaxAffineTransport.exists_isEigenvector_of_slope_nonneg_of_incoming` and
@@ -279,37 +277,6 @@ theorem continuous_coneOperator (G : EdgeGraph V E) (label : E → Label)
 
 end ConeOperator
 
-/-! ## Outgoing edges on a strongly connected graph -/
-
-section Connectivity
-
-/-- A walk either is empty or ends with an edge arriving at its endpoint. -/
-theorem eq_or_exists_target_eq {start finish : V} (walk : G.Walk start finish) :
-    start = finish ∨ ∃ e : E, G.target e = finish := by
-  cases walk with
-  | nil => exact Or.inl rfl
-  | concat e _ => exact Or.inr ⟨e, rfl⟩
-
-/-- **On a strongly connected graph in which every vertex has an incoming edge, every vertex has
-an outgoing edge.**  If no edge left a vertex, no walk could leave it either, so the source of one
-of its incoming edges would be the vertex itself. -/
-theorem exists_source_eq (G : EdgeGraph V E)
-    (hinEdge : ∀ vertex : V, ∃ e : E, G.target e = vertex)
-    (hconn : ∀ start finish : V, Nonempty (G.Walk start finish)) (vertex : V) :
-    ∃ e : E, G.source e = vertex := by
-  by_contra hcon
-  have hne : ∀ e : E, G.source e ≠ vertex := fun e he => hcon ⟨e, he⟩
-  have hstay : ∀ {finish : V}, G.Walk vertex finish → finish = vertex := by
-    intro finish walk
-    induction walk with
-    | nil => rfl
-    | concat e _ ih => exact absurd ih (hne e)
-  obtain ⟨e, he⟩ := hinEdge vertex
-  obtain ⟨walk⟩ := hconn vertex (G.source e)
-  exact hne e (hstay walk)
-
-end Connectivity
-
 /-! ## The fixed point on the simplex -/
 
 section Brouwer
@@ -459,7 +426,7 @@ theorem exists_isEigenvector_of_slope_nonneg_of_incoming [Nonempty V] (G : EdgeG
     (hinEdge : ∀ vertex : V, ∃ e : E, G.target e = vertex)
     (hconn : ∀ start finish : V, Nonempty (G.Walk start finish)) :
     ∃ (lam : ℝ) (x : V → ℝ), IsEigenvector G label lam x := by
-  have hout := exists_source_eq G hinEdge hconn
+  have hout := EdgeGraph.exists_source_eq hinEdge hconn
   obtain ⟨rho, y, hy, hrho, hfix⟩ :=
     exists_mem_stdSimplex_coneOperator_eq G label hslope hout
   have hpos : ∀ vertex : V, 0 < y vertex :=
@@ -499,9 +466,10 @@ theorem exists_isEigenvector_of_slope_nonneg [Nonempty V] (G : EdgeGraph V E) (l
     have hbase : ∀ e : E, G.target e ≠ base := not_exists.1 hbase'
     have hsub : ∀ u : V, u = base := by
       intro u
-      rcases eq_or_exists_target_eq (hconn u base).some with heq | ⟨e, he⟩
-      · exact heq
-      · exact absurd he (hbase e)
+      obtain ⟨walk⟩ := hconn u base
+      cases walk with
+      | nil => rfl
+      | concat e _ => exact absurd rfl (hbase e)
     have hempty : ∀ vertex : V, incoming G vertex = ∅ := by
       intro vertex
       refine Finset.eq_empty_of_forall_notMem fun e he => ?_
