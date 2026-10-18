@@ -119,13 +119,13 @@ This umbrella imports the whole library.  Five groups sit under it.  The first f
 mathlib alone and on nothing else here; the fifth consumes all four.
 
 `Maths.Graph` is the combinatorics of directed multigraphs with edge identities: typed walks,
-monoid labels and sums of walks, strongly connected components, flow conservation for walk
-edge multiplicities, Eulerian trails, infinite walks, and zero-charge lassos.
-`Maths.Recursion` is the scalar theory of affine and max-affine transfer summaries: their monoid completion, fixed points, the Loynes and two-sided reflections,
-and the cyclic and inverse-coordinate estimates.  `Maths.LinearProgramming` is the theorem of the
-alternative by Fourier-Motzkin elimination together with standard-form linear programming --
-feasibility, optimality, extreme-point sparsity, and duality.  `Maths.Algebra` carries the
-join-semidirect label algebra.
+monoid labels and sums of walks, strongly connected components, flow conservation for walk edge
+multiplicities, Eulerian trails, infinite walks, and zero-charge lassos.  `Maths.Recursion` is
+the scalar theory of affine and max-affine transfer summaries: their monoid completion, fixed
+points, the Loynes and two-sided reflections, and the cyclic and inverse-coordinate estimates.
+`Maths.LinearProgramming` is the theorem of the alternative by Fourier-Motzkin elimination
+together with standard-form linear programming -- feasibility, optimality, extreme-point
+sparsity, and duality.  `Maths.Algebra` carries the join-semidirect label algebra.
 
 `Maths.Multitubes` is the theory the other four serve: operator-labelled transition
 graphs, their walks, holonomy, exact, lax, oplax, and mixed-polarity sections, with categorical and
