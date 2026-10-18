@@ -110,13 +110,10 @@ universe uV uE
 
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 
-/-! ### Sums of edge data along walks
+/-! ### Coboundaries and the cycle criterion
 
-The generic fold `Maths.walkSum` and its `simp` calculus live with
-the monoid walk label in `Maths.Multitubes.Basic`; this section relates
-it to the additive walk weight and records its subtraction rule. -/
-
-/-! ### Coboundaries and the cycle criterion -/
+The sum of edge data along a walk is the generic fold `Maths.walkSum`, whose `simp` calculus
+lives with the monoid walk label in `Maths.Graph.WalkLabel`. -/
 section Coboundary
 
 variable {A : Type*} [AddCommGroup A]
@@ -250,13 +247,6 @@ theorem isCoboundary_iff_exists_defect_eq_zero :
     have h : ψ (G.source edge) + w edge - ψ (G.target edge) = 0 := hψ edge
     simp only [coboundary_apply]
     linarith
-
-/-- An exact potential is in particular a one-sided potential. -/
-theorem isPotential_of_isCoboundary (hφ : ∀ edge : E, w edge = coboundary G φ edge) :
-    IsPotential G w φ := by
-  refine isPotential_iff.2 fun edge => ?_
-  have h : w edge = φ (G.target edge) - φ (G.source edge) := hφ edge
-  linarith
 
 /-- Around a closed walk the candidate potential cancels: the defects of the
 traversed edges sum to the cycle sum of the edge data. -/
