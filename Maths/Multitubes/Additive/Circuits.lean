@@ -57,18 +57,6 @@ symmetrization `Maths.EdgeGraph.symmetrization`, indexed by signed edges. -/
 abbrev signedGraph (G : EdgeGraph V E) : EdgeGraph V (SignedEdge E) :=
   G.symmetrization
 
-@[simp] theorem signedGraph_source_false (G : EdgeGraph V E) (edge : E) :
-    (signedGraph G).source (edge, false) = G.source edge := rfl
-
-@[simp] theorem signedGraph_source_true (G : EdgeGraph V E) (edge : E) :
-    (signedGraph G).source (edge, true) = G.target edge := rfl
-
-@[simp] theorem signedGraph_target_false (G : EdgeGraph V E) (edge : E) :
-    (signedGraph G).target (edge, false) = G.target edge := rfl
-
-@[simp] theorem signedGraph_target_true (G : EdgeGraph V E) (edge : E) :
-    (signedGraph G).target (edge, true) = G.source edge := rfl
-
 /-- Signed rows are the target-minus-source incidence rows of the doubled
 graph. -/
 theorem signedDelta_eq_signedGraph_incidence [DecidableEq V]
