@@ -8,6 +8,7 @@ module
 public import Maths.Multitubes.Additive.Eigenvector
 public import Maths.Graph.Condensation
 
+import Mathlib.Algebra.Order.BigOperators.Group.List
 import Mathlib.Tactic.Linarith
 
 /-!
@@ -258,29 +259,8 @@ theorem isCriticalVertex_source_of_isCriticalEdge {weight : E → 𝕜} {lam : �
 
 /-- A list of nonpositive scalars summing to zero has all its entries zero. -/
 private theorem eq_zero_of_nonpos_of_sum_eq_zero (l : List 𝕜)
-    (hle : ∀ x ∈ l, x ≤ 0) (heq : l.sum = 0) : ∀ x ∈ l, x = 0 := by
-  have hsum : ∀ l : List 𝕜, (∀ x ∈ l, x ≤ 0) → l.sum ≤ 0 := by
-    intro l
-    induction l with
-    | nil => simp
-    | cons a t ih =>
-        intro hle
-        have := ih fun x hx => hle x (List.mem_cons_of_mem a hx)
-        have ha := hle a List.mem_cons_self
-        rw [List.sum_cons]
-        linarith
-  induction l with
-  | nil => simp
-  | cons a t ih =>
-      intro x hx
-      have hta := hsum t fun y hy => hle y (List.mem_cons_of_mem a hy)
-      have ha := hle a List.mem_cons_self
-      rw [List.sum_cons] at heq
-      have hazero : a = 0 := by linarith
-      have htzero : t.sum = 0 := by linarith
-      rcases List.mem_cons.1 hx with rfl | hx
-      · exact hazero
-      · exact ih (fun y hy => hle y (List.mem_cons_of_mem a hy)) htzero x hx
+    (hle : ∀ x ∈ l, x ≤ 0) (heq : l.sum = 0) : ∀ x ∈ l, x = 0 :=
+  fun _ hx => List.all_zero_of_le_zero_le_of_sum_eq_zero (M := 𝕜ᵒᵈ) hle heq hx
 
 /-- **Criticality is tightness.**  A critical edge has zero defect for *every* potential of the
 shifted weighting `weight - lam`: along the closed walk of mean `lam` that witnesses the edge, the
