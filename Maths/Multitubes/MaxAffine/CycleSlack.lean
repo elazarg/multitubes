@@ -163,19 +163,6 @@ theorem isSlackChain_closeLastTarget {level source terminal : ℝ}
           refine ⟨hfirst, ih hrest ?_⟩
           simpa only [chainTarget] using hterminal
 
-private theorem monotone_foldl_apply {labels : List Label}
-    (hslope : ∀ label ∈ labels, 0 ≤ label.slope) :
-    Monotone fun point =>
-      labels.foldl (fun value label => label.apply value) point := by
-  intro left right hle
-  induction labels generalizing left right with
-  | nil => exact hle
-  | cons label rest ih =>
-      apply ih
-      · exact fun candidate hc => hslope candidate (List.mem_cons_of_mem _ hc)
-      · exact Label.monotone_apply
-          (hslope label (List.mem_cons_self ..)) hle
-
 private theorem relaxed_foldl_le_chainTarget {level source : ℝ}
     {steps : List CandidateStep}
     (hslope : ∀ step ∈ steps, 0 ≤ step.1.slope)
@@ -192,14 +179,14 @@ private theorem relaxed_foldl_le_chainTarget {level source : ℝ}
       have hstep : (relax level label).apply source ≤ target := by
         rw [apply_relax]
         linarith
-      have hmono := monotone_foldl_apply
-        (labels := (chainLabels rest).map (relax level)) (by
-          intro candidate hc
-          obtain ⟨original, horiginal, rfl⟩ := List.mem_map.mp hc
-          rw [slope_relax]
-          obtain ⟨step, hstepMem, hstepLabel⟩ := List.mem_map.mp horiginal
-          subst hstepLabel
-          exact hslope step (List.mem_cons_of_mem _ hstepMem))
+      have hmono := monotone_foldl_of_forall_mem (fun value label => label.apply value)
+        (items := (chainLabels rest).map (relax level)) fun candidate hc =>
+          Label.monotone_apply (by
+            obtain ⟨original, horiginal, rfl⟩ := List.mem_map.mp hc
+            rw [slope_relax]
+            obtain ⟨step, hstepMem, hstepLabel⟩ := List.mem_map.mp horiginal
+            subst hstepLabel
+            exact hslope step (List.mem_cons_of_mem _ hstepMem))
       exact (hmono hstep).trans
         (ih (fun step hstepMem => hslope step (List.mem_cons_of_mem _ hstepMem)) hrest)
 

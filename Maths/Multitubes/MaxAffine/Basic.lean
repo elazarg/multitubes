@@ -152,6 +152,20 @@ noncomputable section
 
 namespace Maths.MaxAffineTransport
 
+/-- A left fold is monotone in its initial value when each step it performs is monotone; steps
+by items outside the list are unconstrained. -/
+theorem monotone_foldl_of_forall_mem {X A : Type*} [Preorder X] (step : X → A → X)
+    {items : List A} (hmono : ∀ item ∈ items, Monotone fun point => step point item) :
+    Monotone fun point => items.foldl step point := by
+  intro first second hle
+  induction items generalizing first second with
+  | nil => exact hle
+  | cons item rest ih =>
+      simp only [List.foldl_cons]
+      apply ih
+      · exact fun candidate hc => hmono candidate (List.mem_cons_of_mem _ hc)
+      · exact hmono item (List.mem_cons_self ..) hle
+
 /-! ## The label algebra -/
 
 /-- Coefficients of a max-affine self-map of the line with a floor in

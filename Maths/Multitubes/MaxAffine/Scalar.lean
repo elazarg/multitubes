@@ -421,19 +421,6 @@ theorem isFixedPt_foldl_split_rotate (step : X → A → X)
   simp only [List.foldl_append] at hfixed ⊢
   rw [hfixed]
 
-private theorem monotone_foldl_step (step : X → A → X)
-    {items : List A}
-    (hmono : ∀ item ∈ items, Monotone fun point => step point item) :
-    Monotone fun point => items.foldl step point := by
-  intro first second hle
-  induction items generalizing first second with
-  | nil => exact hle
-  | cons item rest ih =>
-      simp only [List.foldl_cons]
-      apply ih
-      · exact fun candidate hc => hmono candidate (List.mem_cons_of_mem _ hc)
-      · exact hmono item (List.mem_cons_self ..) hle
-
 /-- A pre-fixed point of a whole list propagates to a pre-fixed point after
 every prefix/suffix rotation when the prefix maps are monotone. -/
 theorem isPrefixed_foldl_split_rotate (step : X → A → X)
@@ -443,7 +430,7 @@ theorem isPrefixed_foldl_split_rotate (step : X → A → X)
     (back ++ front).foldl step (front.foldl step point) ≤
       front.foldl step point := by
   simp only [List.foldl_append] at hprefixed ⊢
-  exact monotone_foldl_step step hmono hprefixed
+  exact monotone_foldl_of_forall_mem step hmono hprefixed
 
 omit [Preorder X] in
 /-- List-level fixed-point rotation for the split after `index` entries. -/
