@@ -317,23 +317,6 @@ theorem criticalAffineResidualAtMost_iff_closedWalk_ratio_mul_le
   constructor <;> intro h <;> linarith
 
 omit [Fintype V] [DecidableEq V] [Fintype E] in
-private theorem sum_pos_of_mem_pos {values : List ℝ} (hne : values ≠ [])
-    (hpos : ∀ value ∈ values, 0 < value) :
-    0 < values.sum := by
-  induction values with
-  | nil => exact (hne rfl).elim
-  | cons first rest ih =>
-      cases rest with
-      | nil => simpa using hpos first (List.mem_cons_self ..)
-      | cons next tail =>
-          have hfirst := hpos first (List.mem_cons_self ..)
-          have hrest (value : ℝ) (hvalue : value ∈ next :: tail) : 0 < value :=
-            hpos value (List.mem_cons_of_mem _ hvalue)
-          have hsum := ih (by simp) hrest
-          change 0 < first + (next :: tail).sum
-          exact add_pos hfirst hsum
-
-omit [Fintype V] [DecidableEq V] [Fintype E] in
 /-- Reciprocal-gauge mass is positive on every nonempty critical cycle. -/
 theorem gaugeCriticalCycleMass_pos
     (gauge : V → ℝ) (hgauge : ∀ vertex, 0 < gauge vertex)
@@ -341,15 +324,12 @@ theorem gaugeCriticalCycleMass_pos
     (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base)
     (hne : 0 < cycle.length) :
     0 < walkSum (gaugeCriticalMass gauge) cycle := by
-  apply sum_pos_of_mem_pos
-  · intro hempty
-    have hedges : cycle.edges = [] := by simpa using hempty
-    have : cycle.edges.length = 0 := by rw [hedges]; rfl
-    rw [cycle.edges_length] at this
-    omega
+  apply List.sum_pos
   · intro value hvalue
     obtain ⟨edge, _, rfl⟩ := List.mem_map.mp hvalue
     exact one_div_pos.mpr (hgauge (G.target edge.1))
+  · apply List.length_pos_iff.mp
+    simpa only [List.length_map, EdgeGraph.Walk.edges_length] using hne
 
 omit [Fintype V] [DecidableEq V] in
 /-- Quotient form `T_C / S_C` of the raw gauge-critical cycle theorem. -/
