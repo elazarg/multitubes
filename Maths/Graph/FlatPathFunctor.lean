@@ -5,25 +5,25 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.Category
+public import Maths.Graph.PathCategory
 public import Mathlib.CategoryTheory.Retract
 
 /-!
-# Retract normal forms for flat path functors
+# Flat functors on the path category
 
-For a functor from the path category of a directed graph to an arbitrary category, flatness at
-one base object makes the base a retract of every vertex object along chosen walks to and from
-the base.  Compressing any path by its endpoint idempotents gives the same morphism, and the
-compressed morphisms are mutually inverse relative to those idempotents.  This is the concrete
-retract-groupoid statement usually described through the Karoubi envelope.
+A functor out of the path category of a directed multigraph is flat at a vertex when it sends
+every closed walk there to the identity.  Flatness at both endpoints makes parallel walks with a
+return walk agree, and makes each such walk an isomorphism inverted by its return.
 
-Transports and monoid labellings are path functors (`Maths.Multitubes.Category`), and one-base
-flatness of either is flatness of its path functor, so the retract normal form applies to both
-without a separate proof.
+Flatness at one base object alone makes the base a retract of every vertex object along chosen
+walks to and from the base.  Compressing any path by its endpoint idempotents gives the same
+morphism, and the compressed morphisms are mutually inverse relative to those idempotents.  This
+is the concrete retract-groupoid statement usually described through the Karoubi envelope.
 
 ## Main definitions
 
 * `Maths.IsFlatAt`: a path functor sends every endomorphism at one object to the identity.
+* `Maths.isoOfIsFlatAt`: the isomorphism carried by a walk with a return between flat objects.
 * `Maths.categoricalIngress` and `Maths.categoricalReturn`: the morphisms to and from the base
   object determined by chosen path families.
 * `Maths.categoricalRetract`: the base object as a retract of each vertex object.
@@ -40,19 +40,19 @@ without a separate proof.
   path-independent core morphism.
 * `Maths.categorical_coreMap_comp_reverse` and `Maths.categorical_reverse_comp_coreMap`: the
   core morphisms are mutually inverse relative to the projectors.
-* `Maths.Transport.isFlatAt_toPathFunctor_iff` and `Maths.isFlatAt_labelFunctor_iff`: one-base
-  flatness of a transport or of a labelling is flatness of its path functor.
+
+## Tags
+
+path category, flat functor, holonomy, retract, idempotent, Karoubi envelope
 -/
 
 @[expose] public section
-
-noncomputable section
 
 namespace Maths
 
 open CategoryTheory
 
-universe uV uE uF uM uC
+universe uV uE uC
 
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 variable {C : Type uC} [Category C]
@@ -71,22 +71,31 @@ private theorem map_append {start middle finish : V}
     F.map (front.append back) = F.map front ≫ F.map back :=
   F.map_comp front back
 
-/-- **Path independence of flat path functors.**  A path functor flat at both endpoints of two
-parallel walks sends them to the same morphism, as soon as a return walk exists.  Transports and
-monoid labellings are path functors, so this is the path independence of flat transport
-(`Maths.Transport.walkMap_eq_of_trivialHolonomy_of_return`) and of flat labels
-(`Maths.walkLabel_eq_of_trivialCycleLabels_of_return`). -/
-theorem map_eq_of_isFlatAt_of_return {start finish : V} (hstart : IsFlatAt F start)
-    (hfinish : IsFlatAt F finish) (first second : G.Walk start finish)
-    (back : G.Walk finish start) : F.map first = F.map second := by
-  have hback : F.map back ≫ F.map second = 𝟙 _ := by
-    rw [← map_append]
-    exact hfinish _
-  have hfront : F.map first ≫ F.map back = 𝟙 _ := by
+/-- **Flat path functors invert recurrent walks.**  A walk between objects at which the functor
+is flat, together with any return walk, is sent to an isomorphism whose inverse is the image of
+the return walk.  In types this is an equivalence of fibers and in the one-object category of a
+monoid it is a unit. -/
+@[simps]
+def isoOfIsFlatAt {start finish : V} (hstart : IsFlatAt F start) (hfinish : IsFlatAt F finish)
+    (walk : G.Walk start finish) (back : G.Walk finish start) :
+    F.obj (PathCategory.ofVertex G start) ≅ F.obj (PathCategory.ofVertex G finish) where
+  hom := F.map walk
+  inv := F.map back
+  hom_inv_id := by
     rw [← map_append]
     exact hstart _
-  calc F.map first = F.map first ≫ F.map back ≫ F.map second := by rw [hback, Category.comp_id]
-    _ = F.map second := by rw [← Category.assoc, hfront, Category.id_comp]
+  inv_hom_id := by
+    rw [← map_append]
+    exact hfinish _
+
+/-- **Path independence of flat path functors.**  A path functor flat at both endpoints of two
+parallel walks sends them to the same morphism, as soon as a return walk exists: both are
+inverse to the image of the return walk. -/
+theorem map_eq_of_isFlatAt_of_return {start finish : V} (hstart : IsFlatAt F start)
+    (hfinish : IsFlatAt F finish) (first second : G.Walk start finish)
+    (back : G.Walk finish start) : F.map first = F.map second :=
+  (Iso.inv_eq_inv (isoOfIsFlatAt F hstart hfinish first back)
+    (isoOfIsFlatAt F hstart hfinish second back)).1 rfl
 
 /-- The chosen morphism from the base object to one vertex object. -/
 def categoricalIngress (paths : ∀ vertex, G.Walk base vertex)
@@ -196,20 +205,4 @@ theorem categorical_reverse_comp_coreMap
 
 end
 
-/-! ### Transports and labellings -/
-
-/-- One-base flatness of a transport is flatness of its path functor. -/
-theorem Transport.isFlatAt_toPathFunctor_iff {Fiber : V → Type uF} (T : Transport G Fiber)
-    {base : V} :
-    IsFlatAt T.toPathFunctor base ↔ T.HasTrivialHolonomyAt base :=
-  forall_congr' fun _ => ⟨fun h => funext (ConcreteCategory.congr_hom h),
-    fun h => ConcreteCategory.hom_ext _ _ (congrFun h)⟩
-
-/-- One-base flatness of a monoid labelling is flatness of its label functor. -/
-theorem isFlatAt_labelFunctor_iff {M : Type uM} [Monoid M] (label : E → M) {base : V} :
-    IsFlatAt (labelFunctor (G := G) label) base ↔ HasTrivialCycleLabelsAt G label base :=
-  Iff.rfl
-
 end Maths
-
-end

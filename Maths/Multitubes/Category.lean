@@ -6,7 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.Basic
-public import Maths.Graph.PathCategory
+public import Maths.Graph.FlatPathFunctor
 public import Maths.Multitubes.Relational
 public import Mathlib.CategoryTheory.Category.RelCat
 public import Mathlib.CategoryTheory.SingleObj
@@ -35,6 +35,7 @@ the categorical ones.
 * `Maths.Transport.IsLaxPathSection`: ordered naturality along every walk.
 * `Maths.labelFunctor`: a monoid edge labelling as a functor to the associated
   one-object category.
+* `Maths.unitOfLabelIso`: an isomorphism of the label functor read as a unit of the monoid.
 * `Maths.RelationTransport.toPathFunctor`: a relation-labelled transport as a functor to the
   category of types and relations.
 
@@ -54,6 +55,9 @@ the categorical ones.
   lax sections agree for monotone transport.
 * `Maths.hasTrivialCycleLabels_iff_labelFunctor_end_eq_id`: flat labels are
   exactly those whose label functor kills every endomorphism.
+* `Maths.Transport.isFlatAt_toPathFunctor_iff` and `Maths.isFlatAt_labelFunctor_iff`: one-base
+  flatness of a transport or of a labelling is flatness of its path functor, in the sense of
+  `Maths.IsFlatAt`.
 -/
 
 @[expose] public section
@@ -210,6 +214,20 @@ def labelFunctor [Monoid M] (label : E → M) :
     {start finish : PathCategory G} (walk : start ⟶ finish) :
     (labelFunctor (G := G) label).map walk = walkLabel label walk := rfl
 
+/-- An isomorphism between two objects of a label functor is a unit of the monoid: both objects
+are the single object, whose automorphisms are the units. -/
+def unitOfLabelIso [Monoid M] {label : E → M} {first second : PathCategory G}
+    (iso : (labelFunctor (G := G) label).obj first ≅ (labelFunctor label).obj second) : Mˣ where
+  val := iso.hom
+  inv := iso.inv
+  val_inv := iso.inv_hom_id
+  inv_val := iso.hom_inv_id
+
+@[simp] theorem val_unitOfLabelIso [Monoid M] {label : E → M} {first second : PathCategory G}
+    (iso : (labelFunctor (G := G) label).obj first ≅ (labelFunctor label).obj second) :
+    (unitOfLabelIso iso : M) = iso.hom :=
+  rfl
+
 /-- **Walk labels are the extension of the edge labels.**  The label functor is the unique
 functor into the one-object category of the monoid taking each edge to its label. -/
 theorem labelFunctor_eq_lift [Monoid M] (label : E → M) :
@@ -226,6 +244,20 @@ theorem hasTrivialCycleLabels_iff_labelFunctor_end_eq_id [Monoid M]
       ∀ (object : PathCategory G) (cycle : object ⟶ object),
         (labelFunctor (G := G) label).map cycle = 𝟙 (SingleObj.star M) := by
   rfl
+
+/-! ### Flatness -/
+
+/-- One-base flatness of a transport is flatness of its path functor. -/
+theorem Transport.isFlatAt_toPathFunctor_iff {Fiber : V → Type uF} (T : Transport G Fiber)
+    {base : V} :
+    IsFlatAt T.toPathFunctor base ↔ T.HasTrivialHolonomyAt base :=
+  forall_congr' fun _ => ⟨fun h => funext (ConcreteCategory.congr_hom h),
+    fun h => ConcreteCategory.hom_ext _ _ (congrFun h)⟩
+
+/-- One-base flatness of a monoid labelling is flatness of its label functor. -/
+theorem isFlatAt_labelFunctor_iff {M : Type uM} [Monoid M] (label : E → M) {base : V} :
+    IsFlatAt (labelFunctor (G := G) label) base ↔ HasTrivialCycleLabelsAt G label base :=
+  Iff.rfl
 
 /-! ### Relation-labelled transport -/
 

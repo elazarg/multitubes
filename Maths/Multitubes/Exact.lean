@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.CategoricalRetracts
+public import Maths.Multitubes.Category
 public import Mathlib.GroupTheory.DedekindFinite
 
 import Mathlib.Algebra.Group.Units.Basic
@@ -17,14 +17,15 @@ Forward typed walks support exact transport without assuming that
 edge labels form a group.  Parallel-walk equality is primitive, while
 invertibility is derived on recurrent flat regions.
 
-Path independence of flat transport and of flat labels is one statement about flat path
-functors (`Maths.map_eq_of_isFlatAt_of_return`).  Monoid labels enter the section theory through
-the regular representation: a labelling is flat exactly when left multiplication on the monoid
-is flat transport (`Maths.hasTrivialCycleLabels_iff_hasTrivialHolonomy_ofSMul`), and a unit
-potential is a section of it.  Units are produced, not assumed: the label of
-an edge on a closed walk is a unit, and a flat labelling is a unit-valued coboundary on every
-strongly connected component.  Additive edge data are the same theory read through
-`Multiplicative`.
+Path independence of flat transport and of flat labels is one statement about flat path functors
+(`Maths.map_eq_of_isFlatAt_of_return`), and so is their invertibility: a walk with a return
+between flat vertices is an isomorphism (`Maths.isoOfIsFlatAt`), which in types is an
+equivalence of fibers and for a label functor is a unit.  Monoid labels enter the section theory
+through the regular representation: a labelling is flat exactly when left multiplication on the
+monoid is flat transport (`Maths.hasTrivialCycleLabels_iff_hasTrivialHolonomy_ofSMul`), and a
+unit potential is a section of it.  Units are produced, not assumed: the label of an edge on a
+closed walk is a unit, and a flat labelling is a unit-valued coboundary on every strongly
+connected component.  Additive edge data are the same theory read through `Multiplicative`.
 
 ## Main definitions
 
@@ -160,18 +161,13 @@ theorem rootedSection_isSection (hpath : T.HasRootPathIndependence base)
 /-! ## Trivial holonomy on a strongly connected graph -/
 
 /-- Trivial holonomy at both endpoints makes transport along a walk an equivalence whenever a
-return walk exists.  The chosen return is proved to be a two-sided inverse. -/
+return walk exists, inverted by the return.  This is `Maths.isoOfIsFlatAt` for the path functor
+of the transport. -/
 def walkMapEquivOfTrivialHolonomy {start finish : V} (hstart : T.HasTrivialHolonomyAt start)
     (hfinish : T.HasTrivialHolonomyAt finish) (walk : G.Walk start finish)
-    (back : G.Walk finish start) : Fiber start ≃ Fiber finish where
-  toFun := T.walkMap walk
-  invFun := T.walkMap back
-  left_inv point := by
-    rw [← T.walkMap_append walk back]
-    exact hstart.holonomy_eq_self (walk.append back) point
-  right_inv point := by
-    rw [← T.walkMap_append back walk]
-    exact hfinish.holonomy_eq_self (back.append walk) point
+    (back : G.Walk finish start) : Fiber start ≃ Fiber finish :=
+  (isoOfIsFlatAt T.toPathFunctor (T.isFlatAt_toPathFunctor_iff.2 hstart)
+    (T.isFlatAt_toPathFunctor_iff.2 hfinish) walk back).toEquiv
 
 @[simp] theorem walkMapEquivOfTrivialHolonomy_apply {start finish : V}
     (hstart : T.HasTrivialHolonomyAt start) (hfinish : T.HasTrivialHolonomyAt finish)
@@ -308,13 +304,18 @@ theorem walkLabel_mul_eq_of_forall_mem_edges (potential : V → Mˣ) {start fini
   rwa [walkMap_ofSMul_eq_walkLabel_smul, smul_eq_mul] at h
 
 /-- The unit represented by the chosen out-and-back walks between a base and a linked
-vertex.  Flatness makes the two composite labels mutually inverse. -/
+vertex: the isomorphism `Maths.isoOfIsFlatAt` of the label functor, read as a unit by
+`Maths.unitOfLabelIso`. -/
 noncomputable def linkedUnit (hflat : HasTrivialCycleLabels G label) {base vertex : V}
-    (hlinked : LinkedTo G base vertex) : Mˣ where
-  val := walkLabel label hlinked.1.some
-  inv := walkLabel label hlinked.2.some
-  val_inv := by simpa using hflat vertex (hlinked.2.some.append hlinked.1.some)
-  inv_val := by simpa using hflat base (hlinked.1.some.append hlinked.2.some)
+    (hlinked : LinkedTo G base vertex) : Mˣ :=
+  unitOfLabelIso <|
+    isoOfIsFlatAt (labelFunctor label) (hflat base) (hflat vertex) hlinked.1.some hlinked.2.some
+
+/-- The linked unit is the label of the chosen walk out to the linked vertex. -/
+@[simp] theorem val_linkedUnit (hflat : HasTrivialCycleLabels G label) {base vertex : V}
+    (hlinked : LinkedTo G base vertex) :
+    (linkedUnit hflat hlinked : M) = walkLabel label hlinked.1.some :=
+  rfl
 
 /-- The linked unit depends on the base only through its value. -/
 theorem linkedUnit_congr (hflat : HasTrivialCycleLabels G label) {base base' vertex : V}
@@ -408,12 +409,11 @@ theorem hasTrivialCycleLabels_iff_exists_unitPotential {base : V}
     fun ⟨potential, hpotential⟩ => hasTrivialCycleLabels_of_unitPotential potential hpotential⟩
 
 /-- Under flatness, an edge lying on a closed walk carries a unit label: its label and that of
-the return walk are mutually inverse. -/
+the return walk are mutually inverse, by `Maths.isoOfIsFlatAt` for the label functor. -/
 theorem isUnit_edge_of_trivialCycleLabels (hflat : HasTrivialCycleLabels G label) {edge : E}
     (back : G.Walk (G.target edge) (G.source edge)) : IsUnit (label edge) :=
-  ⟨⟨label edge, walkLabel label back,
-      by simpa using hflat (G.target edge) (back.append (.singleton edge)),
-      by simpa using hflat (G.source edge) ((EdgeGraph.Walk.singleton edge).append back)⟩, rfl⟩
+  ⟨unitOfLabelIso (isoOfIsFlatAt (labelFunctor label) (hflat _) (hflat _) (.singleton edge) back),
+    walkLabel_singleton edge⟩
 
 /-- A chosen root-and-return test.  It checks one equation at every edge; it is
 not the smaller non-tree-edge test obtained from a specified arborescence.

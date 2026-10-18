@@ -13,6 +13,7 @@ public import Maths.Graph.EdgeGraph
 public import Maths.Graph.WalkLabel
 public import Maths.Graph.Condensation
 public import Maths.Graph.PathCategory
+public import Maths.Graph.FlatPathFunctor
 public import Maths.Graph.Quiver
 public import Maths.Graph.Morphism
 public import Maths.Graph.Circulation
@@ -45,7 +46,6 @@ public import Maths.Multitubes.Mixed.Order
 public import Maths.Multitubes.Mixed.AdjointOrder
 public import Maths.Multitubes.Mixed.Bellman
 public import Maths.Multitubes.Category
-public import Maths.Multitubes.CategoricalRetracts
 public import Maths.Multitubes.Closure
 public import Maths.Multitubes.Worklist
 public import Maths.Multitubes.Morphism
