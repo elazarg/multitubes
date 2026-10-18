@@ -243,11 +243,11 @@ theorem div_one_sub_le_of_add_mul_le {W P x : ℝ} (hP : P < 1) (h : W + P * x �
   rw [div_le_iff₀ (by linarith)]
   linarith
 
-/-- Solving the wrap identity: a value obeying `x = W + P * x` with `P < 1` is exactly the
+/-- Solving the wrap identity: a value obeying `x = W + P * x` with `P ≠ 1` is exactly the
 discounted total `W / (1 - P)`. -/
-theorem eq_div_one_sub_of_eq_add_mul {W P x : ℝ} (hP : P < 1) (h : x = W + P * x) :
+theorem eq_div_one_sub_of_eq_add_mul {W P x : ℝ} (hP : P ≠ 1) (h : x = W + P * x) :
     x = W / (1 - P) := by
-  rw [eq_div_iff (sub_ne_zero.mpr hP.ne')]
+  rw [eq_div_iff (sub_ne_zero.mpr hP.symm)]
   linear_combination h
 
 /-- **Lower bound.** The base value of any solution is at least the survival-weighted accumulated
@@ -266,7 +266,7 @@ theorem CyclicSolution.le_max_weightedRate (h : CyclicSolution p q C L)
     C 0 ≤ max (weightedRate p q L / (1 - survivalProduct q L)) (weightedRate p q L + 1) := by
   rcases h.prefix_dichotomy L le_rfl with haffine | ⟨j, hj, hjval⟩
   · rw [h.wrap] at haffine
-    rw [eq_div_one_sub_of_eq_add_mul hP haffine]
+    rw [eq_div_one_sub_of_eq_add_mul hP.ne haffine]
     exact le_max_left _ _
   · refine le_trans (le_of_eq hjval) (le_trans ?_ (le_max_right _ _))
     have hpre : weightedRate p q j ≤ weightedRate p q L :=
@@ -279,9 +279,9 @@ theorem CyclicSolution.le_max_weightedRate (h : CyclicSolution p q C L)
     linarith
 
 /-- If no phase caps - the max resolves to its affine branch everywhere - the base value is
-exactly `W / (1 - P)`, the left endpoint of the estimate. -/
+exactly `W / (1 - P)`, the left endpoint of the estimate. Only `P ≠ 1` is used. -/
 theorem CyclicSolution.eq_div_of_affine (h : CyclicSolution p q C L)
-    (hP : survivalProduct q L < 1) (haffine : ∀ k < L, C k = q k * C (k + 1) + p k) :
+    (hP : survivalProduct q L ≠ 1) (haffine : ∀ k < L, C k = q k * C (k + 1) + p k) :
     C 0 = weightedRate p q L / (1 - survivalProduct q L) := by
   have heq := prefix_eq p q C L haffine
   rw [h.wrap] at heq
