@@ -99,20 +99,11 @@ theorem pathSlope_gaugeCriticalLabelList
     {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
     Label.pathSlope (gaugeCriticalLabelList walk) = gauge finish / gauge start := by
-  induction walk with
-  | nil =>
-      simp only [gaugeCriticalLabelList_nil, Label.pathSlope_nil]
-      rw [div_self (hgauge _).ne']
-  | concat edge walk ih =>
-      change Label.pathSlope (gaugeCriticalLabelList walk) =
-        gauge (G.source edge.1) / gauge start at ih
-      change Label.pathSlope (gaugeCriticalLabelList (walk.concat edge)) =
-        gauge (G.target edge.1) / gauge start
-      rw [gaugeCriticalLabelList_concat, Label.pathSlope_append]
-      simp only [Label.pathSlope_cons, Label.pathSlope_nil, mul_one]
-      rw [ih, slope_eq_gauge_ratio hgauge edge]
-      field_simp [(hgauge (G.source edge.1)).ne',
-        (hgauge (G.target edge.1)).ne', (hgauge start).ne']
+  have htelescope := walkProd_mul_gauge_eq_of_forall_mem
+    (fun edge : GaugeCriticalEdge (G := G) label gauge => (label edge.1).slope) walk
+    fun edge _ => edge.2
+  rw [eq_div_iff (hgauge start).ne', ← htelescope]
+  simp [Label.pathSlope, gaugeCriticalLabelList, walkProd, List.map_map, Function.comp_def]
 
 /-- The raw affine shift is the terminal gauge times the normalized critical
 walk weight. -/
