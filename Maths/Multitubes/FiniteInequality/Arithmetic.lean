@@ -24,15 +24,13 @@ finitely many coefficient denominators gives an integral certificate.
 
 ## Main definitions
 
-* `Maths.FiniteInequality.ratDotProduct`: the pairing of two rational state
-  vectors.
 * `Maths.FiniteInequality.commonDenominator` and `integralMultiple`: the scaling
   used to clear denominators, and the resulting integer coefficient.
 
 ## Main results
 
 * `Maths.FiniteInequality.exists_rationalPotential_or_rationalCertificate`: the
-  theorem of alternatives entirely over `ℚ`.
+  theorem of alternatives entirely over `ℚ`, as an instance of the ordered-field statement.
 * `Maths.FiniteInequality.exists_rationalPotential_iff_exists_realPotential`: a
   rational system is feasible over `ℚ` exactly when it is feasible over `ℝ`, so passing to the
   reals gains nothing.
@@ -62,44 +60,17 @@ universe uS uR
 variable {State : Type uS} {Row : Type uR}
 variable [Fintype State] [Fintype Row]
 
-/-- Rational dot product on finite coordinate types. -/
-def ratDotProduct (left right : State → ℚ) : ℚ :=
-  ∑ state, left state * right state
-
-/-- The finite theorem of alternatives directly over the rational field. -/
+/-- The finite theorem of alternatives directly over the rational field: the instance `𝕜 = ℚ`
+of `Maths.exists_potential_or_nonnegative_incompatibility`. -/
 theorem exists_rationalPotential_or_rationalCertificate
     (delta : Row → State → ℚ) (base : Row → ℚ) :
     (∃ potential : State → ℚ,
-      ∀ row, base row ≤ ratDotProduct (delta row) potential) ∨
+      ∀ row, base row ≤ dotProduct (delta row) potential) ∨
     (∃ coefficient : Row → ℚ,
       (∀ row, 0 ≤ coefficient row) ∧
       (∀ state, ∑ row, coefficient row * delta row state = 0) ∧
-      0 < ∑ row, coefficient row * base row) := by
-  classical
-  let matrix : Row → Fin (Fintype.card State) → ℚ :=
-    fun row coordinate => delta row ((Fintype.equivFin State).symm coordinate)
-  by_cases hfeasible : LinearProgramming.IsFeasible matrix base
-  · left
-    obtain ⟨point, hpoint⟩ := hfeasible
-    let potential : State → ℚ := fun state => point (Fintype.equivFin State state)
-    refine ⟨potential, fun row => ?_⟩
-    have hrow := hpoint row
-    change base row ≤ ∑ coordinate, matrix row coordinate * point coordinate at hrow
-    have hsum :
-        (∑ coordinate, matrix row coordinate * point coordinate) =
-          ∑ state, matrix row (Fintype.equivFin State state) *
-            point (Fintype.equivFin State state) :=
-      ((Fintype.equivFin State).sum_comp
-        (fun coordinate => matrix row coordinate * point coordinate)).symm
-    rw [hsum] at hrow
-    simpa [ratDotProduct, matrix, potential] using hrow
-  · right
-    obtain ⟨coefficient, hnonneg, hbalance, hpositive⟩ :=
-      (LinearProgramming.theorem_of_alternative matrix base).mp hfeasible
-    refine ⟨coefficient, hnonneg, ?_, hpositive⟩
-    intro state
-    have hcoordinate := hbalance (Fintype.equivFin State state)
-    simpa [matrix] using hcoordinate
+      0 < ∑ row, coefficient row * base row) :=
+  exists_potential_or_nonnegative_incompatibility delta base
 
 /-- Rational finite inequalities have a rational feasible point whenever they
 have a real feasible point.  Thus extending scalars from `ℚ` to `ℝ` does not
@@ -107,7 +78,7 @@ create feasibility for a rational polyhedron. -/
 theorem exists_rationalPotential_iff_exists_realPotential
     (delta : Row → State → ℚ) (base : Row → ℚ) :
     (∃ potential : State → ℚ,
-      ∀ row, base row ≤ ratDotProduct (delta row) potential) ↔
+      ∀ row, base row ≤ dotProduct (delta row) potential) ↔
     ∃ potential : State → ℝ,
       ∀ row, (base row : ℝ) ≤
         dotProduct (fun state => (delta row state : ℝ)) potential := by
@@ -116,7 +87,7 @@ theorem exists_rationalPotential_iff_exists_realPotential
   · rintro ⟨potential, hpotential⟩
     refine ⟨fun state => (potential state : ℝ), fun row => ?_⟩
     have hcast := Rat.cast_mono (K := ℝ) (hpotential row)
-    simpa only [ratDotProduct, Rat.cast_sum, Rat.cast_mul, dotProduct] using hcast
+    simpa only [Rat.cast_sum, Rat.cast_mul, dotProduct] using hcast
   · rintro ⟨realPotential, hrealPotential⟩
     rcases exists_rationalPotential_or_rationalCertificate delta base with
       hpotential | ⟨coefficient, hnonneg, hbalance, hpositive⟩
@@ -158,7 +129,7 @@ theorem exists_rationalCertificate_of_real_infeasible
     apply hinfeasible
     refine ⟨fun state => (potential state : ℝ), fun row => ?_⟩
     have hrow := hpotential row
-    simp only [ratDotProduct] at hrow
+    simp only [dotProduct] at hrow
     have hcast := Rat.cast_mono (K := ℝ) hrow
     simpa only [Rat.cast_sum, Rat.cast_mul] using hcast
   · exact hcertificate

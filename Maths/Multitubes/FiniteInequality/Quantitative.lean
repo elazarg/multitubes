@@ -6,6 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.FiniteInequality.Basic
+public import Mathlib.Basic.Real.Basic
 
 import Mathlib.Algebra.BigOperators.Field
 import Mathlib.Tactic.Linarith

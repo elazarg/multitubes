@@ -6,7 +6,6 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.LinearProgramming.FourierMotzkin
-public import Mathlib.Basic.Real.Basic
 public import Mathlib.Data.Matrix.Mul
 
 import Mathlib.Tactic.Linarith
@@ -16,7 +15,8 @@ import Mathlib.Tactic.Ring
 # Finite linear-inequality compatibility
 
 This file transports the Fourier--Motzkin theorem of alternatives from
-`Fin (Fintype.card State)` to an arbitrary finite state type.
+`Fin (Fintype.card State)` to an arbitrary finite state type, over an arbitrary linearly
+ordered field.
 
 For finitely many vectors `delta action` and lower bounds `base action`,
 exactly one of the following is possible:
@@ -67,19 +67,22 @@ namespace Maths
 
 open scoped BigOperators
 
+variable {𝕜 : Type*} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
 variable {State Action : Type*}
 
 /-- The matrix obtained by transporting state coordinates along the
 canonical equivalence with `Fin`. -/
 noncomputable def finiteInequalityMatrix [Fintype State]
-    (delta : Action → State → ℝ) :
-    Action → Fin (Fintype.card State) → ℝ :=
+    (delta : Action → State → 𝕜) :
+    Action → Fin (Fintype.card State) → 𝕜 :=
   fun action coordinate =>
     delta action ((Fintype.equivFin State).symm coordinate)
 
+omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
+/-- Evaluating a transported row is pairing the original row with the transported point. -/
 theorem finiteInequalityMatrix_rowEval [Fintype State] [Fintype Action]
-    (delta : Action → State → ℝ) (action : Action)
-    (x : Fin (Fintype.card State) → ℝ) :
+    (delta : Action → State → 𝕜) (action : Action)
+    (x : Fin (Fintype.card State) → 𝕜) :
     LinearProgramming.rowEval (finiteInequalityMatrix delta) action x =
       dotProduct (delta action)
         (fun state => x (Fintype.equivFin State state)) := by
@@ -109,13 +112,14 @@ theorem sum_mul_dotProduct {R : Type*} [NonUnitalSemiring R] [Fintype State] [Fi
       ∑ state, (∑ action, coefficient action * delta action state) * potential state :=
   Matrix.dotProduct_mulVec coefficient (Matrix.of delta) potential
 
+omit [IsStrictOrderedRing 𝕜] in
 /-- Feasibility after transport to `Fin` is exactly feasibility by a
 potential on the original finite state type. -/
 theorem finiteInequality_feasible_iff
     [Fintype State] [Fintype Action]
-    (delta : Action → State → ℝ) (base : Action → ℝ) :
+    (delta : Action → State → 𝕜) (base : Action → 𝕜) :
     LinearProgramming.IsFeasible (finiteInequalityMatrix delta) base ↔
-      ∃ potential : State → ℝ,
+      ∃ potential : State → 𝕜,
         ∀ action, base action ≤
           dotProduct (delta action) potential := by
   classical
@@ -127,7 +131,7 @@ theorem finiteInequality_feasible_iff
     rw [finiteInequalityMatrix_rowEval] at haction
     exact haction
   · rintro ⟨potential, hpotential⟩
-    let x : Fin (Fintype.card State) → ℝ :=
+    let x : Fin (Fintype.card State) → 𝕜 :=
       fun coordinate => potential ((Fintype.equivFin State).symm coordinate)
     refine ⟨x, ?_⟩
     intro action
@@ -139,11 +143,11 @@ bounds are represented by one potential, or a nonnegative dependence among
 the vectors has strictly positive weighted lower bound. -/
 theorem exists_potential_or_nonnegative_incompatibility
     [Fintype State] [Fintype Action]
-    (delta : Action → State → ℝ) (base : Action → ℝ) :
-    (∃ potential : State → ℝ,
+    (delta : Action → State → 𝕜) (base : Action → 𝕜) :
+    (∃ potential : State → 𝕜,
       ∀ action, base action ≤
         dotProduct (delta action) potential) ∨
-    (∃ coefficient : Action → ℝ,
+    (∃ coefficient : Action → 𝕜,
       (∀ action, 0 ≤ coefficient action) ∧
       (∀ state,
         ∑ action, coefficient action * delta action state = 0) ∧
@@ -167,12 +171,12 @@ theorem exists_potential_or_nonnegative_incompatibility
 cannot coexist. -/
 theorem not_nonnegative_incompatibility_of_potential
     [Fintype State] [Fintype Action]
-    {delta : Action → State → ℝ} {base : Action → ℝ}
-    {potential : State → ℝ}
+    {delta : Action → State → 𝕜} {base : Action → 𝕜}
+    {potential : State → 𝕜}
     (hpotential :
       ∀ action, base action ≤
         dotProduct (delta action) potential)
-    {coefficient : Action → ℝ}
+    {coefficient : Action → 𝕜}
     (hnonnegative : ∀ action, 0 ≤ coefficient action)
     (hbalance :
       ∀ state,
@@ -196,11 +200,11 @@ theorem not_nonnegative_incompatibility_of_potential
 incompatibility certificate. -/
 theorem exists_potential_iff_no_nonnegative_incompatibility
     [Fintype State] [Fintype Action]
-    (delta : Action → State → ℝ) (base : Action → ℝ) :
-    (∃ potential : State → ℝ,
+    (delta : Action → State → 𝕜) (base : Action → 𝕜) :
+    (∃ potential : State → 𝕜,
       ∀ action, base action ≤
         dotProduct (delta action) potential) ↔
-    ¬∃ coefficient : Action → ℝ,
+    ¬∃ coefficient : Action → 𝕜,
       (∀ action, 0 ≤ coefficient action) ∧
       (∀ state,
         ∑ action, coefficient action * delta action state = 0) ∧
@@ -219,7 +223,7 @@ theorem exists_potential_iff_no_nonnegative_incompatibility
 
 private theorem exists_positive_weighted_term
     [Fintype Action]
-    {coefficient base : Action → ℝ}
+    {coefficient base : Action → 𝕜}
     (hnonnegative : ∀ action, 0 ≤ coefficient action)
     (hpositive : 0 < ∑ action, coefficient action * base action) :
     ∃ action, 0 < coefficient action ∧ 0 < base action := by
@@ -248,13 +252,13 @@ weighted base and strictly negative weighted level. In particular, one
 positively weighted action has positive base. -/
 theorem exists_potential_or_bellmanResidual_obstruction
     [Fintype State] [Fintype Action]
-    (delta : Action → State → ℝ)
-    (base level : Action → ℝ)
+    (delta : Action → State → 𝕜)
+    (base level : Action → 𝕜)
     (hresidual : ∀ action, base action + level action ≤ 0) :
-    (∃ potential : State → ℝ,
+    (∃ potential : State → 𝕜,
       ∀ action, base action ≤
         dotProduct (delta action) potential) ∨
-    (∃ coefficient : Action → ℝ,
+    (∃ coefficient : Action → 𝕜,
       (∀ action, 0 ≤ coefficient action) ∧
       (∀ state,
         ∑ action, coefficient action * delta action state = 0) ∧

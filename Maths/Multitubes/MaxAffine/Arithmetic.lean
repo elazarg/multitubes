@@ -122,8 +122,7 @@ def rationalBranchBase
 def IsRationalLaxSection (potential : V → ℚ) : Prop :=
   ∀ branch : Branch (fun edge => (label edge).toLabel),
     rationalBranchBase label branch ≤
-      FiniteInequality.ratDotProduct
-        (rationalBranchDelta G label branch) potential
+      dotProduct (rationalBranchDelta G label branch) potential
 
 omit [Fintype E] in
 /-- Casting a rational branch normal gives the real branch normal. -/
