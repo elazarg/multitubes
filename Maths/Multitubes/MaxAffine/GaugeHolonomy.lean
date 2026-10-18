@@ -350,10 +350,6 @@ theorem exists_holonomyApply_le_self_of_noncriticalCycle_of_expansiveGauge
     (hnoncritical : ∃ edge ∈ cycle.edges,
       (label edge).slope * gauge (G.source edge) ≠ gauge (G.target edge)) :
     ∃ point : ℝ, holonomyApply label cycle point ≤ point := by
-  have hpos (edge : E) : 0 < (label edge).slope := by
-    have hmul : 0 < (label edge).slope * gauge (G.source edge) :=
-      (hgauge.1 (G.target edge)).trans_le (hgauge.2 edge)
-    nlinarith [hgauge.1 (G.source edge)]
   have hstrict : ∃ edge ∈ cycle.edges,
       gauge (G.target edge) <
         (label edge).slope * gauge (G.source edge) := by
@@ -361,10 +357,10 @@ theorem exists_holonomyApply_le_self_of_noncriticalCycle_of_expansiveGauge
     exact ⟨edge, hedge, lt_of_le_of_ne (hgauge.2 edge) hne.symm⟩
   have hproduct :=
     one_lt_cycleProduct_of_expansiveGauge_of_exists_strict
-      (fun edge => (label edge).slope) hpos hgauge cycle hstrict
+      (fun edge => (label edge).slope) hgauge cycle hstrict
   exact
     exists_holonomyApply_le_self_of_one_lt_cycleProduct_of_floorless
-      (fun edge => (hpos edge).le) hfloor cycle hproduct
+      (fun edge => (hgauge.slope_pos edge).le) hfloor cycle hproduct
 
 /-- Every original max-affine cycle holonomy has a pre-fixed point. -/
 def HasPrefixedCycleHolonomies (G : EdgeGraph V E) (label : E → Label) : Prop :=
@@ -409,10 +405,7 @@ theorem exists_isLaxSection_iff_prefixedCycleHolonomies_of_expansiveGauge
     (hfloor : ∀ edge : E, (label edge).floor = ⊥) :
     (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
       HasPrefixedCycleHolonomies G label := by
-  have hslope (edge : E) : 0 ≤ (label edge).slope := by
-    have hmul : 0 < (label edge).slope * gauge (G.source edge) :=
-      (hgauge.1 (G.target edge)).trans_le (hgauge.2 edge)
-    nlinarith [hgauge.1 (G.source edge)]
+  have hslope (edge : E) : 0 ≤ (label edge).slope := (hgauge.slope_pos edge).le
   constructor
   · rintro ⟨potential, hpotential⟩ base cycle
     exact ⟨potential base,

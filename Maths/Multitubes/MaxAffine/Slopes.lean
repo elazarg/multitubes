@@ -456,22 +456,28 @@ def IsExpansiveGauge (gauge : V → ℝ) : Prop :=
   (∀ vertex, 0 < gauge vertex) ∧
     ∀ edge, gauge (G.target edge) ≤ slope edge * gauge (G.source edge)
 
+variable {slope} in
+/-- An expansive gauge forces every slope to be positive: a positive target gauge is bounded by
+the slope times a positive source gauge. -/
+theorem IsExpansiveGauge.slope_pos {gauge : V → ℝ}
+    (hgauge : IsExpansiveGauge (G := G) slope gauge) (edge : E) : 0 < slope edge :=
+  pos_of_mul_pos_left ((hgauge.1 (G.target edge)).trans_le (hgauge.2 edge))
+    (hgauge.1 (G.source edge)).le
+
 /-- An expansive gauge controls every forward walk from below. -/
 theorem gauge_le_walkProd_mul
-    (hpos : ∀ edge, 0 < slope edge)
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {start finish : V} (walk : G.Walk start finish) :
     gauge finish ≤ walkProd slope walk * gauge start := by
   have h := (ofSMul G ℝ slope).walkMap_rel_of_forall_mem_edges (family := gauge)
     (R := fun _ => (· ≥ ·)) (fun _ => le_rfl) (fun _ _ _ _ hxy hyz => hyz.trans hxy) walk
-    (fun edge _ _ _ hxy => mul_le_mul_of_nonneg_left hxy (hpos edge).le)
+    (fun edge _ _ _ hxy => mul_le_mul_of_nonneg_left hxy (hgauge.slope_pos edge).le)
     fun edge _ => hgauge.2 edge
   rwa [walkMap_ofSMul_eq_walkLabel_smul, walkLabel_eq_walkProd, smul_eq_mul] at h
 
 /-- If one traversed edge is strictly noncritical for an expansive gauge,
 the path product satisfies a strict endpoint inequality. -/
 theorem gauge_lt_walkProd_mul_of_exists_strict
-    (hpos : ∀ edge, 0 < slope edge)
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {start finish : V} (walk : G.Walk start finish) :
     (∃ edge ∈ walk.edges,
@@ -491,48 +497,45 @@ theorem gauge_lt_walkProd_mul_of_exists_strict
               slope edge * gauge (G.source edge) := hgauge.2 edge
           _ < slope edge *
               (walkProd slope walk * gauge start) :=
-            mul_lt_mul_of_pos_left hprefix (hpos edge)
+            mul_lt_mul_of_pos_left hprefix (hgauge.slope_pos edge)
           _ = (walkProd slope walk * slope edge) * gauge start := by
             ring
       · simp only [List.mem_singleton] at hlast
         subst candidate
-        have hprefix := gauge_le_walkProd_mul slope hpos hgauge walk
+        have hprefix := gauge_le_walkProd_mul slope hgauge walk
         rw [walkProd_concat]
         calc
           gauge (G.target edge) <
               slope edge * gauge (G.source edge) := hstrictCandidate
           _ ≤ slope edge *
               (walkProd slope walk * gauge start) :=
-            mul_le_mul_of_nonneg_left hprefix (hpos edge).le
+            mul_le_mul_of_nonneg_left hprefix (hgauge.slope_pos edge).le
           _ = (walkProd slope walk * slope edge) * gauge start := by
             ring
 
 /-- Every expansive gauge forces every directed cycle product above one. -/
 theorem one_le_cycleProduct_of_expansiveGauge
-    (hpos : ∀ edge, 0 < slope edge)
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {base : V} (cycle : G.Walk base base) :
     1 ≤ walkProd slope cycle := by
-  have hwalk := gauge_le_walkProd_mul slope hpos hgauge cycle
+  have hwalk := gauge_le_walkProd_mul slope hgauge cycle
   nlinarith [hgauge.1 base]
 
 /-- A cycle using a strictly noncritical edge of an expansive gauge has
 product strictly above one. -/
 theorem one_lt_cycleProduct_of_expansiveGauge_of_exists_strict
-    (hpos : ∀ edge, 0 < slope edge)
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {base : V} (cycle : G.Walk base base)
     (hstrict : ∃ edge ∈ cycle.edges,
       gauge (G.target edge) < slope edge * gauge (G.source edge)) :
     1 < walkProd slope cycle := by
   have hwalk := gauge_lt_walkProd_mul_of_exists_strict
-    slope hpos hgauge cycle hstrict
+    slope hgauge cycle hstrict
   nlinarith [hgauge.1 base]
 
 /-- Under an expansive positive gauge, a cycle has product one exactly when
 every traversed edge is gauge-critical. -/
 theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_expansiveGauge
-    (hpos : ∀ edge, 0 < slope edge)
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {base : V} (cycle : G.Walk base base) :
     walkProd slope cycle = 1 ↔
@@ -543,7 +546,7 @@ theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_expansiveGauge
     by_contra hnoncritical
     have hstrict :=
       one_lt_cycleProduct_of_expansiveGauge_of_exists_strict
-        slope hpos hgauge cycle ⟨edge, hedge,
+        slope hgauge cycle ⟨edge, hedge,
           lt_of_le_of_ne (hgauge.2 edge)
             (fun heq => hnoncritical heq.symm)⟩
     linarith
@@ -563,7 +566,7 @@ theorem exists_expansiveGauge_iff_one_le_cycleProduct
         1 ≤ walkProd slope cycle := by
   constructor
   · rintro ⟨gauge, hgauge⟩ base cycle
-    exact one_le_cycleProduct_of_expansiveGauge slope hpos hgauge cycle
+    exact one_le_cycleProduct_of_expansiveGauge slope hgauge cycle
   · intro hcycle
     have hlogCycle (base : V) (cycle : G.Walk base base) :
         walkSum
