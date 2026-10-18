@@ -28,8 +28,6 @@ also supply the required bounds.
 
 ## Main results
 
-* `Maths.MaxAffineTransport.holonomyApply_relax_le_iterate`: relaxed transport bounds later
-  iterates along a walk.
 * `Maths.MaxAffineTransport.bddBelow_relaxedStep_of_contractiveCycle`: a contracting cycle
   bounds a descending relaxed orbit below.
 * `Maths.MaxAffineTransport.exists_isEigenvector_of_reachable_lowerBounds`: lower-bound
@@ -58,27 +56,6 @@ def lowerBoundVertices (G : EdgeGraph V E) (label : E → Label) : Set V :=
     ∃ cycle : G.Walk vertex vertex, Label.pathSlope (cycle.edges.map label) < 1}
 
 variable [Fintype E] [DecidableEq V]
-
-/-- A relaxed edge inequality propagates along a walk, with a time shift equal to its length. -/
-theorem holonomyApply_relax_le_iterate (hslope : ∀ edge, 0 ≤ (label edge).slope)
-    {level : ℝ} {orbit : ℕ → V → ℝ}
-    (hstep : ∀ n vertex, vertexOperator G label (orbit n) vertex - level ≤ orbit (n + 1) vertex)
-    {start finish : V} (walk : G.Walk start finish) (n : ℕ) :
-    holonomyApply (fun edge => Label.relax level (label edge)) walk (orbit n start) ≤
-      orbit (n + walk.length) finish := by
-  induction walk with
-  | nil => simp
-  | concat edge walk ih =>
-      rw [holonomyApply_concat, EdgeGraph.Walk.length_concat]
-      have hmono := Label.monotone_apply (f := Label.relax level (label edge))
-        (by simpa using hslope edge) ih
-      simp only [Label.apply_relax] at hmono
-      have hedge : (label edge).apply (orbit (n + walk.length) (G.source edge)) ≤
-          vertexOperator G label (orbit (n + walk.length)) (G.target edge) :=
-        le_vertexOperator rfl
-      have hnext := hstep (n + walk.length) (G.target edge)
-      have hbound := (sub_le_sub_right hedge level).trans hnext
-      simpa only [Nat.add_assoc, Label.apply_relax] using hmono.trans hbound
 
 /-- In a descending orbit, a constant incoming branch supplies a uniform coordinate bound. -/
 theorem bddBelow_relaxedStep_of_constantBranch {level : ℝ} {orbit : ℕ → V → ℝ}

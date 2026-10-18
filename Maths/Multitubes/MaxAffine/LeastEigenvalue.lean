@@ -82,6 +82,8 @@ eigenvalue (`Maths.MaxAffineTransport.eigenvalues_eq_univ_of_slope_eq`).
   sub-fixed point.
 * `Maths.MaxAffineTransport.relaxedStep_eq_of_mem_criticalVertices`: it is frozen on the
   critical set at every stage, not only the first.
+* `Maths.MaxAffineTransport.holonomyApply_relax_le_iterate`: relaxed transport bounds later
+  iterates along a walk.
 * `Maths.MaxAffineTransport.exists_lowerBound_of_walk`: a lower bound propagates along a
   walk, which is how strong connectivity bounds the orbit below at every vertex.
 * `Maths.MaxAffineTransport.isEigenvector_iInf_of_relaxedStep`: **the pointwise infimum of a
@@ -564,34 +566,42 @@ theorem continuous_vertexOperator (G : EdgeGraph V E) (label : E → Label) {v :
     (Label.continuous_apply (label e)).comp (continuous_apply (G.source e))
 
 omit [Fintype V] in
-/-- **A lower bound propagates along a walk.**  Each edge bounds the next iterate at its target
-below by an increasing affine function of the current one at its source, so a uniform lower bound
-at the start of a walk yields one at its end, offset by the length of the walk. -/
+/-- A relaxed edge inequality propagates along a walk, with a time shift equal to its length. -/
+theorem holonomyApply_relax_le_iterate (hslope : ∀ edge, 0 ≤ (label edge).slope)
+    {level : ℝ} {orbit : ℕ → V → ℝ}
+    (hstep : ∀ n vertex, vertexOperator G label (orbit n) vertex - level ≤ orbit (n + 1) vertex)
+    {start finish : V} (walk : G.Walk start finish) (n : ℕ) :
+    holonomyApply (fun edge => Label.relax level (label edge)) walk (orbit n start) ≤
+      orbit (n + walk.length) finish := by
+  induction walk with
+  | nil => simp
+  | concat edge walk ih =>
+      rw [holonomyApply_concat, EdgeGraph.Walk.length_concat]
+      have hmono := Label.monotone_apply (f := Label.relax level (label edge))
+        (by simpa using hslope edge) ih
+      simp only [Label.apply_relax] at hmono
+      have hedge : (label edge).apply (orbit (n + walk.length) (G.source edge)) ≤
+          vertexOperator G label (orbit (n + walk.length)) (G.target edge) :=
+        le_vertexOperator rfl
+      have hnext := hstep (n + walk.length) (G.target edge)
+      have hbound := (sub_le_sub_right hedge level).trans hnext
+      simpa only [Nat.add_assoc, Label.apply_relax] using hmono.trans hbound
+
+omit [Fintype V] in
+/-- **A lower bound propagates along a walk.**  Relaxed transport along the walk is monotone and
+bounds the iterate at its end, by `Maths.MaxAffineTransport.holonomyApply_relax_le_iterate`, so a
+uniform lower bound at the start of a walk yields one at its end, offset by the length of the
+walk. -/
 theorem exists_lowerBound_of_walk (hslope : ∀ e : E, 0 ≤ (label e).slope) {lam : ℝ}
     {iterate : ℕ → V → ℝ}
     (hstep : ∀ (n : ℕ) (v : V), vertexOperator G label (iterate n) v - lam ≤ iterate (n + 1) v)
     {start finish : V} (walk : G.Walk start finish) {bound : ℝ}
     (hstart : ∀ n : ℕ, bound ≤ iterate n start) :
     ∃ C : ℝ, ∀ n : ℕ, C ≤ iterate (n + walk.length) finish := by
-  induction walk with
-  | nil => exact ⟨bound, fun n => by simpa using hstart n⟩
-  | concat edge walkSoFar ih =>
-      obtain ⟨C, hC⟩ := ih
-      refine ⟨(label edge).shift + (label edge).slope * C - lam, fun n => ?_⟩
-      have hmid : C ≤ iterate (n + walkSoFar.length) (G.source edge) := hC n
-      have haffine := (label edge).affinePart_le_apply
-        (iterate (n + walkSoFar.length) (G.source edge))
-      have hedge : (label edge).apply (iterate (n + walkSoFar.length) (G.source edge))
-          ≤ vertexOperator G label (iterate (n + walkSoFar.length)) (G.target edge) :=
-        le_vertexOperator rfl
-      have hnext := hstep (n + walkSoFar.length) (G.target edge)
-      have hgrow : (label edge).slope * C
-          ≤ (label edge).slope * iterate (n + walkSoFar.length) (G.source edge) :=
-        mul_le_mul_of_nonneg_left hmid (hslope edge)
-      simp only [Label.affinePart] at haffine
-      have hlength : n + (walkSoFar.length + 1) = n + walkSoFar.length + 1 := by omega
-      rw [EdgeGraph.Walk.length_concat, hlength]
-      linarith
+  have hmono : Monotone (holonomyApply (fun edge => Label.relax lam (label edge)) walk) :=
+    Transport.IsMonotone.walkMap (fun edge => Label.monotone_apply (by simpa using hslope edge))
+      walk
+  exact ⟨_, fun n => (hmono (hstart n)).trans (holonomyApply_relax_le_iterate hslope hstep walk n)⟩
 
 end Iteration
 
