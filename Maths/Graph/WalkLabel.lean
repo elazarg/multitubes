@@ -51,6 +51,8 @@ agree in a commutative monoid (`Maths.walkLabel_eq_walkProd`).  A labelling is
 * `Maths.walkLabel_eq_unop_walkProd` - the action order is the chronological order of the
   opposite monoid.
 * `Maths.walkLabel_eq_walkProd` - the two orders agree in a commutative monoid.
+* `Maths.walkProd_mulCoboundary` and `Maths.walkSum_coboundary` - a coboundary telescopes along
+  every walk.
 * `Maths.hasTrivialCycleLabels_ofAdd_iff` - zero cycle sums are trivial cycle labels of the
   multiplicative reading, so additive statements follow from multiplicative ones.
 * `Maths.countP_nsmul_le_walkSum` - a lower bound per marked traversal bounds the walk sum of
@@ -302,6 +304,17 @@ theorem walkProd_div_const (w : E → M) (c : M) (walk : G.Walk start finish) :
   | concat edge walkSoFar ih =>
       rw [walkProd_concat, walkProd_concat, ih, EdgeGraph.Walk.length_concat, pow_succ,
         div_mul_div_comm]
+
+/-- Telescoping: the chronological product of a multiplicative coboundary depends only on the
+endpoints of the walk. -/
+@[to_additive (attr := simp) walkSum_coboundary
+  /-- Telescoping: the walk sum of a coboundary depends only on the endpoints of the walk. -/]
+theorem walkProd_mulCoboundary (η : V → M) (walk : G.Walk start finish) :
+    walkProd (mulCoboundary G η) walk = η finish / η start := by
+  induction walk with
+  | nil => simp
+  | concat edge walkSoFar ih =>
+      rw [walkProd_concat, ih, mulCoboundary_apply, mul_comm, div_mul_div_cancel]
 
 end CommGroup
 

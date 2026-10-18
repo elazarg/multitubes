@@ -124,15 +124,6 @@ def IsCoboundary (G : EdgeGraph V E) (w : E → A) : Prop :=
 
 variable {start finish : V}
 
-/-- Telescoping: the walk sum of a coboundary depends only on the endpoints. -/
-@[simp] theorem walkSum_coboundary (φ : V → A) (walk : G.Walk start finish) :
-    walkSum (coboundary G φ) walk = φ finish - φ start := by
-  induction walk with
-  | nil => simp
-  | concat edge walkSoFar ih =>
-      rw [walkSum_concat, ih, coboundary_apply]
-      abel
-
 theorem walkSum_eq_sub_of_isCoboundary {w : E → A} (hw : IsCoboundary G w)
     (walk : G.Walk start finish) :
     ∃ φ : V → A, walkSum w walk = φ finish - φ start := by
