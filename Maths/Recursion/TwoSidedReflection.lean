@@ -52,7 +52,6 @@ floor is the infinite-buffer case, recovered exactly where the upper clamp does 
 
 * `Maths.TransferSummary.ClampedAffineSummary` and
   `Maths.TransferSummary.ClampedAffineSummary.comp`.
-* `Maths.TransferSummary.floorIter` -- the one-sided orbit above a general floor.
 * `Maths.TransferSummary.bandIter` -- the two-sided orbit.
 * `Maths.TransferSummary.bandRestart` -- the one-sided orbit that restarts from the
   top of the band.
@@ -72,8 +71,6 @@ floor is the infinite-buffer case, recovered exactly where the upper clamp does 
   monotone in the initial state, antitone in the service sequence.
 * `Maths.TransferSummary.bandIter_eq_floorIter` -- the two-sided orbit is the
   one-sided one wherever the upper clamp does not bind.
-* `Maths.TransferSummary.floorIter_eq_sup'` -- Lindley's representation above a
-  general floor.
 * `Maths.TransferSummary.bandIter_eq_inf'` and
   `Maths.TransferSummary.bandIter_eq_inf'_sup'` -- the two-sided representation, as
   an infimum over upper restarts and in closed form.
@@ -271,84 +268,9 @@ instance instSemigroup : Semigroup {f : ClampedAffineSummary // 0 ≤ f.slope} w
 
 end ClampedAffineSummary
 
-/-! ## The one-sided orbit above a general floor -/
+/-! ## The two-sided orbit -/
 
 variable (lo hi : ℝ) (a g : ℕ → ℝ)
-
-/-- The **one-sided orbit** of the Lindley recursion reflected at a general floor,
-`x ↦ max lo (a n * x - g n)`. The reflection at zero is the case `lo = 0`
-(`floorIter_zero_floor`). -/
-def floorIter (x : ℝ) : ℕ → ℝ
-  | 0 => x
-  | n + 1 => max lo (a n * floorIter x n - g n)
-
-/-- The one-sided orbit starts at its initial state. -/
-@[simp] theorem floorIter_zero (x : ℝ) : floorIter lo a g x 0 = x := rfl
-
-/-- One stage of the one-sided orbit. -/
-theorem floorIter_succ (x : ℝ) (n : ℕ) :
-    floorIter lo a g x (n + 1) = max lo (a n * floorIter lo a g x n - g n) := rfl
-
-/-- Reflecting at the floor `0` is the reflected orbit of the Lindley recursion. -/
-theorem floorIter_zero_floor (x : ℝ) : ∀ n : ℕ, floorIter 0 a g x n = reflectedIter a g x n
-  | 0 => rfl
-  | n + 1 => by rw [floorIter_succ, floorIter_zero_floor x n, reflectedIter]
-
-/-- After at least one stage the one-sided orbit dominates its floor. -/
-theorem le_floorIter (x : ℝ) (n : ℕ) (hn : n ≠ 0) : lo ≤ floorIter lo a g x n := by
-  obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
-  exact le_max_left _ _
-
-/-- The state the Lindley representation transports from a restart time, when the reflection is
-at the floor `lo`: the initial state at time `0`, and the floor at every later time. -/
-def floorRestartState (x : ℝ) (m : ℕ) : ℝ := if m = 0 then x else lo
-
-/-- One term of Lindley's representation above the floor `lo`: the state at restart time `m`,
-transported to time `n` and reduced by the service accumulated in between. -/
-def floorTerm (x : ℝ) (m n : ℕ) : ℝ :=
-  transport a m n * floorRestartState lo x m - service a g m n
-
-/-- Restarting at a positive time `n` contributes the floor at time `n`. -/
-theorem floorTerm_self (x : ℝ) (n : ℕ) (hn : n ≠ 0) : floorTerm lo a g x n n = lo := by
-  simp [floorTerm, floorRestartState, hn]
-
-/-- A Lindley term satisfies the one-sided recursion's affine branch in its end time. -/
-theorem floorTerm_succ_right (x : ℝ) {m n : ℕ} (hmn : m ≤ n) :
-    floorTerm lo a g x m (n + 1) = a n * floorTerm lo a g x m n - g n := by
-  rw [floorTerm, floorTerm, transport_succ_right a hmn, service_succ_right a g hmn]
-  ring
-
-/-- **Lindley's representation above a general floor.** The one-sided state at time `n` is the
-largest, over all restart times `m ≤ n`, of the state at `m` transported to `n` minus the
-retention-weighted service accumulated after `m`, where the state at a positive restart time is
-the floor. Only nonnegative retention is used. -/
-theorem floorIter_eq_sup' (ha : ∀ k, 0 ≤ a k) (x : ℝ) :
-    ∀ n : ℕ, floorIter lo a g x n =
-      (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one (fun m => floorTerm lo a g x m n)
-  | 0 => by simp [floorTerm, floorRestartState, transport, service]
-  | n + 1 => by
-    have hcongr (m : ℕ) (hm : m ∈ Finset.range (n + 1)) :
-        floorTerm lo a g x m (n + 1) = (fun y => a n * y - g n) (floorTerm lo a g x m n) :=
-      floorTerm_succ_right lo a g x (Nat.lt_succ_iff.mp (Finset.mem_range.mp hm))
-    have hsup (u v : ℝ) : a n * (u ⊔ v) - g n = (a n * u - g n) ⊔ (a n * v - g n) := by
-      rw [mul_max_of_nonneg _ _ (ha n), max_sub_sub_right]
-    have hright : (Finset.range (n + 1 + 1)).sup' Finset.nonempty_range_add_one
-          (fun m => floorTerm lo a g x m (n + 1)) =
-        max lo (a n * (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
-          (fun m => floorTerm lo a g x m n) - g n) := by
-      have hins : (Finset.range (n + 1 + 1)).sup' Finset.nonempty_range_add_one
-            (fun m => floorTerm lo a g x m (n + 1)) =
-          (insert (n + 1) (Finset.range (n + 1))).sup' (Finset.insert_nonempty _ _)
-            (fun m => floorTerm lo a g x m (n + 1)) :=
-        Finset.sup'_congr Finset.nonempty_range_add_one Finset.range_add_one fun _ _ => rfl
-      rw [hins, Finset.sup'_insert (H := Finset.nonempty_range_add_one),
-        floorTerm_self lo a g x (n + 1) n.succ_ne_zero,
-        Finset.sup'_congr Finset.nonempty_range_add_one rfl hcongr]
-      exact congrArg (max lo)
-        (Finset.apply_sup'_eq_sup'_comp _ (fun y => a n * y - g n) hsup).symm
-    rw [floorIter_succ, floorIter_eq_sup' ha x n, hright]
-
-/-! ## The two-sided orbit -/
 
 /-- The clamped affine summary of the two-sided reflected map `x ↦ min hi (max lo (a * x - g))`:
 retention `a`, service `g`, band `[lo, hi]`. -/

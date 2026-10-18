@@ -49,7 +49,8 @@ still has a bounded number of coefficients.
   `reflectedIter_eq_sup'` is Lindley's representation: the state at time `n` is the largest,
   over all restart times `m ≤ n`, of the state transported from `m` minus the
   retention-weighted service accumulated after `m`. In network calculus the same formula is
-  the backlog bound.
+  the backlog bound. It holds verbatim above any floor `lo` (`floorIter_eq_sup'`), the state
+  at a positive restart time then being `lo`.
 
 ## Main definitions
 
@@ -57,7 +58,8 @@ still has a bounded number of coefficients.
   `Maths.TransferSummary.AffineSummary.instMonoid` instance.
 * `Maths.TransferSummary.MaxAffineSummary` and
   `Maths.TransferSummary.MaxAffineSummary.comp`.
-* `Maths.TransferSummary.reflectedIter` -- the reflected orbit.
+* `Maths.TransferSummary.reflectedIter` -- the reflected orbit, and
+  `Maths.TransferSummary.floorIter` -- the one-sided orbit above a general floor.
 * `Maths.TransferSummary.transport`,
   `Maths.TransferSummary.service`,
   `Maths.TransferSummary.lindleyTerm` -- the three ingredients of Lindley's
@@ -77,7 +79,8 @@ still has a bounded number of coefficients.
   three coefficients.
 * `Maths.TransferSummary.MaxAffineSummary.monotone_apply_iff` and
   `Maths.TransferSummary.MaxAffineSummary.not_exists_apply_eq_id`.
-* `Maths.TransferSummary.reflectedIter_eq_sup'` -- Lindley's representation.
+* `Maths.TransferSummary.floorIter_eq_sup'` -- Lindley's representation above a general
+  floor, and its case `Maths.TransferSummary.reflectedIter_eq_sup'` at the floor `0`.
 * `Maths.TransferSummary.monotone_reflectedIter` and
   `Maths.TransferSummary.reflectedIter_le_of_le_service` -- monotone in the
   initial state, antitone in the service sequence.
@@ -486,6 +489,85 @@ theorem service_shift (m i j : ℕ) :
   · intro k hk; simp only [Finset.mem_Ico] at hk; omega
   · intro p _; rw [transport_shift a m (p + 1) j]; rfl
 
+/-! ### The one-sided orbit above a general floor -/
+
+/-- The **one-sided orbit** of the Lindley recursion reflected at a general floor,
+`x ↦ max lo (a n * x - g n)`. The reflection at zero is the case `lo = 0`
+(`floorIter_zero_floor`). -/
+def floorIter (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) : ℕ → ℝ
+  | 0 => x
+  | n + 1 => max lo (a n * floorIter lo a g x n - g n)
+
+/-- The one-sided orbit starts at its initial state. -/
+@[simp] theorem floorIter_zero (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) : floorIter lo a g x 0 = x := rfl
+
+/-- One stage of the one-sided orbit. -/
+theorem floorIter_succ (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) (n : ℕ) :
+    floorIter lo a g x (n + 1) = max lo (a n * floorIter lo a g x n - g n) := rfl
+
+/-- Reflecting at the floor `0` is the reflected orbit of the Lindley recursion. -/
+theorem floorIter_zero_floor (x : ℝ) : ∀ n : ℕ, floorIter 0 a g x n = reflectedIter a g x n
+  | 0 => rfl
+  | n + 1 => by rw [floorIter_succ, floorIter_zero_floor x n, reflectedIter]
+
+/-- After at least one stage the one-sided orbit dominates its floor. -/
+theorem le_floorIter (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) (n : ℕ) (hn : n ≠ 0) :
+    lo ≤ floorIter lo a g x n := by
+  obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
+  exact le_max_left _ _
+
+/-- The state the Lindley representation transports from a restart time, when the reflection is
+at the floor `lo`: the initial state at time `0`, and the floor at every later time. -/
+def floorRestartState (lo x : ℝ) (m : ℕ) : ℝ := if m = 0 then x else lo
+
+/-- One term of Lindley's representation above the floor `lo`: the state at restart time `m`,
+transported to time `n` and reduced by the service accumulated in between. -/
+def floorTerm (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) (m n : ℕ) : ℝ :=
+  transport a m n * floorRestartState lo x m - service a g m n
+
+/-- Restarting at a positive time `n` contributes the floor at time `n`. -/
+theorem floorTerm_self (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) (n : ℕ) (hn : n ≠ 0) :
+    floorTerm lo a g x n n = lo := by
+  simp [floorTerm, floorRestartState, hn]
+
+/-- A Lindley term satisfies the one-sided recursion's affine branch in its end time. -/
+theorem floorTerm_succ_right (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) {m n : ℕ} (hmn : m ≤ n) :
+    floorTerm lo a g x m (n + 1) = a n * floorTerm lo a g x m n - g n := by
+  rw [floorTerm, floorTerm, transport_succ_right a hmn, service_succ_right a g hmn]
+  ring
+
+/-- **Lindley's representation above a general floor.** The one-sided state at time `n` is the
+largest, over all restart times `m ≤ n`, of the state at `m` transported to `n` minus the
+retention-weighted service accumulated after `m`, where the state at a positive restart time is
+the floor. Only nonnegative retention is used. -/
+theorem floorIter_eq_sup' (lo : ℝ) (a g : ℕ → ℝ) (ha : ∀ k, 0 ≤ a k) (x : ℝ) :
+    ∀ n : ℕ, floorIter lo a g x n =
+      (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one (fun m => floorTerm lo a g x m n)
+  | 0 => by simp [floorTerm, floorRestartState, transport, service]
+  | n + 1 => by
+    have hcongr (m : ℕ) (hm : m ∈ Finset.range (n + 1)) :
+        floorTerm lo a g x m (n + 1) = (fun y => a n * y - g n) (floorTerm lo a g x m n) :=
+      floorTerm_succ_right lo a g x (Nat.lt_succ_iff.mp (Finset.mem_range.mp hm))
+    have hsup (u v : ℝ) : a n * (u ⊔ v) - g n = (a n * u - g n) ⊔ (a n * v - g n) := by
+      rw [mul_max_of_nonneg _ _ (ha n), max_sub_sub_right]
+    have hright : (Finset.range (n + 1 + 1)).sup' Finset.nonempty_range_add_one
+          (fun m => floorTerm lo a g x m (n + 1)) =
+        max lo (a n * (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
+          (fun m => floorTerm lo a g x m n) - g n) := by
+      have hins : (Finset.range (n + 1 + 1)).sup' Finset.nonempty_range_add_one
+            (fun m => floorTerm lo a g x m (n + 1)) =
+          (insert (n + 1) (Finset.range (n + 1))).sup' (Finset.insert_nonempty _ _)
+            (fun m => floorTerm lo a g x m (n + 1)) :=
+        Finset.sup'_congr Finset.nonempty_range_add_one Finset.range_add_one fun _ _ => rfl
+      rw [hins, Finset.sup'_insert (H := Finset.nonempty_range_add_one),
+        floorTerm_self lo a g x (n + 1) n.succ_ne_zero,
+        Finset.sup'_congr Finset.nonempty_range_add_one rfl hcongr]
+      exact congrArg (max lo)
+        (Finset.apply_sup'_eq_sup'_comp _ (fun y => a n * y - g n) hsup).symm
+    rw [floorIter_succ, floorIter_eq_sup' lo a g ha x n, hright]
+
+/-! ### Lindley's representation -/
+
 /-- The state the Lindley representation transports from a restart time: the initial state at
 time `0`, and the reflection floor `0` at every later time. -/
 def restartState (x : ℝ) : ℕ → ℝ
@@ -497,21 +579,10 @@ def restartState (x : ℝ) : ℕ → ℝ
 def lindleyTerm (x : ℝ) (m n : ℕ) : ℝ :=
   transport a m n * restartState x m - service a g m n
 
-/-- Restarting at a positive time `n` contributes `0` at time `n`. -/
-@[simp] theorem lindleyTerm_self (x : ℝ) (n : ℕ) (hn : n ≠ 0) : lindleyTerm a g x n n = 0 := by
-  obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
-  simp [lindleyTerm, restartState]
-
 /-- From the zero initial state every Lindley term is minus the accumulated service. -/
 @[simp] theorem lindleyTerm_zero_state (m n : ℕ) :
     lindleyTerm a g 0 m n = -service a g m n := by
   cases m <;> simp [lindleyTerm, restartState]
-
-/-- A Lindley term satisfies the reflected recursion's affine branch in its end time. -/
-theorem lindleyTerm_succ_right (x : ℝ) {m n : ℕ} (hmn : m ≤ n) :
-    lindleyTerm a g x m (n + 1) = a n * lindleyTerm a g x m n - g n := by
-  rw [lindleyTerm, lindleyTerm, transport_succ_right a hmn, service_succ_right a g hmn]
-  ring
 
 /-- **Lindley's representation.** The reflected state at time `n` is the largest, over all
 restart times `m ≤ n`, of the state at `m` transported to `n` minus the retention-weighted
@@ -521,30 +592,11 @@ this is the backlog bound. -/
 theorem reflectedIter_eq_sup' (ha : ∀ k, 0 ≤ a k) (x : ℝ) :
     ∀ n : ℕ, reflectedIter a g x n =
       (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
-        (fun m => lindleyTerm a g x m n)
-  | 0 => by simp [lindleyTerm, transport, restartState]
-  | n + 1 => by
-    have hcongr (m : ℕ) (hm : m ∈ Finset.range (n + 1)) :
-        lindleyTerm a g x m (n + 1) = (fun y => a n * y - g n) (lindleyTerm a g x m n) :=
-      lindleyTerm_succ_right a g x (Nat.lt_succ_iff.mp (Finset.mem_range.mp hm))
-    have hsup (u v : ℝ) :
-        a n * (u ⊔ v) - g n = (a n * u - g n) ⊔ (a n * v - g n) := by
-      rw [mul_max_of_nonneg _ _ (ha n), max_sub_sub_right]
-    have hright : (Finset.range (n + 1 + 1)).sup' Finset.nonempty_range_add_one
-          (fun m => lindleyTerm a g x m (n + 1)) =
-        max 0 (a n * (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
-          (fun m => lindleyTerm a g x m n) - g n) := by
-      have hins : (Finset.range (n + 1 + 1)).sup' Finset.nonempty_range_add_one
-            (fun m => lindleyTerm a g x m (n + 1)) =
-          (insert (n + 1) (Finset.range (n + 1))).sup' (Finset.insert_nonempty _ _)
-            (fun m => lindleyTerm a g x m (n + 1)) :=
-        Finset.sup'_congr Finset.nonempty_range_add_one Finset.range_add_one fun _ _ => rfl
-      rw [hins, Finset.sup'_insert (H := Finset.nonempty_range_add_one),
-        lindleyTerm_self a g x (n + 1) n.succ_ne_zero,
-        Finset.sup'_congr Finset.nonempty_range_add_one rfl hcongr]
-      exact congrArg (max 0)
-        (Finset.apply_sup'_eq_sup'_comp _ (fun y => a n * y - g n) hsup).symm
-    rw [reflectedIter, reflectedIter_eq_sup' ha x n, hright]
+        (fun m => lindleyTerm a g x m n) := by
+  intro n
+  rw [← floorIter_zero_floor, floorIter_eq_sup' _ _ _ ha]
+  refine Finset.sup'_congr _ rfl fun m _ => ?_
+  cases m <;> rfl
 
 /-- The reflected orbit is monotone in its initial state. -/
 theorem monotone_reflectedIter (ha : ∀ k, 0 ≤ a k) :
