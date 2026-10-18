@@ -96,7 +96,9 @@ theorem exists_contractiveGauge_iff_shortCycleProduct_lt_one [Fintype V] [Finite
         walkSum
           (fun edge : PositiveSlopeEdge gain => Real.log (gain edge.1)) cycle < 0 := by
       apply Real.exp_lt_exp.mp
-      rw [Real.exp_zero, exp_walkSum_log_eq_walkProd,
+      rw [Real.exp_zero,
+        exp_walkSum_log_eq_walkProd (fun edge : PositiveSlopeEdge gain => gain edge.1)
+          (fun edge => edge.2),
         ← walkProd_ofRestrictEdges]
       have hlength := congrArg List.length (EdgeGraph.Walk.edges_ofRestrictEdges cycle)
       simp only [List.length_map, EdgeGraph.Walk.edges_length] at hlength

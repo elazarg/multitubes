@@ -397,18 +397,18 @@ abbrev PositiveSlopeEdge := ↥{edge : E | 0 < slope edge}
 abbrev positiveSlopeGraph : EdgeGraph V (PositiveSlopeEdge slope) :=
   G.restrictEdges {edge | 0 < slope edge}
 
-/-- Exponentiating the log-weight of a positive-edge walk recovers its slope
-product. -/
-theorem exp_walkSum_log_eq_walkProd {start finish : V}
-    (walk : (positiveSlopeGraph (G := G) slope).Walk start finish) :
-    Real.exp (walkSum
-      (fun edge : PositiveSlopeEdge slope ↦ Real.log (slope edge.1)) walk) =
-      walkProd (fun edge : PositiveSlopeEdge slope ↦ slope edge.1) walk := by
+/-- Exponentiating the log-weight of a walk recovers its slope product, when every slope of the
+ambient graph is positive.  On a graph with zero slopes it applies to
+`Maths.MaxAffineTransport.positiveSlopeGraph`. -/
+theorem exp_walkSum_log_eq_walkProd (hpos : ∀ edge, 0 < slope edge)
+    {start finish : V} (walk : G.Walk start finish) :
+    Real.exp (walkSum (fun edge => Real.log (slope edge)) walk) =
+      walkProd slope walk := by
   induction walk with
   | nil => simp [walkSum, walkProd]
   | concat edge walk ih =>
       rw [walkSum_concat, walkProd_concat,
-        Real.exp_add, ih, Real.exp_log edge.2]
+        Real.exp_add, ih, Real.exp_log (hpos edge)]
 
 /-- **Positive gauge theorem.**  With finitely many edges and nonnegative
 slopes, all directed cycle products are at most one exactly when a positive
@@ -428,7 +428,9 @@ theorem exists_nonexpansiveGauge_iff_cycleProduct_le_one
         walkSum
           (fun edge : PositiveSlopeEdge slope ↦ Real.log (slope edge.1)) cycle ≤ 0 := by
       apply Real.exp_le_exp.mp
-      rw [Real.exp_zero, exp_walkSum_log_eq_walkProd]
+      rw [Real.exp_zero,
+        exp_walkSum_log_eq_walkProd (fun edge : PositiveSlopeEdge slope ↦ slope edge.1)
+          (fun edge ↦ edge.2)]
       rw [← walkProd_ofRestrictEdges]
       exact hcycle base cycle.ofRestrictEdges
     obtain ⟨potential, hpotential⟩ :=
@@ -550,18 +552,6 @@ theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_expansiveGauge
       walkProd_mul_gauge_eq_of_forall_mem slope cycle hcritical
     nlinarith [hgauge.1 base]
 
-/-- Exponentiating the log-weight of a walk recovers its slope product, when every slope of the
-ambient graph is positive. -/
-theorem exp_walkSum_log_eq_walkProd_of_pos (hpos : ∀ edge, 0 < slope edge)
-    {start finish : V} (walk : G.Walk start finish) :
-    Real.exp (walkSum (fun edge => Real.log (slope edge)) walk) =
-      walkProd slope walk := by
-  induction walk with
-  | nil => simp [walkSum, walkProd]
-  | concat edge walk ih =>
-      rw [walkSum_concat, walkProd_concat,
-        Real.exp_add, ih, Real.exp_log (hpos edge)]
-
 /-- **Dual positive gauge theorem.**  For positive slopes and finitely many
 edges, all directed cycle products are at least one exactly when a positive
 vertex gauge makes every normalized edge slope at least one.  The vertex type is
@@ -581,7 +571,7 @@ theorem exists_expansiveGauge_iff_one_le_cycleProduct
       have hlogNonneg : 0 ≤ walkSum
           (fun edge => Real.log (slope edge)) cycle := by
         apply Real.exp_le_exp.mp
-        rw [Real.exp_zero, exp_walkSum_log_eq_walkProd_of_pos slope hpos cycle]
+        rw [Real.exp_zero, exp_walkSum_log_eq_walkProd slope hpos cycle]
         exact hcycle base cycle
       rw [walkSum_neg]
       linarith
@@ -646,18 +636,9 @@ theorem exists_slopeGauge_of_cycleProduct_eq_one_of_stronglyConnected
     slope_pos_of_cycleProduct_eq_one_of_stronglyConnected slope hconnected
       hnonneg hflat
   have hzero : HasZeroCycleSums G (fun edge ↦ Real.log (slope edge)) := by
-    have hexp {start finish : V} (walk : G.Walk start finish) :
-        Real.exp (walkSum
-          (fun edge ↦ Real.log (slope edge)) walk) =
-          walkProd slope walk := by
-      induction walk with
-      | nil => simp [walkSum, walkProd]
-      | concat edge walk ih =>
-          rw [walkSum_concat, walkProd_concat,
-            Real.exp_add, ih, Real.exp_log (hpos edge)]
     intro vertex cycle
     apply Real.exp_injective
-    rw [Real.exp_zero, hexp cycle, hflat vertex cycle]
+    rw [Real.exp_zero, exp_walkSum_log_eq_walkProd slope hpos cycle, hflat vertex cycle]
   obtain ⟨potential, hpotential⟩ :=
     (CycleCoboundary.isCoboundary_iff_hasZeroCycleSums hconnected).mpr hzero
   let gauge : V → ℝ := fun vertex ↦ Real.exp (potential vertex)
