@@ -155,28 +155,6 @@ private theorem continuousLinearMap_eq_certificateValue
           Pi.single_smul, map_smul, smul_eq_mul]
     _ = _ := rfl
 
-private theorem sum_edgeMultiplicity_mul_eq_walkSum_general
-    [Fintype E] [DecidableEq E] {G : EdgeGraph V E}
-    (weight : E → ℝ) {start finish : V} (walk : G.Walk start finish) :
-    ∑ edge, (walk.edgeMultiplicity edge : ℝ) * weight edge =
-      walkSum weight walk := by
-  induction walk with
-  | nil => simp
-  | concat edge walk ih =>
-      simp only [EdgeGraph.Walk.edgeMultiplicity_concat, Nat.cast_add,
-        add_mul, Finset.sum_add_distrib, ih,
-        walkSum_concat]
-      simp
-
-private theorem certificateValue_circuitCoefficient_general
-    [Fintype E] [DecidableEq E] {G : EdgeGraph V E}
-    (weight : E → ℝ) {base : V} (cycle : G.Walk base base) :
-    FiniteInequality.certificateValue weight (circuitCoefficient cycle) =
-      walkSum weight cycle / cycle.length := by
-  simp only [FiniteInequality.certificateValue, circuitCoefficient,
-    div_mul_eq_mul_div, ← Finset.sum_div]
-  rw [sum_edgeMultiplicity_mul_eq_walkSum_general]
-
 /-- **Literal normalized-circulation decomposition.**  Every normalized
 nonnegative circulation on the doubled orientation graph belongs to the
 convex hull of its simple-circuit coefficient vectors. -/
@@ -203,7 +181,7 @@ theorem normalizedCertificate_mem_convexHull_simpleSignedCircuits
       ⟨base, cycle, hcycle, rfl⟩
     have hstrict := hcircuit _ (subset_convexHull ℝ circuits hmem)
     rw [continuousLinearMap_eq_certificateValue functional,
-      certificateValue_circuitCoefficient_general orientedWeight] at hstrict
+      certificateValue_circuitCoefficient orientedWeight] at hstrict
     have hlength : (0 : ℝ) < cycle.length := by
       exact_mod_cast hcycle.1
     simpa only [mul_comm] using ((div_lt_iff₀ hlength).mp hstrict).le
@@ -475,7 +453,7 @@ theorem signedCirculationObjective_signedCircuitVector
     {base : V} (cycle : (signedGraph G).Walk base base) :
     signedCirculationObjective weight (signedCircuitVector cycle) =
       walkSum (signedBase weight) cycle / cycle.length := by
-  rw [← certificateValue_circuitCoefficient G weight cycle]
+  rw [← certificateValue_circuitCoefficient (signedBase weight) cycle]
   simp only [signedCirculationObjective, signedCircuitVector, signedProjection,
     FiniteInequality.certificateValue, Fintype.sum_prod_type, Fintype.sum_bool,
     signedBase]
@@ -702,7 +680,7 @@ theorem finite_absoluteSignedCircuitValues
       |FiniteInequality.certificateValue (signedBase weight)
           (circuitCoefficient cycle)| =
         |signedCirculationObjective weight (signedCircuitVector cycle)|
-    rw [certificateValue_circuitCoefficient G weight,
+    rw [certificateValue_circuitCoefficient (signedBase weight),
       signedCirculationObjective_signedCircuitVector]
 
 /-- **Attained absolute-circuit optimum.**  A finite multigraph with a

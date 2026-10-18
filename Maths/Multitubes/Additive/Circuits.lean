@@ -97,7 +97,8 @@ private theorem sum_edgeMultiplicity_eq_length [Fintype E] [DecidableEq E]
         EdgeGraph.Walk.length_concat, Finset.sum_add_distrib, ih]
       simp
 
-private theorem sum_edgeMultiplicity_mul_eq_walkSum
+/-- Weighting each edge by the number of times a walk traverses it recovers the walk sum. -/
+theorem sum_edgeMultiplicity_mul_eq_walkSum
     [Fintype E] [DecidableEq E] {G : EdgeGraph V E}
     (weight : E → ℝ) {start finish : V} (walk : G.Walk start finish) :
     ∑ edge, (walk.edgeMultiplicity edge : ℝ) * weight edge =
@@ -153,13 +154,13 @@ theorem circuitCoefficient_isNormalizedCertificate
     simp only [circuitCoefficient, div_mul_eq_mul_div, ← Finset.sum_div]
     rw [sum_edgeMultiplicity_mul_signedDelta_eq_zero G cycle vertex, zero_div]
 
-/-- The objective of a circuit certificate is its signed mean weight. -/
+/-- The objective of a circuit certificate is the mean weight of its closed walk, in any graph
+and for any edge weight. -/
 theorem certificateValue_circuitCoefficient
-    [Fintype E] [DecidableEq E] (G : EdgeGraph V E) (weight : E → ℝ)
-    {base : V} (cycle : (signedGraph G).Walk base base) :
-    FiniteInequality.certificateValue (signedBase weight)
-        (circuitCoefficient cycle) =
-      walkSum (signedBase weight) cycle / cycle.length := by
+    [Fintype E] [DecidableEq E] {G : EdgeGraph V E} (weight : E → ℝ)
+    {base : V} (cycle : G.Walk base base) :
+    FiniteInequality.certificateValue weight (circuitCoefficient cycle) =
+      walkSum weight cycle / cycle.length := by
   simp only [FiniteInequality.certificateValue, circuitCoefficient,
     div_mul_eq_mul_div, ← Finset.sum_div]
   rw [sum_edgeMultiplicity_mul_eq_walkSum]
