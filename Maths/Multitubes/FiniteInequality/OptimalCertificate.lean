@@ -43,29 +43,6 @@ universe uS uR
 variable {State : Type uS} {Row : Type uR}
 variable [Fintype State] [Fintype Row]
 
-omit [Fintype State] in
-private theorem exists_maximizing_normalizedCertificate
-    (delta : Row → State → ℝ) (base : Row → ℝ)
-    (hexists : ∃ coefficient, IsNormalizedCertificate delta coefficient) :
-    ∃ coefficient, IsNormalizedCertificate delta coefficient ∧
-      ∀ candidate, IsNormalizedCertificate delta candidate →
-        certificateValue base candidate ≤ certificateValue base coefficient := by
-  classical
-  let feasible := LinearProgramming.normalizedFarkasCertificateSet
-    (balanceMatrix delta) (fun _ => 1)
-  obtain ⟨initial, hinitial⟩ := hexists
-  have hinitialMem : initial ∈ feasible :=
-    (mem_normalizedFarkasCertificateSet_iff delta initial).mpr hinitial
-  let objectiveMap := LinearProgramming.finiteDotContinuousLinearMap base
-  obtain ⟨optimal, hoptimalMem, hoptimal⟩ :=
-    (normalizedCertificateSet_isCompact delta).exists_isMaxOn
-      ⟨initial, hinitialMem⟩ objectiveMap.continuous.continuousOn
-  refine ⟨optimal, (mem_normalizedFarkasCertificateSet_iff delta optimal).mp hoptimalMem,
-    fun candidate hcandidate => ?_⟩
-  simpa [certificateValue, objectiveMap,
-    LinearProgramming.finiteDotContinuousLinearMap_apply, mul_comm] using
-      hoptimal ((mem_normalizedFarkasCertificateSet_iff delta candidate).mpr hcandidate)
-
 /-- An attained least worst-residual level has a normalized certificate with matching value. -/
 theorem exists_normalizedCertificate_value_eq_of_isLeast
     (delta : Row → State → ℝ) (base : Row → ℝ) {level : ℝ}
@@ -177,49 +154,6 @@ theorem isLeast_worstResidualAtMost_of_certificate
   rw [← hvalue]
   exact certificateValue_le_of_worstResidualAtMost hcandidate hcertificate
 
-omit [Fintype State] in
-private theorem exists_optimal_linearIndependent
-    (delta : Row → State → ℝ) (base : Row → ℝ)
-    {initial : Row → ℝ} (hinitial : IsNormalizedCertificate delta initial) :
-    ∃ coefficient, IsNormalizedCertificate delta coefficient ∧
-      certificateValue base initial ≤ certificateValue base coefficient ∧
-      LinearIndependent ℝ
-        (fun row : {row : Row // coefficient row ≠ 0} => augmentedColumn delta row.1) := by
-  classical
-  let feasible := LinearProgramming.normalizedFarkasCertificateSet
-    (balanceMatrix delta) (fun _ => 1)
-  have hinitialMem : initial ∈ feasible :=
-    (mem_normalizedFarkasCertificateSet_iff delta initial).mpr hinitial
-  let objectiveMap := LinearProgramming.finiteDotContinuousLinearMap base
-  obtain ⟨optimal, hoptimalMem, hoptimal⟩ :=
-    (normalizedCertificateSet_isCompact delta).exists_isMaxOn
-      ⟨initial, hinitialMem⟩ objectiveMap.continuous.continuousOn
-  have hstandard : LinearProgramming.IsStandardOptimal
-      (LinearProgramming.normalizedFarkasMatrix
-        (balanceMatrix delta) (fun _ => 1))
-      LinearProgramming.normalizedFarkasRhs base optimal := by
-    refine ⟨hoptimalMem, fun candidate hcandidate => ?_⟩
-    simpa [objectiveMap, LinearProgramming.finiteDotContinuousLinearMap_apply] using
-      hoptimal hcandidate
-  obtain ⟨extreme, hextreme, hextremeOptimal, hvalue⟩ :=
-    LinearProgramming.exists_extreme_standardOptimal_of_standardOptimal
-      (LinearProgramming.normalizedFarkasMatrix
-        (balanceMatrix delta) (fun _ => 1))
-      LinearProgramming.normalizedFarkasRhs base hstandard
-  refine ⟨extreme, (mem_normalizedFarkasCertificateSet_iff delta extreme).mp
-    hextremeOptimal.1, ?_, ?_⟩
-  · calc
-      certificateValue base initial ≤ certificateValue base optimal := by
-        simpa [certificateValue, objectiveMap,
-          LinearProgramming.finiteDotContinuousLinearMap_apply, mul_comm] using
-            hoptimal hinitialMem
-      _ = certificateValue base extreme := by
-        simpa [certificateValue, mul_comm] using hvalue.symm
-  · exact LinearProgramming.linearIndependent_supportColumns_of_extreme_standardFeasible
-      (LinearProgramming.normalizedFarkasMatrix
-        (balanceMatrix delta) (fun _ => 1))
-      LinearProgramming.normalizedFarkasRhs hextreme
-
 /-- At an attained least level, an optimal certificate can be chosen on tight rows of any supplied
 optimal point, with support at most the row-vector rank plus one. -/
 theorem exists_rankSparse_normalizedCertificate_of_isLeast
@@ -236,7 +170,7 @@ theorem exists_rankSparse_normalizedCertificate_of_isLeast
   obtain ⟨initial, hinitial, hinitialValue⟩ :=
     exists_normalizedCertificate_value_eq_of_isLeast delta base hleast
   obtain ⟨coefficient, hcertificate, hinitialLe, hlinear⟩ :=
-    exists_optimal_linearIndependent delta base hinitial
+    exists_normalizedCertificate_linearIndependent_value_ge delta base hinitial
   have hvalueLe := certificateValue_le_of_worstResidualAtMost hleast.1 hcertificate
   have hvalue : certificateValue base coefficient = level := by linarith
   refine ⟨coefficient, hcertificate, hvalue,

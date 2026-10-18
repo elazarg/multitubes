@@ -36,9 +36,14 @@ columns, which is at most the coordinate rank plus one.
 
 * `Maths.FiniteInequality.exists_positive_normalizedCertificate_of_infeasible`:
   infeasibility produces a normalized certificate of positive objective.
+* `Maths.FiniteInequality.exists_maximizing_normalizedCertificate`: the objective attains its
+  maximum over the normalized certificates, when there are any.
+* `Maths.FiniteInequality.exists_normalizedCertificate_linearIndependent_value_ge`: every
+  normalized certificate is dominated by one with linearly independent augmented support
+  columns.
 * `Maths.FiniteInequality.exists_positive_normalizedCertificate_linearIndependent`:
-  that certificate can be chosen with linearly independent augmented support columns.  This is
-  the engine for every sparsity bound below.
+  in particular the positive certificate can be chosen with linearly independent augmented
+  support columns.  This is the engine for every sparsity bound below.
 * `Maths.FiniteInequality.exists_positiveCircuit_of_infeasible`: the same witness
   packaged as a minimal affine row configuration around the origin.
 * `Maths.FiniteInequality.exists_positive_normalizedCertificate_support_card_le_rank`
@@ -208,6 +213,66 @@ theorem normalizedCertificateSet_isCompact
   rw [heq]
   simpa [Set.inter_comm] using isCompact_Icc.inter_right hclosed
 
+omit [Fintype State] in
+/-- Some normalized certificate maximizes the objective among all normalized certificates, as
+soon as one exists: the normalized certificates form a compact set. -/
+theorem exists_maximizing_normalizedCertificate
+    (delta : Row → State → ℝ) (base : Row → ℝ)
+    (hexists : ∃ coefficient, IsNormalizedCertificate delta coefficient) :
+    ∃ coefficient, IsNormalizedCertificate delta coefficient ∧
+      ∀ candidate, IsNormalizedCertificate delta candidate →
+        certificateValue base candidate ≤ certificateValue base coefficient := by
+  classical
+  obtain ⟨initial, hinitial⟩ := hexists
+  let objectiveMap := LinearProgramming.finiteDotContinuousLinearMap base
+  obtain ⟨optimal, hoptimalMem, hoptimal⟩ :=
+    (normalizedCertificateSet_isCompact delta).exists_isMaxOn
+      ⟨initial, (mem_normalizedFarkasCertificateSet_iff delta initial).mpr hinitial⟩
+      objectiveMap.continuous.continuousOn
+  refine ⟨optimal, (mem_normalizedFarkasCertificateSet_iff delta optimal).mp hoptimalMem,
+    fun candidate hcandidate => ?_⟩
+  simpa [certificateValue, objectiveMap,
+    LinearProgramming.finiteDotContinuousLinearMap_apply, mul_comm] using
+      hoptimal ((mem_normalizedFarkasCertificateSet_iff delta candidate).mpr hcandidate)
+
+omit [Fintype State] in
+/-- Every normalized certificate is dominated in objective value by a normalized certificate
+whose augmented support columns are linearly independent: an extreme maximizer. -/
+theorem exists_normalizedCertificate_linearIndependent_value_ge
+    (delta : Row → State → ℝ) (base : Row → ℝ)
+    {initial : Row → ℝ} (hinitial : IsNormalizedCertificate delta initial) :
+    ∃ coefficient, IsNormalizedCertificate delta coefficient ∧
+      certificateValue base initial ≤ certificateValue base coefficient ∧
+      LinearIndependent ℝ
+        (fun row : {row : Row // coefficient row ≠ 0} => augmentedColumn delta row.1) := by
+  classical
+  obtain ⟨optimal, hoptimalCertificate, hoptimal⟩ :=
+    exists_maximizing_normalizedCertificate delta base ⟨initial, hinitial⟩
+  have hstandard : LinearProgramming.IsStandardOptimal
+      (LinearProgramming.normalizedFarkasMatrix
+        (balanceMatrix delta) (fun _ => 1))
+      LinearProgramming.normalizedFarkasRhs base optimal := by
+    refine ⟨(mem_normalizedFarkasCertificateSet_iff delta optimal).mpr hoptimalCertificate,
+      fun candidate hcandidate => ?_⟩
+    simpa [certificateValue, mul_comm] using
+      hoptimal candidate ((mem_normalizedFarkasCertificateSet_iff delta candidate).mp hcandidate)
+  obtain ⟨extreme, hextreme, hextremeOptimal, hvalue⟩ :=
+    LinearProgramming.exists_extreme_standardOptimal_of_standardOptimal
+      (LinearProgramming.normalizedFarkasMatrix
+        (balanceMatrix delta) (fun _ => 1))
+      LinearProgramming.normalizedFarkasRhs base hstandard
+  refine ⟨extreme, (mem_normalizedFarkasCertificateSet_iff delta extreme).mp
+    hextremeOptimal.1, ?_, ?_⟩
+  · calc
+      certificateValue base initial ≤ certificateValue base optimal :=
+        hoptimal initial hinitial
+      _ = certificateValue base extreme := by
+        simpa [certificateValue, mul_comm] using hvalue.symm
+  · exact LinearProgramming.linearIndependent_supportColumns_of_extreme_standardFeasible
+      (LinearProgramming.normalizedFarkasMatrix
+        (balanceMatrix delta) (fun _ => 1))
+      LinearProgramming.normalizedFarkasRhs hextreme
+
 /-- **Rank-sparse positive certificate.**  The positive support columns can be
 chosen linearly independent in the augmented balance system. -/
 theorem exists_positive_normalizedCertificate_linearIndependent
@@ -220,49 +285,11 @@ theorem exists_positive_normalizedCertificate_linearIndependent
       LinearIndependent ℝ
         (fun row : {row : Row // coefficient row ≠ 0} =>
           augmentedColumn delta row.1) := by
-  classical
   obtain ⟨initial, hinitial, hinitialPositive⟩ :=
     exists_positive_normalizedCertificate_of_infeasible delta base hinfeasible
-  let feasible := LinearProgramming.normalizedFarkasCertificateSet
-    (balanceMatrix delta) (fun _ => 1)
-  have hinitialMem : initial ∈ feasible :=
-    (mem_normalizedFarkasCertificateSet_iff delta initial).mpr hinitial
-  let objectiveMap := LinearProgramming.finiteDotContinuousLinearMap base
-  obtain ⟨optimal, hoptimalMem, hoptimal⟩ :=
-    (normalizedCertificateSet_isCompact delta).exists_isMaxOn
-      ⟨initial, hinitialMem⟩ objectiveMap.continuous.continuousOn
-  have hstandardOptimal : LinearProgramming.IsStandardOptimal
-      (LinearProgramming.normalizedFarkasMatrix
-        (balanceMatrix delta) (fun _ => 1))
-      LinearProgramming.normalizedFarkasRhs base optimal := by
-    refine ⟨hoptimalMem, fun candidate hcandidate => ?_⟩
-    simpa [objectiveMap, LinearProgramming.finiteDotContinuousLinearMap_apply] using
-      hoptimal hcandidate
-  obtain ⟨extreme, hextreme, hextremeOptimal, hvalue⟩ :=
-    LinearProgramming.exists_extreme_standardOptimal_of_standardOptimal
-      (LinearProgramming.normalizedFarkasMatrix
-        (balanceMatrix delta) (fun _ => 1))
-      LinearProgramming.normalizedFarkasRhs base hstandardOptimal
-  have hextremeNormalized : IsNormalizedCertificate delta extreme :=
-    (mem_normalizedFarkasCertificateSet_iff delta extreme).mp
-      hextremeOptimal.1
-  have hinitialLe : certificateValue base initial ≤
-      certificateValue base optimal := by
-    simpa [certificateValue, objectiveMap,
-      LinearProgramming.finiteDotContinuousLinearMap_apply, mul_comm] using
-      hoptimal hinitialMem
-  have hextremePositive : 0 < certificateValue base extreme := by
-    have hvalue' : certificateValue base extreme =
-        certificateValue base optimal := by
-      simpa [certificateValue, mul_comm] using hvalue
-    rw [hvalue']
-    exact hinitialPositive.trans_le hinitialLe
-  have hlinear :=
-    LinearProgramming.linearIndependent_supportColumns_of_extreme_standardFeasible
-      (LinearProgramming.normalizedFarkasMatrix
-        (balanceMatrix delta) (fun _ => 1))
-      LinearProgramming.normalizedFarkasRhs hextreme
-  exact ⟨extreme, hextremeNormalized, hextremePositive, hlinear⟩
+  obtain ⟨coefficient, hcertificate, hle, hlinear⟩ :=
+    exists_normalizedCertificate_linearIndependent_value_ge delta base hinitial
+  exact ⟨coefficient, hcertificate, hinitialPositive.trans_le hle, hlinear⟩
 
 omit [Fintype State] in
 private theorem affineIndependent_of_linearIndependent_augmented
