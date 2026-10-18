@@ -45,7 +45,6 @@ public import Maths.Multitubes.Mixed.AdjointOrder
 public import Maths.Multitubes.Mixed.Bellman
 public import Maths.Multitubes.Category
 public import Maths.Multitubes.CategoricalRetracts
-public import Maths.Multitubes.CategoricalRetractAdapter
 public import Maths.Multitubes.Closure
 public import Maths.Multitubes.Worklist
 public import Maths.Multitubes.Morphism

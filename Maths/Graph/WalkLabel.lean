@@ -33,7 +33,8 @@ The two agree in a commutative monoid (`Maths.walkLabel_eq_walkProd`).  A labell
 ## Main definitions
 
 * `Maths.walkLabel` - the composite label of a walk in action order.
-* `Maths.HasTrivialCycleLabels` - every closed walk has identity label.
+* `Maths.HasTrivialCycleLabels` - every closed walk has identity label, and
+  `Maths.HasTrivialBaseLabels` - every closed walk at one base does.
 * `Maths.HasZeroCycleSums` - every closed walk has zero sum.
 * `Maths.walkProd` and `Maths.walkSum` - the chronological product and sum of edge data
   along a walk.
@@ -117,6 +118,10 @@ variable {label : E → M}
 balance; for a transport it is flatness. -/
 def HasTrivialCycleLabels (G : EdgeGraph V E) (label : E → M) : Prop :=
   ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkLabel label cycle = 1
+
+/-- Flatness only at one selected base: every closed walk there has identity label. -/
+def HasTrivialBaseLabels (G : EdgeGraph V E) (label : E → M) (base : V) : Prop :=
+  ∀ cycle : G.Walk base base, walkLabel label cycle = 1
 
 end Label
 

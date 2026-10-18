@@ -20,9 +20,8 @@ path family need not be an arborescence.
 
 ## Main definitions
 
-* `Maths.HasSCCUnitPotentialAt` and `Maths.HasSCCUnitPotentials`:
-  the labelling is a unit-valued coboundary on one component, respectively on every
-  component.
+* `Maths.HasSCCUnitPotentials`: the labelling is a unit-valued coboundary on every
+  strongly connected component, in the sense of `Maths.HasSCCUnitPotentialAt`.
 * `Maths.IsGeneratedEdge`: the edges a family of walks out of a root already accounts
   for.
 
@@ -53,17 +52,6 @@ section Monoid
 
 variable [Monoid M]
 
-/-- A unit potential local to the strongly connected component of `base`.
-Only edges whose endpoints lie in that component are constrained. -/
-def HasSCCUnitPotentialAt (G : EdgeGraph V E) (label : E → M)
-    (base : V) : Prop :=
-  ∃ potential : V → Mˣ, ∀ edge : E,
-    LinkedTo G base (G.source edge) →
-    LinkedTo G base (G.target edge) →
-      label edge =
-        (potential (G.target edge) *
-          (potential (G.source edge))⁻¹ : Mˣ)
-
 /-- Unit-potential normal form on every strongly connected component. -/
 def HasSCCUnitPotentials (G : EdgeGraph V E) (label : E → M) : Prop :=
   ∀ base : V, HasSCCUnitPotentialAt G label base
@@ -73,19 +61,15 @@ unit-valued coboundary separately on every strongly connected component.
 No condition is imposed on inter-component edges. -/
 theorem hasTrivialCycleLabels_iff_hasSCCUnitPotentials :
     HasTrivialCycleLabels G label ↔ HasSCCUnitPotentials G label := by
-  constructor
-  · exact exists_unitPotential_on_component
-  · intro hcomponents base cycle
-    obtain ⟨potential, hpotential⟩ := hcomponents base
-    have hedge (edge : E) (hmem : edge ∈ cycle.edges) :
-        label edge =
-          (potential (G.target edge) *
-            (potential (G.source edge))⁻¹ : Mˣ) :=
-      hpotential edge
-        (linkedTo_source_of_mem_edges cycle hmem)
-        (linkedTo_target_of_mem_edges cycle hmem)
-    rw [walkLabel_eq_of_forall_mem_edges potential cycle hedge]
-    simp
+  refine ⟨hasSCCUnitPotentialAt_of_trivialCycleLabels, fun hcomponents base cycle ↦ ?_⟩
+  obtain ⟨potential, hpotential⟩ := hcomponents base
+  have hwalk := walkLabel_mul_eq_of_forall_mem_edges potential cycle fun edge hmem ↦
+    hpotential edge (linkedTo_source_of_mem_edges cycle hmem)
+      (linkedTo_target_of_mem_edges cycle hmem)
+  calc walkLabel label cycle
+      = walkLabel label cycle * potential base * ((potential base)⁻¹ : Mˣ) := by
+        simp [mul_assoc]
+    _ = 1 := by rw [hwalk, Units.mul_inv]
 
 end Monoid
 
@@ -121,12 +105,9 @@ theorem hasTrivialCycleLabels_iff_nonGeneratedEdges {base : V}
     ((paths (G.source edge)).concat edge) (paths (G.target edge)), fun hnongenerated => ?_⟩
   refine hasTrivialCycleLabels_of_unitPotential (fun vertex => toUnits
     (walkLabel label (paths vertex))) fun edge => ?_
-  have hedge : label edge * walkLabel label (paths (G.source edge)) =
-      walkLabel label (paths (G.target edge)) := by
-    by_cases hgenerated : IsGeneratedEdge paths edge
-    · exact label_mul_walkLabel_eq_of_isGeneratedEdge hgenerated
-    · exact hnongenerated edge hgenerated
-  simp [← hedge]
+  by_cases hgenerated : IsGeneratedEdge paths edge
+  · exact label_mul_walkLabel_eq_of_isGeneratedEdge hgenerated
+  · exact hnongenerated edge hgenerated
 
 end Group
 

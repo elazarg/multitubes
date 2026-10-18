@@ -8,6 +8,8 @@ module
 public import Maths.Multitubes.Basic
 public import Mathlib.GroupTheory.DedekindFinite
 
+import Mathlib.Algebra.Group.Units.Basic
+
 /-!
 # Exact transport beyond groups
 
@@ -30,14 +32,10 @@ strongly connected component.  Additive edge data are the same theory read throu
 * `Maths.Transport.IsSectionWithBase` and
   `Maths.Transport.rootedSection`: sections normalised at the base, and the
   canonical one built by transporting a base point.
-* `Maths.Transport.IsBaseHolonomyFixed`: every closed walk at the base fixes
-  the base fiber pointwise.
-* `Maths.Transport.ingressMap`, `Maths.Transport.returnMap`, and
-  `Maths.Transport.retractProjector`: the split retract data attached to
-  chosen path families.
-* `Maths.HasTrivialBaseLabels`: closed walks at one base carry trivial labels.
-* `Maths.IsUnitPotential`: the multiplicative coboundary condition on a
-  unit-valued function on vertices.
+* `Maths.Transport.IsBaseHolonomyFixed`: a point fixed by every closed walk at the base.
+* `Maths.IsUnitPotential`: a unit-valued section of the regular representation, the
+  multiplicative coboundary condition.
+* `Maths.HasSCCUnitPotentialAt`: a unit potential on the strongly connected component of a base.
 * `Maths.linkedUnit`: the unit read off the out-and-back walks to a linked vertex.
 
 ## Main results
@@ -49,19 +47,18 @@ strongly connected component.  Additive edge data are the same theory read throu
   recurrence makes flat transport groupoidal.
 * `Maths.Transport.existsUnique_section_of_base_fixed_of_injective_returns`:
   the sharp injective-return section criterion.
-* `Maths.Transport.compressed_walkMap_eq`: one-base flatness is
-  path-independent on chosen split retracts.
 * `Maths.hasTrivialCycleLabels_of_base_of_dedekindFinite`: direct finiteness
   is the sufficient one-sided-inverse hypothesis used to move flatness between bases.
 * `Maths.walkLabel_eq_of_trivialCycleLabels_of_return`: flat labels are path independent
   on recurrent regions.
 * `Maths.isUnit_edge_of_trivialCycleLabels`: under flatness, the label of an edge on a closed
   walk is a unit.
-* `Maths.walkLabel_eq_of_forall_mem_edges` and `Maths.hasTrivialCycleLabels_of_unitPotential`:
+* `Maths.isUnitPotential_iff_label_eq`: a unit potential is a coboundary.
+* `Maths.walkLabel_mul_eq_of_forall_mem_edges` and `Maths.hasTrivialCycleLabels_of_unitPotential`:
   unit-valued coboundaries telescope along walks, so they are flat.
-* `Maths.exists_unitPotential_on_component`: a flat labelling is a unit-valued coboundary on
-  the strongly connected component of any vertex.
-* `Maths.exists_unitPotential_of_trivialCycleLabels`: arbitrary monoid-valued
+* `Maths.hasSCCUnitPotentialAt_of_trivialCycleLabels`: a flat labelling is a unit-valued
+  coboundary on the strongly connected component of any vertex.
+* `Maths.hasTrivialCycleLabels_iff_exists_unitPotential`: arbitrary monoid-valued
   flat labels live in the unit group as soon as every edge endpoint is linked to a base
   vertex.
 * `Maths.exists_unitPotential_of_trivialCycleLabels_of_hasEdgeReturns`: the same
@@ -277,90 +274,6 @@ theorem existsUnique_section_of_base_fixed_of_injective_returns
   rw [← hother.2]
   exact (hother.1.walkMap_eq (paths vertex)).symm
 
-/-! ## One-base split retracts -/
-
-section Retracts
-
-variable {base : V}
-variable (ingress : ∀ vertex, G.Walk base vertex)
-variable (returns : ∀ vertex, G.Walk vertex base)
-
-/-- Chosen transport from the base into a vertex fiber. -/
-def ingressMap (vertex : V) : Fiber base → Fiber vertex :=
-  T.walkMap (ingress vertex)
-
-/-- Chosen transport from a vertex fiber back to the base. -/
-def returnMap (vertex : V) : Fiber vertex → Fiber base :=
-  T.walkMap (returns vertex)
-
-/-- The chosen split idempotent on a vertex fiber. -/
-def retractProjector (vertex : V) : Fiber vertex → Fiber vertex :=
-  T.ingressMap ingress vertex ∘ T.returnMap returns vertex
-
-theorem returnMap_comp_ingressMap
-    (hbaseFlat : ∀ cycle : G.Walk base base, T.holonomy cycle = id)
-    (vertex : V) :
-    T.returnMap returns vertex ∘ T.ingressMap ingress vertex = id := by
-  funext point
-  rw [returnMap, ingressMap, Function.comp_apply,
-    ← T.walkMap_append (ingress vertex) (returns vertex)]
-  exact congrFun (hbaseFlat _) point
-
-theorem retractProjector_idempotent
-    (hbaseFlat : ∀ cycle : G.Walk base base, T.holonomy cycle = id)
-    (vertex : V) :
-    T.retractProjector ingress returns vertex ∘
-        T.retractProjector ingress returns vertex =
-      T.retractProjector ingress returns vertex := by
-  funext point
-  change T.ingressMap ingress vertex
-      (T.returnMap returns vertex
-        (T.ingressMap ingress vertex (T.returnMap returns vertex point))) =
-    T.ingressMap ingress vertex (T.returnMap returns vertex point)
-  rw [show T.returnMap returns vertex
-      (T.ingressMap ingress vertex (T.returnMap returns vertex point)) =
-      T.returnMap returns vertex point from
-    congrFun (T.returnMap_comp_ingressMap ingress returns hbaseFlat vertex)
-      (T.returnMap returns vertex point)]
-
-/-- **Retract flatness.**  Compressing any forward walk by the chosen split
-idempotents gives the same map, independently of the walk. -/
-theorem compressed_walkMap_eq {start finish : V}
-    (hbaseFlat : ∀ cycle : G.Walk base base, T.holonomy cycle = id)
-    (walk : G.Walk start finish) :
-    T.retractProjector ingress returns finish ∘ T.walkMap walk ∘
-        T.retractProjector ingress returns start =
-      T.ingressMap ingress finish ∘ T.returnMap returns start := by
-  funext point
-  simp only [retractProjector, ingressMap, returnMap, Function.comp_apply]
-  congr 1
-  rw [← T.walkMap_append (ingress start) walk,
-    ← T.walkMap_append ((ingress start).append walk) (returns finish)]
-  exact congrFun (hbaseFlat (((ingress start).append walk).append
-    (returns finish))) (T.walkMap (returns start) point)
-
-/-- The compressed forward and backward maps are mutually inverse on their
-projectors, the concrete function-level content of the Karoubi-envelope
-groupoid statement. -/
-theorem compressed_maps_comp
-    (hbaseFlat : ∀ cycle : G.Walk base base, T.holonomy cycle = id)
-    {first second : V} :
-    (T.ingressMap ingress first ∘ T.returnMap returns second) ∘
-        (T.ingressMap ingress second ∘ T.returnMap returns first) =
-      T.retractProjector ingress returns first := by
-  funext point
-  change T.ingressMap ingress first
-      (T.returnMap returns second
-        (T.ingressMap ingress second (T.returnMap returns first point))) =
-    T.ingressMap ingress first (T.returnMap returns first point)
-  rw [show T.returnMap returns second
-      (T.ingressMap ingress second (T.returnMap returns first point)) =
-      T.returnMap returns first point from
-    congrFun (T.returnMap_comp_ingressMap ingress returns hbaseFlat second)
-      (T.returnMap returns first point)]
-
-end Retracts
-
 end Transport
 
 /-! ## Monoid-valued balance -/
@@ -368,10 +281,6 @@ end Transport
 section Monoid
 
 variable {M : Type uM} [Monoid M] {label : E → M}
-
-/-- Flatness only at one selected base. -/
-def HasTrivialBaseLabels (G : EdgeGraph V E) (label : E → M) (base : V) : Prop :=
-  ∀ cycle : G.Walk base base, walkLabel label cycle = 1
 
 /-- In a directly finite monoid, one-base flatness on a strongly connected
 graph propagates to every base. -/
@@ -410,27 +319,40 @@ theorem walkLabel_eq_of_trivialCycleLabels_of_return
     congrFun ((ofSMul G M label).walkMap_eq_of_trivialHolonomy_of_return
       (hasTrivialHolonomy_ofSMul hflat) first second back) 1
 
-/-- A **unit potential** for a monoid labelling: a unit-valued function on vertices whose ratio
-across each edge is the label of that edge.  This is the multiplicative coboundary condition, and
-it is the shape of every witness produced below. -/
+/-- A **unit potential** for a monoid labelling: a unit-valued family that is a section of the
+regular representation, so that crossing an edge multiplies it by the edge's label,
+`label edge * potential (source edge) = potential (target edge)`.  Equivalently the label of
+each edge is the ratio of the potential across it (`Maths.isUnitPotential_iff_label_eq`): this
+is the multiplicative coboundary condition, and it is the shape of every witness produced
+below. -/
 def IsUnitPotential (G : EdgeGraph V E) (label : E → M) (potential : V → Mˣ) : Prop :=
-  ∀ edge : E,
-    label edge = (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ)
+  (ofSMul G M label).IsSection fun vertex => (potential vertex : M)
 
-/-- Telescoping: along a walk whose every edge satisfies the coboundary equation of a unit
-potential, the walk label is the ratio of the potential at the endpoints. -/
-theorem walkLabel_eq_of_forall_mem_edges (potential : V → Mˣ) {start finish : V}
+theorem isUnitPotential_iff {potential : V → Mˣ} :
+    IsUnitPotential G label potential ↔
+      ∀ edge, label edge * potential (G.source edge) = potential (G.target edge) :=
+  Iff.rfl
+
+/-- The coboundary form of a unit potential: each label is the ratio of the potential across
+its edge. -/
+theorem isUnitPotential_iff_label_eq {potential : V → Mˣ} :
+    IsUnitPotential G label potential ↔
+      ∀ edge, label edge = (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ) :=
+  forall_congr' fun _ => by
+    rw [Units.val_mul, Units.eq_mul_inv_iff_mul_eq]
+    rfl
+
+/-- Telescoping: along a walk whose every edge satisfies the equation of a unit potential, the
+walk label carries the potential at the start to the potential at the end. -/
+theorem walkLabel_mul_eq_of_forall_mem_edges (potential : V → Mˣ) {start finish : V}
     (walk : G.Walk start finish)
     (hedge : ∀ edge ∈ walk.edges,
-      label edge = (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ)) :
-    walkLabel label walk = (potential finish * (potential start)⁻¹ : Mˣ) := by
+      label edge * potential (G.source edge) = potential (G.target edge)) :
+    walkLabel label walk * potential start = potential finish := by
   have h := (ofSMul G M label).walkMap_rel_of_forall_mem_edges
     (family := fun vertex => (potential vertex : M)) (R := fun _ => Eq) (fun _ => rfl)
-    (fun _ => Eq.trans) walk (fun _ _ _ _ hxy => congrArg _ hxy) fun edge hmem => by
-      change label edge * _ = _
-      simp [hedge edge hmem, mul_assoc]
-  rw [walkMap_ofSMul_eq_walkLabel_smul, smul_eq_mul] at h
-  simp [← h, mul_assoc]
+    (fun _ => Eq.trans) walk (fun _ _ _ _ hxy => congrArg _ hxy) hedge
+  rwa [walkMap_ofSMul_eq_walkLabel_smul, smul_eq_mul] at h
 
 /-- The unit represented by the chosen out-and-back walks between a base and a linked
 vertex.  Flatness makes the two composite labels mutually inverse. -/
@@ -449,33 +371,31 @@ theorem linkedUnit_congr (hflat : HasTrivialCycleLabels G label) {base base' ver
   subst hbase
   rfl
 
-/-- An edge whose endpoints are linked to a common base carries the ratio of the linked
-units at its endpoints. -/
-theorem label_eq_linkedUnit (hflat : HasTrivialCycleLabels G label) {base : V} (edge : E)
+/-- An edge whose endpoints are linked to a common base carries the linked unit at its source
+to the linked unit at its target. -/
+theorem label_mul_linkedUnit (hflat : HasTrivialCycleLabels G label) {base : V} (edge : E)
     (hsource : LinkedTo G base (G.source edge)) (htarget : LinkedTo G base (G.target edge)) :
-    label edge =
-      (linkedUnit hflat htarget * (linkedUnit hflat hsource)⁻¹ : Mˣ) := by
-  have hparallel := walkLabel_eq_of_trivialCycleLabels_of_return hflat
-    (hsource.1.some.concat edge) htarget.1.some htarget.2.some
-  simp only [walkLabel_concat] at hparallel
-  have hpathReturn : walkLabel label hsource.1.some * walkLabel label hsource.2.some = 1 := by
-    simpa using hflat (G.source edge) (hsource.2.some.append hsource.1.some)
-  change label edge = walkLabel label htarget.1.some * walkLabel label hsource.2.some
-  rw [← hparallel, mul_assoc, hpathReturn, mul_one]
+    label edge * linkedUnit hflat hsource = linkedUnit hflat htarget :=
+  walkLabel_eq_of_trivialCycleLabels_of_return hflat (hsource.1.some.concat edge)
+    htarget.1.some htarget.2.some
+
+/-- A unit potential local to the strongly connected component of `base`: only edges whose
+endpoints both lie in that component are constrained. -/
+def HasSCCUnitPotentialAt (G : EdgeGraph V E) (label : E → M) (base : V) : Prop :=
+  ∃ potential : V → Mˣ, ∀ edge : E,
+    LinkedTo G base (G.source edge) → LinkedTo G base (G.target edge) →
+      label edge * potential (G.source edge) = potential (G.target edge)
 
 /-- **Component-wise coboundary.**  On the strongly connected component of a base vertex, a
-flat monoid labelling is a unit-valued coboundary: one potential satisfies the coboundary
-equation on every edge whose endpoints are linked to the base.  Vertices outside the component
-receive the trivial unit. -/
-theorem exists_unitPotential_on_component (hflat : HasTrivialCycleLabels G label) (base : V) :
-    ∃ potential : V → Mˣ, ∀ edge : E,
-      LinkedTo G base (G.source edge) → LinkedTo G base (G.target edge) →
-        label edge = (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ) := by
+flat monoid labelling is a unit-valued coboundary.  Vertices outside the component receive the
+trivial unit. -/
+theorem hasSCCUnitPotentialAt_of_trivialCycleLabels (hflat : HasTrivialCycleLabels G label)
+    (base : V) : HasSCCUnitPotentialAt G label base := by
   classical
   refine ⟨fun vertex ↦ if h : LinkedTo G base vertex then linkedUnit hflat h else 1,
     fun edge hsource htarget ↦ ?_⟩
   simp only [dite_eq_left hsource, dite_eq_left htarget]
-  exact label_eq_linkedUnit hflat edge hsource htarget
+  exact label_mul_linkedUnit hflat edge hsource htarget
 
 /-- Every flat monoid labelling whose edge endpoints are all linked to a base
 vertex is a unit-valued coboundary, even when the ambient monoid is not a group. -/
@@ -483,7 +403,7 @@ theorem exists_unitPotential_of_trivialCycleLabels {base : V}
     (hlinked : EdgeEndpointsLinkedTo G base)
     (hflat : HasTrivialCycleLabels G label) :
     ∃ potential : V → Mˣ, IsUnitPotential G label potential :=
-  let ⟨potential, hpotential⟩ := exists_unitPotential_on_component hflat base
+  let ⟨potential, hpotential⟩ := hasSCCUnitPotentialAt_of_trivialCycleLabels hflat base
   ⟨potential, fun edge ↦ hpotential edge (hlinked edge).1 (hlinked edge).2⟩
 
 /-- **Coboundary reconstruction.**  A flat monoid labelling is a unit-valued
@@ -511,15 +431,28 @@ theorem exists_unitPotential_of_trivialCycleLabels_of_hasEdgeReturns
   refine ⟨fun vertex ↦ linkedUnit hflat (hrepresentative vertex), fun edge ↦ ?_⟩
   have hsource : LinkedTo G (representative (G.target edge)) (G.source edge) :=
     hsame edge ▸ hrepresentative (G.source edge)
-  rw [label_eq_linkedUnit hflat edge hsource (hrepresentative (G.target edge)),
-    linkedUnit_congr hflat (hsame edge).symm hsource (hrepresentative (G.source edge))]
+  change label edge * linkedUnit hflat (hrepresentative (G.source edge)) = _
+  rw [linkedUnit_congr hflat (hsame edge) (hrepresentative (G.source edge)) hsource]
+  exact label_mul_linkedUnit hflat edge hsource (hrepresentative (G.target edge))
 
 /-- A unit-valued coboundary has trivial labels on every closed walk. -/
 theorem hasTrivialCycleLabels_of_unitPotential
-    (potential : V → Mˣ) (hedge : IsUnitPotential G label potential) :
-    HasTrivialCycleLabels G label := fun _ cycle ↦ by
-  rw [walkLabel_eq_of_forall_mem_edges potential cycle fun edge _ ↦ hedge edge]
-  simp
+    (potential : V → Mˣ) (hpotential : IsUnitPotential G label potential) :
+    HasTrivialCycleLabels G label := fun vertex cycle ↦ by
+  have h := Transport.IsSection.holonomy_eq hpotential cycle
+  rw [holonomy_ofSMul_eq_walkLabel_smul, smul_eq_mul] at h
+  calc walkLabel label cycle
+      = walkLabel label cycle * potential vertex * ((potential vertex)⁻¹ : Mˣ) := by
+        simp [mul_assoc]
+    _ = 1 := by rw [h, Units.mul_inv]
+
+/-- Flatness is exactly the existence of a unit-valued coboundary potential, when every edge
+endpoint is linked to a base vertex. -/
+theorem hasTrivialCycleLabels_iff_exists_unitPotential {base : V}
+    (hlinked : EdgeEndpointsLinkedTo G base) :
+    HasTrivialCycleLabels G label ↔ ∃ potential : V → Mˣ, IsUnitPotential G label potential :=
+  ⟨exists_unitPotential_of_trivialCycleLabels hlinked,
+    fun ⟨potential, hpotential⟩ => hasTrivialCycleLabels_of_unitPotential potential hpotential⟩
 
 /-- Under flatness, an edge lying on a closed walk carries a unit label: its label and that of
 the return walk are mutually inverse. -/
@@ -528,25 +461,6 @@ theorem isUnit_edge_of_trivialCycleLabels (hflat : HasTrivialCycleLabels G label
   ⟨⟨label edge, walkLabel label back,
       by simpa using hflat (G.target edge) (back.append (.singleton edge)),
       by simpa using hflat (G.source edge) ((EdgeGraph.Walk.singleton edge).append back)⟩, rfl⟩
-
-/-- On a strongly connected graph, flatness implies both parallel-path
-equality and existence of a unit-valued potential; either conjunct separately
-also characterizes flatness via the pairwise theorems in the normal-form API. -/
-theorem hasTrivialCycleLabels_iff_parallelLabels_and_unitPotential {base : V}
-    (hconnected : IsStronglyConnectedAt G base) :
-    HasTrivialCycleLabels G label ↔
-      (∀ {start finish : V} (first second : G.Walk start finish),
-        walkLabel label first = walkLabel label second) ∧
-      (∃ potential : V → Mˣ, IsUnitPotential G label potential) := by
-  constructor
-  · intro hflat
-    refine ⟨?_, exists_unitPotential_of_trivialCycleLabels
-      hconnected.edgeEndpointsLinkedTo hflat⟩
-    intro start finish first second
-    exact walkLabel_eq_of_trivialCycleLabels_of_return hflat first second
-      (hconnected.nonempty_walk finish start).some
-  · rintro ⟨_, potential, hedge⟩
-    exact hasTrivialCycleLabels_of_unitPotential potential hedge
 
 /-- A chosen root-and-return test.  It checks one equation at every edge; it is
 not the smaller non-tree-edge test obtained from a specified arborescence.
@@ -562,33 +476,24 @@ theorem hasTrivialCycleLabels_of_chosen_tests
       walkLabel label (returns (G.target edge)) * label edge *
           walkLabel label (paths (G.source edge)) = 1) :
     HasTrivialCycleLabels G label := by
-  let potential : V → Mˣ := fun vertex ↦
-    { val := walkLabel label (paths vertex)
-      inv := walkLabel label (returns vertex)
-      val_inv := mul_eq_one_comm.mp (hreturn vertex)
-      inv_val := hreturn vertex }
-  apply hasTrivialCycleLabels_of_unitPotential potential
-  intro edge
-  change label edge = walkLabel label (paths (G.target edge)) *
-    walkLabel label (returns (G.source edge))
   have hreverse (vertex : V) :
       walkLabel label (paths vertex) * walkLabel label (returns vertex) = 1 :=
     mul_eq_one_comm.mp (hreturn vertex)
-  calc
-    label edge =
-        (walkLabel label (paths (G.target edge)) *
-            walkLabel label (returns (G.target edge))) * label edge *
-          (walkLabel label (paths (G.source edge)) *
-            walkLabel label (returns (G.source edge))) := by
-      rw [hreverse, hreverse, one_mul, mul_one]
+  let potential : V → Mˣ := fun vertex ↦
+    { val := walkLabel label (paths vertex)
+      inv := walkLabel label (returns vertex)
+      val_inv := hreverse vertex
+      inv_val := hreturn vertex }
+  refine hasTrivialCycleLabels_of_unitPotential potential fun edge ↦ ?_
+  change label edge * walkLabel label (paths (G.source edge)) =
+    walkLabel label (paths (G.target edge))
+  calc label edge * walkLabel label (paths (G.source edge))
+      = (walkLabel label (paths (G.target edge)) * walkLabel label (returns (G.target edge))) *
+          (label edge * walkLabel label (paths (G.source edge))) := by rw [hreverse, one_mul]
     _ = walkLabel label (paths (G.target edge)) *
-        (walkLabel label (returns (G.target edge)) * label edge *
-          walkLabel label (paths (G.source edge))) *
-        walkLabel label (returns (G.source edge)) := by
-      simp only [mul_assoc]
-    _ = walkLabel label (paths (G.target edge)) *
-        walkLabel label (returns (G.source edge)) := by
-      rw [hedge, mul_one]
+          (walkLabel label (returns (G.target edge)) * label edge *
+            walkLabel label (paths (G.source edge))) := by simp only [mul_assoc]
+    _ = walkLabel label (paths (G.target edge)) := by rw [hedge, mul_one]
 
 end Monoid
 
@@ -618,12 +523,8 @@ theorem exists_addUnitPotential_of_zeroCycleSums
       (potential (G.source edge) : A) + weight edge = potential (G.target edge) := by
   obtain ⟨potential, hpotential⟩ := exists_unitPotential_of_trivialCycleLabels_of_hasEdgeReturns
     hreturn (hasTrivialCycleLabels_ofAdd_iff.2 hzero)
-  refine ⟨fun vertex ↦ addUnitsOfUnits (potential vertex), fun edge ↦ ?_⟩
-  have hedge : Multiplicative.ofAdd (weight edge) = _ := hpotential edge
-  change ((potential (G.source edge) : Multiplicative A) *
-    Multiplicative.ofAdd (weight edge)).toAdd = _
-  rw [hedge, Units.val_mul, mul_comm, mul_assoc, Units.inv_mul, mul_one]
-  rfl
+  exact ⟨fun vertex ↦ addUnitsOfUnits (potential vertex), fun edge ↦
+    (add_comm _ _).trans (congrArg Multiplicative.toAdd (hpotential edge))⟩
 
 /-- Under zero cycle sums, an edge lying on a closed walk carries an additive unit. -/
 theorem isAddUnit_edge_of_zeroCycleSums (hzero : HasZeroCycleSums G weight) {edge : E}

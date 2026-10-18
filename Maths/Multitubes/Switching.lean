@@ -5,11 +5,10 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.Basic
+public import Maths.Multitubes.Exact
+public import Maths.Multitubes.Morphism
 public import Mathlib.Algebra.Group.Units.Defs
 public import Mathlib.Algebra.Notation.Pi.Defs
-
-import Maths.Multitubes.Exact
 import Mathlib.Algebra.Group.Basic
 
 /-!
@@ -26,7 +25,9 @@ one-directional and labels need not invert, so only *unit-valued* vertex functio
 switch: `Maths.switch` takes `η : V → Mˣ`.  Over a group every element is a unit
 and the classical notion is recovered.
 
-Switching corrects walk labels at their endpoints only
+Switching is a gauge transformation: left multiplication by the switching unit over each
+vertex is a morphism from the regular representation of a gain to that of its switching
+(`Maths.switchHom`).  By naturality it corrects walk labels at their endpoints only
 (`Maths.walkLabel_switch`), so balance - trivial labels on all closed walks,
 `Maths.HasTrivialCycleLabels` - is a switching invariant.
 `Maths.switch_switch` and `Maths.switch_one` make switching an
@@ -48,10 +49,13 @@ balance on the symmetrization, treated in `Maths.Multitubes.Symmetric`.
 ## Main definitions
 
 * `Maths.switch` - the switching of a gain by a unit-valued vertex function.
+* `Maths.switchHom` - switching as a gauge transformation of regular representations.
 
 ## Main results
 
 * `Maths.walkLabel_switch` - walk labels transform by endpoint correction.
+* `Maths.isUnitPotential_iff_eq_switch` - unit potentials are the switchings of the trivial
+  gain.
 * `Maths.switch_switch` and `Maths.switch_one` - switching is an
   action of the group of unit-valued vertex functions on gains.
 * `Maths.hasTrivialCycleLabels_switch_iff` - balance is a switching invariant.
@@ -106,20 +110,34 @@ theorem switch_switch (θ η : V → Mˣ) (label : E → M) :
   funext edge
   simp only [switch_apply, Pi.mul_apply, Units.val_mul, mul_inv_rev, mul_assoc]
 
-/-! ### Walk labels under switching -/
+/-! ### Switching as a gauge transformation -/
 
 variable {label : E → M}
 
+/-- **Switching is a gauge transformation.**  Left multiplication by the switching unit over
+each vertex is a morphism from the regular representation of a gain to that of its switching;
+it is invertible, with inverse the switching by `η⁻¹`. -/
+def switchHom (η : V → Mˣ) (label : E → M) :
+    Transport.Hom (ofSMul G M label) (ofSMul G M (switch G η label)) where
+  app vertex point := (η vertex : M) * point
+  edge_rel edge point := by simp [mul_assoc]
+
 /-- Switching corrects the composite label of a walk by the units at its endpoints only:
-the corrections at interior vertices cancel telescopically. -/
+the corrections at interior vertices cancel telescopically.  This is naturality of the gauge
+transformation `Maths.switchHom`. -/
 theorem walkLabel_switch (η : V → Mˣ) {start finish : V} (walk : G.Walk start finish) :
     walkLabel (switch G η label) walk =
       (η finish : M) * walkLabel label walk * Units.val (η start)⁻¹ := by
-  induction walk with
-  | nil => simp
-  | concat edge walkSoFar ih =>
-      rw [walkLabel_concat, ih, walkLabel_concat, switch_apply]
-      simp only [mul_assoc, Units.inv_mul_cancel_left]
+  have h := (switchHom (G := G) η label).walkMap_naturality walk (Units.val (η start)⁻¹)
+  simp only [switchHom, walkMap_ofSMul_eq_walkLabel_smul, smul_eq_mul,
+    Units.mul_inv, mul_one] at h
+  rw [← h, mul_assoc]
+
+/-- A unit potential is exactly a switching function carrying the trivial gain to the gain. -/
+theorem isUnitPotential_iff_eq_switch {η : V → Mˣ} :
+    IsUnitPotential G label η ↔ label = switch G η 1 := by
+  rw [isUnitPotential_iff_label_eq, funext_iff]
+  simp [switch_apply]
 
 /-! ### The trivial gain -/
 
@@ -156,8 +174,7 @@ theorem hasTrivialCycleLabels_iff_exists_switch_one_of_hasEdgeReturns
   · intro hflat
     obtain ⟨potential, hpotential⟩ :=
       exists_unitPotential_of_trivialCycleLabels_of_hasEdgeReturns hreturn hflat
-    refine ⟨potential, funext fun edge => ?_⟩
-    rw [hpotential edge, switch_apply, Pi.one_apply, mul_one, Units.val_mul]
+    exact ⟨potential, isUnitPotential_iff_eq_switch.mp hpotential⟩
   · rintro ⟨η, rfl⟩
     exact (hasTrivialCycleLabels_switch_iff η).mpr hasTrivialCycleLabels_one
 

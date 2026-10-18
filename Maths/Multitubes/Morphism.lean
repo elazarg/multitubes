@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.Closure
+public import Maths.Multitubes.Basic
 
 /-!
 # Morphisms and simulations of transports
@@ -27,7 +27,8 @@ sections forward.
 ## Main definitions
 
 * `Maths.Transport.Simulation` - a fiberwise map comparing edge maps through a relation.
-* `Maths.Transport.Hom` - a fiberwise map commuting with edge transport.
+* `Maths.Transport.Hom` - a fiberwise map commuting with edge transport: the simulation for
+  equality.
 * `Maths.Transport.LowerSimulation` and `Maths.Transport.UpperSimulation` - the
   simulations for `≤` and `≥`.
 
@@ -45,7 +46,6 @@ sections forward.
   `Maths.Transport.UpperSimulation.walkMap_le` - simulations extend along walks.
 * `Maths.Transport.LowerSimulation.map_isOplaxSection` and
   `Maths.Transport.UpperSimulation.map_isLaxSection` - directed section preservation.
-* `Maths.Transport.UpperSimulation.leastLaxMajorant_le_map` - global closure soundness.
 -/
 
 @[expose] public section
@@ -103,49 +103,37 @@ theorem walkMap_rel (f : Simulation T S relation)
 
 end Simulation
 
-/-- A fiberwise map intertwining the edge maps of two transports. -/
-structure Hom (T : Transport G Fiber) (S : Transport G Other) where
-  /-- The map on the fiber over each vertex. -/
-  app : (vertex : V) → Fiber vertex → Other vertex
-  /-- The fiber maps commute with transport along each edge. -/
-  naturality : ∀ (edge : E) (point : Fiber (G.source edge)),
-    app (G.target edge) (T.edgeMap edge point) =
-      S.edgeMap edge (app (G.source edge) point)
-
-/-- A transport morphism is a simulation for every reflexive relation. -/
-def Hom.toSimulation (f : Hom T S) {relation : ∀ vertex, Other vertex → Other vertex → Prop}
-    (hrefl : ∀ vertex x, relation vertex x x) : Simulation T S relation where
-  app := f.app
-  edge_rel edge point := f.naturality edge point ▸ hrefl _ _
-
-@[simp] theorem Hom.toSimulation_app (f : Hom T S)
-    {relation : ∀ vertex, Other vertex → Other vertex → Prop}
-    (hrefl : ∀ vertex x, relation vertex x x) (vertex : V) (point : Fiber vertex) :
-    (f.toSimulation hrefl).app vertex point = f.app vertex point := rfl
+/-- A fiberwise map intertwining the edge maps of two transports: a simulation for equality.
+Its edge comparison is `Maths.Transport.Hom.naturality`. -/
+abbrev Hom (T : Transport G Fiber) (S : Transport G Other) :=
+  Simulation T S fun _ => Eq
 
 namespace Hom
+
+/-- The fiber maps of a morphism commute with transport along each edge. -/
+theorem naturality (f : Hom T S) (edge : E) (point : Fiber (G.source edge)) :
+    f.app (G.target edge) (T.edgeMap edge point) = S.edgeMap edge (f.app (G.source edge) point) :=
+  f.edge_rel edge point
 
 /-- The identity morphism of a transport. -/
 def id (T : Transport G Fiber) : Hom T T where
   app _ := fun point => point
-  naturality _ _ := rfl
+  edge_rel _ _ := rfl
 
 /-- The composite of two transport morphisms. -/
 def comp (g : Hom S R) (f : Hom T S) : Hom T R where
   app vertex := g.app vertex ∘ f.app vertex
-  naturality edge point := by
+  edge_rel edge point := by
     rw [Function.comp_apply, f.naturality, Function.comp_apply, g.naturality]
 
 /-- Two transport morphisms are equal when all their fiber maps agree. -/
 @[ext] theorem ext {f g : Hom T S} (happ : ∀ vertex point,
     f.app vertex point = g.app vertex point) : f = g := by
-  cases f with
-  | mk fapp fnaturality =>
-      cases g with
-      | mk gapp gnaturality =>
-          simp only [mk.injEq]
-          funext vertex point
-          exact happ vertex point
+  obtain ⟨fapp, _⟩ := f
+  obtain ⟨gapp, _⟩ := g
+  congr
+  funext vertex point
+  exact happ vertex point
 
 /-- Left composition by the identity morphism changes nothing. -/
 @[simp] theorem id_comp (f : Hom T S) : (id S).comp f = f := by
@@ -177,19 +165,13 @@ theorem walkMap_naturality (f : Hom T S) {start finish : V}
     (walk : G.Walk start finish) (point : Fiber start) :
     f.app finish (T.walkMap walk point) =
       S.walkMap walk (f.app start point) :=
-  (f.toSimulation (relation := fun _ => Eq) fun _ _ => rfl).walkMap_rel (fun _ _ => rfl)
-    (fun _ => Eq.trans) (fun _ => congrArg _) walk point
+  Simulation.walkMap_rel f (fun _ _ => rfl) (fun _ => Eq.trans) (fun _ => congrArg _) walk point
 
 /-- A transport morphism intertwines the holonomy of every closed walk. -/
 theorem holonomy_naturality (f : Hom T S) {base : V} (cycle : G.Walk base base)
     (point : Fiber base) :
     f.app base (T.holonomy cycle point) = S.holonomy cycle (f.app base point) :=
   f.walkMap_naturality cycle point
-
-/-- Apply a transport morphism to a vertex-indexed family. -/
-def mapFamily (f : Hom T S) (family : ∀ vertex, Fiber vertex) :
-    ∀ vertex, Other vertex :=
-  fun vertex => f.app vertex (family vertex)
 
 /-- A transport morphism carries exact sections to exact sections. -/
 theorem map_isSection (f : Hom T S) {family : ∀ vertex, Fiber vertex}
@@ -274,35 +256,6 @@ theorem UpperSimulation.map_isLaxSection (f : UpperSimulation T S)
   fun edge => le_trans (f.edge_rel edge _) (hmono _ (hfamily edge))
 
 end Ordered
-
-section UpperClosure
-
-variable [∀ vertex : V, CompleteLattice (Fiber vertex)]
-variable [∀ vertex : V, CompleteLattice (Other vertex)]
-
-namespace UpperSimulation
-
-/-- Concrete closure is bounded by the concretization of abstract closure.
-
-Here `T` is the abstract transport, `S` is the concrete transport, and `f` is
-concretization.  The edge inequality of an upper simulation is the local
-soundness condition; leastness of concrete closure turns it into the global
-comparison. -/
-theorem leastLaxMajorant_le_map (f : UpperSimulation T S)
-    (hfmono : ∀ vertex, Monotone (f.app vertex))
-    (hTmono : ∀ edge : E, Monotone (T.edgeMap edge))
-    (hSmono : ∀ edge : E, Monotone (S.edgeMap edge))
-    (lowerT : ∀ vertex, Fiber vertex) (lowerS : ∀ vertex, Other vertex)
-    (hlower : lowerS ≤ f.mapFamily lowerT) :
-    S.leastLaxMajorant hSmono lowerS ≤
-      f.mapFamily (T.leastLaxMajorant hTmono lowerT) :=
-  S.leastLaxMajorant_le hSmono
-    (fun vertex ↦ (hlower vertex).trans <| hfmono vertex (T.le_leastLaxMajorant hTmono _ vertex))
-    (f.map_isLaxSection hfmono (T.isLaxSection_leastLaxMajorant hTmono lowerT))
-
-end UpperSimulation
-
-end UpperClosure
 
 end Transport
 

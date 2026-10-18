@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.Basic
+public import Maths.Multitubes.Morphism
 public import Mathlib.Order.Closure
 public import Mathlib.Order.FixedPoints
 public import Mathlib.Order.Hom.CompleteLattice
@@ -49,6 +49,8 @@ even when separate cycle witnesses are not.
   lax majorant.
 * `Maths.Transport.rooted_pathClosure_isLeast`: the rooted form, where one pre-fixed witness at
   the root suffices.
+* `Maths.Transport.UpperSimulation.leastLaxMajorant_le_map`: soundness of abstract closure,
+  bounding concrete closure by the concretization of abstract closure.
 
 ## Implementation notes
 
@@ -199,6 +201,23 @@ theorem leastLaxMajorant_eq_self_iff
     (family : ∀ vertex : V, Fiber vertex) :
     T.leastLaxMajorant hmono family = family ↔ T.IsLaxSection family :=
   (T.leastLaxMajorantClosure hmono).isClosed_iff.symm
+
+variable {T} in
+/-- **Closure soundness.**  Concrete closure is bounded by the concretization of abstract
+closure.  Here `T` is the abstract transport, `S` is the concrete transport, and `f` is
+concretization.  The edge inequality of an upper simulation is the local soundness condition;
+leastness of concrete closure turns it into the global comparison. -/
+theorem UpperSimulation.leastLaxMajorant_le_map {Other : V → Type*}
+    [∀ vertex : V, CompleteLattice (Other vertex)] {S : Transport G Other}
+    (f : UpperSimulation T S) (hfmono : ∀ vertex, Monotone (f.app vertex))
+    (hTmono : ∀ edge : E, Monotone (T.edgeMap edge))
+    (hSmono : ∀ edge : E, Monotone (S.edgeMap edge))
+    (lowerT : ∀ vertex, Fiber vertex) (lowerS : ∀ vertex, Other vertex)
+    (hlower : lowerS ≤ f.mapFamily lowerT) :
+    S.leastLaxMajorant hSmono lowerS ≤ f.mapFamily (T.leastLaxMajorant hTmono lowerT) :=
+  S.leastLaxMajorant_le hSmono
+    (fun vertex ↦ (hlower vertex).trans <| hfmono vertex (T.le_leastLaxMajorant hTmono _ vertex))
+    (f.map_isLaxSection hfmono (T.isLaxSection_leastLaxMajorant hTmono lowerT))
 
 /-! ### Path closure for supremum-preserving maps -/
 

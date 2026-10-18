@@ -18,6 +18,8 @@ This gives the free path-category composition of the edge relations.
 Existential image embeds relation-labelled transport into ordinary map-labelled transport on
 powersets. The native composite relation and the induced walk map agree exactly. Function graphs
 embed ordinary transport in the other direction, and this embedding also commutes with walks.
+Every section condition of ordinary transport, exact, lax, oplax or mixed, is a relational
+section condition (`Maths.RelationTransport.ofSectionFor`).
 
 ## Main definitions
 
@@ -25,6 +27,8 @@ embed ordinary transport in the other direction, and this embedding also commute
 * `Maths.RelationTransport.walkRelation` - existential composition along a typed walk.
 * `Maths.RelationTransport.powersetTransport` - transport by existential image.
 * `Maths.RelationTransport.ofTransport` - ordinary transport embedded by function graphs.
+* `Maths.RelationTransport.ofSectionFor` - the relation-labelled transport of a section
+  condition.
 * `Maths.RelationTransport.IsSection` - a point assignment satisfying every edge relation.
 
 ## Main results
@@ -38,6 +42,9 @@ embed ordinary transport in the other direction, and this embedding also commute
   oplax sections after the powerset embedding.
 * `Maths.RelationTransport.IsSection.walkRelation` - edgewise compatibility propagates along
   walks.
+* `Maths.RelationTransport.isSection_ofSectionFor_iff` and
+  `Maths.RelationTransport.isSection_ofTransport_iff` - exact, lax, oplax, and mixed sections
+  are relational sections.
 
 ## Tags
 
@@ -67,6 +74,19 @@ variable (T : RelationTransport G Fiber)
 /-- Regard the maps of an ordinary transport as their function-graph relations. -/
 def ofTransport (transport : Transport G Fiber) : RelationTransport G Fiber where
   edgeRelation edge := Function.graph (transport.edgeMap edge)
+
+/-- The relation-labelled transport of a section condition: an edge relates a source value to a
+target value when `relation` relates the transported source value to it.  Its relational
+sections are the sections of `T` for `relation` (`isSection_ofSectionFor_iff`). -/
+def ofSectionFor (transport : Transport G Fiber)
+    (relation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop) :
+    RelationTransport G Fiber where
+  edgeRelation edge := {pair | relation edge (transport.edgeMap edge pair.1) pair.2}
+
+/-- Function graphs are the section condition of equality. -/
+theorem ofTransport_eq_ofSectionFor (transport : Transport G Fiber) :
+    ofTransport transport = ofSectionFor transport fun _ => Eq :=
+  rfl
 
 /-- Compose edge relations existentially along a typed walk. -/
 def walkRelation {start : V} :
@@ -146,6 +166,20 @@ theorem monotone_powersetTransport_edgeMap :
     ∀ edge, Monotone (T.powersetTransport.edgeMap edge) :=
   fun edge ↦ (T.edgeRelation edge).image_mono
 
+/-- **Every section notion is relational.**  The sections of a transport for an edge-indexed
+relation are the relational sections of its section condition. -/
+theorem isSection_ofSectionFor_iff (transport : Transport G Fiber)
+    (relation : ∀ edge : E, Fiber (G.target edge) → Fiber (G.target edge) → Prop)
+    (family : ∀ vertex, Fiber vertex) :
+    (ofSectionFor transport relation).IsSection family ↔ transport.IsSectionFor relation family :=
+  Iff.rfl
+
+/-- Relational sections of the function graphs are exactly the exact sections. -/
+theorem isSection_ofTransport_iff (transport : Transport G Fiber)
+    (family : ∀ vertex, Fiber vertex) :
+    (ofTransport transport).IsSection family ↔ transport.IsSection family :=
+  isSection_ofSectionFor_iff transport (fun _ => Eq) family
+
 /-- Edgewise compatibility propagates through the composite relation of every walk. -/
 theorem IsSection.walkRelation {family : ∀ vertex, Fiber vertex}
     (hfamily : T.IsSection family) {start finish : V} (walk : G.Walk start finish) :
@@ -153,8 +187,7 @@ theorem IsSection.walkRelation {family : ∀ vertex, Fiber vertex}
   induction walk with
   | nil => rfl
   | concat edge walk ih =>
-      refine ⟨family _, ih, ?_⟩
-      simpa only [Set.mem_ofPred_eq, fiberCast_family] using hfamily edge
+      exact ⟨family _, ih, hfamily edge⟩
 
 end RelationTransport
 

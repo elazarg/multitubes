@@ -5,38 +5,41 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Graph.PathCategory
+public import Maths.Multitubes.Category
+public import Mathlib.CategoryTheory.Retract
 
 /-!
-# Categorical retract normal forms for transport
+# Retract normal forms for flat path functors
 
-For a functor from a directed path category to an arbitrary category,
-flatness at one base object produces split idempotents at every vertex.
-Compressing any path by its endpoint idempotents gives the same morphism,
-and the compressed morphisms are mutually inverse relative to those
-idempotents.  This is the concrete retract-groupoid statement usually
-described via the Karoubi envelope.
+For a functor from the path category of a directed graph to an arbitrary category, flatness at
+one base object makes the base a retract of every vertex object along chosen walks to and from
+the base.  Compressing any path by its endpoint idempotents gives the same morphism, and the
+compressed morphisms are mutually inverse relative to those idempotents.  This is the concrete
+retract-groupoid statement usually described through the Karoubi envelope.
+
+Transports and monoid labellings are path functors (`Maths.Multitubes.Category`), and one-base
+flatness of either is flatness of its path functor, so the retract normal form applies to both
+without a separate proof.
 
 ## Main definitions
 
-* `Maths.IsFlatAt`: a path functor sends every endomorphism at one object to
-  the identity.
-* `Maths.categoricalIngress` and `Maths.categoricalReturn`: the
-  morphisms to and from the base object determined by chosen path families.
-* `Maths.categoricalRetractProjector`: the resulting endomorphism at each
-  vertex object.
+* `Maths.IsFlatAt`: a path functor sends every endomorphism at one object to the identity.
+* `Maths.categoricalIngress` and `Maths.categoricalReturn`: the morphisms to and from the base
+  object determined by chosen path families.
+* `Maths.categoricalRetract`: the base object as a retract of each vertex object.
+* `Maths.categoricalRetractProjector`: the resulting idempotent at each vertex object.
 
 ## Main results
 
-* `Maths.categoricalIngress_comp_return`: ingress followed by return is the
-  identity, so the projectors split.
-* `Maths.categoricalRetractProjector_idempotent`: the projectors are
-  idempotent.
-* `Maths.categorical_compressed_map_eq`: compressing a path by its endpoint
-  projectors gives a path-independent core morphism.
-* `Maths.categorical_coreMap_comp_reverse` and
-  `Maths.categorical_reverse_comp_coreMap`: the core morphisms are mutually
-  inverse relative to the projectors.
+* `Maths.categoricalIngress_comp_return`: ingress followed by return is the identity, so the
+  projectors split.
+* `Maths.categoricalRetractProjector_idempotent`: the projectors are idempotent.
+* `Maths.categorical_compressed_map_eq`: compressing a path by its endpoint projectors gives a
+  path-independent core morphism.
+* `Maths.categorical_coreMap_comp_reverse` and `Maths.categorical_reverse_comp_coreMap`: the
+  core morphisms are mutually inverse relative to the projectors.
+* `Maths.Transport.isFlatAt_toPathFunctor_iff` and `Maths.isFlatAt_labelFunctor_iff`: one-base
+  flatness of a transport or of a labelling is flatness of its path functor.
 -/
 
 @[expose] public section
@@ -47,7 +50,7 @@ namespace Maths
 
 open CategoryTheory
 
-universe uV uE uC
+universe uV uE uF uM uC
 
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 variable {C : Type uC} [Category C]
@@ -98,6 +101,15 @@ theorem categoricalIngress_comp_return
   rw [categoricalIngress, categoricalReturn, ← map_append]
   exact hflat ((paths vertex).append (returns vertex))
 
+/-- The base object as a retract of a vertex object, along the chosen ingress and return
+morphisms.  Its idempotent `r ≫ i` is `Maths.categoricalRetractProjector`. -/
+def categoricalRetract (hflat : IsFlatAt F base) (paths : ∀ vertex, G.Walk base vertex)
+    (returns : ∀ vertex, G.Walk vertex base) (vertex : V) :
+    Retract (F.obj (PathCategory.ofVertex G base)) (F.obj (PathCategory.ofVertex G vertex)) where
+  i := categoricalIngress F paths vertex
+  r := categoricalReturn F returns vertex
+  retract := categoricalIngress_comp_return F hflat paths returns vertex
+
 theorem categoricalRetractProjector_idempotent
     (hflat : IsFlatAt F base)
     (paths : ∀ vertex, G.Walk base vertex)
@@ -126,17 +138,8 @@ theorem categorical_compressed_map_eq
       categoricalIngress F paths source ≫ F.map walk ≫
           categoricalReturn F returns target = 𝟙 _ := by
     unfold categoricalIngress categoricalReturn
-    calc
-      F.map (paths source) ≫ F.map walk ≫ F.map (returns target) =
-          (F.map (paths source) ≫ F.map walk) ≫
-            F.map (returns target) := by rw [Category.assoc]
-      _ =
-          F.map ((paths source).append walk) ≫
-            F.map (returns target) := by rw [map_append]
-      _ = F.map
-          (((paths source).append walk).append (returns target)) :=
-            (map_append F _ _).symm
-      _ = 𝟙 _ := hflat _
+    rw [← map_append, ← map_append]
+    exact hflat _
   simp only [categoricalRetractProjector]
   slice_lhs 2 4 => rw [hmiddle]
   simp
@@ -173,6 +176,20 @@ theorem categorical_reverse_comp_coreMap
   categorical_coreMap_comp_reverse F hflat paths returns target source
 
 end
+
+/-! ### Transports and labellings -/
+
+/-- One-base flatness of a transport is flatness of its path functor. -/
+theorem Transport.isFlatAt_toPathFunctor_iff {Fiber : V → Type uF} (T : Transport G Fiber)
+    {base : V} :
+    IsFlatAt T.toPathFunctor base ↔ ∀ cycle : G.Walk base base, T.holonomy cycle = id :=
+  forall_congr' fun _ => ⟨fun h => funext (ConcreteCategory.congr_hom h),
+    fun h => ConcreteCategory.hom_ext _ _ (congrFun h)⟩
+
+/-- One-base flatness of a monoid labelling is flatness of its label functor. -/
+theorem isFlatAt_labelFunctor_iff {M : Type uM} [Monoid M] (label : E → M) {base : V} :
+    IsFlatAt (labelFunctor (G := G) label) base ↔ HasTrivialBaseLabels G label base :=
+  Iff.rfl
 
 end Maths
 
