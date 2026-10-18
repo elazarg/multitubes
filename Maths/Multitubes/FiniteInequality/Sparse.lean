@@ -11,6 +11,7 @@ public import Mathlib.LinearAlgebra.AffineSpace.FiniteDimensional
 
 import Maths.Multitubes.FiniteInequality.Arithmetic
 import Mathlib.Algebra.BigOperators.Field
+import Mathlib.LinearAlgebra.Dimension.OrzechProperty
 import Mathlib.Tactic.Linarith
 
 /-!

@@ -24,7 +24,7 @@ from `Maths/Multitubes/` into any of them inverts the layering.
 
 ## Conventions
 
-- Toolchain: `leanprover/lean4:v4.34.0`, mathlib pinned to `v4.34.0`.
+- Toolchain: `leanprover/lean4:v4.35.0`, mathlib pinned to `v4.35.0`.
 - Root namespace is `Maths`, and namespaces stay shallow: the directory path carries the
   taxonomy, so `Maths/Graph/EdgeGraph.lean` declares `Maths.EdgeGraph`, not
   `Maths.Graph.EdgeGraph`. Only `Maths.LinearProgramming` repeats its directory.
