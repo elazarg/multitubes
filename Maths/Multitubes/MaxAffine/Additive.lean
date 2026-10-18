@@ -43,7 +43,7 @@ theorem isLaxSection_translationLabel_iff
     (G : EdgeGraph V E) (weight : E → ℝ) (potential : V → ℝ) :
     IsLaxSection G (fun edge => translationLabel (weight edge)) potential ↔
       Maths.MaxPlusPotential.IsPotential G weight potential := by
-  simp only [IsLaxSection, Maths.MaxPlusPotential.IsPotential, apply_translationLabel]
+  simp only [isLaxSection_iff, Maths.MaxPlusPotential.isPotential_iff, apply_translationLabel]
   exact forall_congr' fun edge => ⟨fun h => by linarith, fun h => by linarith⟩
 
 @[simp] theorem defect_translationLabel

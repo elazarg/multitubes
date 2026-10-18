@@ -114,7 +114,7 @@ label. -/
 def laxifiedTranslationTransport (G : EdgeGraph V E) (mode : E → EdgeMode)
     (weight : E → A) :
     Transport (Transport.laxificationGraph G mode) (fun _ : V => A) :=
-  CycleCoboundary.translationTransport
+  translationTransport
     (Transport.laxificationGraph G mode) (laxifiedWeight mode weight)
 
 /-- A forward transformed edge acts by translation by its original label. -/
@@ -138,7 +138,7 @@ def laxifiedTranslationTransport (G : EdgeGraph V E) (mode : E → EdgeMode)
 theorem laxifiedTranslationTransport_eq_laxification
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A) :
     laxifiedTranslationTransport G mode weight =
-      (CycleCoboundary.translationTransport G weight).laxification mode
+      (translationTransport G weight).laxification mode
         (translationResidual mode weight) := by
   change Transport.mk _ = Transport.mk _
   rw [Transport.mk.injEq]
@@ -155,11 +155,11 @@ transport on the laxification graph. -/
 theorem isMixedSection_iff_isLaxSection_laxified
     [PartialOrder A] [IsOrderedAddMonoid A]
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A) (potential : V → A) :
-    (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential ↔
+    (translationTransport G weight).IsMixedSection mode potential ↔
       (laxifiedTranslationTransport G mode weight).IsLaxSection potential := by
   rw [laxifiedTranslationTransport_eq_laxification]
   exact Transport.isMixedSection_iff_laxification_of_galoisConnection
-    (CycleCoboundary.translationTransport G weight)
+    (translationTransport G weight)
     (fun edge => translationResidual_galoisConnection mode weight edge)
 
 /-- A mixed additive section is exactly an ordinary additive potential on the
@@ -167,7 +167,7 @@ laxification graph with its signed weighting. -/
 theorem isMixedSection_iff_isPotential_laxified
     [PartialOrder A] [IsOrderedAddMonoid A]
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A) (potential : V → A) :
-    (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential ↔
+    (translationTransport G weight).IsMixedSection mode potential ↔
       MaxPlusPotential.IsPotential (Transport.laxificationGraph G mode)
         (laxifiedWeight mode weight) potential := by
   rw [isMixedSection_iff_isLaxSection_laxified]
@@ -176,7 +176,7 @@ theorem isMixedSection_iff_isPotential_laxified
 /-- An exact-mode closed walk has zero original signed weight. -/
 theorem walkSum_eq_zero_of_exact
     [LE A] (mode : E → EdgeMode) {weight : E → A} {family : V → A}
-    (hfamily : (CycleCoboundary.translationTransport G weight).IsMixedSection mode family)
+    (hfamily : (translationTransport G weight).IsMixedSection mode family)
     {vertex : V} (cycle : G.Walk vertex vertex)
     (hmode : ∀ edge ∈ cycle.edges, (mode edge).IsExact) :
     walkSum weight cycle = 0 := by
@@ -191,13 +191,13 @@ variable [Preorder A] [IsOrderedAddMonoid A]
 weight whenever a mixed section exists. -/
 theorem walkSum_nonpos_of_lax_or_exact
     (mode : E → EdgeMode) {weight : E → A} {family : V → A}
-    (hfamily : (CycleCoboundary.translationTransport G weight).IsMixedSection mode family)
+    (hfamily : (translationTransport G weight).IsMixedSection mode family)
     {vertex : V} (cycle : G.Walk vertex vertex)
     (hmode : ∀ edge ∈ cycle.edges, (mode edge).IsLaxOrExact) :
     walkSum weight cycle ≤ 0 := by
   have hwalk := hfamily.walkMap_le_of_lax_or_exact
-    (CycleCoboundary.monotone_edgeMap_translationTransport weight) cycle hmode
-  rw [CycleCoboundary.walkMap_translationTransport] at hwalk
+    (monotone_edgeMap_translationTransport weight) cycle hmode
+  rw [walkMap_translationTransport] at hwalk
   apply le_of_add_le_add_left (a := family vertex)
   simpa using hwalk
 
@@ -205,13 +205,13 @@ theorem walkSum_nonpos_of_lax_or_exact
 weight whenever a mixed section exists. -/
 theorem walkSum_nonneg_of_oplax_or_exact
     (mode : E → EdgeMode) {weight : E → A} {family : V → A}
-    (hfamily : (CycleCoboundary.translationTransport G weight).IsMixedSection mode family)
+    (hfamily : (translationTransport G weight).IsMixedSection mode family)
     {vertex : V} (cycle : G.Walk vertex vertex)
     (hmode : ∀ edge ∈ cycle.edges, (mode edge).IsOplaxOrExact) :
     0 ≤ walkSum weight cycle := by
   have hwalk := hfamily.le_walkMap_of_oplax_or_exact
-    (CycleCoboundary.monotone_edgeMap_translationTransport weight) cycle hmode
-  rw [CycleCoboundary.walkMap_translationTransport] at hwalk
+    (monotone_edgeMap_translationTransport weight) cycle hmode
+  rw [walkMap_translationTransport] at hwalk
   apply le_of_add_le_add_left (a := family vertex)
   simpa using hwalk
 
@@ -263,7 +263,7 @@ theorem mixedMaxIncomingWeight_isMixedSection
     (hcycle : ∀ (vertex : V)
       (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
       walkSum (laxifiedWeight mode weight) cycle ≤ 0) :
-    (CycleCoboundary.translationTransport G weight).IsMixedSection mode
+    (translationTransport G weight).IsMixedSection mode
       (mixedMaxIncomingWeight G mode weight) := by
   apply (isMixedSection_iff_isPotential_laxified G mode weight _).2
   exact MaxPlusPotential.maxIncomingWeight_isPotential hcycle
@@ -279,7 +279,7 @@ theorem isLeast_nonnegativeMixedSections
       walkSum (laxifiedWeight mode weight) cycle ≤ 0) :
     IsLeast
       {potential : V → A | (0 : V → A) ≤ potential ∧
-        (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential}
+        (translationTransport G weight).IsMixedSection mode potential}
       (mixedMaxIncomingWeight G mode weight) := by
   have hleast := MaxPlusPotential.isLeast_nonnegativePotentials hcycle
   constructor
@@ -295,12 +295,12 @@ theorem exists_isMixedSection_iff_forall_laxified_closedWalk_nonpos
     (G : EdgeGraph V E) (mode : E → EdgeMode)
     [Finite (Transport.LaxificationEdge mode)] (weight : E → A) :
     (∃ potential : V → A,
-      (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential) ↔
+      (translationTransport G weight).IsMixedSection mode potential) ↔
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
         walkSum (laxifiedWeight mode weight) cycle ≤ 0 := by
   rw [show (∃ potential : V → A,
-      (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential) ↔
+      (translationTransport G weight).IsMixedSection mode potential) ↔
       ∃ potential : V → A,
         MaxPlusPotential.IsPotential (Transport.laxificationGraph G mode)
           (laxifiedWeight mode weight) potential by

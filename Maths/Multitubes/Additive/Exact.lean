@@ -53,7 +53,7 @@ bounded range.
 
 * `Maths.CycleCoboundary.coboundary` and
   `Maths.CycleCoboundary.IsCoboundary`.
-* `Maths.CycleCoboundary.translationTransport` - the direct additive reading as
+* `Maths.translationTransport` - the direct additive reading as
   a `Maths.Transport`.
 
 The walk sum `Maths.walkSum` that this file consumes lives in
@@ -72,7 +72,7 @@ The walk sum `Maths.walkSum` that this file consumes lives in
   translation transport has a section, without a connectivity hypothesis.
 * `Maths.CycleCoboundary.hasZeroCycleSums_iff_hasTrivialHolonomy` - cycle sums are
   precisely translation holonomy.
-* `Maths.CycleCoboundary.monotone_edgeMap_translationTransport` - ordered
+* `Maths.monotone_edgeMap_translationTransport` - ordered
   translations are monotone edge maps.
 * `Maths.CycleCoboundary.exists_edge_defect_ge_of_pos` and
   `Maths.CycleCoboundary.exists_edge_abs_defect_ge` - quantitative obstruction
@@ -263,7 +263,7 @@ theorem isCoboundary_iff_exists_defect_eq_zero :
 /-- An exact potential is in particular a one-sided potential. -/
 theorem isPotential_of_isCoboundary (hφ : ∀ edge : E, w edge = coboundary G φ edge) :
     IsPotential G w φ := by
-  intro edge
+  refine isPotential_iff.2 fun edge => ?_
   have h : w edge = φ (G.target edge) - φ (G.source edge) := hφ edge
   linarith
 
@@ -337,33 +337,6 @@ section TranslationTransport
 variable {A : Type*} [AddCommGroup A]
 
 variable {w : E → A} {start finish : V}
-
-/-- The constant-fiber transport whose edge `e` acts by translation by
-`w e`. -/
-def translationTransport (G : EdgeGraph V E) (w : E → A) :
-    Maths.Transport G (fun _ : V => A) :=
-  Maths.ofEdgeAct G A fun edge point => point + w edge
-
-/-- Every edge map of an ordered translation transport is monotone. -/
-theorem monotone_edgeMap_translationTransport
-    [Preorder A] [IsOrderedAddMonoid A] (w : E → A) :
-    ∀ edge : E, Monotone ((translationTransport G w).edgeMap edge) := by
-  intro edge first second hle
-  change first + w edge ≤ second + w edge
-  exact add_le_add_left hle (w edge)
-
-/-- Transport by additive edge data is translation by the walk sum. -/
-@[simp] theorem walkMap_translationTransport (w : E → A)
-    (walk : G.Walk start finish) (point : A) :
-    (translationTransport G w).walkMap walk point = point + walkSum w walk := by
-  induction walk with
-  | nil => simp
-  | concat walkSoFar edge legal ih =>
-      rw [Maths.Transport.walkMap_concat,
-        Maths.fiberCast_const, ih, walkSum_concat]
-      change (point + walkSum w walkSoFar) + w edge =
-        point + (walkSum w walkSoFar + w edge)
-      exact add_assoc _ _ _
 
 /-- The section equation for translation transport is the coboundary equation. -/
 theorem isSection_translationTransport_iff (w : E → A) (φ : V → A) :
@@ -446,7 +419,8 @@ variable {A : Type*} [AddCommGroup A] [PartialOrder A] [IsOrderedAddMonoid A] {w
 /-- A potential is a vertex function whose coboundary dominates the edge data. -/
 theorem isPotential_iff_le_coboundary (φ : V → A) :
     MaxPlusPotential.IsPotential G w φ ↔ ∀ edge : E, w edge ≤ coboundary G φ edge :=
-  forall_congr' fun _ => by rw [coboundary_apply, le_sub_iff_add_le']
+  MaxPlusPotential.isPotential_iff.trans <|
+    forall_congr' fun _ => by rw [coboundary_apply, le_sub_iff_add_le']
 
 /-- A potential difference is a potential, with equality on every edge. -/
 theorem isPotential_of_eq_coboundary {φ : V → A} (hφ : ∀ edge : E, w edge = coboundary G φ edge) :

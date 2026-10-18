@@ -280,22 +280,10 @@ theorem walkProd_mul_gauge_eq_of_forall_mem
     (hedge : ∀ edge ∈ walk.edges,
       slope edge * gauge (G.source edge) = gauge (G.target edge)) :
     walkProd slope walk * gauge start = gauge finish := by
-  induction walk with
-  | nil => simp
-  | @concat finish walk edge legal ih =>
-      subst legal
-      have hbefore (candidate : E) (hcandidate : candidate ∈ walk.edges) :
-          slope candidate * gauge (G.source candidate) =
-            gauge (G.target candidate) :=
-        hedge candidate (by simp [hcandidate])
-      have hfinal := hedge edge (by simp)
-      rw [walkProd_concat]
-      calc
-        (walkProd slope walk * slope edge) * gauge start =
-            slope edge * (walkProd slope walk * gauge start) := by
-          ring
-        _ = slope edge * gauge (G.source edge) := by rw [ih hbefore]
-        _ = gauge (G.target edge) := hfinal
+  have h := (ofSMul G ℝ slope).walkMap_rel_of_forall_mem_edges (family := gauge)
+    (R := fun _ => Eq) (fun _ => rfl) (fun _ => Eq.trans) walk
+    (fun _ _ _ _ hxy => congrArg _ hxy) hedge
+  rwa [walkMap_ofSMul_eq_walkLabel_smul, walkLabel_eq_walkProd, smul_eq_mul] at h
 
 /-- A positive vertex gauge making all normalized slopes nonexpansive. -/
 def IsNonexpansiveGauge (gauge : V → ℝ) : Prop :=
@@ -308,17 +296,10 @@ theorem walkProd_mul_gauge_le
     {gauge : V → ℝ} (hgauge : IsNonexpansiveGauge (G := G) slope gauge)
     {start finish : V} (walk : G.Walk start finish) :
     walkProd slope walk * gauge start ≤ gauge finish := by
-  induction walk with
-  | nil => simp
-  | @concat finish walk edge legal ih =>
-      subst legal
-      rw [walkProd_concat]
-      calc
-        (walkProd slope walk * slope edge) * gauge start =
-            slope edge * (walkProd slope walk * gauge start) := by ring
-        _ ≤ slope edge * gauge (G.source edge) :=
-          mul_le_mul_of_nonneg_left ih (hnonneg edge)
-        _ ≤ gauge (G.target edge) := hgauge.2 edge
+  have h := (ofSMul G ℝ slope).walkMap_rel_of_forall_mem_edges (family := gauge)
+    (R := fun _ => (· ≤ ·)) (fun _ => le_rfl) (fun _ => le_trans) walk
+    (fun edge _ _ _ hxy => mul_le_mul_of_nonneg_left hxy (hnonneg edge)) fun edge _ => hgauge.2 edge
+  rwa [walkMap_ofSMul_eq_walkLabel_smul, walkLabel_eq_walkProd, smul_eq_mul] at h
 
 /-- If one traversed edge is strictly noncritical for a nonexpansive gauge,
 the path product satisfies a strict endpoint inequality. -/
@@ -505,19 +486,11 @@ theorem gauge_le_walkProd_mul
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {start finish : V} (walk : G.Walk start finish) :
     gauge finish ≤ walkProd slope walk * gauge start := by
-  induction walk with
-  | nil => simp [walkProd]
-  | @concat finish walk edge legal ih =>
-      subst legal
-      rw [walkProd_concat]
-      calc
-        gauge (G.target edge) ≤
-            slope edge * gauge (G.source edge) := hgauge.2 edge
-        _ ≤ slope edge *
-            (walkProd slope walk * gauge start) :=
-          mul_le_mul_of_nonneg_left ih (hpos edge).le
-        _ = (walkProd slope walk * slope edge) * gauge start := by
-          ring
+  have h := (ofSMul G ℝ slope).walkMap_rel_of_forall_mem_edges (family := gauge)
+    (R := fun _ => (· ≥ ·)) (fun _ => le_rfl) (fun _ _ _ _ hxy hyz => hyz.trans hxy) walk
+    (fun edge _ _ _ hxy => mul_le_mul_of_nonneg_left hxy (hpos edge).le)
+    fun edge _ => hgauge.2 edge
+  rwa [walkMap_ofSMul_eq_walkLabel_smul, walkLabel_eq_walkProd, smul_eq_mul] at h
 
 /-- If one traversed edge is strictly noncritical for an expansive gauge,
 the path product satisfies a strict endpoint inequality. -/
@@ -644,7 +617,7 @@ theorem exists_expansiveGauge_iff_one_le_cycleProduct
         (G := G) (fun edge => -Real.log (slope edge))).mpr hlogCycle
     let gauge : V → ℝ := fun vertex => Real.exp (-potential vertex)
     refine ⟨gauge, fun vertex => Real.exp_pos _, fun edge => ?_⟩
-    have hrow := hpotential edge
+    have hrow := hpotential.le edge
     have hexponent : -potential (G.target edge) ≤
         Real.log (slope edge) - potential (G.source edge) := by
       linarith
@@ -734,23 +707,9 @@ theorem walkProd_mul_gauge_eq_of_slopeGauge
     (hedge : ∀ edge,
       slope edge = gauge (G.target edge) / gauge (G.source edge))
     {start finish : V} (walk : G.Walk start finish) :
-    walkProd slope walk * gauge start = gauge finish := by
-  induction walk with
-  | nil => simp [walkProd]
-  | @concat middle walk edge legal ih =>
-      subst legal
-      rw [walkProd_concat, hedge edge]
-      have hsource : gauge (G.source edge) ≠ 0 :=
-        (hgauge (G.source edge)).ne'
-      calc
-        (walkProd slope walk *
-              (gauge (G.target edge) / gauge (G.source edge))) *
-            gauge start =
-            (walkProd slope walk * gauge start) *
-              (gauge (G.target edge) / gauge (G.source edge)) := by ring
-        _ = gauge (G.source edge) *
-              (gauge (G.target edge) / gauge (G.source edge)) := by rw [ih]
-        _ = gauge (G.target edge) := by field_simp
+    walkProd slope walk * gauge start = gauge finish :=
+  walkProd_mul_gauge_eq_of_forall_mem slope walk fun edge _ => by
+    rw [hedge edge, div_mul_cancel₀ _ (hgauge (G.source edge)).ne']
 
 /-- Exact gauge ratios have unit multiplicative holonomy on every cycle. -/
 theorem cycleProduct_eq_one_of_slopeGauge

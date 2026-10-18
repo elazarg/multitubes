@@ -224,7 +224,7 @@ maximising walk is assumed: an arbitrary walk arriving at the source is extended
 edge. -/
 theorem isPotential_supIncomingWeight (h : HasFiniteBudget G weight) :
     IsPotential G weight (supIncomingWeight G weight) := by
-  intro edge
+  refine isPotential_iff.2 fun edge => ?_
   have hedge : weight edge ≤ supIncomingWeight G weight (G.target edge) := by
     simpa using walkSum_le_supIncomingWeight h (EdgeGraph.Walk.singleton (G := G) edge)
   have key : supIncomingWeight G weight (G.source edge) ≤

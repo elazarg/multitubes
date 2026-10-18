@@ -150,12 +150,12 @@ additive mixed section. -/
 theorem exists_isMixedSection_iff_mixedResidualAtMost_zero
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → ℝ) :
     (∃ potential : V → ℝ,
-      (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential) ↔
+      (translationTransport G weight).IsMixedSection mode potential) ↔
       MixedResidualAtMost G mode weight 0 := by
   rw [mixedResidualAtMost_iff_worstDirectedResidualAtMost]
   calc
     (∃ potential : V → ℝ,
-        (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential) ↔
+        (translationTransport G weight).IsMixedSection mode potential) ↔
         ∃ potential : V → ℝ,
           MaxPlusPotential.IsPotential (Transport.laxificationGraph G mode)
             (laxifiedWeight mode weight) potential := by
@@ -172,7 +172,7 @@ theorem exists_isMixedSection_iff_forall_laxified_simpleCycle_nonpos
     (G : EdgeGraph V E) (mode : E → EdgeMode)
     [Finite (Transport.LaxificationEdge mode)] (weight : E → ℝ) :
     (∃ potential : V → ℝ,
-      (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential) ↔
+      (translationTransport G weight).IsMixedSection mode potential) ↔
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
         AdditiveTransport.IsSimpleCycle cycle →

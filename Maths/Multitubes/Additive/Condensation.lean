@@ -113,14 +113,11 @@ private theorem walkSum_le_of_forall_mem_edges {weight : E → ℝ} {φ : V → 
     {start finish : V} (walk : G.Walk start finish)
     (hedge : ∀ e ∈ walk.edges, φ (G.source e) + weight e ≤ φ (G.target e)) :
     walkSum weight walk ≤ φ finish - φ start := by
-  induction walk with
-  | nil => simp
-  | concat walkSoFar edge legal ih =>
-      have hlast := hedge edge (by simp)
-      have hrest := ih fun e hmem => hedge e (by simp [hmem])
-      subst legal
-      simp only [walkSum_concat]
-      linarith
+  have h := (translationTransport G weight).walkMap_rel_of_forall_mem_edges (family := φ)
+    (R := fun _ => (· ≤ ·)) (fun _ => le_rfl) (fun _ => le_trans) walk
+    (fun edge _ _ _ hxy => monotone_edgeMap_translationTransport weight edge hxy) hedge
+  rw [walkMap_translationTransport] at h
+  linarith
 
 /-- **Componentwise decomposition of lax feasibility.**  Over finitely many edges a
 potential exists exactly when every strongly connected component carries a vertex

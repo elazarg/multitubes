@@ -74,8 +74,9 @@ products of slopes.
   endpoint reindexing commutes with transport.
 * `Maths.Transport.walkMap_append` - path composition.
 * `Maths.Transport.walkMap_injective` - walks of injective edge maps transport injectively.
-* `Maths.Transport.IsSectionFor.walkMap_rel` - walk propagation of sections, for a
-  transitive relation preserved by the edge maps.
+* `Maths.Transport.walkMap_rel_of_forall_mem_edges` - walk propagation of an edgewise
+  relation along one walk, for a transitive relation preserved by its edge maps.
+* `Maths.Transport.IsSectionFor.walkMap_rel` - its form for sections.
 * `Maths.Transport.IsSection.walkMap_eq`, `Maths.Transport.IsLaxSection.walkMap_le`, and
   `Maths.Transport.IsOplaxSection.le_walkMap` - its exact, lax, and oplax instances.
 * `Maths.Transport.IsSection.isLaxSection` and `Maths.Transport.IsSection.isOplaxSection` -
@@ -291,6 +292,27 @@ def IsSectionFor (T : Transport G Fiber)
 
 variable {family : ∀ vertex, Fiber vertex}
 
+/-- **Walk propagation.**  Let `R` be a fiberwise relation, transitive, reflexive at a family,
+and preserved by the edge maps along a walk.  If every edge of the walk relates the transported
+source value to the target value, then so does the whole walk.  Only the edges of the walk are
+consulted. -/
+theorem walkMap_rel_of_forall_mem_edges {R : ∀ vertex, Fiber vertex → Fiber vertex → Prop}
+    (hrefl : ∀ vertex, R vertex (family vertex) (family vertex))
+    (htrans : ∀ vertex {x y z}, R vertex x y → R vertex y z → R vertex x z)
+    (walk : G.Walk start finish)
+    (hpreserve : ∀ edge ∈ walk.edges, ∀ {x y}, R (G.source edge) x y →
+      R (G.target edge) (T.edgeMap edge x) (T.edgeMap edge y))
+    (hedge : ∀ edge ∈ walk.edges,
+      R (G.target edge) (T.edgeMap edge (family (G.source edge))) (family (G.target edge))) :
+    R finish (T.walkMap walk (family start)) (family finish) := by
+  induction walk with
+  | nil => exact hrefl start
+  | concat walk edge legal ih =>
+      cases legal
+      have hprefix := ih (fun edge' hedge' => hpreserve edge' (by simp [hedge']))
+        fun edge' hedge' => hedge edge' (by simp [hedge'])
+      exact htrans _ (hpreserve edge (by simp) hprefix) (hedge edge (by simp))
+
 /-- **Walk propagation of sections.**  Let `R` be a fiberwise relation, transitive, reflexive
 at the family, and preserved by the edge maps.  If every edge of a walk relates a point to the
 family value only when `R` does, then the family value at the start is transported along the
@@ -309,17 +331,18 @@ theorem IsSectionFor.walkMap_rel
     (hfamily : T.IsSectionFor relation family) (walk : G.Walk start finish)
     (hedge : ∀ edge ∈ walk.edges, ∀ x, relation edge x (family (G.target edge)) →
       R (G.target edge) x (family (G.target edge))) :
-    R finish (T.walkMap walk (family start)) (family finish) := by
-  induction walk with
-  | nil => exact hrefl start
-  | concat walk edge legal ih =>
-      cases legal
-      have hprefix := ih fun edge' hedge' => hedge edge' (by simp [hedge'])
-      exact htrans _ (hpreserve edge hprefix) (hedge edge (by simp) _ (hfamily edge))
+    R finish (T.walkMap walk (family start)) (family finish) :=
+  walkMap_rel_of_forall_mem_edges hrefl htrans walk (fun edge _ => hpreserve edge)
+    fun edge hmem => hedge edge hmem _ (hfamily edge)
 
-/-- A family carried by every edge map to the family's value at the target. -/
+/-- A family carried by every edge map to the family's value at the target: the case `=` of
+`Maths.Transport.IsSectionFor`. -/
 def IsSection (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
-  T.IsSectionFor (fun _ => Eq) family
+  ∀ edge : E, T.edgeMap edge (family (G.source edge)) = family (G.target edge)
+
+theorem isSection_iff_isSectionFor :
+    T.IsSection family ↔ T.IsSectionFor (fun _ => Eq) family :=
+  Iff.rfl
 
 /-- A section is transported exactly along every walk. -/
 theorem IsSection.walkMap_eq (hfamily : T.IsSection family) (walk : G.Walk start finish) :
@@ -336,16 +359,18 @@ theorem IsSection.holonomy_eq (hfamily : T.IsSection family)
 /-! ### Lax and oplax sections -/
 
 /-- A family whose target value dominates the transported source value on every
-edge.  Only a fiberwise `LE` is needed to state this predicate. -/
+edge: the case `≤` of `Maths.Transport.IsSectionFor`.  Only a fiberwise `LE` is needed to
+state this predicate. -/
 def IsLaxSection [∀ vertex : V, LE (Fiber vertex)]
     (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
-  T.IsSectionFor (fun _ => (· ≤ ·)) family
+  ∀ edge : E, T.edgeMap edge (family (G.source edge)) ≤ family (G.target edge)
 
 /-- A family whose target value is below its transported source value on every
-edge.  Only a fiberwise `LE` is needed to state this predicate. -/
+edge: the case `≥` of `Maths.Transport.IsSectionFor`.  Only a fiberwise `LE` is needed to
+state this predicate. -/
 def IsOplaxSection [∀ vertex : V, LE (Fiber vertex)]
     (T : Transport G Fiber) (family : ∀ vertex, Fiber vertex) : Prop :=
-  T.IsSectionFor (fun _ => (· ≥ ·)) family
+  ∀ edge : E, family (G.target edge) ≤ T.edgeMap edge (family (G.source edge))
 
 section Ordered
 
@@ -378,7 +403,8 @@ the terminal vertex of every walk. -/
 theorem IsOplaxSection.le_walkMap (hmono : ∀ edge : E, Monotone (T.edgeMap edge))
     (hfamily : T.IsOplaxSection family) (walk : G.Walk start finish) :
     family finish ≤ T.walkMap walk (family start) :=
-  IsSectionFor.walkMap_rel (R := fun _ => (· ≥ ·)) (fun _ => le_rfl)
+  IsSectionFor.walkMap_rel (relation := fun _ => (· ≥ ·)) (R := fun _ => (· ≥ ·))
+    (fun _ => le_rfl)
     (fun _ _ _ _ hxy hyz => le_trans hyz hxy) (fun edge _ _ hxy => hmono edge hxy) hfamily walk
     fun _ _ _ => id
 

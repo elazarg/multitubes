@@ -730,10 +730,9 @@ theorem exists_isLeast_eigenvalues_of_translation [Fintype V] [DecidableEq V] [F
     refine ⟨eigenvalues_subset_relaxationLevels G label ⟨x, hx⟩, fun mu hmu => ?_⟩
     obtain ⟨y, hy⟩ := (mem_relaxationLevels_iff G label mu).1 hmu
     have hpot : IsPotential G (fun e => (label e).shift - mu) y := by
-      intro e
+      refine isPotential_iff.2 fun e => ?_
       have hvalue := hy e
       rw [Label.apply_of_floor_bot (hfloor e), Label.affinePart, hslope e, one_mul] at hvalue
-      simp only
       linarith
     have hcycle := hpot.closedWalk_nonpos best
     rw [walkSum_sub_const, nsmul_eq_mul] at hcycle

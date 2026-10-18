@@ -90,7 +90,7 @@ theorem rootedPhase_isSchedule [Fintype E] [DecidableEq V] (network : TimedNetwo
     (network.rootedPhase cycleTime base) hin]
   constructor
   · intro edge
-    have hedge := heigen.1 edge
+    have hedge := heigen.1.le edge
     simp only [label, rootedPhase, Label.apply_of_floor_bot, Label.affinePart, one_mul]
     linarith [hedge]
   · intro vertex

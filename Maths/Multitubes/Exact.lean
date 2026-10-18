@@ -424,13 +424,13 @@ theorem walkLabel_eq_of_forall_mem_edges (potential : V → Mˣ) {start finish :
     (hedge : ∀ edge ∈ walk.edges,
       label edge = (potential (G.target edge) * (potential (G.source edge))⁻¹ : Mˣ)) :
     walkLabel label walk = (potential finish * (potential start)⁻¹ : Mˣ) := by
-  induction walk with
-  | nil => simp
-  | concat walk edge legal ih =>
-      subst legal
-      rw [walkLabel_concat, hedge edge (by simp),
-        ih fun edge' hedge' => hedge edge' (by simp [hedge'])]
-      simp [← Units.val_mul, mul_assoc]
+  have h := (ofSMul G M label).walkMap_rel_of_forall_mem_edges
+    (family := fun vertex => (potential vertex : M)) (R := fun _ => Eq) (fun _ => rfl)
+    (fun _ => Eq.trans) walk (fun _ _ _ _ hxy => congrArg _ hxy) fun edge hmem => by
+      change label edge * _ = _
+      simp [hedge edge hmem, mul_assoc]
+  rw [walkMap_ofSMul_eq_walkLabel_smul, smul_eq_mul] at h
+  simp [← h, mul_assoc]
 
 /-- The unit represented by the chosen out-and-back walks between a base and a linked
 vertex.  Flatness makes the two composite labels mutually inverse. -/

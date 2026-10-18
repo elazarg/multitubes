@@ -184,11 +184,11 @@ theorem mem_relaxationLevels_iff (G : EdgeGraph V E) (label : E → Label) (lam 
   constructor
   · rintro ⟨x, hx⟩
     refine ⟨x, fun e => ?_⟩
-    have he := hx e
+    have he := hx.apply_le e
     rw [Label.apply_relax] at he
     linarith
   · rintro ⟨x, hx⟩
-    refine ⟨x, fun e => ?_⟩
+    refine ⟨x, isLaxSection_iff.2 fun e => ?_⟩
     have he := hx e
     rw [Label.apply_relax]
     linarith
@@ -205,8 +205,8 @@ theorem mem_relaxationLevels_of_le {lam mu : ℝ} (hlam : lam ∈ relaxationLeve
 theorem zero_mem_relaxationLevels_iff (G : EdgeGraph V E) (label : E → Label) :
     (0 : ℝ) ∈ relaxationLevels G label ↔ ∃ x : V → ℝ, IsLaxSection G label x := by
   rw [mem_relaxationLevels_iff]
-  exact ⟨fun ⟨x, hx⟩ => ⟨x, fun e => by have := hx e; linarith⟩,
-    fun ⟨x, hx⟩ => ⟨x, fun e => by have := hx e; linarith⟩⟩
+  exact ⟨fun ⟨x, hx⟩ => ⟨x, isLaxSection_iff.2 fun e => by have := hx e; linarith⟩,
+    fun ⟨x, hx⟩ => ⟨x, fun e => by have := hx.apply_le e; linarith⟩⟩
 
 variable [Fintype E] [DecidableEq V]
 

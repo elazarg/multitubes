@@ -224,7 +224,7 @@ theorem isLaxSection_of_isPotential {label : E → Label} (hslope : ∀ e : E, (
     IsLaxSection G label φ := by
   intro e
   refine (Label.apply_le_target_iff _ _ _).2 ⟨hfloor e, ?_⟩
-  have hpot := hφ e
+  have hpot := hφ.le e
   simp only [Label.affinePart, hslope e, one_mul]
   linarith
 
@@ -254,7 +254,7 @@ theorem exists_isLaxSection_iff_forall_cycle_shift_nonpos [Finite E]
     obtain ⟨lift, hlift⟩ :=
       Finite.exists_le fun e : E => (label e).floor.unbotD 0 - base (G.target e)
     refine ⟨fun v => base v + lift, isLaxSection_of_isPotential hslope (fun e => ?_) fun e => ?_⟩
-    · have := hbase e
+    · have := hbase.le e
       change base (G.source e) + lift + (label e).shift ≤ base (G.target e) + lift
       linarith
     · refine (Label.le_coe_unbotD _ 0).trans (WithBot.coe_le_coe.mpr ?_)

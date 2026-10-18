@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Graph.WalkLabel
+public import Maths.Multitubes.Basic
 public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 public import Mathlib.Data.Finset.Max
 public import Mathlib.Data.Fintype.Card
@@ -63,8 +63,9 @@ component in question reaches the whole graph.
 
 ## Main definitions
 
-- `walkSum` - total weight of a finite typed walk
-- `Maths.MaxPlusPotential.IsPotential` - the edge increment inequality
+- `Maths.translationTransport` - additive edge data acting by translation
+- `Maths.MaxPlusPotential.IsPotential` - the edge increment inequality, a lax section of the
+  translation transport
 - `Maths.MaxPlusPotential.defect` - the amount by which one edge fails it
 - `Maths.MaxPlusPotential.incomingWeights`,
   `Maths.MaxPlusPotential.nodupIncomingWeights` - the weights of the walks
@@ -139,9 +140,40 @@ namespace Maths
 
 noncomputable section
 
-namespace MaxPlusPotential
-
 universe uV uE
+
+/-! ### Translation transport -/
+
+section Translation
+
+variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E} {A : Type*}
+
+/-- The constant-fiber transport whose edge `e` acts by translation by `w e`. -/
+def translationTransport [Add A] (G : EdgeGraph V E) (w : E → A) :
+    Transport G (fun _ : V => A) :=
+  ofEdgeAct G A fun edge point => point + w edge
+
+@[simp] theorem translationTransport_edgeMap [Add A] (w : E → A) (edge : E) (point : A) :
+    (translationTransport G w).edgeMap edge point = point + w edge := rfl
+
+/-- Transport by additive edge data is translation by the walk sum. -/
+@[simp] theorem walkMap_translationTransport [AddMonoid A] (w : E → A) {start finish : V}
+    (walk : G.Walk start finish) (point : A) :
+    (translationTransport G w).walkMap walk point = point + walkSum w walk := by
+  induction walk with
+  | nil => simp
+  | concat walkSoFar edge legal ih =>
+      rw [Transport.walkMap_concat, fiberCast_const, ih, walkSum_concat,
+        translationTransport_edgeMap, add_assoc]
+
+/-- Every edge map of an ordered translation transport is monotone. -/
+theorem monotone_edgeMap_translationTransport [Add A] [Preorder A] [AddRightMono A]
+    (w : E → A) (edge : E) : Monotone ((translationTransport G w).edgeMap edge) :=
+  fun _ _ hle => add_le_add_left hle (w edge)
+
+end Translation
+
+namespace MaxPlusPotential
 
 variable {𝕜 : Type*} [AddCommMonoid 𝕜] [LinearOrder 𝕜] [IsOrderedAddMonoid 𝕜]
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
@@ -151,12 +183,23 @@ section Potential
 variable {𝕜p : Type*} [Add 𝕜p] [LE 𝕜p]
 
 /-- A potential for an edge weighting: traversing an edge increases it by at
-least the weight of that edge.  Also called a feasible node potential, a feasible
+least the weight of that edge, `φ (source e) + weight e ≤ φ (target e)`.  It is a lax
+section of the translation transport.  Also called a feasible node potential, a feasible
 price vector, a subinvariant function, or a Lyapunov weighting; in the (max, +)
 semiring it is a subeigenvector of the weight matrix.  The opposite decrement
 convention is the same notion on the reversed graph. -/
 def IsPotential (G : EdgeGraph V E) (weight : E → 𝕜p) (φ : V → 𝕜p) : Prop :=
-  ∀ e : E, φ (G.source e) + weight e ≤ φ (G.target e)
+  (translationTransport G weight).IsLaxSection φ
+
+/-- The edge inequality of a potential. -/
+theorem isPotential_iff {weight : E → 𝕜p} {φ : V → 𝕜p} :
+    IsPotential G weight φ ↔ ∀ e : E, φ (G.source e) + weight e ≤ φ (G.target e) :=
+  Iff.rfl
+
+/-- The edge inequality of a potential at one edge. -/
+theorem IsPotential.le {weight : E → 𝕜p} {φ : V → 𝕜p} (hφ : IsPotential G weight φ) (e : E) :
+    φ (G.source e) + weight e ≤ φ (G.target e) :=
+  hφ e
 
 end Potential
 
@@ -174,7 +217,7 @@ def defect (G : EdgeGraph V E) (weight : E → 𝕜g) (φ : V → 𝕜g) (e : E)
 
 theorem isPotential_iff_forall_defect_nonpos (G : EdgeGraph V E) (weight : E → 𝕜g)
     (φ : V → 𝕜g) : IsPotential G weight φ ↔ ∀ e : E, defect G weight φ e ≤ 0 := by
-  simp [IsPotential, defect]
+  simp [isPotential_iff, defect]
 
 omit [Preorder 𝕜g] [IsOrderedAddMonoid 𝕜g] in
 /-- Telescoping along a walk: the defects of the traversed edges sum to the
@@ -192,51 +235,27 @@ theorem sum_defect_eq (weight : E → 𝕜g) (φ : V → 𝕜g) {start finish : 
         walkSum_concat]
       abel
 
-/-- A potential dominates the weight of every walk between its endpoints. -/
-theorem IsPotential.walkSum_le {weight : E → 𝕜g} {φ : V → 𝕜g}
-    (hφ : IsPotential G weight φ) {start finish : V} (walk : G.Walk start finish) :
-    walkSum weight walk ≤ φ finish - φ start := by
-  induction walk with
-  | nil => simp
-  | concat walkSoFar edge legal ih =>
-      have hedge := hφ edge
-      subst legal
-      simp only [walkSum_concat]
-      rw [le_sub_iff_add_le]
-      calc
-        walkSum weight walkSoFar + weight edge + φ start ≤
-            (φ (G.source edge) - φ start) + weight edge + φ start :=
-          by
-            have h := add_le_add_right (add_le_add_right ih (weight edge)) (φ start)
-            simpa [add_assoc, add_comm, add_left_comm] using h
-        _ = φ (G.source edge) + weight edge := by abel
-        _ ≤ φ (G.target edge) := by simpa [add_comm] using hedge
-
 end AddGroup
 
 section OrderedMonoid
 
 variable {𝕜o : Type*} [AddCommMonoid 𝕜o] [Preorder 𝕜o] [IsOrderedAddMonoid 𝕜o]
 
-/-- A potential bounds a walk after adding the value at its starting vertex.
-This form only needs an additive monoid, unlike `IsPotential.walkSum_le`. -/
+/-- A potential bounds a walk after adding the value at its starting vertex: walk propagation
+of the lax section along the translation transport. -/
 theorem IsPotential.walkSum_add_le {weight : E → 𝕜o} {φ : V → 𝕜o}
     (hφ : IsPotential G weight φ) {start finish : V} (walk : G.Walk start finish) :
     walkSum weight walk + φ start ≤ φ finish := by
-  induction walk with
-  | nil => simp
-  | concat walkSoFar edge legal ih =>
-      have hedge := hφ edge
-      subst legal
-      calc
-        walkSum weight (walkSoFar.concat edge rfl) + φ start =
-            weight edge + (walkSum weight walkSoFar + φ start) := by
-          simp only [walkSum_concat]
-          ac_rfl
-        _ ≤ weight edge + φ (G.source edge) := by
-          have h := add_le_add_right ih (weight edge)
-          simpa [add_assoc, add_comm, add_left_comm] using h
-        _ ≤ φ (G.target edge) := by simpa [add_comm] using hedge
+  have h := Transport.IsLaxSection.walkMap_le
+    (monotone_edgeMap_translationTransport weight) hφ walk
+  rwa [walkMap_translationTransport, add_comm] at h
+
+/-- A potential dominates the weight of every walk between its endpoints. -/
+theorem IsPotential.walkSum_le {𝕜g : Type*} [AddCommGroup 𝕜g] [Preorder 𝕜g]
+    [IsOrderedAddMonoid 𝕜g] {weight : E → 𝕜g} {φ : V → 𝕜g}
+    (hφ : IsPotential G weight φ) {start finish : V} (walk : G.Walk start finish) :
+    walkSum weight walk ≤ φ finish - φ start :=
+  le_sub_iff_add_le.2 (hφ.walkSum_add_le walk)
 
 section CancelOrder
 
@@ -595,13 +614,14 @@ theorem isSubeigenvector_iff_isPotential (A : ι → ι → 𝕜g) (lam : 𝕜g)
   constructor
   · intro hv e
     have := hv e.1 e.2
-    simp only [matrixGraph_source, matrixGraph_target, matrixWeight]
+    simp only [translationTransport_edgeMap, matrixGraph_source, matrixGraph_target,
+      matrixWeight]
     rw [show v e.2 + (A e.1 e.2 - lam) =
       (A e.1 e.2 + v e.2) - lam by abel]
     apply (sub_le_iff_le_add).2
     simpa [add_assoc, add_comm, add_left_comm] using this
   · intro hv i j
-    have := hv (i, j)
+    have := hv.le (i, j)
     simp only [matrixGraph_source, matrixGraph_target, matrixWeight] at this
     have h' : (A i j + v j) - lam ≤ v i := by
       calc

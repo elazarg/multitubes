@@ -374,7 +374,7 @@ theorem isEigenvector_maxRootedWeight_of_maximizing_cycle (G : EdgeGraph V E)
     obtain ⟨e, he, -⟩ := htight vertex
     exact ⟨e, mem_incoming.2 he⟩
   refine (isEigenvector_iff G label lam x hin).2 ⟨fun e => ?_, fun vertex => ?_⟩
-  · have hpot := maxRootedWeight_isPotential hcyc hreach e
+  · have hpot := (maxRootedWeight_isPotential hcyc hreach).le e
     rw [hvalue e]
     simp only [hshifted] at hpot
     linarith

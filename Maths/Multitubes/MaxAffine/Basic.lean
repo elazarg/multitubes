@@ -53,9 +53,10 @@ labels `(↑0, -g, a)` the transport along a path is the Lindley orbit
 (`holonomyApply_eq_reflectedIter`), whose survival-weighted representation is
 `Maths.TransferSummary.reflectedIter_eq_sup'`.
 
-`Maths.Multitubes.Basic` is the generic semantic layer.  `toTransport`
-reads a max-affine labelling as a constant-fiber transport on `ℝ`, and
-`holonomyApply` is `Maths.transport` at those edge actions.
+A max-affine labelling is read as the constant-fiber transport `toTransport` on `ℝ`, and its
+lax sections and walk transport are those of `Maths.Multitubes.Basic`: `IsLaxSection` is the lax
+section predicate of `toTransport` and `holonomyApply` its walk map, so the generic walk calculus
+applies without translation.
 The theorem `holonomyApply_eq_walkLabel_smul` identifies it with
 `Maths.walkLabel` in the nonnegative-slope label monoid.
 The affine part of a composite label is represented by the transfer matrices of
@@ -85,10 +86,10 @@ of a finite linear program, by `Maths.Multitubes.MaxAffine.LeastEigenvalue`.
   `Maths.TransferSummary`'s classes.
 * `Maths.MaxAffineTransport.Label.toTransferMatrix` -- affine summaries as
   `2 × 2` transfer matrices.
-* `Maths.MaxAffineTransport.IsLaxSection`, `defect` -- the lax section and
+* `Maths.MaxAffineTransport.toTransport` -- a labelling as a transport on `ℝ`.
+* `Maths.MaxAffineTransport.IsLaxSection`, `defect` -- the lax section of that transport and
   its edgewise residual.
-* `Maths.MaxAffineTransport.holonomyApply` -- chronological transport along a
-  walk.
+* `Maths.MaxAffineTransport.holonomyApply` -- the walk map of that transport.
 * `Maths.MaxAffineTransport.slopeProd`, `suffixWeight`, `suffixWeightSum`,
   `weightedDefect` -- the survival-weighted accounting along an edge list.
 * `Maths.MaxAffineTransport.cyclicLabel`, `cyclicChain`, `cyclicHolonomy` -- one
@@ -644,12 +645,30 @@ universe uV uE
 
 variable {V : Type uV} {E : Type uE} {G : Maths.EdgeGraph V E}
 
+/-- The transport of a labelled graph: every fiber is the line and each edge acts by its
+label. -/
+def toTransport (G : EdgeGraph V E) (label : E → Label) : Transport G fun _ : V => ℝ :=
+  ofEdgeAct G ℝ fun e => (label e).apply
+
+@[simp] theorem toTransport_edgeMap (label : E → Label) (e : E) (x : ℝ) :
+    (toTransport G label).edgeMap e x = (label e).apply x := rfl
+
 /-- A **lax section**: traversing an edge does not increase the
-candidate beyond its value at the head of that edge.  Also called a
-subsolution, a subinvariant family, a superharmonic section, or an
-inductive invariant. -/
+candidate beyond its value at the head of that edge, so it is a lax section of
+`Maths.MaxAffineTransport.toTransport`.  Also called a subsolution, a subinvariant
+family, a superharmonic section, or an inductive invariant. -/
 def IsLaxSection (G : EdgeGraph V E) (label : E → Label) (φ : V → ℝ) : Prop :=
-  ∀ e : E, (label e).apply (φ (G.source e)) ≤ φ (G.target e)
+  (toTransport G label).IsLaxSection φ
+
+/-- The edge inequalities of a lax section. -/
+theorem isLaxSection_iff {label : E → Label} {φ : V → ℝ} :
+    IsLaxSection G label φ ↔ ∀ e : E, (label e).apply (φ (G.source e)) ≤ φ (G.target e) :=
+  Iff.rfl
+
+/-- The edge inequality of a lax section at one edge. -/
+theorem IsLaxSection.apply_le {label : E → Label} {φ : V → ℝ} (hφ : IsLaxSection G label φ)
+    (e : E) : (label e).apply (φ (G.source e)) ≤ φ (G.target e) :=
+  hφ e
 
 /-- The amount by which a candidate fails the edge inequality.  Also called the
 edge slack or the residual of the edge. -/
@@ -658,7 +677,7 @@ def defect (G : EdgeGraph V E) (label : E → Label) (φ : V → ℝ) (e : E) : 
 
 theorem isLaxSection_iff_forall_defect_nonpos (G : EdgeGraph V E) (label : E → Label)
     (φ : V → ℝ) : IsLaxSection G label φ ↔ ∀ e : E, defect G label φ e ≤ 0 := by
-  simp [IsLaxSection, defect]
+  simp [isLaxSection_iff, defect]
 
 /-! ### Transport along a walk -/
 
@@ -667,7 +686,7 @@ chronological order.  For a closed walk this is the action of the walk's
 holonomy. -/
 def holonomyApply (label : E → Label) {start finish : V}
     (walk : G.Walk start finish) : ℝ → ℝ :=
-  Maths.transport (fun e x => (label e).apply x) walk
+  (toTransport G label).walkMap walk
 
 @[simp] theorem holonomyApply_nil (label : E → Label) {start : V} (x : ℝ) :
     holonomyApply label (.nil : G.Walk start start) x = x := rfl
@@ -901,13 +920,8 @@ theorem holonomyApply_le_add_weightedDefect {label : E → Label}
 theorem holonomyApply_le_of_isLaxSection {label : E → Label}
     (hslope : ∀ e : E, 0 ≤ (label e).slope) {φ : V → ℝ}
     (hφ : IsLaxSection G label φ) {start finish : V} (walk : G.Walk start finish) :
-    holonomyApply label walk (φ start) ≤ φ finish := by
-  induction walk with
-  | nil => simp
-  | @concat middle walkSoFar edge legal ih =>
-      subst legal
-      have hmono := Label.monotone_apply (f := label edge) (hslope edge) ih
-      exact hmono.trans (hφ edge)
+    holonomyApply label walk (φ start) ≤ φ finish :=
+  Transport.IsLaxSection.walkMap_le (fun e => Label.monotone_apply (hslope e)) hφ walk
 
 /-- **Weak duality.**  A lax section makes its value at a vertex a
 pre-fixed point of the composite action of every closed walk there. -/
@@ -1074,41 +1088,5 @@ theorem cyclicSolution_of_holonomyApply_eq {label : E → Label} {p q : ℕ → 
     (by rw [← holonomyApply_eq_cyclicHolonomy p q cycle hmatch]; exact hx)
 
 end Specialization
-
-/-! ## The transport interpretation
-`Maths` develops transport with vertex-indexed fibers; a
-max-affine transport graph is its constant-fiber case, with every fiber the line
-and each edge acting by its label.  The identifications below let the
-
-section and holonomy statements of that module specialize here. -/
-section Transport
-
-open Maths
-
-universe uV' uE'
-
-variable {V : Type uV'} {E : Type uE'} {G : Maths.EdgeGraph V E}
-
-/-- The constant-fiber transport of a labelled graph: every fiber is
-the line and each edge acts by its label. -/
-def toTransport (G : EdgeGraph V E) (label : E → Label) :
-    Transport G fun _ : V => ℝ :=
-  ofEdgeAct G ℝ fun e => (label e).apply
-
-/-- Walk transport of the constant-fiber reading is the composite label
-action. -/
-theorem walkMap_toTransport (label : E → Label) {start finish : V}
-    (walk : G.Walk start finish) (x : ℝ) :
-    (toTransport G label).walkMap walk x = holonomyApply label walk x :=
-  walkMap_ofEdgeAct _ walk x
-
-/-- A lax section of a labelled graph is a lax section of its constant-fiber
-transport. -/
-theorem isLaxSection_iff_toTransport_isLaxSection (G : EdgeGraph V E) (label : E → Label)
-    (φ : V → ℝ) :
-    IsLaxSection G label φ ↔ (toTransport G label).IsLaxSection φ :=
-  Iff.rfl
-
-end Transport
 
 end Maths.MaxAffineTransport
