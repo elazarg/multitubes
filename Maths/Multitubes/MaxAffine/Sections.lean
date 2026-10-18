@@ -243,7 +243,7 @@ theorem exists_isLaxSection_iff_forall_cycle_shift_nonpos [Finite E]
     {label : E → Label} (hslope : ∀ e : E, (label e).slope = 1) :
     (∃ φ : V → ℝ, IsLaxSection G label φ) ↔
       ∀ (base : V) (cycle : G.Walk base base),
-        Maths.MaxPlusPotential.walkWeight (fun e => (label e).shift) cycle ≤ 0 := by
+        walkSum (fun e => (label e).shift) cycle ≤ 0 := by
   constructor
   · rintro ⟨φ, hφ⟩ base cycle
     exact (isPotential_of_isLaxSection hslope hφ).closedWalk_nonpos cycle
@@ -266,9 +266,9 @@ theorem exists_isLaxSection_iff_forall_cycle_shift_nonpos [Finite E]
 theorem shift_compList_edges {label : E → Label} (hslope : ∀ e : E, (label e).slope = 1)
     {start finish : V} (walk : G.Walk start finish) :
     (Label.compList (walk.edges.map label)).shift
-      = Maths.MaxPlusPotential.walkWeight (fun e => (label e).shift) walk := by
+      = walkSum (fun e => (label e).shift) walk := by
   rw [Label.shift_compList (fun f hf => ?_)]
-  · rw [Maths.MaxPlusPotential.walkWeight, List.map_map]
+  · rw [walkSum, List.map_map]
     rfl
   · obtain ⟨e, _, rfl⟩ := List.mem_map.mp hf
     exact hslope e

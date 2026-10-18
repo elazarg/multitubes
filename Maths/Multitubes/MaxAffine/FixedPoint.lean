@@ -345,24 +345,24 @@ theorem isEigenvector_maxRootedWeight_of_maximizing_cycle (G : EdgeGraph V E)
     (hfloor : ∀ e : E, (label e).floor = ⊥) {base : V} (best : G.Walk base base)
     (hpos : 0 < best.length)
     (hbest : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      walkWeight (fun e => (label e).shift) cycle
-        ≤ cycle.length * (walkWeight (fun e => (label e).shift) best / best.length))
+      walkSum (fun e => (label e).shift) cycle
+        ≤ cycle.length * (walkSum (fun e => (label e).shift) best / best.length))
     (hreach : ∀ vertex : V, Nonempty (G.Walk base vertex)) :
-    IsEigenvector G label (walkWeight (fun e => (label e).shift) best / best.length)
+    IsEigenvector G label (walkSum (fun e => (label e).shift) best / best.length)
       (maxRootedWeight G
         (fun e => (label e).shift
-          - walkWeight (fun e => (label e).shift) best / best.length) base) := by
+          - walkSum (fun e => (label e).shift) best / best.length) base) := by
   set weight : E → ℝ := fun e => (label e).shift with hweight
-  set lam : ℝ := walkWeight weight best / best.length with hlam
+  set lam : ℝ := walkSum weight best / best.length with hlam
   set shifted : E → ℝ := fun e => weight e - lam with hshifted
   set x : V → ℝ := maxRootedWeight G shifted base with hx
   have hlenPos : (0 : ℝ) < best.length := by exact_mod_cast hpos
-  have hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight shifted cycle ≤ 0 := by
+  have hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum shifted cycle ≤ 0 := by
     intro vertex cycle
-    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul]
+    rw [hshifted, walkSum_sub_const, nsmul_eq_mul]
     linarith [hbest vertex cycle]
-  have hzero : walkWeight shifted best = 0 := by
-    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul, hlam]
+  have hzero : walkSum shifted best = 0 := by
+    rw [hshifted, walkSum_sub_const, nsmul_eq_mul, hlam]
     field_simp
     ring
   have hvalue (e : E) (z : ℝ) : (label e).apply z = weight e + z := by
@@ -395,23 +395,23 @@ theorem exists_isEigenvector_of_translation [Fintype V] [Nonempty V] (G : EdgeGr
     (hconnected : ∀ source target : V, Nonempty (G.Walk source target)) :
     ∃ (lam : ℝ) (base : V) (best : G.Walk base base),
       0 < best.length ∧ best.length ≤ Fintype.card V ∧
-        lam = walkWeight (fun e => (label e).shift) best / best.length ∧
+        lam = walkSum (fun e => (label e).shift) best / best.length ∧
         (∀ (vertex : V) (cycle : G.Walk vertex vertex), 0 < cycle.length →
-          walkWeight (fun e => (label e).shift) cycle / cycle.length ≤ lam) ∧
+          walkSum (fun e => (label e).shift) cycle / cycle.length ≤ lam) ∧
         ∃ x : V → ℝ, IsEigenvector G label lam x := by
   obtain ⟨base, best, hpos, hcard, hmax⟩ :=
     AdditiveTransport.exists_short_closedWalk_maximizing_mean G (fun e => (label e).shift)
       (exists_closedWalk_length_pos (G := G) hinEdge)
   set weight : E → ℝ := fun e => (label e).shift with hweight
-  set lam : ℝ := walkWeight weight best / best.length with hlam
+  set lam : ℝ := walkSum weight best / best.length with hlam
   have hlenPos : (0 : ℝ) < best.length := by exact_mod_cast hpos
   have hbest : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      walkWeight weight cycle ≤ cycle.length * lam := by
+      walkSum weight cycle ≤ cycle.length * lam := by
     intro vertex cycle
     rcases Nat.eq_zero_or_pos cycle.length with hzero | hcyclePos
     · have hedges : cycle.edges = [] :=
         List.length_eq_zero_iff.mp (by rw [EdgeGraph.Walk.edges_length, hzero])
-      simp [walkWeight, hedges, hzero]
+      simp [walkSum, hedges, hzero]
     · have hlen : (0 : ℝ) < cycle.length := by exact_mod_cast hcyclePos
       have := (div_le_iff₀ hlen).mp (hmax vertex cycle hcyclePos)
       linarith

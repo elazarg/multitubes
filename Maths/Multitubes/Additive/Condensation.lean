@@ -6,7 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.Additive.Potentials
-public import Maths.Multitubes.SCC
+public import Maths.Graph.Condensation
 
 import Mathlib.Tactic.Linarith
 
@@ -179,17 +179,17 @@ theorem hasSCCPotentialAt_iff_exists_isPotential_induce (weight : E → ℝ) (ba
     simp only [φ, dite_eq_left hs, dite_eq_left ht]
     exact hedge
 
-private theorem walkWeight_le_of_forall_mem_edges {weight : E → ℝ} {φ : V → ℝ}
+private theorem walkSum_le_of_forall_mem_edges {weight : E → ℝ} {φ : V → ℝ}
     {start finish : V} (walk : G.Walk start finish)
     (hedge : ∀ e ∈ walk.edges, φ (G.source e) + weight e ≤ φ (G.target e)) :
-    walkWeight weight walk ≤ φ finish - φ start := by
+    walkSum weight walk ≤ φ finish - φ start := by
   induction walk with
   | nil => simp
   | concat walkSoFar edge legal ih =>
       have hlast := hedge edge (by simp)
       have hrest := ih fun e hmem => hedge e (by simp [hmem])
       subst legal
-      simp only [walkWeight_concat]
+      simp only [walkSum_concat]
       linarith
 
 /-- **Componentwise decomposition of lax feasibility.**  Over finitely many edges a
@@ -210,7 +210,7 @@ theorem exists_isPotential_iff_hasSCCPotentials [Finite E] (weight : E → ℝ) 
       hφ e
         (mem_sccSet_toSCC_iff_linkedTo.mp (source_mem_sccSet_of_mem_edges cycle hmem))
         (mem_sccSet_toSCC_iff_linkedTo.mp (target_mem_sccSet_of_mem_edges cycle hmem))
-    simpa using walkWeight_le_of_forall_mem_edges cycle hedge
+    simpa using walkSum_le_of_forall_mem_edges cycle hedge
 
 /-- **Condensation decomposition of lax feasibility.**  Over finitely many edges a
 potential for a weighted digraph exists exactly when the induced subgraph of every

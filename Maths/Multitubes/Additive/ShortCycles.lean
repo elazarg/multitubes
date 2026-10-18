@@ -68,12 +68,12 @@ nonpositive weight, then every closed walk has nonpositive weight. -/
 theorem closedWalk_nonpos_of_short [Fintype V] (weight : E → ℝ)
     (hshort : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
       0 < cycle.length → cycle.length ≤ Fintype.card V →
-        walkWeight weight cycle ≤ 0) :
+        walkSum weight cycle ≤ 0) :
     ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      walkWeight weight cycle ≤ 0 := by
+      walkSum weight cycle ≤ 0 := by
   intro vertex cycle
   suffices hbounded : ∀ bound : ℕ, cycle.length ≤ bound →
-      walkWeight weight cycle ≤ 0 by
+      walkSum weight cycle ≤ 0 by
     exact hbounded cycle.length le_rfl
   intro bound
   induction bound generalizing vertex cycle with
@@ -81,18 +81,18 @@ theorem closedWalk_nonpos_of_short [Fintype V] (weight : E → ℝ)
       intro hlength
       have hzero : cycle.length = 0 := Nat.eq_zero_of_le_zero hlength
       cases cycle with
-      | nil => simp [walkWeight]
+      | nil => simp [walkSum]
       | concat before edge legal => simp at hzero
   | succ bound ih =>
       intro hlength
       by_cases hcard : cycle.length ≤ Fintype.card V
       · by_cases hnil : cycle.length = 0
         · cases cycle with
-          | nil => simp [walkWeight]
+          | nil => simp [walkSum]
           | concat before edge legal => simp at hnil
         · exact hshort vertex cycle (Nat.pos_of_ne_zero hnil) hcard
       · cases cycle with
-        | nil => simp [walkWeight]
+        | nil => simp [walkSum]
         | concat initial edge legal =>
             have hinitialDup : ¬initial.visited.Nodup := by
               intro hnodup
@@ -117,9 +117,9 @@ theorem closedWalk_nonpos_of_short [Fintype V] (weight : E → ℝ)
             have hremainderLe : remainder.length ≤ bound := by omega
             have hinnerWeight := ih middle inner hinnerLe
             have hremainderWeight := ih (G.target edge) remainder hremainderLe
-            have hweightEq : walkWeight weight (initial.concat edge legal) =
-                walkWeight weight inner + walkWeight weight remainder := by
-              simp only [walkWeight, EdgeGraph.Walk.edges_concat,
+            have hweightEq : walkSum weight (initial.concat edge legal) =
+                walkSum weight inner + walkSum weight remainder := by
+              simp only [walkSum, EdgeGraph.Walk.edges_concat,
                 EdgeGraph.Walk.edges_append, remainder, hedges,
                 List.map_append, List.sum_append]
               ring
@@ -132,18 +132,18 @@ theorem closedWalk_le_length_mul_of_short [Fintype V]
     (weight : E → ℝ) (level : ℝ)
     (hshort : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
       0 < cycle.length → cycle.length ≤ Fintype.card V →
-        walkWeight weight cycle ≤ cycle.length * level) :
+        walkSum weight cycle ≤ cycle.length * level) :
     ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      walkWeight weight cycle ≤ cycle.length * level := by
+      walkSum weight cycle ≤ cycle.length * level := by
   have hnonpos := closedWalk_nonpos_of_short
     (G := G) (fun edge => weight edge - level) (by
       intro vertex cycle hpos hcard
-      rw [walkWeight_sub_const, nsmul_eq_mul]
+      rw [walkSum_sub_const, nsmul_eq_mul]
       have hbound := hshort vertex cycle hpos hcard
       linarith)
   intro vertex cycle
   have hbound := hnonpos vertex cycle
-  rw [walkWeight_sub_const, nsmul_eq_mul] at hbound
+  rw [walkSum_sub_const, nsmul_eq_mul] at hbound
   linarith
 
 /-- **Short-cycle exact threshold.**  On a finite graph, every obstruction to
@@ -155,7 +155,7 @@ theorem worstDirectedResidualAtMost_iff_shortClosedWalk_le
     WorstDirectedResidualAtMost G weight level ↔
       ∀ (vertex : V) (cycle : G.Walk vertex vertex),
         0 < cycle.length → cycle.length ≤ Fintype.card V →
-          walkWeight weight cycle ≤ cycle.length * level := by
+          walkSum weight cycle ≤ cycle.length * level := by
   rw [worstDirectedResidualAtMost_iff_closedWalk_le]
   exact ⟨fun hall vertex cycle _ _ => hall vertex cycle,
     closedWalk_le_length_mul_of_short weight level⟩
@@ -168,7 +168,7 @@ theorem exists_short_closedWalk_of_not_worstDirectedResidualAtMost
     (hfailure : ¬WorstDirectedResidualAtMost G weight level) :
     ∃ (vertex : V) (cycle : G.Walk vertex vertex),
       0 < cycle.length ∧ cycle.length ≤ Fintype.card V ∧
-        cycle.length * level < walkWeight weight cycle := by
+        cycle.length * level < walkSum weight cycle := by
   grind [worstDirectedResidualAtMost_iff_shortClosedWalk_le]
 
 /-! ## Attainment of the maximum cycle mean -/
@@ -187,8 +187,8 @@ theorem exists_short_closedWalk_of_nonempty [Fintype V]
       apply hnone
       exact ⟨middle, short, hpos, hcard⟩)
   have himpossible := hnonpos vertex cycle
-  have hweight : walkWeight (fun _ : E => (1 : ℝ)) cycle = cycle.length := by
-    simp [walkWeight, EdgeGraph.Walk.edges_length, nsmul_eq_mul]
+  have hweight : walkSum (fun _ : E => (1 : ℝ)) cycle = cycle.length := by
+    simp [walkSum, EdgeGraph.Walk.edges_length, nsmul_eq_mul]
   rw [hweight] at himpossible
   have hpositive : (0 : ℝ) < cycle.length := by exact_mod_cast hcycle
   linarith
@@ -223,8 +223,8 @@ theorem exists_short_closedWalk_maximizing_mean
       0 < best.length ∧ best.length ≤ Fintype.card V ∧
         ∀ (otherVertex : V) (other : G.Walk otherVertex otherVertex),
           0 < other.length →
-            walkWeight weight other / other.length ≤
-              walkWeight weight best / best.length := by
+            walkSum weight other / other.length ≤
+              walkSum weight best / best.length := by
   obtain ⟨vertex, cycle, hcycle⟩ := hexists
   obtain ⟨shortVertex, short, hshortPos, hshortCard⟩ :=
     exists_short_closedWalk_of_nonempty cycle hcycle
@@ -237,8 +237,8 @@ theorem exists_short_closedWalk_maximizing_mean
   refine ⟨bestVertex, best, hbestPos, hbestCard, ?_⟩
   have hshortBound (middle : V) (candidate : G.Walk middle middle)
       (hpos : 0 < candidate.length) (hcard : candidate.length ≤ Fintype.card V) :
-      walkWeight weight candidate ≤
-        candidate.length * (walkWeight weight best / best.length) := by
+      walkSum weight candidate ≤
+        candidate.length * (walkSum weight best / best.length) := by
     have hcandidateMem : candidate.edges ∈ shortClosedEdgeLists G :=
       ⟨middle, candidate, hpos, hcard, rfl⟩
     have hmean := hmax candidate.edges hcandidateMem
@@ -246,9 +246,9 @@ theorem exists_short_closedWalk_maximizing_mean
     simp only [EdgeGraph.Walk.edges_length] at hmean
     have hlengthPos : (0 : ℝ) < candidate.length := by exact_mod_cast hpos
     have hbound := (div_le_iff₀ hlengthPos).mp hmean
-    simpa only [walkWeight, mul_comm] using hbound
+    simpa only [walkSum, mul_comm] using hbound
   have hall := closedWalk_le_length_mul_of_short weight
-    (walkWeight weight best / best.length) hshortBound
+    (walkSum weight best / best.length) hshortBound
   intro otherVertex other hotherPos
   have hbound := hall otherVertex other
   have hlengthPos : (0 : ℝ) < other.length := by exact_mod_cast hotherPos
@@ -265,7 +265,7 @@ theorem exists_short_closedWalk_realizing_residual_threshold
       0 < best.length ∧ best.length ≤ Fintype.card V ∧
         ∀ level : ℝ,
           WorstDirectedResidualAtMost G weight level ↔
-            walkWeight weight best / best.length ≤ level := by
+            walkSum weight best / best.length ≤ level := by
   obtain ⟨vertex, best, hbestPos, hbestCard, hbest⟩ :=
     exists_short_closedWalk_maximizing_mean G weight hexists
   refine ⟨vertex, best, hbestPos, hbestCard, fun level => ?_⟩
@@ -279,7 +279,7 @@ theorem exists_short_closedWalk_realizing_residual_threshold
   · intro hlevel otherVertex other
     by_cases hotherZero : other.length = 0
     · cases other with
-      | nil => simp [walkWeight]
+      | nil => simp [walkSum]
       | concat initial edge legal => simp at hotherZero
     · have hotherPos : 0 < other.length := Nat.pos_of_ne_zero hotherZero
       have hmean := (hbest otherVertex other hotherPos).trans hlevel
@@ -293,19 +293,19 @@ negative residual bound on a finite graph. Acyclic graphs are included. -/
 theorem exists_negative_residual_bound_of_short [Fintype V] [Finite E]
     (G : EdgeGraph V E) (weight : E → ℝ)
     (hnegative : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      0 < cycle.length → cycle.length ≤ Fintype.card V → walkWeight weight cycle < 0) :
+      0 < cycle.length → cycle.length ≤ Fintype.card V → walkSum weight cycle < 0) :
     ∃ level : ℝ, level < 0 ∧ WorstDirectedResidualAtMost G weight level := by
   classical
   by_cases hexists : ∃ (vertex : V) (cycle : G.Walk vertex vertex), 0 < cycle.length
   · obtain ⟨vertex, best, hpos, hcard, hthreshold⟩ :=
       exists_short_closedWalk_realizing_residual_threshold G weight hexists
-    refine ⟨walkWeight weight best / best.length, ?_, (hthreshold _).mpr le_rfl⟩
+    refine ⟨walkSum weight best / best.length, ?_, (hthreshold _).mpr le_rfl⟩
     exact div_neg_of_neg_of_pos (hnegative vertex best hpos hcard) (by exact_mod_cast hpos)
   · refine ⟨-1, by norm_num, ?_⟩
     apply (worstDirectedResidualAtMost_iff_closedWalk_le G weight (-1)).mpr
     intro vertex cycle
     cases cycle with
-    | nil => simp [walkWeight]
+    | nil => simp [walkSum]
     | concat walk edge legal =>
         exact (hexists ⟨G.target edge, walk.concat edge legal, by simp⟩).elim
 
@@ -314,7 +314,7 @@ whose edge residuals have one strictly negative upper bound. Acyclic graphs are 
 theorem exists_negative_residual_bound [Fintype V] [Finite E]
     (G : EdgeGraph V E) (weight : E → ℝ)
     (hnegative : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      0 < cycle.length → walkWeight weight cycle < 0) :
+      0 < cycle.length → walkSum weight cycle < 0) :
     ∃ level : ℝ, level < 0 ∧ WorstDirectedResidualAtMost G weight level :=
   exists_negative_residual_bound_of_short G weight fun vertex cycle hpos _ =>
     hnegative vertex cycle hpos

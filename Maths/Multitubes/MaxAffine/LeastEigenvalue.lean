@@ -715,9 +715,9 @@ theorem exists_isLeast_eigenvalues_of_translation [Fintype V] [DecidableEq V] [F
     (hconn : ∀ start finish : V, Nonempty (G.Walk start finish)) :
     ∃ (base : V) (best : G.Walk base base), 0 < best.length ∧
       IsLeast (relaxationLevels G label)
-          (walkWeight (fun e => (label e).shift) best / best.length) ∧
+          (walkSum (fun e => (label e).shift) best / best.length) ∧
         IsLeast (eigenvalues G label)
-          (walkWeight (fun e => (label e).shift) best / best.length) := by
+          (walkSum (fun e => (label e).shift) best / best.length) := by
   obtain ⟨lam, base, best, hpos, -, hlam, -, x, hx⟩ :=
     exists_isEigenvector_of_translation G hslope hfloor
       (fun vertex => by
@@ -726,7 +726,7 @@ theorem exists_isLeast_eigenvalues_of_translation [Fintype V] [DecidableEq V] [F
   subst hlam
   have hlenPos : (0 : ℝ) < best.length := by exact_mod_cast hpos
   have hleast : IsLeast (relaxationLevels G label)
-      (walkWeight (fun e => (label e).shift) best / best.length) := by
+      (walkSum (fun e => (label e).shift) best / best.length) := by
     refine ⟨eigenvalues_subset_relaxationLevels G label ⟨x, hx⟩, fun mu hmu => ?_⟩
     obtain ⟨y, hy⟩ := (mem_relaxationLevels_iff G label mu).1 hmu
     have hpot : IsPotential G (fun e => (label e).shift - mu) y := by
@@ -736,7 +736,7 @@ theorem exists_isLeast_eigenvalues_of_translation [Fintype V] [DecidableEq V] [F
       simp only
       linarith
     have hcycle := hpot.closedWalk_nonpos best
-    rw [walkWeight_sub_const, nsmul_eq_mul] at hcycle
+    rw [walkSum_sub_const, nsmul_eq_mul] at hcycle
     rw [div_le_iff₀ hlenPos]
     linarith
   exact ⟨base, best, hpos, hleast,

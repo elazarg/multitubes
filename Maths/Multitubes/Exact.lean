@@ -17,7 +17,6 @@ invertibility is derived on recurrent flat regions.
 
 ## Main definitions
 
-* `Maths.Transport.RootReaches`: every vertex is reachable from a chosen base.
 * `Maths.Transport.HasRootPathIndependence`: parallel walks out of the base
   agree.
 * `Maths.Transport.IsSectionWithBase` and
@@ -71,10 +70,6 @@ variable {Fiber : V → Type uF} {T : Transport G Fiber}
 /-! ## Rooted path independence and sections -/
 
 namespace Transport
-
-/-- Every vertex is reachable from `base` by a directed walk. -/
-def RootReaches (G : EdgeGraph V E) (base : V) : Prop :=
-  ∀ vertex : V, Nonempty (G.Walk base vertex)
 
 /-- All walks from one root to the same endpoint induce the same map. -/
 def HasRootPathIndependence (T : Transport G Fiber) (base : V) : Prop :=

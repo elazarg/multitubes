@@ -68,12 +68,12 @@ theorem isCoboundary_iff_exists_translation_defect_eq_zero
 theorem holonomyApply_translationLabel
     (weight : E → ℝ) {start finish : V} (walk : G.Walk start finish) (point : ℝ) :
     holonomyApply (fun edge => translationLabel (weight edge)) walk point =
-      point + Maths.MaxPlusPotential.walkWeight weight walk := by
+      point + walkSum weight walk := by
   induction walk with
   | nil => simp
   | concat walkSoFar edge legal ih =>
       rw [holonomyApply_concat, ih, apply_translationLabel,
-        Maths.MaxPlusPotential.walkWeight_concat]
+        walkSum_concat]
       ring
 
 end Maths.MaxAffineTransport

@@ -100,7 +100,7 @@ def toChargedPath (G : EdgeGraph V E) (weight : E → ℝ) (hweight : ∀ edge :
       (ChargedRelation.Path.edge edge rfl legal).append (toChargedPath G weight hweight walk)
 
 @[simp] theorem chargeSum_toChargedPath {start finish : V} (walk : G.Walk start finish) :
-    (toChargedPath G weight hweight walk).chargeSum = walkWeight weight walk := by
+    (toChargedPath G weight hweight walk).chargeSum = walkSum weight walk := by
   induction walk with
   | nil => simp [toChargedPath]
   | concat walk edge legal ih => simp [toChargedPath, ih, add_comm]
@@ -112,9 +112,9 @@ def ofChargedPath (G : EdgeGraph V E) (weight : E → ℝ) (hweight : ∀ edge :
   | _, _, .nil _ => .nil
   | _, _, .cons edge rest => (ofChargedPath G weight hweight rest).concat edge rfl
 
-@[simp] theorem walkWeight_ofChargedPath {first second : V}
+@[simp] theorem walkSum_ofChargedPath {first second : V}
     (path : (chargedRelation G weight hweight).Path first second) :
-    walkWeight weight (ofChargedPath G weight hweight path) = path.chargeSum := by
+    walkSum weight (ofChargedPath G weight hweight path) = path.chargeSum := by
   induction path with
   | nil => simp [ofChargedPath]
   | cons edge rest ih => simp [ofChargedPath, ih, add_comm]
@@ -123,10 +123,10 @@ def ofChargedPath (G : EdgeGraph V E) (weight : E → ℝ) (hweight : ∀ edge :
 
 /-- The weights of the finite walks of a weighted digraph. -/
 def walkWeights (G : EdgeGraph V E) (weight : E → ℝ) : Set ℝ :=
-  {value | ∃ (start finish : V) (walk : G.Walk start finish), walkWeight weight walk = value}
+  {value | ∃ (start finish : V) (walk : G.Walk start finish), walkSum weight walk = value}
 
 theorem mem_walkWeights {start finish : V} (walk : G.Walk start finish) :
-    walkWeight weight walk ∈ walkWeights G weight :=
+    walkSum weight walk ∈ walkWeights G weight :=
   ⟨start, finish, walk, rfl⟩
 
 /-- **The path charges of the charged relation are the walk weights of the graph.**  Reversal
@@ -136,7 +136,7 @@ theorem pathCharges_chargedRelation :
   ext value
   constructor
   · rintro ⟨first, second, path, rfl⟩
-    exact ⟨second, first, ofChargedPath G weight hweight path, walkWeight_ofChargedPath path⟩
+    exact ⟨second, first, ofChargedPath G weight hweight path, walkSum_ofChargedPath path⟩
   · rintro ⟨start, finish, walk, rfl⟩
     exact ⟨finish, start, toChargedPath G weight hweight walk, chargeSum_toChargedPath walk⟩
 

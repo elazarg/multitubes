@@ -37,9 +37,9 @@ potentials on the laxification graph.
   partial-order reduction to signed lax transport.
 * `Maths.MixedAdditiveTransport.isMixedSection_iff_isPotential_laxified` - the
   mixed-section/potential correspondence.
-* `Maths.MixedAdditiveTransport.walkWeight_eq_zero_of_exact`,
-  `Maths.MixedAdditiveTransport.walkWeight_nonpos_of_lax_or_exact`, and
-  `Maths.MixedAdditiveTransport.walkWeight_nonneg_of_oplax_or_exact` - the
+* `Maths.MixedAdditiveTransport.walkSum_eq_zero_of_exact`,
+  `Maths.MixedAdditiveTransport.walkSum_nonpos_of_lax_or_exact`, and
+  `Maths.MixedAdditiveTransport.walkSum_nonneg_of_oplax_or_exact` - the
   original-orientation cycle consequences.
 * `Maths.MixedAdditiveTransport.exists_isMixedSection_iff_forall_laxified_closedWalk_nonpos` -
   the finite-edge cycle feasibility criterion.
@@ -174,13 +174,12 @@ theorem isMixedSection_iff_isPotential_laxified
   rfl
 
 /-- An exact-mode closed walk has zero original signed weight. -/
-theorem walkWeight_eq_zero_of_exact
+theorem walkSum_eq_zero_of_exact
     [LE A] (mode : E → EdgeMode) {weight : E → A} {family : V → A}
     (hfamily : (CycleCoboundary.translationTransport G weight).IsMixedSection mode family)
     {vertex : V} (cycle : G.Walk vertex vertex)
     (hmode : ∀ edge ∈ cycle.edges, (mode edge).IsExact) :
-    MaxPlusPotential.walkWeight weight cycle = 0 := by
-  rw [CycleCoboundary.walkWeight_eq_walkSum]
+    walkSum weight cycle = 0 := by
   apply add_left_cancel (a := family vertex)
   simpa using hfamily.walkMap_eq_of_exact cycle hmode
 
@@ -190,31 +189,29 @@ variable [Preorder A] [IsOrderedAddMonoid A]
 
 /-- A closed walk using only lax or exact edges has nonpositive original
 weight whenever a mixed section exists. -/
-theorem walkWeight_nonpos_of_lax_or_exact
+theorem walkSum_nonpos_of_lax_or_exact
     (mode : E → EdgeMode) {weight : E → A} {family : V → A}
     (hfamily : (CycleCoboundary.translationTransport G weight).IsMixedSection mode family)
     {vertex : V} (cycle : G.Walk vertex vertex)
     (hmode : ∀ edge ∈ cycle.edges, (mode edge).IsLaxOrExact) :
-    MaxPlusPotential.walkWeight weight cycle ≤ 0 := by
+    walkSum weight cycle ≤ 0 := by
   have hwalk := hfamily.walkMap_le_of_lax_or_exact
     (CycleCoboundary.monotone_edgeMap_translationTransport weight) cycle hmode
-  rw [CycleCoboundary.walkMap_translationTransport,
-    ← CycleCoboundary.walkWeight_eq_walkSum] at hwalk
+  rw [CycleCoboundary.walkMap_translationTransport] at hwalk
   apply le_of_add_le_add_left (a := family vertex)
   simpa using hwalk
 
 /-- A closed walk using only oplax or exact edges has nonnegative original
 weight whenever a mixed section exists. -/
-theorem walkWeight_nonneg_of_oplax_or_exact
+theorem walkSum_nonneg_of_oplax_or_exact
     (mode : E → EdgeMode) {weight : E → A} {family : V → A}
     (hfamily : (CycleCoboundary.translationTransport G weight).IsMixedSection mode family)
     {vertex : V} (cycle : G.Walk vertex vertex)
     (hmode : ∀ edge ∈ cycle.edges, (mode edge).IsOplaxOrExact) :
-    0 ≤ MaxPlusPotential.walkWeight weight cycle := by
+    0 ≤ walkSum weight cycle := by
   have hwalk := hfamily.le_walkMap_of_oplax_or_exact
     (CycleCoboundary.monotone_edgeMap_translationTransport weight) cycle hmode
-  rw [CycleCoboundary.walkMap_translationTransport,
-    ← CycleCoboundary.walkWeight_eq_walkSum] at hwalk
+  rw [CycleCoboundary.walkMap_translationTransport] at hwalk
   apply le_of_add_le_add_left (a := family vertex)
   simpa using hwalk
 
@@ -232,16 +229,16 @@ def mixedMaxIncomingWeight (G : EdgeGraph V E) (mode : E → EdgeMode)
 
 /-- Every transformed walk is bounded by the incoming envelope when all
 transformed closed walks have nonpositive weight. -/
-theorem walkWeight_le_mixedMaxIncomingWeight
+theorem walkSum_le_mixedMaxIncomingWeight
     (mode : E → EdgeMode) [Finite (Transport.LaxificationEdge mode)]
     {weight : E → A}
     (hcycle : ∀ (vertex : V)
       (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-      MaxPlusPotential.walkWeight (laxifiedWeight mode weight) cycle ≤ 0)
+      walkSum (laxifiedWeight mode weight) cycle ≤ 0)
     {start finish : V} (walk : (Transport.laxificationGraph G mode).Walk start finish) :
-    MaxPlusPotential.walkWeight (laxifiedWeight mode weight) walk ≤
+    walkSum (laxifiedWeight mode weight) walk ≤
       mixedMaxIncomingWeight G mode weight finish := by
-  exact MaxPlusPotential.walkWeight_le_maxIncomingWeight hcycle walk
+  exact MaxPlusPotential.walkSum_le_maxIncomingWeight hcycle walk
 
 /-- The incoming envelope is the greatest weight of a transformed walk ending
 at the specified vertex, under the nonpositive closed-walk condition. -/
@@ -250,7 +247,7 @@ theorem isGreatest_laxifiedIncomingWeights
     {weight : E → A}
     (hcycle : ∀ (vertex : V)
       (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-      MaxPlusPotential.walkWeight (laxifiedWeight mode weight) cycle ≤ 0)
+      walkSum (laxifiedWeight mode weight) cycle ≤ 0)
     (vertex : V) :
     IsGreatest
       (MaxPlusPotential.incomingWeights (Transport.laxificationGraph G mode)
@@ -265,7 +262,7 @@ theorem mixedMaxIncomingWeight_isMixedSection
     {weight : E → A}
     (hcycle : ∀ (vertex : V)
       (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-      MaxPlusPotential.walkWeight (laxifiedWeight mode weight) cycle ≤ 0) :
+      walkSum (laxifiedWeight mode weight) cycle ≤ 0) :
     (CycleCoboundary.translationTransport G weight).IsMixedSection mode
       (mixedMaxIncomingWeight G mode weight) := by
   apply (isMixedSection_iff_isPotential_laxified G mode weight _).2
@@ -279,7 +276,7 @@ theorem isLeast_nonnegativeMixedSections
     {weight : E → A}
     (hcycle : ∀ (vertex : V)
       (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-      MaxPlusPotential.walkWeight (laxifiedWeight mode weight) cycle ≤ 0) :
+      walkSum (laxifiedWeight mode weight) cycle ≤ 0) :
     IsLeast
       {potential : V → A | (0 : V → A) ≤ potential ∧
         (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential}
@@ -301,7 +298,7 @@ theorem exists_isMixedSection_iff_forall_laxified_closedWalk_nonpos
       (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential) ↔
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-        MaxPlusPotential.walkWeight (laxifiedWeight mode weight) cycle ≤ 0 := by
+        walkSum (laxifiedWeight mode weight) cycle ≤ 0 := by
   rw [show (∃ potential : V → A,
       (CycleCoboundary.translationTransport G weight).IsMixedSection mode potential) ↔
       ∃ potential : V → A,

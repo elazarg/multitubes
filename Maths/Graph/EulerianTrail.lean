@@ -662,15 +662,15 @@ def detokenize (multiplicity : E → ℕ) {start : V} : {finish : V} →
     (walk.detokenize multiplicity).length = walk.length := by
   rw [← Walk.edges_length, ← Walk.edges_length, edges_detokenize, List.length_map]
 
-@[simp] theorem charge_detokenize {κ : Type uκ}
+@[simp] theorem walkSum_detokenize {κ : Type uκ}
     (multiplicity : E → ℕ) (edgeCharge : E → κ → ℤ)
     (walk : (G.tokenGraph multiplicity).Walk start finish) :
-    (walk.detokenize multiplicity).charge edgeCharge =
-      walk.charge fun token => edgeCharge token.edge := by
+    walkSum edgeCharge (walk.detokenize multiplicity) =
+      walkSum (fun token => edgeCharge token.edge) walk := by
   induction walk with
   | nil => rfl
   | concat walkSoFar token legal ih =>
-      rw [detokenize, charge_castFinish, charge_concat, charge_concat, ih]
+      rw [detokenize, walkSum_castFinish, walkSum_concat, walkSum_concat, ih]
 
 /-- Counting the values of an injectively indexed list is a sum of indicators. -/
 private theorem count_map_eq_sum_toFinset_ite
@@ -727,7 +727,7 @@ theorem exists_closedWalk_exactMultiplicity_at
     ∃ walk : G.Walk base base,
       0 < walk.length ∧
       (∀ edge, walk.edgeMultiplicity edge = circulation.multiplicity edge) ∧
-      walk.charge edgeCharge = 0 := by
+      walkSum edgeCharge walk = 0 := by
   set multiplicity := circulation.multiplicity with hmultiplicityDef
   set tokenG := G.tokenGraph multiplicity with htokenGDef
   have htokenBalanced :
@@ -759,7 +759,7 @@ theorem exists_closedWalk_exactMultiplicity_at
       fun edge => tokenWalk.edgeMultiplicity_detokenize_of_nodup_all multiplicity
         htokenTrail.1 (fun token => (htokenCover token).2 (Finset.mem_univ token)) edge
     calc
-      (tokenWalk.detokenize multiplicity).charge edgeCharge =
+      walkSum edgeCharge (tokenWalk.detokenize multiplicity) =
           G.multiplicityCharge edgeCharge
             (tokenWalk.detokenize multiplicity).edgeMultiplicity :=
         ((tokenWalk.detokenize multiplicity).multiplicityCharge_edgeMultiplicity

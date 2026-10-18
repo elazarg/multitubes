@@ -78,7 +78,7 @@ cycle time bounds all closed-walk means, is attained at `base`, and `base` reach
 theorem rootedPhase_isSchedule [Fintype E] [DecidableEq V] (network : TimedNetwork V E)
     {cycleTime : ℝ} {base : V}
     (hcycles : ∀ (vertex : V) (cycle : network.graph.Walk vertex vertex),
-      walkWeight network.delay cycle ≤ cycle.length * cycleTime)
+      walkSum network.delay cycle ≤ cycle.length * cycleTime)
     (hcritical : IsCriticalVertex network.graph network.delay cycleTime base)
     (hreach : ∀ vertex : V, Nonempty (network.graph.Walk base vertex)) :
     network.IsSchedule cycleTime (network.rootedPhase cycleTime base) := by
@@ -105,14 +105,14 @@ theorem cycleMean_le_of_feasibleCycleTime (network : TimedNetwork V E)
     {cycleTime : ℝ} {phase : V → ℝ}
     (hfeasible : network.IsFeasibleCycleTime cycleTime phase)
     {base : V} (cycle : network.graph.Walk base base) (hcycle : 0 < cycle.length) :
-    walkWeight network.delay cycle / cycle.length ≤ cycleTime := by
+    walkSum network.delay cycle / cycle.length ≤ cycleTime := by
   have hpotential : IsPotential network.graph
       (fun edge => network.delay edge - cycleTime) phase := by
     intro edge
     dsimp [MaxPlusPotential.defect]
     linarith [hfeasible edge]
   have hclosed := hpotential.closedWalk_nonpos cycle
-  rw [walkWeight_sub_const, nsmul_eq_mul] at hclosed
+  rw [walkSum_sub_const, nsmul_eq_mul] at hclosed
   rw [div_le_iff₀ (by exact_mod_cast hcycle)]
   linarith
 
@@ -121,7 +121,7 @@ theorem cycleMean_le_of_isSchedule [Fintype E] [DecidableEq V]
     (network : TimedNetwork V E) {cycleTime : ℝ} {phase : V → ℝ}
     (hschedule : network.IsSchedule cycleTime phase)
     {base : V} (cycle : network.graph.Walk base base) (hcycle : 0 < cycle.length) :
-    walkWeight network.delay cycle / cycle.length ≤ cycleTime := by
+    walkSum network.delay cycle / cycle.length ≤ cycleTime := by
   apply network.cycleMean_le_of_feasibleCycleTime (phase := phase) _ cycle hcycle
   intro edge
   have hedge : (network.label edge).apply (phase (network.graph.source edge)) ≤
@@ -139,26 +139,26 @@ theorem exists_optimalSchedule [Fintype V] [Fintype E] [DecidableEq V]
     (hreach : ∀ base vertex : V, Nonempty (network.graph.Walk base vertex)) :
     ∃ (cycleTime : ℝ) (base : V) (best : network.graph.Walk base base),
       0 < best.length ∧ best.length ≤ Fintype.card V ∧
-        walkWeight network.delay best = best.length * cycleTime ∧
+        walkSum network.delay best = best.length * cycleTime ∧
         IsCriticalVertex network.graph network.delay cycleTime base ∧
         network.IsSchedule cycleTime (network.rootedPhase cycleTime base) ∧
         (∀ (vertex : V) (cycle : network.graph.Walk vertex vertex), 0 < cycle.length →
-          walkWeight network.delay cycle / cycle.length ≤ cycleTime) ∧
+          walkSum network.delay cycle / cycle.length ≤ cycleTime) ∧
         ∀ (otherTime : ℝ) (phase : V → ℝ),
           network.IsFeasibleCycleTime otherTime phase → cycleTime ≤ otherTime := by
   obtain ⟨base, best, hpos, hcard, hmax⟩ :=
     AdditiveTransport.exists_short_closedWalk_maximizing_mean
       network.graph network.delay hexists
-  let cycleTime := walkWeight network.delay best / best.length
+  let cycleTime := walkSum network.delay best / best.length
   have hcycles (vertex : V) (cycle : network.graph.Walk vertex vertex) :
-      walkWeight network.delay cycle ≤ cycle.length * cycleTime := by
+      walkSum network.delay cycle ≤ cycle.length * cycleTime := by
     rcases Nat.eq_zero_or_pos cycle.length with hzero | hcycle
     · have hedges : cycle.edges = [] :=
         List.length_eq_zero_iff.mp (by rw [EdgeGraph.Walk.edges_length, hzero])
-      simp [walkWeight, hedges, hzero]
+      simp [walkSum, hedges, hzero]
     · have hlen : (0 : ℝ) < cycle.length := by exact_mod_cast hcycle
       simpa [cycleTime, mul_comm] using (div_le_iff₀ hlen).mp (hmax vertex cycle hcycle)
-  have hbest : walkWeight network.delay best = best.length * cycleTime := by
+  have hbest : walkSum network.delay best = best.length * cycleTime := by
     dsimp [cycleTime]
     have hne : (best.length : ℝ) ≠ 0 := by exact_mod_cast hpos.ne'
     field_simp
@@ -184,14 +184,14 @@ def exampleBottleneckCycle : exampleNetwork.graph.Walk .second .second :=
 
 /-- The bottleneck cycle has total delay three. -/
 @[simp] theorem exampleBottleneckCycle_weight :
-    walkWeight exampleNetwork.delay exampleBottleneckCycle = 3 := by
+    walkSum exampleNetwork.delay exampleBottleneckCycle = 3 := by
   calc
-    _ = walkWeight exampleNetwork.delay
+    _ = walkSum exampleNetwork.delay
           (.nil : exampleNetwork.graph.Walk .second .second) +
-        exampleNetwork.delay .secondSelf := walkWeight_concat
-          exampleNetwork.delay (.nil : exampleNetwork.graph.Walk .second .second)
+        exampleNetwork.delay .secondSelf := walkSum_concat (w := exampleNetwork.delay)
+          (.nil : exampleNetwork.graph.Walk .second .second)
             .secondSelf rfl
-    _ = 3 := by norm_num [walkWeight, exampleNetwork]
+    _ = 3 := by norm_num [walkSum, exampleNetwork]
 
 /-- Every event is reachable from the bottleneck event. -/
 theorem example_reachable_from_second (vertex : ExampleEvent) :
@@ -217,9 +217,9 @@ theorem exampleShiftedPhase_isPotential :
 /-- Every example cycle has mean at most three. -/
 theorem example_cycle_bound (vertex : ExampleEvent)
     (cycle : exampleNetwork.graph.Walk vertex vertex) :
-    walkWeight exampleNetwork.delay cycle ≤ cycle.length * 3 := by
+    walkSum exampleNetwork.delay cycle ≤ cycle.length * 3 := by
   have hclosed := exampleShiftedPhase_isPotential.closedWalk_nonpos cycle
-  rw [walkWeight_sub_const, nsmul_eq_mul] at hclosed
+  rw [walkSum_sub_const, nsmul_eq_mul] at hclosed
   linarith
 
 /-- The bottleneck event is critical at cycle time three. -/
@@ -243,18 +243,18 @@ theorem example_rootedPhase_eq :
           (fun v cycle => exampleShiftedPhase_isPotential.closedWalk_nonpos cycle)
           (example_reachable_from_second .first)
         rw [TimedNetwork.rootedPhase, ← hwalk]
-        simpa [exampleShiftedPhase] using exampleShiftedPhase_isPotential.walkWeight_le walk
+        simpa [exampleShiftedPhase] using exampleShiftedPhase_isPotential.walkSum_le walk
       · refine le_maxRootedWeight ⟨
           (.nil : exampleNetwork.graph.Walk .second .second).concat .secondToFirst rfl, ?_, ?_⟩
         · change [ExampleDependency.secondToFirst].Nodup
           simp
         · calc
-            _ = walkWeight (fun edge => exampleNetwork.delay edge - 3)
+            _ = walkSum (fun edge => exampleNetwork.delay edge - 3)
                   (.nil : exampleNetwork.graph.Walk .second .second) +
-                (exampleNetwork.delay .secondToFirst - 3) := walkWeight_concat
-                  (fun edge => exampleNetwork.delay edge - 3)
+                (exampleNetwork.delay .secondToFirst - 3) := walkSum_concat
+                  (w := fun edge => exampleNetwork.delay edge - 3)
                   (.nil : exampleNetwork.graph.Walk .second .second) .secondToFirst rfl
-            _ = -2 := by norm_num [walkWeight, exampleNetwork]
+            _ = -2 := by norm_num [walkSum, exampleNetwork]
 
 /-- The maximizing-cycle construction produces a schedule of cycle time three. -/
 theorem example_certified_schedule :

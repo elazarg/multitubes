@@ -38,8 +38,6 @@ satisfy every cycle-product equation vacuously while carrying a zero slope.
 * `Maths.MaxAffineTransport.unitSlopeGraph`,
   `Maths.MaxAffineTransport.unitSlopeShift`: the subgraph of unit-slope edges and
   the shift carried by such an edge.
-* `Maths.MaxAffineTransport.walkSlopeProduct`: the product of scalar slopes along
-  a walk.
 * `Maths.MaxAffineTransport.IsNonexpansiveGauge`,
   `Maths.MaxAffineTransport.IsExpansiveGauge`: a positive vertex gauge making
   every normalized edge slope at most, respectively at least, one.
@@ -212,7 +210,7 @@ theorem exists_unitSlopePotential_iff_unitSlopeCycles_nonpos :
           (label edge).shift + potential (G.source edge) ≤
             potential (G.target edge)) ↔
       ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
-        MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ 0 := by
+        walkSum (unitSlopeShift label) cycle ≤ 0 := by
   constructor
   · rintro ⟨potential, hpotential⟩
     apply (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
@@ -233,7 +231,7 @@ theorem exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_slope_le_one
     (hslope : ∀ edge : E, (label edge).slope ≤ 1) :
     (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
       ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
-        MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ 0 :=
+        walkSum (unitSlopeShift label) cycle ≤ 0 :=
   (exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one hslope).trans
     exists_unitSlopePotential_iff_unitSlopeCycles_nonpos
 
@@ -263,7 +261,7 @@ theorem exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_one_le_slope
     (hfloor : ∀ edge : E, (label edge).floor = ⊥) :
     (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
       ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
-        MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ 0 :=
+        walkSum (unitSlopeShift label) cycle ≤ 0 :=
   (exists_isLaxSection_iff_exists_unitSlopePotential_of_one_le_slope hslope hfloor).trans
     exists_unitSlopePotential_iff_unitSlopeCycles_nonpos
 
@@ -275,32 +273,13 @@ section Gauges
 
 variable {G : EdgeGraph V E} (slope : E → ℝ)
 
-/-- Product of scalar slopes along a typed walk. -/
-def walkSlopeProduct {start finish : V} (walk : G.Walk start finish) : ℝ :=
-  (walk.edges.map slope).prod
-
-@[simp] theorem walkSlopeProduct_nil (vertex : V) :
-    walkSlopeProduct slope (.nil : G.Walk vertex vertex) = 1 := rfl
-
-@[simp] theorem walkSlopeProduct_concat {start finish : V}
-    (walk : G.Walk start finish) (edge : E) (legal : G.source edge = finish) :
-    walkSlopeProduct slope (walk.concat edge legal) =
-      walkSlopeProduct slope walk * slope edge := by
-  simp [walkSlopeProduct]
-
-@[simp] theorem walkSlopeProduct_append {start middle finish : V}
-    (first : G.Walk start middle) (second : G.Walk middle finish) :
-    walkSlopeProduct slope (first.append second) =
-    walkSlopeProduct slope first * walkSlopeProduct slope second := by
-  simp [walkSlopeProduct, List.map_append, List.prod_append]
-
 /-- Edgewise gauge equality telescopes along a walk, without requiring a
 global equality assumption on edges outside that walk. -/
-theorem walkSlopeProduct_mul_gauge_eq_of_forall_mem
+theorem walkProd_mul_gauge_eq_of_forall_mem
     {gauge : V → ℝ} {start finish : V} (walk : G.Walk start finish)
     (hedge : ∀ edge ∈ walk.edges,
       slope edge * gauge (G.source edge) = gauge (G.target edge)) :
-    walkSlopeProduct slope walk * gauge start = gauge finish := by
+    walkProd slope walk * gauge start = gauge finish := by
   induction walk with
   | nil => simp
   | @concat finish walk edge legal ih =>
@@ -310,10 +289,10 @@ theorem walkSlopeProduct_mul_gauge_eq_of_forall_mem
             gauge (G.target candidate) :=
         hedge candidate (by simp [hcandidate])
       have hfinal := hedge edge (by simp)
-      rw [walkSlopeProduct_concat]
+      rw [walkProd_concat]
       calc
-        (walkSlopeProduct slope walk * slope edge) * gauge start =
-            slope edge * (walkSlopeProduct slope walk * gauge start) := by
+        (walkProd slope walk * slope edge) * gauge start =
+            slope edge * (walkProd slope walk * gauge start) := by
           ring
         _ = slope edge * gauge (G.source edge) := by rw [ih hbefore]
         _ = gauge (G.target edge) := hfinal
@@ -324,32 +303,32 @@ def IsNonexpansiveGauge (gauge : V → ℝ) : Prop :=
     ∀ edge, slope edge * gauge (G.source edge) ≤ gauge (G.target edge)
 
 /-- A nonexpansive gauge controls the product along every forward walk. -/
-theorem walkSlopeProduct_mul_gauge_le
+theorem walkProd_mul_gauge_le
     (hnonneg : ∀ edge, 0 ≤ slope edge)
     {gauge : V → ℝ} (hgauge : IsNonexpansiveGauge (G := G) slope gauge)
     {start finish : V} (walk : G.Walk start finish) :
-    walkSlopeProduct slope walk * gauge start ≤ gauge finish := by
+    walkProd slope walk * gauge start ≤ gauge finish := by
   induction walk with
   | nil => simp
   | @concat finish walk edge legal ih =>
       subst legal
-      rw [walkSlopeProduct_concat]
+      rw [walkProd_concat]
       calc
-        (walkSlopeProduct slope walk * slope edge) * gauge start =
-            slope edge * (walkSlopeProduct slope walk * gauge start) := by ring
+        (walkProd slope walk * slope edge) * gauge start =
+            slope edge * (walkProd slope walk * gauge start) := by ring
         _ ≤ slope edge * gauge (G.source edge) :=
           mul_le_mul_of_nonneg_left ih (hnonneg edge)
         _ ≤ gauge (G.target edge) := hgauge.2 edge
 
 /-- If one traversed edge is strictly noncritical for a nonexpansive gauge,
 the path product satisfies a strict endpoint inequality. -/
-theorem walkSlopeProduct_mul_gauge_lt_of_exists_strict
+theorem walkProd_mul_gauge_lt_of_exists_strict
     (hnonneg : ∀ edge, 0 ≤ slope edge)
     {gauge : V → ℝ} (hgauge : IsNonexpansiveGauge (G := G) slope gauge)
     {start finish : V} (walk : G.Walk start finish) :
     (∃ edge ∈ walk.edges,
       slope edge * gauge (G.source edge) < gauge (G.target edge)) →
-      walkSlopeProduct slope walk * gauge start < gauge finish := by
+      walkProd slope walk * gauge start < gauge finish := by
   intro hstrict
   induction walk with
   | nil => simp at hstrict
@@ -359,28 +338,28 @@ theorem walkSlopeProduct_mul_gauge_lt_of_exists_strict
       rw [EdgeGraph.Walk.edges_concat, List.mem_append] at hcandidate
       rcases hcandidate with hbefore | hlast
       · have hprefix := ih ⟨candidate, hbefore, hstrictCandidate⟩
-        rw [walkSlopeProduct_concat]
+        rw [walkProd_concat]
         by_cases hzero : slope edge = 0
         · rw [hzero]
           simpa using hgauge.1 (G.target edge)
         · have hpositive : 0 < slope edge :=
             lt_of_le_of_ne (hnonneg edge) (Ne.symm hzero)
           calc
-            (walkSlopeProduct slope walk * slope edge) * gauge start =
+            (walkProd slope walk * slope edge) * gauge start =
                 slope edge *
-                  (walkSlopeProduct slope walk * gauge start) := by ring
+                  (walkProd slope walk * gauge start) := by ring
             _ < slope edge * gauge (G.source edge) :=
               mul_lt_mul_of_pos_left hprefix hpositive
             _ ≤ gauge (G.target edge) := hgauge.2 edge
       · simp only [List.mem_singleton] at hlast
         subst candidate
         have hprefix :=
-          walkSlopeProduct_mul_gauge_le slope hnonneg hgauge walk
-        rw [walkSlopeProduct_concat]
+          walkProd_mul_gauge_le slope hnonneg hgauge walk
+        rw [walkProd_concat]
         calc
-          (walkSlopeProduct slope walk * slope edge) * gauge start =
+          (walkProd slope walk * slope edge) * gauge start =
               slope edge *
-                (walkSlopeProduct slope walk * gauge start) := by ring
+                (walkProd slope walk * gauge start) := by ring
           _ ≤ slope edge * gauge (G.source edge) :=
             mul_le_mul_of_nonneg_left hprefix (hnonneg edge)
           _ < gauge (G.target edge) := hstrictCandidate
@@ -390,8 +369,8 @@ theorem cycleProduct_le_one_of_nonexpansiveGauge
     (hnonneg : ∀ edge, 0 ≤ slope edge)
     {gauge : V → ℝ} (hgauge : IsNonexpansiveGauge (G := G) slope gauge)
     {base : V} (cycle : G.Walk base base) :
-    walkSlopeProduct slope cycle ≤ 1 := by
-  have hwalk := walkSlopeProduct_mul_gauge_le slope hnonneg hgauge cycle
+    walkProd slope cycle ≤ 1 := by
+  have hwalk := walkProd_mul_gauge_le slope hnonneg hgauge cycle
   apply le_of_mul_le_mul_right (a := gauge base) _ (hgauge.1 base)
   simpa using hwalk
 
@@ -403,8 +382,8 @@ theorem cycleProduct_lt_one_of_nonexpansiveGauge_of_exists_strict
     {base : V} (cycle : G.Walk base base)
     (hstrict : ∃ edge ∈ cycle.edges,
       slope edge * gauge (G.source edge) < gauge (G.target edge)) :
-    walkSlopeProduct slope cycle < 1 := by
-  have hwalk := walkSlopeProduct_mul_gauge_lt_of_exists_strict
+    walkProd slope cycle < 1 := by
+  have hwalk := walkProd_mul_gauge_lt_of_exists_strict
     slope hnonneg hgauge cycle hstrict
   nlinarith [hgauge.1 base]
 
@@ -414,7 +393,7 @@ theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_nonexpansiveGauge
     (hnonneg : ∀ edge, 0 ≤ slope edge)
     {gauge : V → ℝ} (hgauge : IsNonexpansiveGauge (G := G) slope gauge)
     {base : V} (cycle : G.Walk base base) :
-    walkSlopeProduct slope cycle = 1 ↔
+    walkProd slope cycle = 1 ↔
       ∀ edge ∈ cycle.edges,
         slope edge * gauge (G.source edge) = gauge (G.target edge) := by
   constructor
@@ -427,7 +406,7 @@ theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_nonexpansiveGauge
     linarith
   · intro hcritical
     have htelescope :=
-      walkSlopeProduct_mul_gauge_eq_of_forall_mem slope cycle hcritical
+      walkProd_mul_gauge_eq_of_forall_mem slope cycle hcritical
     nlinarith [hgauge.1 base]
 
 /-- Positive-slope edges, used to take logarithms without imposing positivity
@@ -457,23 +436,23 @@ def forgetPositiveWalk {start : V} :
       simp only [EdgeGraph.Walk.edges_concat, List.map_append, List.map_singleton]
       rw [ih]
 
-@[simp] theorem walkSlopeProduct_forgetPositiveWalk {start finish : V}
+@[simp] theorem walkProd_forgetPositiveWalk {start finish : V}
     (walk : (positiveSlopeGraph (G := G) slope).Walk start finish) :
-    walkSlopeProduct slope (forgetPositiveWalk slope walk) =
-      walkSlopeProduct (fun edge : PositiveSlopeEdge slope ↦ slope edge.1) walk := by
-  simp [walkSlopeProduct]
+    walkProd slope (forgetPositiveWalk slope walk) =
+      walkProd (fun edge : PositiveSlopeEdge slope ↦ slope edge.1) walk := by
+  simp [walkProd]
 
 /-- Exponentiating the log-weight of a positive-edge walk recovers its slope
 product. -/
-theorem exp_walkWeight_log_eq_walkSlopeProduct {start finish : V}
+theorem exp_walkSum_log_eq_walkProd {start finish : V}
     (walk : (positiveSlopeGraph (G := G) slope).Walk start finish) :
-    Real.exp (MaxPlusPotential.walkWeight
+    Real.exp (walkSum
       (fun edge : PositiveSlopeEdge slope ↦ Real.log (slope edge.1)) walk) =
-      walkSlopeProduct (fun edge : PositiveSlopeEdge slope ↦ slope edge.1) walk := by
+      walkProd (fun edge : PositiveSlopeEdge slope ↦ slope edge.1) walk := by
   induction walk with
-  | nil => simp [MaxPlusPotential.walkWeight, walkSlopeProduct]
+  | nil => simp [walkSum, walkProd]
   | concat walk edge legal ih =>
-      rw [MaxPlusPotential.walkWeight_concat, walkSlopeProduct_concat,
+      rw [walkSum_concat, walkProd_concat,
         Real.exp_add, ih, Real.exp_log edge.2]
 
 /-- **Positive gauge theorem.**  With finitely many edges and nonnegative
@@ -484,18 +463,18 @@ theorem exists_nonexpansiveGauge_iff_cycleProduct_le_one
     [Finite E] (hnonneg : ∀ edge, 0 ≤ slope edge) :
     (∃ gauge : V → ℝ, IsNonexpansiveGauge (G := G) slope gauge) ↔
       ∀ (base : V) (cycle : G.Walk base base),
-        walkSlopeProduct slope cycle ≤ 1 := by
+        walkProd slope cycle ≤ 1 := by
   constructor
   · rintro ⟨gauge, hgauge⟩ base cycle
     exact cycleProduct_le_one_of_nonexpansiveGauge slope hnonneg hgauge cycle
   · intro hcycle
     have hlogCycle (base : V)
         (cycle : (positiveSlopeGraph (G := G) slope).Walk base base) :
-        MaxPlusPotential.walkWeight
+        walkSum
           (fun edge : PositiveSlopeEdge slope ↦ Real.log (slope edge.1)) cycle ≤ 0 := by
       apply Real.exp_le_exp.mp
-      rw [Real.exp_zero, exp_walkWeight_log_eq_walkSlopeProduct]
-      rw [← walkSlopeProduct_forgetPositiveWalk]
+      rw [Real.exp_zero, exp_walkSum_log_eq_walkProd]
+      rw [← walkProd_forgetPositiveWalk]
       exact hcycle base (forgetPositiveWalk slope cycle)
     obtain ⟨potential, hpotential⟩ :=
       (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
@@ -521,34 +500,34 @@ def IsExpansiveGauge (gauge : V → ℝ) : Prop :=
     ∀ edge, gauge (G.target edge) ≤ slope edge * gauge (G.source edge)
 
 /-- An expansive gauge controls every forward walk from below. -/
-theorem gauge_le_walkSlopeProduct_mul
+theorem gauge_le_walkProd_mul
     (hpos : ∀ edge, 0 < slope edge)
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {start finish : V} (walk : G.Walk start finish) :
-    gauge finish ≤ walkSlopeProduct slope walk * gauge start := by
+    gauge finish ≤ walkProd slope walk * gauge start := by
   induction walk with
-  | nil => simp [walkSlopeProduct]
+  | nil => simp [walkProd]
   | @concat finish walk edge legal ih =>
       subst legal
-      rw [walkSlopeProduct_concat]
+      rw [walkProd_concat]
       calc
         gauge (G.target edge) ≤
             slope edge * gauge (G.source edge) := hgauge.2 edge
         _ ≤ slope edge *
-            (walkSlopeProduct slope walk * gauge start) :=
+            (walkProd slope walk * gauge start) :=
           mul_le_mul_of_nonneg_left ih (hpos edge).le
-        _ = (walkSlopeProduct slope walk * slope edge) * gauge start := by
+        _ = (walkProd slope walk * slope edge) * gauge start := by
           ring
 
 /-- If one traversed edge is strictly noncritical for an expansive gauge,
 the path product satisfies a strict endpoint inequality. -/
-theorem gauge_lt_walkSlopeProduct_mul_of_exists_strict
+theorem gauge_lt_walkProd_mul_of_exists_strict
     (hpos : ∀ edge, 0 < slope edge)
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {start finish : V} (walk : G.Walk start finish) :
     (∃ edge ∈ walk.edges,
       gauge (G.target edge) < slope edge * gauge (G.source edge)) →
-      gauge finish < walkSlopeProduct slope walk * gauge start := by
+      gauge finish < walkProd slope walk * gauge start := by
   intro hstrict
   induction walk with
   | nil => simp at hstrict
@@ -558,26 +537,26 @@ theorem gauge_lt_walkSlopeProduct_mul_of_exists_strict
       rw [EdgeGraph.Walk.edges_concat, List.mem_append] at hcandidate
       rcases hcandidate with hbefore | hlast
       · have hprefix := ih ⟨candidate, hbefore, hstrictCandidate⟩
-        rw [walkSlopeProduct_concat]
+        rw [walkProd_concat]
         calc
           gauge (G.target edge) ≤
               slope edge * gauge (G.source edge) := hgauge.2 edge
           _ < slope edge *
-              (walkSlopeProduct slope walk * gauge start) :=
+              (walkProd slope walk * gauge start) :=
             mul_lt_mul_of_pos_left hprefix (hpos edge)
-          _ = (walkSlopeProduct slope walk * slope edge) * gauge start := by
+          _ = (walkProd slope walk * slope edge) * gauge start := by
             ring
       · simp only [List.mem_singleton] at hlast
         subst candidate
-        have hprefix := gauge_le_walkSlopeProduct_mul slope hpos hgauge walk
-        rw [walkSlopeProduct_concat]
+        have hprefix := gauge_le_walkProd_mul slope hpos hgauge walk
+        rw [walkProd_concat]
         calc
           gauge (G.target edge) <
               slope edge * gauge (G.source edge) := hstrictCandidate
           _ ≤ slope edge *
-              (walkSlopeProduct slope walk * gauge start) :=
+              (walkProd slope walk * gauge start) :=
             mul_le_mul_of_nonneg_left hprefix (hpos edge).le
-          _ = (walkSlopeProduct slope walk * slope edge) * gauge start := by
+          _ = (walkProd slope walk * slope edge) * gauge start := by
             ring
 
 /-- Every expansive gauge forces every directed cycle product above one. -/
@@ -585,8 +564,8 @@ theorem one_le_cycleProduct_of_expansiveGauge
     (hpos : ∀ edge, 0 < slope edge)
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {base : V} (cycle : G.Walk base base) :
-    1 ≤ walkSlopeProduct slope cycle := by
-  have hwalk := gauge_le_walkSlopeProduct_mul slope hpos hgauge cycle
+    1 ≤ walkProd slope cycle := by
+  have hwalk := gauge_le_walkProd_mul slope hpos hgauge cycle
   nlinarith [hgauge.1 base]
 
 /-- A cycle using a strictly noncritical edge of an expansive gauge has
@@ -597,8 +576,8 @@ theorem one_lt_cycleProduct_of_expansiveGauge_of_exists_strict
     {base : V} (cycle : G.Walk base base)
     (hstrict : ∃ edge ∈ cycle.edges,
       gauge (G.target edge) < slope edge * gauge (G.source edge)) :
-    1 < walkSlopeProduct slope cycle := by
-  have hwalk := gauge_lt_walkSlopeProduct_mul_of_exists_strict
+    1 < walkProd slope cycle := by
+  have hwalk := gauge_lt_walkProd_mul_of_exists_strict
     slope hpos hgauge cycle hstrict
   nlinarith [hgauge.1 base]
 
@@ -608,7 +587,7 @@ theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_expansiveGauge
     (hpos : ∀ edge, 0 < slope edge)
     {gauge : V → ℝ} (hgauge : IsExpansiveGauge (G := G) slope gauge)
     {base : V} (cycle : G.Walk base base) :
-    walkSlopeProduct slope cycle = 1 ↔
+    walkProd slope cycle = 1 ↔
       ∀ edge ∈ cycle.edges,
         slope edge * gauge (G.source edge) = gauge (G.target edge) := by
   constructor
@@ -622,19 +601,19 @@ theorem cycleProduct_eq_one_iff_forall_gaugeCritical_of_expansiveGauge
     linarith
   · intro hcritical
     have htelescope :=
-      walkSlopeProduct_mul_gauge_eq_of_forall_mem slope cycle hcritical
+      walkProd_mul_gauge_eq_of_forall_mem slope cycle hcritical
     nlinarith [hgauge.1 base]
 
 /-- Exponentiating the log-weight of a walk recovers its slope product, when every slope of the
 ambient graph is positive. -/
-theorem exp_walkWeight_log_eq_walkSlopeProduct_of_pos (hpos : ∀ edge, 0 < slope edge)
+theorem exp_walkSum_log_eq_walkProd_of_pos (hpos : ∀ edge, 0 < slope edge)
     {start finish : V} (walk : G.Walk start finish) :
-    Real.exp (MaxPlusPotential.walkWeight (fun edge => Real.log (slope edge)) walk) =
-      walkSlopeProduct slope walk := by
+    Real.exp (walkSum (fun edge => Real.log (slope edge)) walk) =
+      walkProd slope walk := by
   induction walk with
-  | nil => simp [MaxPlusPotential.walkWeight, walkSlopeProduct]
+  | nil => simp [walkSum, walkProd]
   | concat walk edge legal ih =>
-      rw [MaxPlusPotential.walkWeight_concat, walkSlopeProduct_concat,
+      rw [walkSum_concat, walkProd_concat,
         Real.exp_add, ih, Real.exp_log (hpos edge)]
 
 /-- **Dual positive gauge theorem.**  For positive slopes and finitely many
@@ -645,20 +624,20 @@ theorem exists_expansiveGauge_iff_one_le_cycleProduct
     [Finite E] (hpos : ∀ edge, 0 < slope edge) :
     (∃ gauge : V → ℝ, IsExpansiveGauge (G := G) slope gauge) ↔
       ∀ (base : V) (cycle : G.Walk base base),
-        1 ≤ walkSlopeProduct slope cycle := by
+        1 ≤ walkProd slope cycle := by
   constructor
   · rintro ⟨gauge, hgauge⟩ base cycle
     exact one_le_cycleProduct_of_expansiveGauge slope hpos hgauge cycle
   · intro hcycle
     have hlogCycle (base : V) (cycle : G.Walk base base) :
-        MaxPlusPotential.walkWeight
+        walkSum
           (fun edge => -Real.log (slope edge)) cycle ≤ 0 := by
-      have hlogNonneg : 0 ≤ MaxPlusPotential.walkWeight
+      have hlogNonneg : 0 ≤ walkSum
           (fun edge => Real.log (slope edge)) cycle := by
         apply Real.exp_le_exp.mp
-        rw [Real.exp_zero, exp_walkWeight_log_eq_walkSlopeProduct_of_pos slope hpos cycle]
+        rw [Real.exp_zero, exp_walkSum_log_eq_walkProd_of_pos slope hpos cycle]
         exact hcycle base cycle
-      rw [MaxPlusPotential.walkWeight_neg]
+      rw [walkSum_neg]
       linarith
     obtain ⟨potential, hpotential⟩ :=
       (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
@@ -686,18 +665,18 @@ theorem slope_pos_of_cycleProduct_eq_one_of_stronglyConnected
     {base : V} (hconnected : IsStronglyConnectedAt G base)
     (hnonneg : ∀ edge, 0 ≤ slope edge)
     (hflat : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      walkSlopeProduct slope cycle = 1) (edge : E) :
+      walkProd slope cycle = 1) (edge : E) :
     0 < slope edge := by
   let back := (hconnected.nonempty_walk (G.target edge) (G.source edge)).some
   have hcycle := hflat (G.source edge)
     ((EdgeGraph.Walk.singleton (G := G) edge).append back)
-  rw [walkSlopeProduct_append] at hcycle
-  have hsingle : walkSlopeProduct slope
+  rw [walkProd_append] at hcycle
+  have hsingle : walkProd slope
       (EdgeGraph.Walk.singleton (G := G) edge) = slope edge := by
-    simp [walkSlopeProduct]
+    simp [walkProd]
   rw [hsingle] at hcycle
-  have hback : 0 ≤ walkSlopeProduct slope back := by
-    unfold walkSlopeProduct
+  have hback : 0 ≤ walkProd slope back := by
+    unfold walkProd
     apply List.prod_nonneg
     intro value hvalue
     rcases List.mem_map.mp hvalue with ⟨candidate, _, rfl⟩
@@ -714,7 +693,7 @@ theorem exists_slopeGauge_of_cycleProduct_eq_one_of_stronglyConnected
     {base : V} (hconnected : IsStronglyConnectedAt G base)
     (hnonneg : ∀ edge, 0 ≤ slope edge)
     (hflat : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      walkSlopeProduct slope cycle = 1) :
+      walkProd slope cycle = 1) :
     ∃ gauge : V → ℝ, (∀ vertex, 0 < gauge vertex) ∧
       ∀ edge, slope edge = gauge (G.target edge) / gauge (G.source edge) := by
   have hpos : ∀ edge, 0 < slope edge :=
@@ -724,11 +703,11 @@ theorem exists_slopeGauge_of_cycleProduct_eq_one_of_stronglyConnected
     have hexp {start finish : V} (walk : G.Walk start finish) :
         Real.exp (walkSum
           (fun edge ↦ Real.log (slope edge)) walk) =
-          walkSlopeProduct slope walk := by
+          walkProd slope walk := by
       induction walk with
-      | nil => simp [walkSum, walkSlopeProduct]
+      | nil => simp [walkSum, walkProd]
       | concat walk edge legal ih =>
-          rw [walkSum_concat, walkSlopeProduct_concat,
+          rw [walkSum_concat, walkProd_concat,
             Real.exp_add, ih, Real.exp_log (hpos edge)]
     intro vertex cycle
     apply Real.exp_injective
@@ -750,24 +729,24 @@ theorem exists_slopeGauge_of_cycleProduct_eq_one_of_stronglyConnected
       rw [Real.exp_sub]
 
 /-- Exact gauge ratios telescope along every directed walk. -/
-theorem walkSlopeProduct_mul_gauge_eq_of_slopeGauge
+theorem walkProd_mul_gauge_eq_of_slopeGauge
     {gauge : V → ℝ} (hgauge : ∀ vertex, 0 < gauge vertex)
     (hedge : ∀ edge,
       slope edge = gauge (G.target edge) / gauge (G.source edge))
     {start finish : V} (walk : G.Walk start finish) :
-    walkSlopeProduct slope walk * gauge start = gauge finish := by
+    walkProd slope walk * gauge start = gauge finish := by
   induction walk with
-  | nil => simp [walkSlopeProduct]
+  | nil => simp [walkProd]
   | @concat middle walk edge legal ih =>
       subst legal
-      rw [walkSlopeProduct_concat, hedge edge]
+      rw [walkProd_concat, hedge edge]
       have hsource : gauge (G.source edge) ≠ 0 :=
         (hgauge (G.source edge)).ne'
       calc
-        (walkSlopeProduct slope walk *
+        (walkProd slope walk *
               (gauge (G.target edge) / gauge (G.source edge))) *
             gauge start =
-            (walkSlopeProduct slope walk * gauge start) *
+            (walkProd slope walk * gauge start) *
               (gauge (G.target edge) / gauge (G.source edge)) := by ring
         _ = gauge (G.source edge) *
               (gauge (G.target edge) / gauge (G.source edge)) := by rw [ih]
@@ -779,8 +758,8 @@ theorem cycleProduct_eq_one_of_slopeGauge
     (hedge : ∀ edge,
       slope edge = gauge (G.target edge) / gauge (G.source edge))
     {base : V} (cycle : G.Walk base base) :
-    walkSlopeProduct slope cycle = 1 := by
-  have htel := walkSlopeProduct_mul_gauge_eq_of_slopeGauge
+    walkProd slope cycle = 1 := by
+  have htel := walkProd_mul_gauge_eq_of_slopeGauge
     slope hgauge hedge cycle
   exact (mul_right_cancel₀ (hgauge base).ne') (by simpa using htel)
 
@@ -791,7 +770,7 @@ theorem cycleProduct_eq_one_iff_exists_slopeGauge_of_stronglyConnected
     {base : V} (hconnected : IsStronglyConnectedAt G base)
     (hnonneg : ∀ edge, 0 ≤ slope edge) :
     (∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      walkSlopeProduct slope cycle = 1) ↔
+      walkProd slope cycle = 1) ↔
       ∃ gauge : V → ℝ, (∀ vertex, 0 < gauge vertex) ∧
         ∀ edge,
           slope edge = gauge (G.target edge) / gauge (G.source edge) := by

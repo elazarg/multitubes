@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Graph.EdgeGraph
+public import Maths.Graph.WalkLabel
 public import Mathlib.Algebra.BigOperators.Pi
 
 public import Mathlib.Data.Fintype.BigOperators
@@ -29,7 +29,6 @@ support.
 
 ## Main definitions
 
-* `Maths.EdgeGraph.Walk.charge`: the total integer charge of a finite walk.
 * `Maths.EdgeGraph.outgoingMultiplicity`,
   `Maths.EdgeGraph.incomingMultiplicity`: the multiplicity leaving and entering a
   vertex.
@@ -76,44 +75,6 @@ variable {V : Type uV} {E : Type uE} (G : EdgeGraph V E)
 namespace Walk
 
 variable {G} {start finish middle : V}
-
-/-- Total integer charge of a finite walk. -/
-def charge {κ : Type uκ} (edgeCharge : E → κ → ℤ) {start : V} :
-    {finish : V} → G.Walk start finish → κ → ℤ
-  | _, .nil => 0
-  | _, .concat walkSoFar edge _ => walkSoFar.charge edgeCharge + edgeCharge edge
-
-@[simp] theorem charge_nil {κ : Type uκ} (edgeCharge : E → κ → ℤ) :
-    (Walk.nil : G.Walk start start).charge edgeCharge = 0 := rfl
-
-@[simp] theorem charge_concat {κ : Type uκ} (edgeCharge : E → κ → ℤ)
-    (walkSoFar : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    (Walk.concat walkSoFar edge legal).charge edgeCharge =
-      walkSoFar.charge edgeCharge + edgeCharge edge := rfl
-
-/-- The recursive charge agrees with summing the chronological edge list. -/
-theorem charge_eq_sum_map {κ : Type uκ} (edgeCharge : E → κ → ℤ)
-    (walk : G.Walk start finish) :
-    walk.charge edgeCharge = (walk.edges.map edgeCharge).sum := by
-  induction walk with
-  | nil => rfl
-  | concat walkSoFar edge legal ih => simp [charge, edges, ih]
-
-@[simp] theorem charge_castFinish {κ : Type uκ} (edgeCharge : E → κ → ℤ)
-    {start finish finish' : V} (walk : G.Walk start finish)
-    (hfinish : finish = finish') :
-    (walk.castFinish hfinish).charge edgeCharge = walk.charge edgeCharge := by
-  subst hfinish
-  rfl
-
-@[simp] theorem charge_append {κ : Type uκ} (edgeCharge : E → κ → ℤ)
-    (first : G.Walk start middle) (second : G.Walk middle finish) :
-    (first.append second).charge edgeCharge =
-      first.charge edgeCharge + second.charge edgeCharge := by
-  induction second with
-  | nil => simp
-  | concat second edge legal ih => simp [ih, add_assoc]
 
 end Walk
 
@@ -350,12 +311,12 @@ theorem multiplicityCharge_edgeMultiplicity
     [Fintype E] [DecidableEq E] {κ : Type uκ}
     (edgeCharge : E → κ → ℤ) (walk : G.Walk start finish) :
     G.multiplicityCharge edgeCharge walk.edgeMultiplicity =
-      walk.charge edgeCharge := by
+      walkSum edgeCharge walk := by
   induction walk with
   | nil => simp [multiplicityCharge]
   | concat walkSoFar edge legal ih =>
       funext coordinate
-      simp only [multiplicityCharge, edgeMultiplicity, Walk.charge_concat,
+      simp only [multiplicityCharge, edgeMultiplicity, walkSum_concat,
         Pi.add_apply, Finset.sum_apply, nsmul_eq_mul]
       simp_rw [Nat.cast_add, add_mul, Pi.add_apply, Pi.mul_apply]
       have ihCoordinate := congrFun ih coordinate
@@ -408,7 +369,7 @@ occurrence counts. -/
 def toConnectedIntegerCirculation
     [Fintype E] [DecidableEq E] [DecidableEq V] {κ : Type uκ} {base : V}
     (edgeCharge : E → κ → ℤ) (walk : G.Walk base base)
-    (hne : 0 < walk.length) (hzero : walk.charge edgeCharge = 0) :
+    (hne : 0 < walk.length) (hzero : walkSum edgeCharge walk = 0) :
     G.ConnectedIntegerCirculation edgeCharge where
   multiplicity := walk.edgeMultiplicity
   nonzero :=

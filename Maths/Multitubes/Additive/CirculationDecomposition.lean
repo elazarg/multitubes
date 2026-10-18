@@ -155,27 +155,27 @@ private theorem continuousLinearMap_eq_certificateValue
           Pi.single_smul, map_smul, smul_eq_mul]
     _ = _ := rfl
 
-private theorem sum_edgeMultiplicity_mul_eq_walkWeight_general
+private theorem sum_edgeMultiplicity_mul_eq_walkSum_general
     [Fintype E] [DecidableEq E] {G : EdgeGraph V E}
     (weight : E → ℝ) {start finish : V} (walk : G.Walk start finish) :
     ∑ edge, (walk.edgeMultiplicity edge : ℝ) * weight edge =
-      MaxPlusPotential.walkWeight weight walk := by
+      walkSum weight walk := by
   induction walk with
   | nil => simp
   | concat walk edge legal ih =>
       simp only [EdgeGraph.Walk.edgeMultiplicity_concat, Nat.cast_add,
         add_mul, Finset.sum_add_distrib, ih,
-        MaxPlusPotential.walkWeight_concat]
+        walkSum_concat]
       simp
 
 private theorem certificateValue_circuitCoefficient_general
     [Fintype E] [DecidableEq E] {G : EdgeGraph V E}
     (weight : E → ℝ) {base : V} (cycle : G.Walk base base) :
     FiniteInequality.certificateValue weight (circuitCoefficient cycle) =
-      MaxPlusPotential.walkWeight weight cycle / cycle.length := by
+      walkSum weight cycle / cycle.length := by
   simp only [FiniteInequality.certificateValue, circuitCoefficient,
     div_mul_eq_mul_div, ← Finset.sum_div]
-  rw [sum_edgeMultiplicity_mul_eq_walkWeight_general]
+  rw [sum_edgeMultiplicity_mul_eq_walkSum_general]
 
 /-- **Literal normalized-circulation decomposition.**  Every normalized
 nonnegative circulation on the doubled orientation graph belongs to the
@@ -197,7 +197,7 @@ theorem normalizedCertificate_mem_convexHull_simpleSignedCircuits
     fun edge => functional (Pi.single edge 1)
   have hsimple (base : V) (cycle : (signedGraph G).Walk base base)
       (hcycle : IsSimpleCycle cycle) :
-      MaxPlusPotential.walkWeight orientedWeight cycle ≤
+      walkSum orientedWeight cycle ≤
         cycle.length * level := by
     have hmem : circuitCoefficient cycle ∈ circuits :=
       ⟨base, cycle, hcycle, rfl⟩
@@ -474,7 +474,7 @@ theorem signedCirculationObjective_signedCircuitVector
     [Fintype E] [DecidableEq E] (G : EdgeGraph V E) (weight : E → ℝ)
     {base : V} (cycle : (signedGraph G).Walk base base) :
     signedCirculationObjective weight (signedCircuitVector cycle) =
-      MaxPlusPotential.walkWeight (signedBase weight) cycle / cycle.length := by
+      walkSum (signedBase weight) cycle / cycle.length := by
   rw [← certificateValue_circuitCoefficient G weight cycle]
   simp only [signedCirculationObjective, signedCircuitVector, signedProjection,
     FiniteInequality.certificateValue, Fintype.sum_prod_type, Fintype.sum_bool,
@@ -650,7 +650,7 @@ theorem unitSignedCirculationObjective_le_iff_genuineCircuitMean_le
       0 ≤ level ∧
         ∀ (base : V) (cycle : (signedGraph G).Walk base base),
           IsGenuineSignedCircuit cycle →
-            |MaxPlusPotential.walkWeight (signedBase weight) cycle| ≤
+            |walkSum (signedBase weight) cycle| ≤
               cycle.length * level := by
   rw [unitSignedCirculationObjective_le_iff_genuineCircuitObjective_le]
   apply and_congr_right'

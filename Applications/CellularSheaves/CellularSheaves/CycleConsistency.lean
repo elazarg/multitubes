@@ -85,7 +85,7 @@ theorem exists_isConsistent_uniform_iff_closedWalk_le
     (htarget : ∀ edge, network.targetScale edge = 1) (level : ℝ) :
     (∃ reading, network.IsConsistent (fun _ => level) reading) ↔
       ∀ (vertex : Fin n) (cycle : network.signedComparisonGraph.Walk vertex vertex),
-        MaxPlusPotential.walkWeight network.signedComparisonWeight cycle ≤
+        walkSum network.signedComparisonWeight cycle ≤
           cycle.length * level := by
   let forgetSign : Transport.LaxificationEdge (exactMode (m := m)) → Fin m ⊕ Fin m
     | .inl edge => .inl edge.1
@@ -115,7 +115,7 @@ theorem mem_uniformToleranceLevels_iff_closedWalk_le
     level ∈ network.uniformToleranceLevels ↔
       0 ≤ level ∧
       ∀ (vertex : Fin n) (cycle : network.signedComparisonGraph.Walk vertex vertex),
-        MaxPlusPotential.walkWeight network.signedComparisonWeight cycle ≤
+        walkSum network.signedComparisonWeight cycle ≤
           cycle.length * level := by
   rw [uniformToleranceLevels, Set.mem_ofPred_eq,
     network.exists_isConsistent_uniform_iff_closedWalk_le hsource htarget]
@@ -130,7 +130,7 @@ theorem minimumUniformTolerance_eq_of_cycle
     (hreading : network.IsConsistent (fun _ => level) reading)
     {vertex : Fin n} (cycle : network.signedComparisonGraph.Walk vertex vertex)
     (hlength : 0 < cycle.length)
-    (hweight : MaxPlusPotential.walkWeight network.signedComparisonWeight cycle =
+    (hweight : walkSum network.signedComparisonWeight cycle =
       cycle.length * level) :
     network.minimumUniformTolerance = level := by
   apply le_antisymm

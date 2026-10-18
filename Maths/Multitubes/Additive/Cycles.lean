@@ -64,18 +64,18 @@ safely for an empty reference walk. -/
 def CycleMeanDominates (weight : E → ℝ) {firstBase secondBase : V}
     (first : G.Walk firstBase firstBase)
     (second : G.Walk secondBase secondBase) : Prop :=
-  second.length * MaxPlusPotential.walkWeight weight first ≥
-    first.length * MaxPlusPotential.walkWeight weight second
+  second.length * walkSum weight first ≥
+    first.length * walkSum weight second
 
 private theorem cycle_weight_eq_of_decomposition (weight : E → ℝ)
     {base vertex : V} (cycle : G.Walk base base)
     (before : G.Walk base vertex) (inner : G.Walk vertex vertex)
     (after : G.Walk vertex base)
     (hedges : cycle.edges = before.edges ++ inner.edges ++ after.edges) :
-    MaxPlusPotential.walkWeight weight cycle =
-      MaxPlusPotential.walkWeight weight inner +
-        MaxPlusPotential.walkWeight weight (before.append after) := by
-  simp only [MaxPlusPotential.walkWeight, hedges, List.map_append,
+    walkSum weight cycle =
+      walkSum weight inner +
+        walkSum weight (before.append after) := by
+  simp only [walkSum, hedges, List.map_append,
     List.sum_append, EdgeGraph.Walk.edges_append]
   ring
 
@@ -126,8 +126,8 @@ theorem exists_simpleCycle_cycleMeanDominates (weight : E → ℝ)
         inner.length + (before.append after).length := by
       exact_mod_cast hlen
     have hcandidateLt :
-        reference.length * MaxPlusPotential.walkWeight weight candidate <
-          candidate.length * MaxPlusPotential.walkWeight weight reference := by
+        reference.length * walkSum weight candidate <
+          candidate.length * walkSum weight reference := by
       rw [hweight, hlenReal]
       nlinarith
     exact (not_lt_of_ge hdominates) hcandidateLt
@@ -147,17 +147,17 @@ theorem exists_simpleCycle_mean_gt_of_closedWalk
     (weight : E → ℝ) (level : ℝ) {base : V}
     (cycle : G.Walk base base)
     (hviolation : cycle.length * level <
-      MaxPlusPotential.walkWeight weight cycle) :
+      walkSum weight cycle) :
     ∃ (simpleBase : V) (simple : G.Walk simpleBase simpleBase),
       IsSimpleCycle simple ∧
-        simple.length * level < MaxPlusPotential.walkWeight weight simple := by
+        simple.length * level < walkSum weight simple := by
   have hne : 0 < cycle.length := by
     by_contra hnot
     have hzero : cycle.length = 0 := Nat.eq_zero_of_not_pos hnot
     have hempty : cycle.edges = [] := by
       apply List.eq_nil_of_length_eq_zero
       simpa using hzero
-    simp [MaxPlusPotential.walkWeight, hzero, hempty] at hviolation
+    simp [walkSum, hzero, hempty] at hviolation
   obtain ⟨simpleBase, simple, hsimple, hdominates⟩ :=
     exists_simpleCycle_cycleMeanDominates weight cycle hne
   refine ⟨simpleBase, simple, hsimple, ?_⟩
@@ -166,7 +166,7 @@ theorem exists_simpleCycle_mean_gt_of_closedWalk
   have hcyclePos : (0 : ℝ) < cycle.length := by exact_mod_cast hne
   have hscaledViolation := mul_lt_mul_of_pos_left hviolation hsimplePos
   by_contra hnot
-  have hsimpleLe : MaxPlusPotential.walkWeight weight simple ≤
+  have hsimpleLe : walkSum weight simple ≤
       simple.length * level := le_of_not_gt hnot
   have hscaledSimple := mul_le_mul_of_nonneg_left hsimpleLe hcyclePos.le
   nlinarith
@@ -176,17 +176,17 @@ simple cycles. -/
 theorem forall_closedWalk_mean_le_iff_simpleCycle
     (weight : E → ℝ) (level : ℝ) :
     (∀ (base : V) (cycle : G.Walk base base),
-      MaxPlusPotential.walkWeight weight cycle ≤ cycle.length * level) ↔
+      walkSum weight cycle ≤ cycle.length * level) ↔
     (∀ (base : V) (cycle : G.Walk base base),
       IsSimpleCycle cycle →
-        MaxPlusPotential.walkWeight weight cycle ≤ cycle.length * level) := by
+        walkSum weight cycle ≤ cycle.length * level) := by
   constructor
   · intro hall base cycle _
     exact hall base cycle
   · intro hsimple base cycle
     by_contra hnot
     have hviolation : cycle.length * level <
-        MaxPlusPotential.walkWeight weight cycle := lt_of_not_ge hnot
+        walkSum weight cycle := lt_of_not_ge hnot
     obtain ⟨simpleBase, simple, hs, hgt⟩ :=
       exists_simpleCycle_mean_gt_of_closedWalk weight level cycle hviolation
     exact (not_lt_of_ge (hsimple simpleBase simple hs)) hgt
@@ -198,7 +198,7 @@ theorem worstDirectedResidualAtMost_iff_simpleCycles_le
     WorstDirectedResidualAtMost G weight level ↔
       ∀ (base : V) (cycle : G.Walk base base),
         IsSimpleCycle cycle →
-          MaxPlusPotential.walkWeight weight cycle ≤ cycle.length * level := by
+          walkSum weight cycle ≤ cycle.length * level := by
   rw [worstDirectedResidualAtMost_iff_closedWalk_le,
     forall_closedWalk_mean_le_iff_simpleCycle]
 

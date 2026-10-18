@@ -126,7 +126,7 @@ theorem mixedResidualAtMost_iff_laxified_closedWalk_le
     MixedResidualAtMost G mode weight level ↔
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-        MaxPlusPotential.walkWeight (laxifiedWeight mode weight) cycle ≤
+        walkSum (laxifiedWeight mode weight) cycle ≤
           cycle.length * level := by
   rw [mixedResidualAtMost_iff_worstDirectedResidualAtMost,
     AdditiveTransport.worstDirectedResidualAtMost_iff_closedWalk_le]
@@ -140,7 +140,7 @@ theorem mixedResidualAtMost_iff_laxified_simpleCycle_le
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
         AdditiveTransport.IsSimpleCycle cycle →
-        MaxPlusPotential.walkWeight (laxifiedWeight mode weight) cycle ≤
+        walkSum (laxifiedWeight mode weight) cycle ≤
           cycle.length * level := by
   rw [mixedResidualAtMost_iff_worstDirectedResidualAtMost,
     AdditiveTransport.worstDirectedResidualAtMost_iff_simpleCycles_le]
@@ -176,7 +176,7 @@ theorem exists_isMixedSection_iff_forall_laxified_simpleCycle_nonpos
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
         AdditiveTransport.IsSimpleCycle cycle →
-          MaxPlusPotential.walkWeight (laxifiedWeight mode weight) cycle ≤ 0 := by
+          walkSum (laxifiedWeight mode weight) cycle ≤ 0 := by
   rw [exists_isMixedSection_iff_mixedResidualAtMost_zero,
     mixedResidualAtMost_iff_laxified_simpleCycle_le]
   simp

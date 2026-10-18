@@ -150,8 +150,8 @@ criterion theorems impose positive cycle length where division matters. -/
 def gaugeCriticalCycleRatio (label : E → Label) (gauge : V → ℝ)
     {base : V}
     (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base) : ℝ :=
-  MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle /
-    MaxPlusPotential.walkWeight (gaugeCriticalMass gauge) cycle
+  walkSum (gaugeCriticalShift label gauge) cycle /
+    walkSum (gaugeCriticalMass gauge) cycle
 
 omit [Fintype V] [DecidableEq V] [Fintype E] in
 /-- Relaxing by nothing is the plain gauge-normalized shift. -/
@@ -227,7 +227,7 @@ theorem criticalAffineGaugeResidualAtMost_iff_closedWalk_mean_le
     CriticalAffineGaugeResidualAtMost (G := G) label gauge level ↔
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
-        MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤
+        walkSum (gaugeCriticalShift label gauge) cycle ≤
           cycle.length * level := by
   rw [criticalAffineGaugeResidualAtMost_iff_gaugeCriticalResidualAtMost
     gauge hgauge]
@@ -245,7 +245,7 @@ theorem criticalAffineGaugeResidualAtMost_iff_simpleCycle_mean_le
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
         AdditiveTransport.IsSimpleCycle cycle →
-          MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤
+          walkSum (gaugeCriticalShift label gauge) cycle ≤
             cycle.length * level := by
   rw [criticalAffineGaugeResidualAtMost_iff_closedWalk_mean_le gauge hgauge,
     AdditiveTransport.forall_closedWalk_mean_le_iff_simpleCycle]
@@ -275,20 +275,20 @@ private theorem criticalAffineResidualAtMost_iff_isPotential
     exact hkey
 
 omit [Fintype V] [DecidableEq V] [Fintype E] in
-private theorem walkWeight_gaugeCriticalRelaxedShift
+private theorem walkSum_gaugeCriticalRelaxedShift
     (gauge : V → ℝ) (hgauge : ∀ vertex, 0 < gauge vertex)
     (level : ℝ) {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
-    MaxPlusPotential.walkWeight
+    walkSum
         (gaugeCriticalRelaxedShift label gauge level) walk =
-      MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) walk -
-        level * MaxPlusPotential.walkWeight (gaugeCriticalMass gauge) walk := by
+      walkSum (gaugeCriticalShift label gauge) walk -
+        level * walkSum (gaugeCriticalMass gauge) walk := by
   induction walk with
   | nil => simp
   | concat walk edge legal ih =>
-      rw [MaxPlusPotential.walkWeight_concat,
-        MaxPlusPotential.walkWeight_concat,
-        MaxPlusPotential.walkWeight_concat, ih]
+      rw [walkSum_concat,
+        walkSum_concat,
+        walkSum_concat, ih]
       dsimp [gaugeCriticalRelaxedShift, gaugeCriticalShift,
         gaugeCriticalMass]
       have htarget : gauge (G.target edge.1) ≠ 0 :=
@@ -306,8 +306,8 @@ theorem criticalAffineResidualAtMost_iff_closedWalk_ratio_mul_le
     CriticalAffineResidualAtMost (G := G) label gauge level ↔
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
-        MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤
-          level * MaxPlusPotential.walkWeight
+        walkSum (gaugeCriticalShift label gauge) cycle ≤
+          level * walkSum
             (gaugeCriticalMass gauge) cycle := by
   rw [criticalAffineResidualAtMost_iff_isPotential gauge hgauge,
     MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos]
@@ -315,7 +315,7 @@ theorem criticalAffineResidualAtMost_iff_closedWalk_ratio_mul_le
   intro base
   apply forall_congr'
   intro cycle
-  rw [walkWeight_gaugeCriticalRelaxedShift gauge hgauge]
+  rw [walkSum_gaugeCriticalRelaxedShift gauge hgauge]
   constructor <;> intro h <;> linarith
 
 omit [Fintype V] [DecidableEq V] [Fintype E] in
@@ -342,7 +342,7 @@ theorem gaugeCriticalCycleMass_pos
     {base : V}
     (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base)
     (hne : 0 < cycle.length) :
-    0 < MaxPlusPotential.walkWeight (gaugeCriticalMass gauge) cycle := by
+    0 < walkSum (gaugeCriticalMass gauge) cycle := by
   apply sum_pos_of_mem_pos
   · intro hempty
     have hedges : cycle.edges = [] := by simpa using hempty
@@ -376,7 +376,7 @@ theorem criticalAffineResidualAtMost_iff_cycleRatio_le
       have hedges : cycle.edges = [] := by
         apply List.eq_nil_of_length_eq_zero
         simpa using hzero
-      simp [MaxPlusPotential.walkWeight, hedges]
+      simp [walkSum, hedges]
 
 omit [Fintype E] in
 private theorem worstResidualAtMost_iff_shiftedRows (level : ℝ) :
@@ -514,7 +514,7 @@ theorem exists_criticalAffinePotential_iff_gaugeCriticalCycles_nonpos
           potential (G.target edge)) ↔
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
-        MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤ 0 := by
+        walkSum (gaugeCriticalShift label gauge) cycle ≤ 0 := by
   have hzero := criticalAffineResidualAtMost_iff_isPotential
     (G := G) (label := label) gauge hgauge 0
   rw [gaugeCriticalRelaxedShift_zero] at hzero
@@ -529,7 +529,7 @@ theorem forall_gaugeCriticalCycles_nonpos_iff_holonomy_prefixed
     (gauge : V → ℝ) :
     (∀ (base : V)
       (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
-      MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤ 0) ↔
+      walkSum (gaugeCriticalShift label gauge) cycle ≤ 0) ↔
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
         ∃ point : ℝ,
@@ -593,7 +593,7 @@ theorem exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_nonexpansiveGauge
     (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
-        MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤ 0 := by
+        walkSum (gaugeCriticalShift label gauge) cycle ≤ 0 := by
   rw [← exists_criticalAffinePotential_iff_gaugeCriticalCycles_nonpos gauge hgauge.1]
   refine exists_isLaxSection_iff_exists_criticalAffinePotential_of_direction gauge gauge
     (fun branch => ?_) (fun edge => ?_) (fun edge _ => ?_)
@@ -616,7 +616,7 @@ theorem exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_expansiveGauge
     (∃ potential : V → ℝ, IsLaxSection G label potential) ↔
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
-        MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle ≤ 0 := by
+        walkSum (gaugeCriticalShift label gauge) cycle ≤ 0 := by
   rw [← exists_criticalAffinePotential_iff_gaugeCriticalCycles_nonpos gauge hgauge.1]
   refine exists_isLaxSection_iff_exists_criticalAffinePotential_of_direction gauge
     (fun vertex => -gauge vertex) (fun branch => ?_) (fun edge => ?_)

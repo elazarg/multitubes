@@ -5,12 +5,9 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Graph.EdgeGraph
-public import Mathlib.Algebra.BigOperators.Group.List.Defs
+public import Maths.Graph.WalkLabel
 public import Mathlib.Algebra.Group.Action.Defs
 public import Mathlib.Order.Monotone.Defs
-
-import Mathlib.Algebra.BigOperators.Group.List.Basic
 
 /-!
 # Transport on operator-labelled transition graphs
@@ -46,10 +43,11 @@ The same structure can be read in several ways.
   the composite of its edge maps, and concatenation denotes composition
   (`Transport.walkMap_append`).
 
-`Maths.EdgeGraph` supplies the directed multigraph and its typed
-walks.  `Maths.Multitubes.Additive.Exact` specializes this file to translation
-maps, where cycle sums are translation holonomy and coboundaries are sections,
-and `Maths.Multitubes.MaxAffine.Basic` specializes it to monotone max-affine
+`Maths.EdgeGraph` supplies the directed multigraph and its typed walks, and
+`Maths.Graph.WalkLabel` the monoid labels of walks.
+`Maths.Multitubes.Additive.Exact` specializes this file to translation maps,
+where cycle sums are translation holonomy and coboundaries are sections, and
+`Maths.Multitubes.MaxAffine.Basic` specializes it to monotone max-affine
 self-maps of `ℝ`, where the non-additive defect telescope is weighted by suffix
 products of slopes.
 
@@ -64,11 +62,9 @@ products of slopes.
   `Maths.Transport.IsOplaxSection`.
 * `Maths.ofEdgeAct` and `Maths.transport` -
   the constant-fiber case.
-* `Maths.walkLabel` and
-  `Maths.HasTrivialCycleLabels` - monoid-labelled walks and
-  trivial cycle labels.
-* `Maths.walkSum` - the additive walk sum, the additive sibling
-  of `walkLabel`.
+* `Maths.ofSMul` - the constant-fiber transport of a monoid labelling acting
+  on a common fiber, whose walk maps are the actions of the walk labels
+  `Maths.walkLabel`.
 
 ## Main results
 
@@ -379,12 +375,11 @@ def ofEdgeAct (G : EdgeGraph V E) (X : Type uX) (act : E → X → X) :
     Transport G (fun _ : V => X) where
   edgeMap edge := act edge
 
-/-- Apply edge-indexed self-maps along a walk in chronological order.  This is
-the constant-fiber form of `Transport.walkMap`. -/
-def transport {X : Type uX} (act : E → X → X) {start : V} :
-    {finish : V} → G.Walk start finish → X → X
-  | _, .nil => id
-  | _, .concat walkSoFar edge _ => act edge ∘ transport act walkSoFar
+/-- Apply edge-indexed self-maps along a walk in chronological order: the walk map of the
+constant-fiber transport `ofEdgeAct`. -/
+def transport {X : Type uX} (act : E → X → X) {start finish : V}
+    (walk : G.Walk start finish) : X → X :=
+  (ofEdgeAct G X act).walkMap walk
 
 @[simp] theorem transport_nil {X : Type uX} (act : E → X → X) :
     transport act (.nil : G.Walk start start) = id := rfl
@@ -393,58 +388,20 @@ def transport {X : Type uX} (act : E → X → X) {start : V} :
     (walk : G.Walk start finish) (edge : E) (legal : G.source edge = finish) :
     transport act (walk.concat edge legal) = act edge ∘ transport act walk := rfl
 
-/-- Constant-fiber dependent transport agrees with direct composition of the
-edge actions. -/
+/-- Constant-fiber walk transport is direct composition of the edge actions. -/
 theorem walkMap_ofEdgeAct {X : Type uX} (act : E → X → X)
     (walk : G.Walk start finish) (point : X) :
-    (ofEdgeAct G X act).walkMap walk point = transport act walk point := by
-  induction walk with
-  | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      rw [Transport.walkMap_concat, fiberCast_const, transport_concat,
-        Function.comp_apply, ih]
-      rfl
+    (ofEdgeAct G X act).walkMap walk point = transport act walk point := rfl
 
 /-- Transport along concatenated constant-fiber walks is chronological
 composition. -/
 theorem transport_append {X : Type uX} (act : E → X → X)
     (first : G.Walk start middle) (second : G.Walk middle finish) (point : X) :
     transport act (first.append second) point =
-      transport act second (transport act first point) := by
-  induction second with
-  | nil => rfl
-  | concat walkSoFar edge legal ih =>
-      rw [EdgeGraph.Walk.append_concat, transport_concat, transport_concat,
-        Function.comp_apply, Function.comp_apply, ih]
-
-/-- Composite label of a walk, with the last edge outermost so that the label
-acts in the same order as `transport`. -/
-def walkLabel {M : Type uM} [Monoid M] (label : E → M) {start : V} :
-    {finish : V} → G.Walk start finish → M
-  | _, .nil => 1
-  | _, .concat walkSoFar edge _ => label edge * walkLabel label walkSoFar
+      transport act second (transport act first point) :=
+  (ofEdgeAct G X act).walkMap_append first second point
 
 variable {M : Type uM} [Monoid M] {label : E → M}
-
-@[simp] theorem walkLabel_nil : walkLabel label (.nil : G.Walk start start) = 1 := rfl
-
-@[simp] theorem walkLabel_concat (walk : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    walkLabel label (walk.concat edge legal) = label edge * walkLabel label walk := rfl
-
-/-- Concatenating walks multiplies labels in chronological-action order. -/
-@[simp] theorem walkLabel_append (first : G.Walk start middle)
-    (second : G.Walk middle finish) :
-    walkLabel label (first.append second) = walkLabel label second * walkLabel label first := by
-  induction second with
-  | nil => simp
-  | concat walkSoFar edge legal ih =>
-      rw [EdgeGraph.Walk.append_concat, walkLabel_concat, walkLabel_concat, ih, mul_assoc]
-
-/-- Every closed walk has identity composite label.  For group-labelled gain
-graphs this is balance or flatness. -/
-def HasTrivialCycleLabels (G : EdgeGraph V E) (label : E → M) : Prop :=
-  ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkLabel label cycle = 1
 
 /-- When labels act on a common fiber, the composite walk label acts exactly as
 the chronological edge transport. -/
@@ -512,42 +469,5 @@ theorem hasTrivialHolonomy_ofSMul {X : Type uX} {M : Type uM}
   intro base cycle
   funext point
   exact holonomy_ofSMul_eq_self hflat cycle point
-
-/-! ## Additive walk sums -/
-
-section WalkSum
-
-variable {A : Type*} [AddCommMonoid A]
-
-/-- Sum of edge data along a finite walk, in chronological order.  Also called
-the walk's tension, its line integral, or its cycle sum when the walk is
-closed.  This is the additive sibling of `walkLabel`. -/
-def walkSum (w : E → A) {start finish : V} (walk : G.Walk start finish) : A :=
-  (walk.edges.map w).sum
-
-variable {w : E → A}
-
-@[simp] theorem walkSum_nil : walkSum w (.nil : G.Walk start start) = 0 := rfl
-
-@[simp] theorem walkSum_concat (walk : G.Walk start finish) (edge : E)
-    (legal : G.source edge = finish) :
-    walkSum w (walk.concat edge legal) = walkSum w walk + w edge := by
-  simp [walkSum]
-
-@[simp] theorem walkSum_append (first : G.Walk start middle)
-    (second : G.Walk middle finish) :
-    walkSum w (first.append second) = walkSum w first + walkSum w second := by
-  simp [walkSum]
-
-@[simp] theorem walkSum_singleton (edge : E) :
-    walkSum w (EdgeGraph.Walk.singleton (G := G) edge) = w edge := by
-  simp [walkSum]
-
-@[simp] theorem walkSum_castFinish {finish' : V} (walk : G.Walk start finish)
-    (hfinish : finish = finish') :
-    walkSum w (walk.castFinish hfinish) = walkSum w walk := by
-  simp [walkSum]
-
-end WalkSum
 
 end Maths

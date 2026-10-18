@@ -137,7 +137,7 @@ the pointwise ratio of two potentials for the same labels is the same unit, name
 the base: each edge of a walk out of the base leaves the ratio unchanged, because both potentials
 cross that edge by the same label. -/
 theorem unitPotential_ratio_eq_of_rootReaches {base : V}
-    (hreaches : Transport.RootReaches G base)
+    (hreaches : RootReaches G base)
     (first second : V → Mˣ)
     (hfirst : IsUnitPotential G label first)
     (hsecond : IsUnitPotential G label second) (vertex : V) :
@@ -152,7 +152,7 @@ theorem unitPotential_ratio_eq_of_rootReaches {base : V}
 every vertex reachable from the base.  This is the constant ratio of
 `Maths.unitPotential_ratio_eq_of_rootReaches` moved to the other side. -/
 theorem unitPotential_eq_mul_constant_of_rootReaches {base : V}
-    (hreaches : Transport.RootReaches G base)
+    (hreaches : RootReaches G base)
     (first second : V → Mˣ)
     (hfirst : IsUnitPotential G label first)
     (hsecond : IsUnitPotential G label second) :
@@ -167,7 +167,7 @@ theorem unitPotential_eq_mul_constant_of_rootReaches {base : V}
 
 /-- In particular, base-normalized potentials are unique. -/
 theorem unitPotential_eq_of_rootReaches_of_eq_base {base : V}
-    (hreaches : Transport.RootReaches G base)
+    (hreaches : RootReaches G base)
     (first second : V → Mˣ)
     (hfirst : IsUnitPotential G label first)
     (hsecond : IsUnitPotential G label second)

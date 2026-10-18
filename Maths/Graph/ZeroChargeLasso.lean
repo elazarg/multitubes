@@ -92,7 +92,7 @@ structure ZeroChargeLasso {κ : Type uκ} (edgeCharge : E → κ → ℤ) (start
   /-- The period uses at least one edge. -/
   period_nonempty : 0 < period.length
   /-- The period carries no net charge. -/
-  period_zero : period.charge edgeCharge = 0
+  period_zero : walkSum edgeCharge period = 0
 
 namespace ReachableConnectedIntegerCirculation
 
@@ -131,8 +131,8 @@ def closedPeriod (lasso : G.ZeroChargeLasso edgeCharge start) :
     lasso.closedPeriod.length = lasso.period.length := by
   simp [closedPeriod]
 
-@[simp] theorem closedPeriod_charge (lasso : G.ZeroChargeLasso edgeCharge start) :
-    lasso.closedPeriod.charge edgeCharge = 0 := by
+@[simp] theorem walkSum_closedPeriod (lasso : G.ZeroChargeLasso edgeCharge start) :
+    walkSum edgeCharge lasso.closedPeriod = 0 := by
   simpa [closedPeriod] using lasso.period_zero
 
 /-- A lasso certificate constructs a genuine eventually periodic infinite walk from the
@@ -146,8 +146,8 @@ theorem exists_eventuallyPeriodic_boundedDiscrepancy
   set cycle : G.CyclicWord lasso.base := lasso.closedPeriod.toCyclicWord hclosedNonempty
     with hcycleDef
   have hwordZero : (cycle.word.map edgeCharge).sum = 0 := by
-    rw [hcycleDef, Walk.toCyclicWord_word, ← lasso.closedPeriod.charge_eq_sum_map]
-    exact lasso.closedPeriod_charge
+    rw [hcycleDef, Walk.toCyclicWord_word]
+    exact lasso.walkSum_closedPeriod
   refine ⟨lasso.initialWalk.prependInfinite cycle.toInfiniteWalk,
     lasso.initialWalk.hasBoundedDiscrepancy_prependInfinite edgeCharge cycle.toInfiniteWalk
       (cycle.hasBoundedDiscrepancy_of_wordCharge_zero edgeCharge hwordZero),
@@ -172,7 +172,7 @@ def toReachableConnectedIntegerCirculation
     G.ReachableConnectedIntegerCirculation edgeCharge start where
   toConnectedIntegerCirculation :=
     lasso.closedPeriod.toConnectedIntegerCirculation edgeCharge
-      (by simpa using lasso.period_nonempty) lasso.closedPeriod_charge
+      (by simpa using lasso.period_nonempty) lasso.walkSum_closedPeriod
   entry := lasso.base
   initialWalk := lasso.initialWalk
   entry_mem_support := by
@@ -231,7 +231,7 @@ theorem exists_zeroChargeLasso_length_le_of_boundedDiscrepancy [Finite V] {κ : 
       period_closed := by rw [hsum]; exact hvertex.symm
       period_nonempty := by simpa using Nat.sub_pos_of_lt hlt
       period_zero := by
-        rw [walk.segment_charge edgeCharge, hsum, ← hcharge, sub_self] }, ?_⟩
+        rw [walk.walkSum_segment edgeCharge, hsum, ← hcharge, sub_self] }, ?_⟩
     simp only [InfiniteWalk.take_length, InfiniteWalk.segment_length]
     omega
   let state : Fin (bound + 1) → V × Set.range (walk.prefixCharge edgeCharge) := fun time =>

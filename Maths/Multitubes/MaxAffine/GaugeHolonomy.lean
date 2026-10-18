@@ -130,11 +130,11 @@ def walkReciprocalTargetMass {start finish : V}
 
 /-- The local reciprocal-mass sum is the additive walk weight used by the
 gauge-feasibility API. -/
-@[simp] theorem walkReciprocalTargetMass_eq_walkWeight_gaugeCriticalMass
+@[simp] theorem walkReciprocalTargetMass_eq_walkSum_gaugeCriticalMass
     {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
     walkReciprocalTargetMass walk =
-      MaxPlusPotential.walkWeight (gaugeCriticalMass gauge) walk := by
+      walkSum (gaugeCriticalMass gauge) walk := by
   rfl
 
 private theorem slope_eq_gauge_ratio
@@ -175,24 +175,24 @@ theorem pathShift_gaugeCriticalLabelList
     {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
     Label.pathShift (gaugeCriticalLabelList walk) =
-      gauge finish * MaxPlusPotential.walkWeight
+      gauge finish * walkSum
         (gaugeCriticalShift label gauge) walk := by
   induction walk with
-  | nil => simp [MaxPlusPotential.walkWeight]
+  | nil => simp [walkSum]
   | @concat finish walk edge legal ih =>
       change G.source edge.1 = finish at legal
       subst finish
       change Label.pathShift (gaugeCriticalLabelList walk) =
         gauge (G.source edge.1) *
-          MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) walk at ih
+          walkSum (gaugeCriticalShift label gauge) walk at ih
       change Label.pathShift (gaugeCriticalLabelList (walk.concat edge rfl)) =
         gauge (G.target edge.1) *
-          MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge)
+          walkSum (gaugeCriticalShift label gauge)
             (walk.concat edge rfl)
       rw [gaugeCriticalLabelList_concat, Label.pathShift_append]
       simp only [Label.pathShift_cons, Label.pathShift_nil,
         Label.pathSlope_cons, Label.pathSlope_nil, mul_one, one_mul, zero_add,
-        MaxPlusPotential.walkWeight_concat]
+        walkSum_concat]
       rw [ih]
       have hcritical := edge.2
       have htarget : gauge (G.target edge.1) ≠ 0 :=
@@ -202,14 +202,14 @@ theorem pathShift_gaugeCriticalLabelList
         (label edge.1).shift +
             (label edge.1).slope *
               (gauge (G.source edge.1) *
-                MaxPlusPotential.walkWeight
+                walkSum
                   (gaugeCriticalShift label gauge) walk) =
             (label edge.1).shift + gauge (G.target edge.1) *
-              MaxPlusPotential.walkWeight
+              walkSum
                 (gaugeCriticalShift label gauge) walk := by
           rw [← mul_assoc, hcritical]
         _ = gauge (G.target edge.1) *
-            (MaxPlusPotential.walkWeight
+            (walkSum
                 (gaugeCriticalShift label gauge) walk +
               (label edge.1).shift / gauge (G.target edge.1)) := by
           field_simp
@@ -257,11 +257,11 @@ theorem pathRelaxationMass_gaugeCriticalLabelList
           ring
 
 /-- Division form of the raw-shift bridge. -/
-theorem walkWeight_gaugeCriticalShift_eq_pathShift_div
+theorem walkSum_gaugeCriticalShift_eq_pathShift_div
     (hgauge : ∀ vertex, 0 < gauge vertex)
     {start finish : V}
     (walk : (gaugeCriticalGraph (G := G) label gauge).Walk start finish) :
-    MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) walk =
+    walkSum (gaugeCriticalShift label gauge) walk =
       Label.pathShift (gaugeCriticalLabelList walk) / gauge finish := by
   rw [pathShift_gaugeCriticalLabelList hgauge]
   field_simp [(hgauge finish).ne']
@@ -300,7 +300,7 @@ theorem rawCycleMean_eq_gaugeCriticalMean
     (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base) :
     Label.pathShift (gaugeCriticalLabelList cycle) /
         Label.pathRelaxationMass (gaugeCriticalLabelList cycle) =
-      MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle /
+      walkSum (gaugeCriticalShift label gauge) cycle /
         walkReciprocalTargetMass cycle := by
   rw [pathShift_gaugeCriticalLabelList hgauge,
     pathRelaxationMass_gaugeCriticalLabelList hgauge]
@@ -317,7 +317,7 @@ theorem rawCycleMean_eq_gaugeCriticalCycleRatio
         Label.pathRelaxationMass (gaugeCriticalLabelList cycle) =
       gaugeCriticalCycleRatio label gauge cycle := by
   rw [rawCycleMean_eq_gaugeCriticalMean hgauge cycle,
-    walkReciprocalTargetMass_eq_walkWeight_gaugeCriticalMass]
+    walkReciprocalTargetMass_eq_walkSum_gaugeCriticalMass]
   rfl
 
 /-- Exact original max-affine slack criterion on a nonempty gauge-critical
@@ -329,7 +329,7 @@ theorem hasCyclicSlack_gaugeCriticalCycle_iff
     (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base)
     (hcycle : 0 < cycle.length) (level : ℝ) :
     Label.HasCyclicSlack (gaugeCriticalLabelList cycle) level ↔
-      MaxPlusPotential.walkWeight (gaugeCriticalShift label gauge) cycle /
+      walkSum (gaugeCriticalShift label gauge) cycle /
         walkReciprocalTargetMass cycle ≤ level := by
   have hne : gaugeCriticalLabelList cycle ≠ [] := by
     intro hnil
@@ -358,7 +358,7 @@ theorem hasCyclicSlack_gaugeCriticalCycle_iff_cycleRatio_le
     Label.HasCyclicSlack (gaugeCriticalLabelList cycle) level ↔
       gaugeCriticalCycleRatio label gauge cycle ≤ level := by
   rw [hasCyclicSlack_gaugeCriticalCycle_iff hgauge cycle hcycle,
-    walkReciprocalTargetMass_eq_walkWeight_gaugeCriticalMass]
+    walkReciprocalTargetMass_eq_walkSum_gaugeCriticalMass]
   rfl
 
 /-- Coefficient-level bridge to the original max-affine holonomy. -/
@@ -368,7 +368,7 @@ theorem compList_gaugeCriticalCycle
     (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base) :
     Label.compList (gaugeCriticalLabelList cycle) =
       ⟨Label.pathFloor (gaugeCriticalLabelList cycle),
-        gauge base * MaxPlusPotential.walkWeight
+        gauge base * walkSum
           (gaugeCriticalShift label gauge) cycle, 1⟩ := by
   have hslope (candidate : Label) (hcandidate : candidate ∈ gaugeCriticalLabelList cycle) :
       0 ≤ candidate.slope := by
@@ -388,13 +388,13 @@ holonomy and allows arbitrary floors. -/
 theorem exists_holonomyApply_le_self_of_cycleProduct_lt_one
     (hslope : ∀ edge : E, 0 ≤ (label edge).slope)
     {base : V} (cycle : G.Walk base base)
-    (hproduct : walkSlopeProduct (fun edge => (label edge).slope) cycle < 1) :
+    (hproduct : walkProd (fun edge => (label edge).slope) cycle < 1) :
     ∃ point : ℝ, holonomyApply label cycle point ≤ point := by
   let composite := Label.compList (cycle.edges.map label)
   have hcomposite : composite.slope < 1 := by
     dsimp [composite]
     rw [Label.slope_compList_eq_pathSlope]
-    simpa [Label.pathSlope, walkSlopeProduct, List.map_map]
+    simpa [Label.pathSlope, walkProd, List.map_map]
   obtain ⟨point, hpoint⟩ :=
     (Label.exists_apply_le_self_iff composite).mpr (Or.inl hcomposite)
   refine ⟨point, ?_⟩
@@ -407,7 +407,7 @@ theorem exists_holonomyApply_le_self_of_one_lt_cycleProduct_of_floorless
     (hslope : ∀ edge : E, 0 ≤ (label edge).slope)
     (hfloor : ∀ edge : E, (label edge).floor = ⊥)
     {base : V} (cycle : G.Walk base base)
-    (hproduct : 1 < walkSlopeProduct (fun edge => (label edge).slope) cycle) :
+    (hproduct : 1 < walkProd (fun edge => (label edge).slope) cycle) :
     ∃ point : ℝ, holonomyApply label cycle point ≤ point := by
   let composite := Label.compList (cycle.edges.map label)
   have hlabelSlope (candidate : Label) (hcandidate : candidate ∈ cycle.edges.map label) :
@@ -421,7 +421,7 @@ theorem exists_holonomyApply_le_self_of_one_lt_cycleProduct_of_floorless
   have hcompositeSlope : 1 < composite.slope := by
     dsimp [composite]
     rw [Label.slope_compList_eq_pathSlope]
-    simpa [Label.pathSlope, walkSlopeProduct, List.map_map]
+    simpa [Label.pathSlope, walkProd, List.map_map]
   have hcompositeFloor : composite.floor = ⊥ :=
     Label.floor_compList_eq_bot_of_floorless hlabelSlope hlabelFloor
   obtain ⟨point, hpoint⟩ :=

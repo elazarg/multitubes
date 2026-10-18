@@ -152,13 +152,13 @@ variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 
 /-- Weights of the finite walks from a fixed base vertex to a given vertex. -/
 def rootedWeights (G : EdgeGraph V E) (weight : E → 𝕜) (base vertex : V) : Set 𝕜 :=
-  {r | ∃ walk : G.Walk base vertex, walkWeight weight walk = r}
+  {r | ∃ walk : G.Walk base vertex, walkSum weight walk = r}
 
 /-- Weights of the finite walks from a fixed base vertex to a given vertex that traverse
 pairwise distinct edges.  With finitely many edges there are only finitely many of these, so
 their maximum is attained without any completeness assumption on the weights. -/
 def nodupRootedWeights (G : EdgeGraph V E) (weight : E → 𝕜) (base vertex : V) : Set 𝕜 :=
-  {r | ∃ walk : G.Walk base vertex, walk.edges.Nodup ∧ walkWeight weight walk = r}
+  {r | ∃ walk : G.Walk base vertex, walk.edges.Nodup ∧ walkSum weight walk = r}
 
 omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
 theorem nodupRootedWeights_subset (weight : E → 𝕜) (base vertex : V) :
@@ -179,7 +179,7 @@ theorem finite_nodupRootedWeights [Finite E] (weight : E → 𝕜) (base vertex 
 
 /-- The greatest weight of a walk from the base to a vertex that repeats no edge.  With no
 closed walk of positive weight this is the greatest weight of *any* walk from the base
-(`walkWeight_le_maxRootedWeight`), that is, the entry of the Kleene star of the weight matrix
+(`walkSum_le_maxRootedWeight`), that is, the entry of the Kleene star of the weight matrix
 indexed by the pair.  It takes the junk value `0` when the vertex is unreachable from the base,
 which the reachability hypothesis of every result below rules out. -/
 def maxRootedWeight [Finite E] (G : EdgeGraph V E) (weight : E → 𝕜) (base vertex : V) : 𝕜 :=
@@ -204,56 +204,56 @@ theorem le_maxRootedWeight {weight : E → 𝕜} {base vertex : V} {r : 𝕜}
 /-- Under the reachability hypothesis, and with no closed walk of positive weight, the rooted
 maximum is itself the weight of a walk from the base that repeats no edge. -/
 theorem maxRootedWeight_mem {weight : E → 𝕜}
-    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum weight cycle ≤ 0)
     {base vertex : V} (hreach : Nonempty (G.Walk base vertex)) :
     maxRootedWeight G weight base vertex ∈ nodupRootedWeights G weight base vertex := by
   have hfin := finite_nodupRootedWeights (G := G) weight base vertex
   obtain ⟨walk⟩ := hreach
-  obtain ⟨pruned, hnd, -⟩ := exists_nodup_visited_walkWeight_le hcyc walk.length walk le_rfl
+  obtain ⟨pruned, hnd, -⟩ := exists_nodup_visited_walkSum_le hcyc walk.length walk le_rfl
   have hne : hfin.toFinset.Nonempty :=
     hfin.toFinset_nonempty.2
-      ⟨walkWeight weight pruned, pruned, pruned.edges_nodup_of_visited_nodup hnd, rfl⟩
+      ⟨walkSum weight pruned, pruned, pruned.edges_nodup_of_visited_nodup hnd, rfl⟩
   obtain ⟨a, ha⟩ := Finset.max_of_nonempty hne
   have hmem := Finset.mem_of_max ha
   simpa [maxRootedWeight, ha] using hfin.mem_toFinset.1 hmem
 
 /-- Pruning: with no closed walk of positive weight the rooted maximum dominates the weight of
 *every* walk from the base, not only of those that repeat no edge. -/
-theorem walkWeight_le_maxRootedWeight {weight : E → 𝕜}
-    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)
+theorem walkSum_le_maxRootedWeight {weight : E → 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum weight cycle ≤ 0)
     {base vertex : V} (walk : G.Walk base vertex) :
-    walkWeight weight walk ≤ maxRootedWeight G weight base vertex := by
+    walkSum weight walk ≤ maxRootedWeight G weight base vertex := by
   obtain ⟨pruned, hnd, hle⟩ :=
-    exists_nodup_visited_walkWeight_le hcyc walk.length walk le_rfl
+    exists_nodup_visited_walkSum_le hcyc walk.length walk le_rfl
   exact hle.trans
     (le_maxRootedWeight ⟨pruned, pruned.edges_nodup_of_visited_nodup hnd, rfl⟩)
 
 /-- With no closed walk of positive weight, the rooted maximum is the greatest weight of a walk
 from the base to the vertex. -/
 theorem isGreatest_rootedWeights {weight : E → 𝕜}
-    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum weight cycle ≤ 0)
     {base vertex : V} (hreach : Nonempty (G.Walk base vertex)) :
     IsGreatest (rootedWeights G weight base vertex) (maxRootedWeight G weight base vertex) :=
   ⟨nodupRootedWeights_subset weight base vertex (maxRootedWeight_mem hcyc hreach), by
     rintro r ⟨walk, rfl⟩
-    exact walkWeight_le_maxRootedWeight hcyc walk⟩
+    exact walkSum_le_maxRootedWeight hcyc walk⟩
 
 /-- The rooted maximum is a potential: it is the rooted analogue of
 `Maths.MaxPlusPotential.maxIncomingWeight_isPotential`, and needs the source of every
 edge to be reachable from the base. -/
 theorem maxRootedWeight_isPotential {weight : E → 𝕜}
-    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum weight cycle ≤ 0)
     {base : V} (hreach : ∀ vertex : V, Nonempty (G.Walk base vertex)) :
     IsPotential G weight (maxRootedWeight G weight base) := by
   intro e
   obtain ⟨walk, -, hwalk⟩ := maxRootedWeight_mem hcyc (hreach (G.source e))
-  have hle := walkWeight_le_maxRootedWeight hcyc (walk.concat e rfl)
-  rwa [walkWeight_concat, hwalk] at hle
+  have hle := walkSum_le_maxRootedWeight hcyc (walk.concat e rfl)
+  rwa [walkSum_concat, hwalk] at hle
 
 /-- The weight of the base itself is zero: the empty walk realizes it, and every walk from the
 base back to the base is a closed walk, hence of nonpositive weight. -/
 theorem maxRootedWeight_self {weight : E → 𝕜}
-    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum weight cycle ≤ 0)
     (base : V) : maxRootedWeight G weight base base = 0 := by
   refine le_antisymm ?_ (le_maxRootedWeight ⟨.nil, by simp, rfl⟩)
   obtain ⟨walk, -, hwalk⟩ := maxRootedWeight_mem hcyc ⟨(.nil : G.Walk base base)⟩
@@ -266,17 +266,17 @@ weight exactly `lam`.  The maximum cycle mean is the unique value for which a cr
 exist alongside the subeigenvector inequality, and the critical vertices are exactly the vertices
 of the critical graph. -/
 def IsCriticalVertex (G : EdgeGraph V E) (weight : E → 𝕜) (lam : 𝕜) (base : V) : Prop :=
-  ∃ cycle : G.Walk base base, 0 < cycle.length ∧ walkWeight weight cycle = cycle.length * lam
+  ∃ cycle : G.Walk base base, 0 < cycle.length ∧ walkSum weight cycle = cycle.length * lam
 
 /-- A nonempty walk from the base realizing the rooted maximum exists at every reachable vertex,
 provided the base carries a nonempty closed walk of weight zero: away from the base every walk is
 already nonempty, and at the base that closed walk is a maximizer. -/
-theorem exists_pos_length_walkWeight_eq_maxRootedWeight {weight : E → 𝕜}
-    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)
+theorem exists_pos_length_walkSum_eq_maxRootedWeight {weight : E → 𝕜}
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum weight cycle ≤ 0)
     {base : V} (best : G.Walk base base) (hpos : 0 < best.length)
-    (hzero : walkWeight weight best = 0) {vertex : V} (hreach : Nonempty (G.Walk base vertex)) :
+    (hzero : walkSum weight best = 0) {vertex : V} (hreach : Nonempty (G.Walk base vertex)) :
     ∃ walk : G.Walk base vertex,
-      0 < walk.length ∧ walkWeight weight walk = maxRootedWeight G weight base vertex := by
+      0 < walk.length ∧ walkSum weight walk = maxRootedWeight G weight base vertex := by
   obtain ⟨walk, -, hwalk⟩ := maxRootedWeight_mem hcyc hreach
   rcases Nat.eq_zero_or_pos walk.length with hlen | hlen
   · obtain rfl := walk.eq_of_length_eq_zero hlen
@@ -289,23 +289,23 @@ inequality *with equality* along some incoming edge of every vertex.  The witnes
 edge of a greatest walk arriving at the vertex: its prefix is dominated by the rooted maximum at
 that edge's source, while the potential inequality forces the reverse. -/
 theorem exists_tight_edge_maxRootedWeight {weight : E → 𝕜}
-    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkWeight weight cycle ≤ 0)
+    (hcyc : ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum weight cycle ≤ 0)
     {base : V} (hreach : ∀ vertex : V, Nonempty (G.Walk base vertex))
-    (best : G.Walk base base) (hpos : 0 < best.length) (hzero : walkWeight weight best = 0)
+    (best : G.Walk base base) (hpos : 0 < best.length) (hzero : walkSum weight best = 0)
     (vertex : V) :
     ∃ e : E, G.target e = vertex ∧
       maxRootedWeight G weight base (G.source e) + weight e
         = maxRootedWeight G weight base vertex := by
   obtain ⟨walk, hlen, hwalk⟩ :=
-    exists_pos_length_walkWeight_eq_maxRootedWeight hcyc best hpos hzero (hreach vertex)
+    exists_pos_length_walkSum_eq_maxRootedWeight hcyc best hpos hzero (hreach vertex)
   obtain ⟨e, before, htarget, hedges⟩ := walk.exists_last_edge hlen
   refine ⟨e, htarget, le_antisymm ?_ ?_⟩
   · have := maxRootedWeight_isPotential hcyc hreach e
     rwa [htarget] at this
-  · have hsplit : walkWeight weight walk = walkWeight weight before + weight e := by
-      simp [walkWeight, hedges]
-    have hbefore : walkWeight weight before ≤ maxRootedWeight G weight base (G.source e) :=
-      walkWeight_le_maxRootedWeight hcyc before
+  · have hsplit : walkSum weight walk = walkSum weight before + weight e := by
+      simp [walkSum, hedges]
+    have hbefore : walkSum weight before ≤ maxRootedWeight G weight base (G.source e) :=
+      walkSum_le_maxRootedWeight hcyc before
     linarith [hwalk, hsplit]
 
 end Finite
@@ -360,21 +360,21 @@ entries in a field is complete. -/
 theorem exists_isEigenvector_of_maximizing_cycle [Fintype ι] [Nonempty ι] (A : ι → ι → 𝕜)
     {base : ι} (best : (matrixGraph ι).Walk base base) (hpos : 0 < best.length)
     (hbest : ∀ (i : ι) (cycle : (matrixGraph ι).Walk i i),
-      walkWeight (matrixWeight A) cycle
-        ≤ cycle.length * (walkWeight (matrixWeight A) best / best.length)) :
-    IsEigenvector A (walkWeight (matrixWeight A) best / best.length)
+      walkSum (matrixWeight A) cycle
+        ≤ cycle.length * (walkSum (matrixWeight A) best / best.length)) :
+    IsEigenvector A (walkSum (matrixWeight A) best / best.length)
       (maxRootedWeight (matrixGraph ι)
-        (fun e => matrixWeight A e - walkWeight (matrixWeight A) best / best.length) base) := by
+        (fun e => matrixWeight A e - walkSum (matrixWeight A) best / best.length) base) := by
   classical
-  set lam := walkWeight (matrixWeight A) best / best.length with hlam
+  set lam := walkSum (matrixWeight A) best / best.length with hlam
   set shifted : ι × ι → 𝕜 := fun e => matrixWeight A e - lam with hshifted
   have hlenPos : (0 : 𝕜) < best.length := by exact_mod_cast hpos
-  have hcyc : ∀ (i : ι) (cycle : (matrixGraph ι).Walk i i), walkWeight shifted cycle ≤ 0 := by
+  have hcyc : ∀ (i : ι) (cycle : (matrixGraph ι).Walk i i), walkSum shifted cycle ≤ 0 := by
     intro i cycle
-    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul]
+    rw [hshifted, walkSum_sub_const, nsmul_eq_mul]
     linarith [hbest i cycle]
-  have hzero : walkWeight shifted best = 0 := by
-    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul, hlam]
+  have hzero : walkSum shifted best = 0 := by
+    rw [hshifted, walkSum_sub_const, nsmul_eq_mul, hlam]
     field_simp
     ring
   have hreach := nonempty_walk_matrixGraph (ι := ι) base
@@ -398,7 +398,7 @@ theorem exists_isEigenvector {ι : Type*} [Fintype ι] [Nonempty ι] (A : ι →
       0 < best.length ∧ best.length ≤ Fintype.card ι ∧
         IsCriticalVertex (matrixGraph ι) (matrixWeight A) lam base ∧
         (∀ (i : ι) (cycle : (matrixGraph ι).Walk i i), 0 < cycle.length →
-          walkWeight (matrixWeight A) cycle / cycle.length ≤ lam) ∧
+          walkSum (matrixWeight A) cycle / cycle.length ≤ lam) ∧
         ∃ v : ι → ℝ, IsEigenvector A lam v := by
   classical
   obtain ⟨i⟩ := (inferInstance : Nonempty ι)
@@ -412,14 +412,14 @@ theorem exists_isEigenvector {ι : Type*} [Fintype ι] [Nonempty ι] (A : ι →
     AdditiveTransport.exists_short_closedWalk_maximizing_mean
       (matrixGraph ι) (matrixWeight A) hexists
   have hlenPos : (0 : ℝ) < best.length := by exact_mod_cast hpos
-  set lam := walkWeight (matrixWeight A) best / best.length with hlam
+  set lam := walkSum (matrixWeight A) best / best.length with hlam
   have hbest : ∀ (j : ι) (cycle : (matrixGraph ι).Walk j j),
-      walkWeight (matrixWeight A) cycle ≤ cycle.length * lam := by
+      walkSum (matrixWeight A) cycle ≤ cycle.length * lam := by
     intro j cycle
     rcases Nat.eq_zero_or_pos cycle.length with hzero | hposCycle
     · have hedges : cycle.edges = [] :=
         List.length_eq_zero_iff.mp (by rw [EdgeGraph.Walk.edges_length, hzero])
-      simp [walkWeight, hedges, hzero]
+      simp [walkSum, hedges, hzero]
     · have hlen : (0 : ℝ) < cycle.length := by exact_mod_cast hposCycle
       have := (div_le_iff₀ hlen).mp (hmax j cycle hposCycle)
       linarith

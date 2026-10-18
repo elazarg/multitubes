@@ -118,23 +118,6 @@ The generic fold `Maths.walkSum` and its `simp` calculus live with
 the monoid walk label in `Maths.Multitubes.Basic`; this section relates
 it to the additive walk weight and records its subtraction rule. -/
 
-/-- The walk weight of `Maths.Multitubes.Additive.Potentials` is the
-commutative additive instance of `walkSum`. -/
-theorem walkWeight_eq_walkSum {A : Type*} [AddCommMonoid A]
-    (weight : E → A) {start finish : V}
-    (walk : G.Walk start finish) :
-    Maths.MaxPlusPotential.walkWeight weight walk = walkSum weight walk := rfl
-
-theorem walkSum_sub {A : Type*} [AddCommGroup A] (w₁ w₂ : E → A)
-    {start finish : V} (walk : G.Walk start finish) :
-    walkSum (fun edge => w₁ edge - w₂ edge) walk =
-      walkSum w₁ walk - walkSum w₂ walk := by
-  induction walk with
-  | nil => simp
-  | concat walkSoFar edge legal ih =>
-      rw [walkSum_concat, walkSum_concat, walkSum_concat, ih]
-      abel
-
 /-! ### Coboundaries and the cycle criterion -/
 section Coboundary
 
@@ -296,7 +279,6 @@ traversed edges sum to the cycle sum of the edge data. -/
 theorem sum_defect_cycle (cycle : G.Walk vertex vertex) :
     (cycle.edges.map (defect G w φ)).sum = walkSum w cycle := by
   rw [sum_defect_eq, add_sub_cancel_right]
-  rfl
 
 /-- A closed walk of cycle sum at least `γ > 0` has at least one edge. -/
 theorem length_pos_of_le_cycleSum {γ : ℝ} (hγ : 0 < γ)

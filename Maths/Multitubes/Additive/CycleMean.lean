@@ -124,7 +124,7 @@ theorem exists_walk_length_eq (hin : ∀ vertex : V, ∃ e : E, G.target e = ver
 def lengthIncomingWeights (G : EdgeGraph V E) (weight : E → 𝕜) (count : ℕ)
     (vertex : V) : Set 𝕜 :=
   {r | ∃ (start : V) (walk : G.Walk start vertex),
-    walk.length = count ∧ walkWeight weight walk = r}
+    walk.length = count ∧ walkSum weight walk = r}
 
 omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
 /-- With finitely many edges only finitely many weights are realized by walks of a fixed
@@ -144,7 +144,7 @@ theorem nonempty_lengthIncomingWeights
     (count : ℕ) (vertex : V) :
     (lengthIncomingWeights G weight count vertex).Nonempty := by
   obtain ⟨start, walk, hlen⟩ := exists_walk_length_eq hin count vertex
-  exact ⟨walkWeight weight walk, start, walk, hlen, rfl⟩
+  exact ⟨walkSum weight walk, start, walk, hlen, rfl⟩
 
 /-! ### The step-value table -/
 
@@ -184,11 +184,11 @@ theorem stepValue_mem [Finite E]
 
 omit [IsStrictOrderedRing 𝕜] in
 /-- The walk realizing the step value. -/
-theorem exists_walk_walkWeight_eq_stepValue [Finite E]
+theorem exists_walk_walkSum_eq_stepValue [Finite E]
     (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex) (weight : E → 𝕜)
     (count : ℕ) (vertex : V) :
     ∃ (start : V) (walk : G.Walk start vertex),
-      walk.length = count ∧ walkWeight weight walk = stepValue G weight count vertex :=
+      walk.length = count ∧ walkSum weight walk = stepValue G weight count vertex :=
   stepValue_mem hin weight count vertex
 
 /-- Shifting every edge weight by a constant shifts the `count`-step value by `count` times
@@ -200,16 +200,16 @@ theorem stepValue_sub_const [Finite E]
       = stepValue G weight count vertex - count * lam := by
   refine le_antisymm ?_ ?_
   · obtain ⟨start, walk, hlen, hwt⟩ :=
-      exists_walk_walkWeight_eq_stepValue hin (fun e => weight e - lam) count vertex
-    rw [← hwt, walkWeight_sub_const, nsmul_eq_mul, hlen]
+      exists_walk_walkSum_eq_stepValue hin (fun e => weight e - lam) count vertex
+    rw [← hwt, walkSum_sub_const, nsmul_eq_mul, hlen]
     have := le_stepValue (G := G) (weight := weight) (count := count) (vertex := vertex)
       ⟨start, walk, hlen, rfl⟩
     linarith
   · obtain ⟨start, walk, hlen, hwt⟩ :=
-      exists_walk_walkWeight_eq_stepValue hin weight count vertex
+      exists_walk_walkSum_eq_stepValue hin weight count vertex
     have hmem := le_stepValue (G := G) (weight := fun e => weight e - lam) (count := count)
       (vertex := vertex) ⟨start, walk, hlen, rfl⟩
-    rw [walkWeight_sub_const, nsmul_eq_mul, hlen, hwt] at hmem
+    rw [walkSum_sub_const, nsmul_eq_mul, hlen, hwt] at hmem
     linarith
 
 omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
@@ -218,13 +218,13 @@ theorem exists_closedWalk_length_mul (weight : E → 𝕜) {base : V}
     (cycle : G.Walk base base) (times : ℕ) :
     ∃ iterated : G.Walk base base,
       iterated.length = times * cycle.length ∧
-        walkWeight weight iterated = times * walkWeight weight cycle := by
+        walkSum weight iterated = times * walkSum weight cycle := by
   induction times with
   | zero => exact ⟨.nil, by simp, by simp⟩
   | succ times ih =>
       obtain ⟨iterated, hlen, hwt⟩ := ih
       refine ⟨iterated.append cycle, by simp [hlen]; ring, ?_⟩
-      rw [walkWeight_append, hwt]
+      rw [walkSum_append, hwt]
       push_cast
       ring
 
@@ -237,13 +237,13 @@ maximizing walk of length `Fintype.card V`, which must revisit a vertex. -/
 theorem exists_stepValue_sub_le [Fintype V] [Finite E]
     (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex) (weight : E → 𝕜) (lam : 𝕜)
     (hcyc : ∀ (base : V) (cycle : G.Walk base base),
-      walkWeight weight cycle ≤ cycle.length * lam)
+      walkSum weight cycle ≤ cycle.length * lam)
     (vertex : V) :
     ∃ count < Fintype.card V,
       stepValue G weight (Fintype.card V) vertex - stepValue G weight count vertex
         ≤ ((Fintype.card V : 𝕜) - count) * lam := by
   obtain ⟨start, walk, hlen, hwt⟩ :=
-    exists_walk_walkWeight_eq_stepValue hin weight (Fintype.card V) vertex
+    exists_walk_walkSum_eq_stepValue hin weight (Fintype.card V) vertex
   have hdup : ¬ walk.visited.Nodup := by
     intro hnodup
     have hcard := hnodup.length_le_card
@@ -256,9 +256,9 @@ theorem exists_stepValue_sub_le [Fintype V] [Finite E]
     simp only [EdgeGraph.Walk.edges_length, List.length_append] at hcongr
     omega
   refine ⟨before.length + after.length, by omega, ?_⟩
-  have hsplit : walkWeight weight walk
-      = walkWeight weight inner + walkWeight weight (before.append after) := by
-    simp only [walkWeight, hedges, List.map_append, List.sum_append,
+  have hsplit : walkSum weight walk
+      = walkSum weight inner + walkSum weight (before.append after) := by
+    simp only [walkSum, hedges, List.map_append, List.sum_append,
       EdgeGraph.Walk.edges_append]
     ring
   have hle := le_stepValue (G := G) (weight := weight)
@@ -280,19 +280,19 @@ dominates every other step value by the corresponding multiple of `lam`. -/
 theorem exists_le_stepValue_sub [Fintype V] [Finite E]
     (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex) (weight : E → 𝕜) (lam : 𝕜)
     (hcyc : ∀ (base : V) (cycle : G.Walk base base),
-      walkWeight weight cycle ≤ cycle.length * lam)
+      walkSum weight cycle ≤ cycle.length * lam)
     {base : V} (best : G.Walk base base) (hpos : 0 < best.length)
-    (hattained : walkWeight weight best = best.length * lam) :
+    (hattained : walkSum weight best = best.length * lam) :
     ∃ vertex : V, ∀ count : ℕ,
       ((Fintype.card V : 𝕜) - count) * lam
         ≤ stepValue G weight (Fintype.card V) vertex - stepValue G weight count vertex := by
   set shifted : E → 𝕜 := fun e => weight e - lam with hshifted
-  have hnonpos : ∀ (v : V) (cycle : G.Walk v v), walkWeight shifted cycle ≤ 0 := by
+  have hnonpos : ∀ (v : V) (cycle : G.Walk v v), walkSum shifted cycle ≤ 0 := by
     intro v cycle
-    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul]
+    rw [hshifted, walkSum_sub_const, nsmul_eq_mul]
     linarith [hcyc v cycle]
-  have hbestZero : walkWeight shifted best = 0 := by
-    rw [hshifted, walkWeight_sub_const, nsmul_eq_mul, hattained]
+  have hbestZero : walkSum shifted best = 0 := by
+    rw [hshifted, walkSum_sub_const, nsmul_eq_mul, hattained]
     ring
   -- the greatest weight of a walk arriving at the base of the attaining cycle
   have hgreatest := isGreatest_incomingWeights (G := G) (weight := shifted) hnonpos base
@@ -309,23 +309,23 @@ theorem exists_le_stepValue_sub [Fintype V] [Finite E]
   obtain ⟨vertex, front, back, hfrontLen, hedges⟩ :=
     long.exists_split_of_length_le hlongLen
   refine ⟨vertex, fun count => ?_⟩
-  have hfrontBack : walkWeight shifted front + walkWeight shifted back
+  have hfrontBack : walkSum shifted front + walkSum shifted back
       = maxIncomingWeight G shifted base := by
-    have hlongWt : walkWeight shifted long = maxIncomingWeight G shifted base := by
-      rw [hlong, walkWeight_append, hprefixWt, hiterWt, hbestZero]
+    have hlongWt : walkSum shifted long = maxIncomingWeight G shifted base := by
+      rw [hlong, walkSum_append, hprefixWt, hiterWt, hbestZero]
       ring
     rw [← hlongWt]
-    simp only [walkWeight, hedges, List.map_append, List.sum_append]
-  have hfrontLe : walkWeight shifted front
+    simp only [walkSum, hedges, List.map_append, List.sum_append]
+  have hfrontLe : walkSum shifted front
       ≤ stepValue G shifted (Fintype.card V) vertex :=
     le_stepValue ⟨prefixStart, front, hfrontLen, rfl⟩
-  have hcountLe : stepValue G shifted count vertex ≤ walkWeight shifted front := by
+  have hcountLe : stepValue G shifted count vertex ≤ walkSum shifted front := by
     obtain ⟨tailStart, tailWalk, -, htailWt⟩ :=
-      exists_walk_walkWeight_eq_stepValue hin shifted count vertex
-    have hmem : walkWeight shifted (tailWalk.append back)
+      exists_walk_walkSum_eq_stepValue hin shifted count vertex
+    have hmem : walkSum shifted (tailWalk.append back)
         ∈ incomingWeights G shifted base := ⟨tailStart, _, rfl⟩
     have hbound := hgreatest.2 hmem
-    rw [walkWeight_append, htailWt] at hbound
+    rw [walkSum_append, htailWt] at hbound
     linarith
   have hshiftN : stepValue G shifted (Fintype.card V) vertex
       = stepValue G weight (Fintype.card V) vertex - (Fintype.card V : 𝕜) * lam :=
@@ -348,17 +348,17 @@ theorem sup'_inf'_stepValue_div [Fintype V] [Nonempty V] [Finite E]
     (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex) (weight : E → 𝕜)
     {base : V} (best : G.Walk base base) (hpos : 0 < best.length)
     (hbest : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      walkWeight weight cycle
-        ≤ cycle.length * (walkWeight weight best / best.length)) :
+      walkSum weight cycle
+        ≤ cycle.length * (walkSum weight best / best.length)) :
     (Finset.univ : Finset V).sup' Finset.univ_nonempty (fun vertex =>
         (Finset.range (Fintype.card V)).inf'
           (Finset.nonempty_range_iff.mpr Fintype.card_ne_zero)
           (fun count => (stepValue G weight (Fintype.card V) vertex
               - stepValue G weight count vertex) / ((Fintype.card V : 𝕜) - count)))
-      = walkWeight weight best / best.length := by
-  set lam := walkWeight weight best / best.length with hlam
+      = walkSum weight best / best.length := by
+  set lam := walkSum weight best / best.length with hlam
   have hlenPos : (0 : 𝕜) < best.length := by exact_mod_cast hpos
-  have hattained : walkWeight weight best = best.length * lam := by
+  have hattained : walkSum weight best = best.length * lam := by
     rw [hlam]
     field_simp
   have hgap : ∀ count ∈ Finset.range (Fintype.card V),
@@ -406,14 +406,14 @@ theorem exists_short_closedWalk_sup'_inf'_stepValue_div
     ∃ (base : V) (best : G.Walk base base),
       0 < best.length ∧ best.length ≤ Fintype.card V ∧
         (∀ (vertex : V) (cycle : G.Walk vertex vertex), 0 < cycle.length →
-          walkWeight weight cycle / cycle.length
-            ≤ walkWeight weight best / best.length) ∧
+          walkSum weight cycle / cycle.length
+            ≤ walkSum weight best / best.length) ∧
         (Finset.univ : Finset V).sup' Finset.univ_nonempty (fun vertex =>
             (Finset.range (Fintype.card V)).inf'
               (Finset.nonempty_range_iff.mpr Fintype.card_ne_zero)
               (fun count => (stepValue G weight (Fintype.card V) vertex
                   - stepValue G weight count vertex) / ((Fintype.card V : ℝ) - count)))
-          = walkWeight weight best / best.length := by
+          = walkSum weight best / best.length := by
   obtain ⟨vertex, best, hpos, hcard, hmax⟩ :=
     AdditiveTransport.exists_short_closedWalk_maximizing_mean G weight
       (exists_closedWalk_length_pos hin)
@@ -422,7 +422,7 @@ theorem exists_short_closedWalk_sup'_inf'_stepValue_div
   rcases Nat.eq_zero_or_pos cycle.length with hzero | hcyclePos
   · have hedges : cycle.edges = [] :=
       List.length_eq_zero_iff.mp (by rw [EdgeGraph.Walk.edges_length, hzero])
-    simp [walkWeight, hedges, hzero]
+    simp [walkSum, hedges, hzero]
   · have hlenPos : (0 : ℝ) < cycle.length := by exact_mod_cast hcyclePos
     have hmean := hmax other cycle hcyclePos
     have := (div_le_iff₀ hlenPos).mp hmean
@@ -440,7 +440,7 @@ theorem exists_critical_cycle_subeigenvector_iff
       0 < best.length ∧ best.length ≤ Fintype.card ι ∧
         ∀ lam : ℝ,
           ((∃ v : ι → ℝ, IsSubeigenvector A lam v) ↔
-            walkWeight (matrixWeight A) best ≤ best.length * lam) := by
+            walkSum (matrixWeight A) best ≤ best.length * lam) := by
   classical
   obtain ⟨i⟩ := (inferInstance : Nonempty ι)
   have hexists : ∃ (vertex : ι) (cycle : (matrixGraph ι).Walk vertex vertex),
@@ -463,10 +463,10 @@ theorem exists_critical_cycle_subeigenvector_iff
     rcases Nat.eq_zero_or_pos cycle.length with hzero | hposCycle
     · have hedges : cycle.edges = [] :=
         List.length_eq_zero_iff.mp (by rw [EdgeGraph.Walk.edges_length, hzero])
-      simp [walkWeight, hedges, hzero]
+      simp [walkSum, hedges, hzero]
     · have hlenPos : (0 : ℝ) < cycle.length := by exact_mod_cast hposCycle
       have hmean := hmax j cycle hposCycle
-      have hbestMean : walkWeight (matrixWeight A) best / best.length ≤ lam := by
+      have hbestMean : walkSum (matrixWeight A) best / best.length ≤ lam := by
         rw [div_le_iff₀ hbestLenPos]
         linarith [hbest]
       have hcycleMean := hmean.trans hbestMean

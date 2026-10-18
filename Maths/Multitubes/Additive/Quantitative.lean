@@ -77,7 +77,7 @@ theorem worstDirectedResidualAtMost_iff_closedWalk_le
     (level : ℝ) :
     WorstDirectedResidualAtMost G weight level ↔
       ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-        MaxPlusPotential.walkWeight weight cycle ≤ cycle.length * level := by
+        walkSum weight cycle ≤ cycle.length * level := by
   have hpotential : WorstDirectedResidualAtMost G weight level ↔
       ∃ potential : V → ℝ,
         MaxPlusPotential.IsPotential G (fun edge => weight edge - level) potential := by
@@ -102,7 +102,7 @@ theorem worstDirectedResidualAtMost_iff_closedWalk_le
   intro vertex
   apply forall_congr'
   intro cycle
-  rw [MaxPlusPotential.walkWeight_sub_const, nsmul_eq_mul]
+  rw [walkSum_sub_const, nsmul_eq_mul]
   constructor <;> intro h <;> linarith
 
 /-! ## Symmetric signed-circulation threshold -/

@@ -178,11 +178,11 @@ along every closed walk of its doubled graph have nonnegative sum. -/
 theorem feasible_iff_forall_closedWalk_nonneg [Finite ι] (constraints : ι → Constraint V 𝕜) :
     Feasible constraints ↔
       ∀ (vertex : V × Bool) (cycle : (doubledGraph constraints).Walk vertex vertex),
-        0 ≤ walkWeight (fun edge : ι × Bool => (constraints edge.1).bound) cycle := by
+        0 ≤ walkSum (fun edge : ι × Bool => (constraints edge.1).bound) cycle := by
   rw [feasible_iff_exists_isPotential, exists_isPotential_iff_forall_closedWalk_nonpos]
   refine forall_congr' fun vertex => forall_congr' fun cycle => ?_
   rw [show doubledWeight constraints = fun edge => -(constraints edge.1).bound from rfl,
-    walkWeight_neg, neg_nonpos]
+    walkSum_neg, neg_nonpos]
 
 end Field
 

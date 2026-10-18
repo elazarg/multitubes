@@ -134,7 +134,7 @@ graph. This is an existence theorem; prescribed upper budgets may still be infea
 theorem exists_radius_of_cycle_contraction [Fintype V] [Finite E]
     (comparison : ErrorComparison concrete approximate) (lower : V → ℝ)
     (hcycles : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-      0 < cycle.length → walkSlopeProduct comparison.gain cycle < 1) :
+      0 < cycle.length → Maths.walkProd comparison.gain cycle < 1) :
     ∃ radius : V → ℝ, (∀ vertex, lower vertex ≤ radius vertex) ∧
       IsRadiusFamily comparison radius := by
   obtain ⟨rate, gauge, _, hrate, hgauge⟩ :=

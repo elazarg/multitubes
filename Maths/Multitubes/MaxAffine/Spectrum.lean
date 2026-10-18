@@ -232,12 +232,12 @@ omit [Fintype V] [DecidableEq V] [Fintype E] in
 /-- **Relaxation is a cycle-mean shift.**  Subtracting the level from every shift subtracts the
 level times the length from the weight of every closed walk of the unit-slope subgraph, which
 relaxation leaves unchanged. -/
-theorem walkWeight_unitSlopeShift_relax (label : E → Label) (lam : ℝ) (base : V)
+theorem walkSum_unitSlopeShift_relax (label : E → Label) (lam : ℝ) (base : V)
     (cycle : (unitSlopeGraph G label).Walk base base) :
-    MaxPlusPotential.walkWeight (unitSlopeShift fun e => Label.relax lam (label e)) cycle
-      = MaxPlusPotential.walkWeight (unitSlopeShift label) cycle - cycle.length * lam := by
+    walkSum (unitSlopeShift fun e => Label.relax lam (label e)) cycle
+      = walkSum (unitSlopeShift label) cycle - cycle.length * lam := by
   rw [← nsmul_eq_mul,
-    ← MaxPlusPotential.walkWeight_sub_const (unitSlopeShift label) lam cycle]
+    ← walkSum_sub_const (unitSlopeShift label) lam cycle]
   congr 1
   funext edge
   simp [unitSlopeShift, Label.relax, Label.recenter]
@@ -248,21 +248,21 @@ means of the original one. -/
 theorem forall_unitSlopeCycles_relax_nonpos_iff (label : E → Label) (lam : ℝ) :
     (∀ (base : V)
         (cycle : (unitSlopeGraph G fun e => Label.relax lam (label e)).Walk base base),
-      MaxPlusPotential.walkWeight (unitSlopeShift fun e => Label.relax lam (label e)) cycle ≤ 0)
+      walkSum (unitSlopeShift fun e => Label.relax lam (label e)) cycle ≤ 0)
       ↔ ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
-        MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ cycle.length * lam := by
+        walkSum (unitSlopeShift label) cycle ≤ cycle.length * lam := by
   constructor
   · intro h base cycle
-    have hstep : MaxPlusPotential.walkWeight
+    have hstep : walkSum
         (unitSlopeShift fun e => Label.relax lam (label e)) cycle ≤ 0 := h base cycle
-    rw [walkWeight_unitSlopeShift_relax label lam base cycle] at hstep
+    rw [walkSum_unitSlopeShift_relax label lam base cycle] at hstep
     linarith
   · intro h base cycle
-    have hvalue : MaxPlusPotential.walkWeight
+    have hvalue : walkSum
           (unitSlopeShift fun e => Label.relax lam (label e)) cycle
-        = MaxPlusPotential.walkWeight (unitSlopeShift label) cycle - cycle.length * lam :=
-      walkWeight_unitSlopeShift_relax label lam base cycle
-    have hstep : MaxPlusPotential.walkWeight (unitSlopeShift label) cycle
+        = walkSum (unitSlopeShift label) cycle - cycle.length * lam :=
+      walkSum_unitSlopeShift_relax label lam base cycle
+    have hstep : walkSum (unitSlopeShift label) cycle
         ≤ cycle.length * lam := h base cycle
     rw [hvalue]
     linarith
@@ -274,7 +274,7 @@ theorem mem_relaxationLevels_iff_unitSlopeCycles_of_slope_le_one
     (hslope : ∀ e : E, (label e).slope ≤ 1) (lam : ℝ) :
     lam ∈ relaxationLevels G label ↔
       ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
-        MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ cycle.length * lam := by
+        walkSum (unitSlopeShift label) cycle ≤ cycle.length * lam := by
   rw [← forall_unitSlopeCycles_relax_nonpos_iff (G := G) label lam]
   exact exists_isLaxSection_iff_unitSlopeCycles_nonpos_of_slope_le_one
     (G := G) (label := fun e => Label.relax lam (label e)) hslope
@@ -287,7 +287,7 @@ theorem mem_relaxationLevels_iff_unitSlopeCycles_of_one_le_slope
     (hslope : ∀ e : E, 1 ≤ (label e).slope) (hfloor : ∀ e : E, (label e).floor = ⊥) (lam : ℝ) :
     lam ∈ relaxationLevels G label ↔
       ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
-        MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ cycle.length * lam := by
+        walkSum (unitSlopeShift label) cycle ≤ cycle.length * lam := by
   have hfloor' : ∀ e : E, (Label.relax lam (label e)).floor = ⊥ := by
     intro e
     simp [Label.relax, Label.recenter, hfloor e]
@@ -303,7 +303,7 @@ theorem unitSlopeCycles_le_of_isEigenvector_of_slope_le_one
     (hslope : ∀ e : E, (label e).slope ≤ 1) {lam : ℝ} {x : V → ℝ}
     (hx : IsEigenvector G label lam x) (base : V)
     (cycle : (unitSlopeGraph G label).Walk base base) :
-    MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ cycle.length * lam :=
+    walkSum (unitSlopeShift label) cycle ≤ cycle.length * lam :=
   (mem_relaxationLevels_iff_unitSlopeCycles_of_slope_le_one hslope lam).1
     (eigenvalues_subset_relaxationLevels G label ⟨x, hx⟩) base cycle
 
@@ -312,7 +312,7 @@ theorem unitSlopeCycles_le_of_isEigenvector_of_one_le_slope
     (hslope : ∀ e : E, 1 ≤ (label e).slope) (hfloor : ∀ e : E, (label e).floor = ⊥) {lam : ℝ}
     {x : V → ℝ} (hx : IsEigenvector G label lam x) (base : V)
     (cycle : (unitSlopeGraph G label).Walk base base) :
-    MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ cycle.length * lam :=
+    walkSum (unitSlopeShift label) cycle ≤ cycle.length * lam :=
   (mem_relaxationLevels_iff_unitSlopeCycles_of_one_le_slope hslope hfloor lam).1
     (eigenvalues_subset_relaxationLevels G label ⟨x, hx⟩) base cycle
 
@@ -486,7 +486,7 @@ instance isEmpty_unitSlopeEdge_loopLabel : IsEmpty (UnitSlopeEdge loopLabel) whe
 so its cycle bound holds at every level. -/
 theorem unitSlopeCycles_loopLabel_le (lam : ℝ) (base : Unit)
     (cycle : (unitSlopeGraph loopGraph loopLabel).Walk base base) :
-    MaxPlusPotential.walkWeight (unitSlopeShift loopLabel) cycle ≤ cycle.length * lam := by
+    walkSum (unitSlopeShift loopLabel) cycle ≤ cycle.length * lam := by
   cases cycle with
   | nil => simp
   | concat _ edge _ => exact (isEmpty_unitSlopeEdge_loopLabel.false edge).elim
@@ -504,7 +504,7 @@ theorem not_forall_mem_relaxationLevels_iff_unitSlopeCycles_le :
       (∀ e : E, 0 ≤ (label e).slope) →
       (lam ∈ relaxationLevels G label ↔
         ∀ (base : V) (cycle : (unitSlopeGraph G label).Walk base base),
-          MaxPlusPotential.walkWeight (unitSlopeShift label) cycle ≤ cycle.length * lam) := by
+          walkSum (unitSlopeShift label) cycle ≤ cycle.length * lam) := by
   intro hrule
   have hmem : (0 : ℝ) ∈ relaxationLevels loopGraph loopLabel :=
     (hrule Unit Bool inferInstance inferInstance inferInstance loopGraph loopLabel 0

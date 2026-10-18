@@ -44,9 +44,9 @@ circulations, and application-specific semantics belong in files that import thi
   walk constructors.
 * `Maths.EdgeGraph.Walk.VertexSplit`: a witness that a walk visits a vertex,
   together with `splice` for inserting a closed walk there.
-* `Maths.LinkedTo`, `Maths.IsStronglyConnectedAt`, `Maths.EdgeEndpointsLinkedTo`, and
-  `Maths.HasEdgeReturns`: the walk-existence reachability scopes consumed by the potential
-  and normal-form theory.
+* `Maths.RootReaches`, `Maths.LinkedTo`, `Maths.IsStronglyConnectedAt`,
+  `Maths.EdgeEndpointsLinkedTo`, and `Maths.HasEdgeReturns`: walk-existence reachability
+  conditions.
 
 ## Main results
 
@@ -677,6 +677,10 @@ In a directed graph a walk out to a vertex and a walk back from it are
 independent, so both directions are demanded explicitly. -/
 
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
+
+/-- Every vertex is reachable from `base` by a directed walk. -/
+def RootReaches (G : EdgeGraph V E) (base : V) : Prop :=
+  ∀ vertex : V, Nonempty (G.Walk base vertex)
 
 /-- `base` reaches `vertex` and `vertex` reaches `base`.  Equivalently, the two
 vertices lie in a common strongly connected component. -/

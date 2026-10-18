@@ -53,7 +53,7 @@ transient, since that only translates and extends the prefix-charge range by fin
   a nonempty zero-charge cyclic word has bounded discrepancy.
 * `Maths.EdgeGraph.Walk.hasBoundedDiscrepancy_prependInfinite`: a finite legal
   transient preserves bounded discrepancy.
-* `Maths.EdgeGraph.InfiniteWalk.segment_charge`: the charge of a finite segment is
+* `Maths.EdgeGraph.InfiniteWalk.walkSum_segment`: the charge of a finite segment is
   the difference of the prefix charges at its endpoints.
 
 ## Tags
@@ -277,12 +277,13 @@ def take (walk : G.InfiniteWalk start) : (n : ℕ) → G.Walk start (walk.vertex
   | zero => rfl
   | succ n ih => exact congrArg (· + 1) ih
 
-@[simp] theorem take_charge (walk : G.InfiniteWalk start) {κ : Type uκ}
+@[simp] theorem walkSum_take (walk : G.InfiniteWalk start) {κ : Type uκ}
     (edgeCharge : E → κ → ℤ) (n : ℕ) :
-    (walk.take n).charge edgeCharge = walk.prefixCharge edgeCharge n := by
+    walkSum edgeCharge (walk.take n) = walk.prefixCharge edgeCharge n := by
   induction n with
   | zero => rfl
-  | succ n ih => exact congrArg (· + edgeCharge (walk.edge n)) ih
+  | succ n ih =>
+      exact (walkSum_concat (walk.take n) _ _).trans (congrArg (· + edgeCharge (walk.edge n)) ih)
 
 /-- The next `length` edges beginning at time `startTime`. -/
 def segment (walk : G.InfiniteWalk start) (startTime : ℕ) : (length : ℕ) →
@@ -300,17 +301,17 @@ def segment (walk : G.InfiniteWalk start) (startTime : ℕ) : (length : ℕ) →
 
 /-- The charge of a finite segment is the difference of the prefix charges at its
 endpoints. -/
-theorem segment_charge (walk : G.InfiniteWalk start) {κ : Type uκ}
+theorem walkSum_segment (walk : G.InfiniteWalk start) {κ : Type uκ}
     (edgeCharge : E → κ → ℤ) (startTime length : ℕ) :
-    (walk.segment startTime length).charge edgeCharge =
+    walkSum edgeCharge (walk.segment startTime length) =
       walk.prefixCharge edgeCharge (startTime + length) -
         walk.prefixCharge edgeCharge startTime := by
   induction length with
   | zero => simp [segment]
   | succ length ih =>
-      have hstep : (walk.segment startTime (length + 1)).charge edgeCharge =
-          (walk.segment startTime length).charge edgeCharge +
-            edgeCharge (walk.edge (startTime + length)) := rfl
+      have hstep : walkSum edgeCharge (walk.segment startTime (length + 1)) =
+          walkSum edgeCharge (walk.segment startTime length) +
+            edgeCharge (walk.edge (startTime + length)) := walkSum_concat _ _ _
       have hnext : walk.prefixCharge edgeCharge (startTime + (length + 1)) =
           walk.prefixCharge edgeCharge (startTime + length) +
             edgeCharge (walk.edge (startTime + length)) := rfl

@@ -25,7 +25,7 @@ additive residual bound. Finiteness makes a uniform strict margin possible.
 
 ## Main results
 
-* `Maths.MaxAffineTransport.walkSlopeProduct_mul_gauge_le_pow`: a geometric bound along walks.
+* `Maths.MaxAffineTransport.walkProd_mul_gauge_le_pow`: a geometric bound along walks.
 * `Maths.MaxAffineTransport.exists_contractiveGauge_iff_cycleProduct_lt_one`: exact cycle
   criterion for a strict contraction gauge, including zero-gain transitions.
 * `Maths.MaxAffineTransport.exists_contractiveGauge_iff_shortCycleProduct_lt_one`: it suffices
@@ -46,19 +46,19 @@ def IsContractiveGauge (gain : E → ℝ) (rate : ℝ) (gauge : V → ℝ) : Pro
     ∀ edge, gain edge * gauge (G.source edge) ≤ rate * gauge (G.target edge)
 
 /-- A nonnegative contraction rate controls every walk gain by its geometric power. -/
-theorem walkSlopeProduct_mul_gauge_le_pow (gain : E → ℝ)
+theorem walkProd_mul_gauge_le_pow (gain : E → ℝ)
     (hnonneg : ∀ edge, 0 ≤ gain edge) {rate : ℝ} (hrate : 0 ≤ rate)
     {gauge : V → ℝ} (hgauge : IsContractiveGauge (G := G) gain rate gauge)
     {start finish : V} (walk : G.Walk start finish) :
-    walkSlopeProduct gain walk * gauge start ≤ rate ^ walk.length * gauge finish := by
+    walkProd gain walk * gauge start ≤ rate ^ walk.length * gauge finish := by
   induction walk with
   | nil => simp
   | concat walk edge legal ih =>
       cases legal
-      rw [walkSlopeProduct_concat, EdgeGraph.Walk.length_concat, pow_succ]
+      rw [walkProd_concat, EdgeGraph.Walk.length_concat, pow_succ]
       calc
-        walkSlopeProduct gain walk * gain edge * gauge start =
-            gain edge * (walkSlopeProduct gain walk * gauge start) := by ring
+        walkProd gain walk * gain edge * gauge start =
+            gain edge * (walkProd gain walk * gauge start) := by ring
         _ ≤ gain edge * (rate ^ walk.length * gauge _) :=
           mul_le_mul_of_nonneg_left ih (hnonneg edge)
         _ = rate ^ walk.length * (gain edge * gauge _) := by ring
@@ -71,8 +71,8 @@ theorem cycleProduct_lt_one_of_contractiveGauge (gain : E → ℝ)
     (hnonneg : ∀ edge, 0 ≤ gain edge) {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
     {gauge : V → ℝ} (hgauge : IsContractiveGauge (G := G) gain rate gauge)
     {vertex : V} (cycle : G.Walk vertex vertex) (hcycle : 0 < cycle.length) :
-    walkSlopeProduct gain cycle < 1 := by
-  have hwalk := walkSlopeProduct_mul_gauge_le_pow gain hnonneg hrate hgauge cycle
+    walkProd gain cycle < 1 := by
+  have hwalk := walkProd_mul_gauge_le_pow gain hnonneg hrate hgauge cycle
   have hpower : rate ^ cycle.length < 1 := pow_lt_one₀ hrate hlt (by omega)
   have hbound := mul_lt_mul_of_pos_right hpower (hgauge.1 vertex)
   nlinarith
@@ -85,7 +85,7 @@ theorem exists_contractiveGauge_iff_shortCycleProduct_lt_one [Fintype V] [Finite
       0 < rate ∧ rate < 1 ∧ IsContractiveGauge (G := G) gain rate gauge) ↔
       ∀ (vertex : V) (cycle : G.Walk vertex vertex),
         0 < cycle.length → cycle.length ≤ Fintype.card V →
-          walkSlopeProduct gain cycle < 1 := by
+          walkProd gain cycle < 1 := by
   classical
   constructor
   · rintro ⟨rate, gauge, hpos, hlt, hgauge⟩ vertex cycle hcycle _
@@ -94,11 +94,11 @@ theorem exists_contractiveGauge_iff_shortCycleProduct_lt_one [Fintype V] [Finite
     have hnegative (vertex : V)
         (cycle : (positiveSlopeGraph (G := G) gain).Walk vertex vertex)
         (hcycle : 0 < cycle.length) (hcard : cycle.length ≤ Fintype.card V) :
-        MaxPlusPotential.walkWeight
+        walkSum
           (fun edge : PositiveSlopeEdge gain => Real.log (gain edge.1)) cycle < 0 := by
       apply Real.exp_lt_exp.mp
-      rw [Real.exp_zero, exp_walkWeight_log_eq_walkSlopeProduct,
-        ← walkSlopeProduct_forgetPositiveWalk]
+      rw [Real.exp_zero, exp_walkSum_log_eq_walkProd,
+        ← walkProd_forgetPositiveWalk]
       have hlength := congrArg List.length (edges_forgetPositiveWalk gain cycle)
       simp only [List.length_map, EdgeGraph.Walk.edges_length] at hlength
       exact hcycles vertex (forgetPositiveWalk gain cycle)
@@ -130,7 +130,7 @@ theorem exists_contractiveGauge_iff_cycleProduct_lt_one [Fintype V] [Finite E]
     (∃ (rate : ℝ) (gauge : V → ℝ),
       0 < rate ∧ rate < 1 ∧ IsContractiveGauge (G := G) gain rate gauge) ↔
       ∀ (vertex : V) (cycle : G.Walk vertex vertex),
-        0 < cycle.length → walkSlopeProduct gain cycle < 1 := by
+        0 < cycle.length → walkProd gain cycle < 1 := by
   constructor
   · rintro ⟨rate, gauge, hpos, hlt, hgauge⟩ vertex cycle hcycle
     exact cycleProduct_lt_one_of_contractiveGauge gain hnonneg hpos.le hlt hgauge cycle hcycle
