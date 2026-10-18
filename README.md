@@ -90,11 +90,12 @@ It is likely a good fit if you need to formalize one of the following.
 | Additive difference constraints and cycle feasibility | [`Additive.Potentials`](Maths/Multitubes/Additive/Potentials.lean) and [`Additive.Mixed`](Maths/Multitubes/Additive/Mixed.lean) |
 | Gain-graph and voltage-graph switching and balance | [`Maths.Multitubes.Switching`](Maths/Multitubes/Switching.lean) and [`Symmetric`](Maths/Multitubes/Symmetric.lean) |
 | Frustration index and balancing deletions | [`Maths.Multitubes.Frustration`](Maths/Multitubes/Frustration.lean) |
-| Derived and covering graphs, path lifting, and monodromy | [`Maths.Multitubes.ElementsGraph`](Maths/Multitubes/ElementsGraph.lean) |
+| Graphs of elements, derived graphs, path lifting, and monodromy | [`Maths.Multitubes.ElementsGraph`](Maths/Multitubes/ElementsGraph.lean) |
 | Graph morphisms and isomorphisms | [`Maths.Graph.Morphism`](Maths/Graph/Morphism.lean) |
+| Path categories, mathlib quivers, and flat functors on paths | [`Maths.Graph.PathCategory`](Maths/Graph/PathCategory.lean), [`Quiver`](Maths/Graph/Quiver.lean), and [`FlatPathFunctor`](Maths/Graph/FlatPathFunctor.lean) |
 | Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/Multitubes/Additive/CycleMean.lean), [`CriticalGraph`](Maths/Multitubes/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/Multitubes/Additive/Eigenvector.lean) |
 | Functions between possibly different state spaces along edges | [`Maths.Multitubes.Basic`](Maths/Multitubes/Basic.lean) |
-| Morphisms, directed simulations, and closure soundness | [`Maths.Multitubes.Morphism`](Maths/Multitubes/Morphism.lean) |
+| Morphisms, lax and oplax morphisms, and closure soundness | [`Maths.Multitubes.Morphism`](Maths/Multitubes/Morphism.lean) |
 | Relations between possibly different state spaces along edges | [`Maths.Multitubes.Relational`](Maths/Multitubes/Relational.lean) |
 | Path independence, trivial holonomy, or exact-section normal forms | [`Maths.Multitubes.Exact`](Maths/Multitubes/Exact.lean) and [`NormalForms`](Maths/Multitubes/NormalForms.lean) |
 | Least solutions of monotone graph inequalities | [`Maths.Multitubes.Closure`](Maths/Multitubes/Closure.lean) |
@@ -128,7 +129,7 @@ client packages built on the reusable transport specializations. Max-plus and ma
 transport belong to the library independently of the queueing, stopping, or control models that
 may use them. Compiled capstones connect finite reachability with typed-walk execution and least
 path closure. Finite abstract saturation also proves safety for infinite concrete state spaces
-through transport simulations. Other capstones connect finite-horizon hitting with stopped-kernel
+through lax transport morphisms. Other capstones connect finite-horizon hitting with stopped-kernel
 probabilities and barriers, timed synchronization with optimal bottleneck-cycle schedules, and
 affine sensor consistency with rational certificates and an attained least uniform tolerance.
 The switched and hybrid control client proves geometric error bounds in a contraction gauge,
@@ -165,8 +166,10 @@ The library includes the following theorem families.
 
 - **Graphs, walks, and flows.** Typed finite walks retain edge identities and encode endpoint
   compatibility. Their edge multiplicities satisfy endpoint-corrected flow conservation; closed
-  walks produce circulations. The graph layer also includes Eulerian realization, infinite
-  walks, and zero-charge lassos. Bounded potentials and walk budgets belong to the additive
+  walks produce circulations. Edge graphs present mathlib quivers: typed walks are quiver paths,
+  and the path category is mathlib's free category. The graph layer also includes Eulerian
+  realization, infinite walks, zero-charge lassos, and the condensation into strongly connected
+  components. Bounded potentials and walk budgets belong to the additive
   specialization.
 - **Additive potentials.** For finite edge types, potential feasibility is characterized by
   closed-walk weights under the stated ordered-cancellation assumptions. There are circulation
@@ -187,15 +190,18 @@ The library includes the following theorem families.
 - **Operator-valued walk semantics.** Arbitrary edge functions compose chronologically.
   Transport respects concatenation, and exact, lax, and oplax edge constraints propagate along
   suitable walks. Fiberwise morphisms commute with all walk transports and preserve sections;
-  directed simulations preserve the corresponding ordered sections and give a global soundness
-  bound between least lax-majorant closures.
+  lax and oplax morphisms preserve the corresponding ordered sections and give a global soundness
+  bound between least lax-majorant closures. A section is itself a morphism out of the transport
+  with one-point fibers.
 - **Relation-valued walk semantics.** Arbitrary edge relations compose existentially. Their
   native walk relations agree exactly with ordinary walk transport under the existential-image
   embedding into powersets; point-valued relational sections become singleton-valued oplax
   sections, and optional path closure is exact reachability.
 - **Exact transport.** Trivial holonomy, path independence, rooted and strongly connected normal
   forms, categorical retract formulations, and rigidity of potentials are developed without
-  assuming a group of labels.
+  assuming a group of labels. A functor on the path category that is flat at both ends of a walk
+  with a return sends it to an isomorphism, which is an equivalence of fibers for transport and a
+  unit for monoid labels.
 - **Lax closure.** On complete lattices, joins over all incoming walks give an explicit least lax
   section when edge maps preserve the required joins. For merely monotone maps, a Bellman
   operator gives the least lax majorant as a least fixed point. Fair schedules of local edge
@@ -316,7 +322,7 @@ mathlib; the Multitubes layer consumes them.
 
 | Directory | Contents |
 | --- | --- |
-| `Maths/Graph/` | Directed multigraphs, typed walks, graph morphisms, circulations, Eulerian trails, infinite walks, and zero-charge lassos |
+| `Maths/Graph/` | Directed multigraphs, typed walks, walk labels, the path category and its quiver presentation, flat path functors, graph morphisms, condensation, circulations, Eulerian trails, infinite walks, and zero-charge lassos |
 | `Maths/Recursion/` | Affine, max-affine, and clamped-affine summaries, fixed points, and one-sided and two-sided reflections |
 | `Maths/LinearProgramming/` | Fourier–Motzkin elimination, alternatives, standard-form LP, sparsity, and duality |
 | `Maths/Algebra/` | The join-semidirect label algebra |
@@ -332,8 +338,8 @@ dependency graph.
 
 ## Building this repository
 
-The project uses Lean `v4.35.0` and the matching mathlib release, as recorded in
-`lean-toolchain` and `lakefile.toml`. The only additional dependency is
+The Lean toolchain and the matching mathlib release are pinned in `lean-toolchain` and
+`lakefile.toml`. The only additional dependency is
 [`fixed-point-theorems`](https://github.com/elazarg/fixed-point-theorems-lean4), used for
 Brouwer's theorem in the max-affine eigenproblem. No other module depends on it.
 
