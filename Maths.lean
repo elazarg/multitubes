@@ -13,6 +13,7 @@ public import Maths.Graph.EdgeGraph
 public import Maths.Graph.WalkLabel
 public import Maths.Graph.Condensation
 public import Maths.Graph.PathCategory
+public import Maths.Graph.Quiver
 public import Maths.Graph.Morphism
 public import Maths.Graph.Circulation
 public import Maths.Graph.EulerianTrail
