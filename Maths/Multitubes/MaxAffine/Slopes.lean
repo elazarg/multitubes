@@ -186,13 +186,12 @@ theorem exists_isLaxSection_iff_exists_unitSlopePotential_of_slope_le_one
 
 /-- Unit-slope edges as a directed subgraph. -/
 abbrev UnitSlopeEdge (label : E → Label) :=
-  {edge : E // (label edge).slope = 1}
+  ↥{edge : E | (label edge).slope = 1}
 
 /-- The directed graph containing exactly the unit-slope edges. -/
-def unitSlopeGraph (G : EdgeGraph V E) (label : E → Label) :
-    EdgeGraph V (UnitSlopeEdge label) where
-  source edge := G.source edge.1
-  target edge := G.target edge.1
+abbrev unitSlopeGraph (G : EdgeGraph V E) (label : E → Label) :
+    EdgeGraph V (UnitSlopeEdge label) :=
+  G.restrictEdges {edge | (label edge).slope = 1}
 
 /-- The shift on a unit-slope edge. -/
 def unitSlopeShift (label : E → Label) (edge : UnitSlopeEdge label) : ℝ :=
