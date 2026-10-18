@@ -109,16 +109,6 @@ theorem hasSCCPotentialAt_iff_exists_isPotential_induce (weight : E → ℝ) (ba
     simp only [φ, dite_eq_left hs, dite_eq_left ht]
     exact hedge
 
-private theorem walkSum_le_of_forall_mem_edges {weight : E → ℝ} {φ : V → ℝ}
-    {start finish : V} (walk : G.Walk start finish)
-    (hedge : ∀ e ∈ walk.edges, φ (G.source e) + weight e ≤ φ (G.target e)) :
-    walkSum weight walk ≤ φ finish - φ start := by
-  have h := (translationTransport G weight).walkMap_rel_of_forall_mem_edges (family := φ)
-    (R := fun _ => (· ≤ ·)) (fun _ => le_rfl) (fun _ => le_trans) walk
-    (fun edge _ _ _ hxy => monotone_edgeMap_translationTransport weight edge hxy) hedge
-  rw [walkMap_translationTransport] at h
-  linarith
-
 /-- **Componentwise decomposition of lax feasibility.**  Over finitely many edges a
 potential exists exactly when every strongly connected component carries a vertex
 function satisfying the increment inequalities on the edges of that component.
@@ -137,7 +127,7 @@ theorem exists_isPotential_iff_hasSCCPotentials [Finite E] (weight : E → ℝ) 
       hφ e
         (mem_sccSet_toSCC_iff_linkedTo.mp (source_mem_sccSet_of_mem_edges cycle hmem))
         (mem_sccSet_toSCC_iff_linkedTo.mp (target_mem_sccSet_of_mem_edges cycle hmem))
-    simpa using walkSum_le_of_forall_mem_edges cycle hedge
+    simpa using walkSum_add_le_of_forall_mem_edges cycle hedge
 
 /-- **Condensation decomposition of lax feasibility.**  Over finitely many edges a
 potential for a weighted digraph exists exactly when the induced subgraph of every

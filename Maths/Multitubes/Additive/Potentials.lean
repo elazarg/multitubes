@@ -81,8 +81,9 @@ component in question reaches the whole graph.
 - `Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos` - the
   duality, for finitely many edges, an arbitrary vertex type and ordered
   additive commutative monoid with cancellation of weights
-- `Maths.MaxPlusPotential.IsPotential.walkSum_add_le` - the additive-monoid
-  walk propagation inequality
+- `Maths.MaxPlusPotential.walkSum_add_le_of_forall_mem_edges` and
+  `Maths.MaxPlusPotential.IsPotential.walkSum_add_le` - the additive-monoid
+  walk propagation inequality, from the edge inequality on one walk's edges
 - `Maths.MaxPlusPotential.isGreatest_incomingWeights` - with no positive closed
   walk, `maxIncomingWeight` is the greatest weight of a walk arriving at a vertex
 - `Maths.MaxPlusPotential.isLeast_nonnegativePotentials` - the same envelope is
@@ -240,14 +241,24 @@ section OrderedMonoid
 
 variable {𝕜o : Type*} [AddCommMonoid 𝕜o] [Preorder 𝕜o] [IsOrderedAddMonoid 𝕜o]
 
+/-- A vertex function satisfying the edge inequality of a potential on the edges of one walk
+bounds that walk after adding the value at its starting vertex: walk propagation of the lax
+section along the translation transport, needed only on the edges the walk traverses. -/
+theorem walkSum_add_le_of_forall_mem_edges {weight : E → 𝕜o} {φ : V → 𝕜o} {start finish : V}
+    (walk : G.Walk start finish)
+    (hedge : ∀ e ∈ walk.edges, φ (G.source e) + weight e ≤ φ (G.target e)) :
+    walkSum weight walk + φ start ≤ φ finish := by
+  have h := (translationTransport G weight).walkMap_rel_of_forall_mem_edges (family := φ)
+    (R := fun _ => (· ≤ ·)) (fun _ => le_rfl) (fun _ => le_trans) walk
+    (fun edge _ _ _ hxy => monotone_edgeMap_translationTransport weight edge hxy) hedge
+  rwa [walkMap_translationTransport, add_comm] at h
+
 /-- A potential bounds a walk after adding the value at its starting vertex: walk propagation
 of the lax section along the translation transport. -/
 theorem IsPotential.walkSum_add_le {weight : E → 𝕜o} {φ : V → 𝕜o}
     (hφ : IsPotential G weight φ) {start finish : V} (walk : G.Walk start finish) :
-    walkSum weight walk + φ start ≤ φ finish := by
-  have h := Transport.IsLaxSection.walkMap_le
-    (monotone_edgeMap_translationTransport weight) hφ walk
-  rwa [walkMap_translationTransport, add_comm] at h
+    walkSum weight walk + φ start ≤ φ finish :=
+  walkSum_add_le_of_forall_mem_edges walk fun e _ => hφ e
 
 /-- A potential dominates the weight of every walk between its endpoints. -/
 theorem IsPotential.walkSum_le {𝕜g : Type*} [AddCommGroup 𝕜g] [Preorder 𝕜g]
