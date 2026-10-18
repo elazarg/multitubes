@@ -11,7 +11,6 @@ public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Basic.Real.Basic
 public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.PiProd
 
-import Maths.LinearProgramming.FourierMotzkin
 import Mathlib.Algebra.BigOperators.Pi
 import Mathlib.Analysis.Convex.KreinMilman
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
@@ -27,21 +26,14 @@ A *standard-form* polyhedron is the nonnegative affine fiber
 ordered field. This file develops the basic theory of such polyhedra and of linear
 optimization over them.
 
-Almost everything here - the fiber itself, its convexity, Farkas' lemma, and the identification
-of the extreme points with the basic feasible solutions - is proved over an arbitrary linearly
-ordered field `𝕜`, with the certificate direction of Farkas coming from the theorem of the
-alternative in `Maths.LinearProgramming.FourierMotzkin`. Only the three results that
-genuinely use topology are stated over `ℝ`: closedness of the fiber, the continuous functional
-`finiteDotContinuousLinearMap`, and attainment of an optimum at an extreme point, which goes
-through Krein–Milman.
+Almost everything here - the fiber itself, its convexity, and the identification of the extreme
+points with the basic feasible solutions - is proved over an arbitrary linearly ordered field
+`𝕜`. Only the three results that genuinely use topology are stated over `ℝ`: closedness of the
+fiber, the continuous functional `finiteDotContinuousLinearMap`, and attainment of an optimum at
+an extreme point, which goes through Krein–Milman. Farkas' lemma for the fiber and the duality
+theory of linear optimization over it are in `Maths.LinearProgramming.Duality`.
 
-Three things are proved.
-
-*Farkas' lemma in standard form.* Exactly one of `{z | 0 ≤ z ∧ A *ᵥ z = rhs}` and
-`{y | 0 ≤ Aᵀ *ᵥ y ∧ ⟪y, rhs⟫ < 0}` is nonempty. The certificate direction is obtained from
-the inequality-form theorem of the alternative in
-`Maths.LinearProgramming.FourierMotzkin`, applied to the dual system in the free
-variable `y`, whose Farkas certificate is exactly a scaled primal feasible point.
+Two things are proved.
 
 *Basic feasible solutions.* A feasible point is an extreme point of the fiber exactly when the
 columns carrying its positive support are linearly independent. Consequently the support of an
@@ -70,9 +62,6 @@ arguments in `Maths.FiniteInequality` and `Maths.Multitubes.MaxAffine` consume.
 * `Maths.LinearProgramming.mem_standardFeasibleSet`: the membership criterion.
 * `Maths.LinearProgramming.isClosed_standardFeasibleSet`: a standard-form fiber is
   closed.
-* `Maths.LinearProgramming.nonempty_standardFeasibleSet_iff`,
-  `Maths.LinearProgramming.not_nonempty_standardFeasibleSet_iff`: **Farkas' lemma** in
-  standard form, as an alternative between the fiber and the dual certificate set.
 * `Maths.LinearProgramming.linearIndependent_supportColumns_of_extreme_standardFeasible`,
   `Maths.LinearProgramming.mem_extremePoints_standardFeasibleSet_of_linearIndependent`,
   `Maths.LinearProgramming.mem_extremePoints_standardFeasibleSet_iff`: extreme points
@@ -89,7 +78,7 @@ arguments in `Maths.FiniteInequality` and `Maths.Multitubes.MaxAffine` consume.
 
 ## Tags
 
-linear programming, standard form, polyhedron, Farkas lemma, basic feasible solution,
+linear programming, standard form, polyhedron, basic feasible solution,
 extreme point, Krein-Milman
 -/
 
@@ -174,122 +163,6 @@ theorem isClosed_standardFeasibleSet
       rw [hrow]
       exact continuous_finsetSum _ fun j _ => continuous_const.mul (continuous_apply j)
     exact isClosed_eq hcont continuous_const
-
-/-! ### Farkas' lemma in standard form
-
-The dual object to a standard-form fiber is a vector `y` on the rows with `Aᵀ *ᵥ y` nonnegative
-and `⟪y, rhs⟫` negative: pairing such a `y` with a feasible `z` would give
-`0 ≤ ⟪Aᵀ y, z⟫ = ⟪y, A z⟫ = ⟪y, rhs⟫ < 0`. Farkas' lemma says this obvious obstruction is the
-only one. -/
-
-/-- A dual certificate of infeasibility of the standard-form system `0 ≤ z`, `A *ᵥ z = rhs`:
-a row vector that is nonnegative against every column of `A` but pairs negatively with the
-right-hand side. -/
-def IsStandardCertificate
-    {Row Col : Type*} [Fintype Row]
-    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (y : Row → 𝕜) : Prop :=
-  (∀ j, 0 ≤ ∑ i, y i * A i j) ∧ ∑ i, y i * rhs i < 0
-
-/-- A standard-form fiber and a dual certificate cannot both exist: evaluating the certificate
-on a feasible point gives `0 ≤ ⟪y, rhs⟫ < 0`. -/
-theorem not_isStandardCertificate_of_mem_standardFeasibleSet
-    {Row Col : Type*} [Fintype Row] [Fintype Col]
-    {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {z : Col → 𝕜} {y : Row → 𝕜}
-    (hz : z ∈ standardFeasibleSet A rhs) : ¬ IsStandardCertificate A rhs y := by
-  rintro ⟨hy, hneg⟩
-  have hr (i : Row) : rhs i = ∑ j, A i j * z j := by
-    rw [← mulVec_apply_of_mem_standardFeasibleSet hz i]
-    simp [Matrix.mulVec, dotProduct]
-  have hpair : ∑ i, y i * rhs i = ∑ j, (∑ i, y i * A i j) * z j := by
-    simp only [hr, Finset.mul_sum, Finset.sum_mul, mul_assoc]
-    rw [Finset.sum_comm]
-  rw [hpair] at hneg
-  exact absurd hneg (not_lt.mpr (Finset.sum_nonneg fun j _ => mul_nonneg (hy j) (hz.1 j)))
-
-/-- **Farkas' lemma**, standard form, infeasible direction: if the nonnegative affine fiber of
-`A` over `rhs` is empty, a dual certificate exists.
-
-The proof applies the inequality-form theorem of the alternative
-(`Maths.LinearProgramming.theorem_of_alternative`) to the dual system
-`Aᵀ *ᵥ y ≥ 0`, `-⟪y, rhs⟫ ≥ 1` in the free variable `y`. A Farkas certificate of *that* system
-is a nonnegative vector on `Col ⊕ Unit` whose `Col` part solves `A *ᵥ z = t • rhs` with
-`0 < t`; dividing by `t` produces a point of the fiber. -/
-theorem exists_isStandardCertificate_of_not_nonempty
-    {Row Col : Type*} [Fintype Row] [Fintype Col]
-    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜)
-    (hempty : ¬ (standardFeasibleSet A rhs).Nonempty) :
-    ∃ y : Row → 𝕜, IsStandardCertificate A rhs y := by
-  classical
-  by_contra hnocert
-  push Not at hnocert
-  -- The dual system, transported to the variable index `Fin (card Row)`.
-  set e : Row ≃ Fin (Fintype.card Row) := Fintype.equivFin Row with he
-  set M : (Col ⊕ Unit) → Fin (Fintype.card Row) → 𝕜 :=
-    Sum.elim (fun j k => A (e.symm k) j) (fun _ k => -rhs (e.symm k)) with hM
-  set bvec : (Col ⊕ Unit) → 𝕜 := Sum.elim (fun _ => 0) (fun _ => 1) with hb
-  -- It is infeasible, since a solution would be a dual certificate.
-  have hinfeasible : ¬ IsFeasible M bvec := by
-    rintro ⟨x, hx⟩
-    refine absurd ⟨fun j => ?_, ?_⟩ (hnocert fun i => x (e i))
-    · have hxj := hx (Sum.inl j)
-      simp only [hb, hM, Sum.elim_inl, rowEval] at hxj
-      have hEq : ∑ i, x (e i) * A i j = ∑ k, A (e.symm k) j * x k :=
-        Fintype.sum_equiv e _ _ fun i => by rw [Equiv.symm_apply_apply]; ring
-      rw [hEq]
-      exact hxj
-    · have hxu := hx (Sum.inr ())
-      simp only [hb, hM, Sum.elim_inr, rowEval] at hxu
-      have hEq : ∑ i, x (e i) * rhs i = -∑ k, -rhs (e.symm k) * x k := by
-        rw [← Finset.sum_neg_distrib]
-        exact Fintype.sum_equiv e _ _ fun i => by rw [Equiv.symm_apply_apply]; ring
-      rw [hEq]
-      linarith
-  -- So it has a Farkas certificate, whose `Col` part is a scaled point of the fiber.
-  obtain ⟨u, hu_nonneg, hu_zero, hu_pos⟩ := (theorem_of_alternative M bvec).mp hinfeasible
-  set t : 𝕜 := u (Sum.inr ()) with ht
-  have htpos : 0 < t := by
-    have hval : ∑ i, u i * bvec i = t := by
-      rw [Fintype.sum_sum_type, hb, ht]
-      simp
-    rwa [hval] at hu_pos
-  have hrow (i : Row) : (A *ᵥ fun j => u (Sum.inl j)) i = t * rhs i := by
-    have hk := hu_zero (e i)
-    rw [Fintype.sum_sum_type] at hk
-    simp only [hM, Sum.elim_inl, Sum.elim_inr, Equiv.symm_apply_apply] at hk
-    have hunit : ∑ _b : Unit, u (Sum.inr ()) * -rhs i = t * -rhs i := by
-      rw [ht]
-      simp
-    rw [hunit, mul_neg] at hk
-    have hcol : ∑ j, u (Sum.inl j) * A i j = t * rhs i := by linarith
-    rw [← hcol]
-    simp only [Matrix.mulVec, dotProduct]
-    exact Finset.sum_congr rfl fun j _ => mul_comm _ _
-  refine hempty ⟨fun j => u (Sum.inl j) / t, fun j => div_nonneg (hu_nonneg _) htpos.le, ?_⟩
-  funext i
-  have hsmul : (fun j => u (Sum.inl j) / t) = t⁻¹ • fun j => u (Sum.inl j) := by
-    funext j
-    simp [div_eq_inv_mul]
-  rw [hsmul, Matrix.mulVec_smul, Pi.smul_apply, smul_eq_mul, hrow i, ← mul_assoc,
-    inv_mul_cancel₀ htpos.ne', one_mul]
-
-/-- **Farkas' lemma**, standard form: the nonnegative affine fiber `{z | 0 ≤ z ∧ A *ᵥ z = rhs}`
-is empty exactly when a dual certificate `y` exists, with `Aᵀ *ᵥ y` nonnegative and
-`⟪y, rhs⟫` negative. -/
-theorem not_nonempty_standardFeasibleSet_iff
-    {Row Col : Type*} [Fintype Row] [Fintype Col]
-    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) :
-    ¬ (standardFeasibleSet A rhs).Nonempty ↔ ∃ y : Row → 𝕜, IsStandardCertificate A rhs y :=
-  ⟨exists_isStandardCertificate_of_not_nonempty A rhs, by
-    rintro ⟨y, hy⟩ ⟨z, hz⟩
-    exact not_isStandardCertificate_of_mem_standardFeasibleSet hz hy⟩
-
-/-- **Farkas' lemma**, standard form, stated positively: the fiber is nonempty exactly when no
-dual certificate exists. -/
-theorem nonempty_standardFeasibleSet_iff
-    {Row Col : Type*} [Fintype Row] [Fintype Col]
-    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) :
-    (standardFeasibleSet A rhs).Nonempty ↔ ¬ ∃ y : Row → 𝕜, IsStandardCertificate A rhs y := by
-  rw [← not_nonempty_standardFeasibleSet_iff, not_not]
 
 /-! ### Linear objectives and standard-form optima -/
 

@@ -20,8 +20,8 @@ import Mathlib.Tactic.Ring
 
 The standard-form linear program is `max ⟪c, z⟫` over the nonnegative affine fiber
 `0 ≤ z`, `A *ᵥ z = rhs`; its dual is `min ⟪rhs, y⟫` over the free vectors `y` on the rows
-with `Aᵀ *ᵥ y ≥ c`. This file proves weak duality, strong duality, dual attainment and
-complementary slackness for that pair.
+with `Aᵀ *ᵥ y ≥ c`. This file proves weak duality, Farkas' lemma, strong duality, dual
+attainment and complementary slackness for that pair.
 
 Following the pattern of `Maths.Multitubes.MaxAffine.Duality` and
 `Maths.FiniteInequality.worstResidualAtMost_iff_normalizedDual_le`, strong duality
@@ -48,6 +48,8 @@ linearly ordered field.
 ## Main definitions
 
 * `Maths.LinearProgramming.IsDualFeasible`: dual feasibility of `Aᵀ *ᵥ y ≥ c`.
+* `Maths.LinearProgramming.IsStandardCertificate`: a Farkas certificate of infeasibility of
+  the standard-form fiber.
 * `Maths.LinearProgramming.ComplementarySlackness`: the complementary slackness
   relation between a primal and a dual vector.
 
@@ -56,6 +58,10 @@ linearly ordered field.
 * `Maths.LinearProgramming.objective_le_of_isDualFeasible`: **weak duality**.
 * `Maths.LinearProgramming.exists_scaledDual_of_not_exists_objective_ge`: an
   unreachable level is witnessed by a scaled dual vector.
+* `Maths.LinearProgramming.nonempty_standardFeasibleSet_iff`,
+  `Maths.LinearProgramming.not_nonempty_standardFeasibleSet_iff`: **Farkas' lemma** in
+  standard form, as an alternative between the fiber and the dual certificate set; it is the
+  scaled dual at the zero objective.
 * `Maths.LinearProgramming.exists_objective_ge_iff_feasible_and_forall_isDualFeasible`,
   `Maths.LinearProgramming.exists_objective_ge_iff_forall_isDualFeasible`: **strong
   duality**, as a threshold equivalence.
@@ -219,6 +225,63 @@ theorem exists_scaledDual_of_not_exists_objective_ge
     rw [hsub]
     linarith
 
+/-! ### Farkas' lemma in standard form
+
+The dual object to a standard-form fiber is a vector `y` on the rows with `Aᵀ *ᵥ y` nonnegative
+and `⟪y, rhs⟫` negative: pairing such a `y` with a feasible `z` would give
+`0 ≤ ⟪Aᵀ y, z⟫ = ⟪y, A z⟫ = ⟪y, rhs⟫ < 0`. Farkas' lemma says this obvious obstruction is the
+only one; it is the scaled dual at the zero objective and level `0`. -/
+
+/-- A dual certificate of infeasibility of the standard-form system `0 ≤ z`, `A *ᵥ z = rhs`:
+a row vector that is nonnegative against every column of `A` but pairs negatively with the
+right-hand side. -/
+def IsStandardCertificate
+    {Row Col : Type*} [Fintype Row]
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) (y : Row → 𝕜) : Prop :=
+  (∀ j, 0 ≤ ∑ i, y i * A i j) ∧ ∑ i, y i * rhs i < 0
+
+/-- A standard-form fiber and a dual certificate cannot both exist: evaluating the certificate
+on a feasible point gives `0 ≤ ⟪y, rhs⟫ < 0`. -/
+theorem not_isStandardCertificate_of_mem_standardFeasibleSet
+    {Row Col : Type*} [Fintype Row] [Fintype Col]
+    {A : Matrix Row Col 𝕜} {rhs : Row → 𝕜} {z : Col → 𝕜} {y : Row → 𝕜}
+    (hz : z ∈ standardFeasibleSet A rhs) : ¬ IsStandardCertificate A rhs y := by
+  rintro ⟨hy, hneg⟩
+  rw [sum_dual_eq_of_mem_standardFeasibleSet hz y] at hneg
+  exact absurd hneg (not_lt.mpr (Finset.sum_nonneg fun j _ => mul_nonneg (hy j) (hz.1 j)))
+
+/-- **Farkas' lemma**, standard form, infeasible direction: if the nonnegative affine fiber of
+`A` over `rhs` is empty, a dual certificate exists. It is the scaled dual pair of
+`Maths.LinearProgramming.exists_scaledDual_of_not_exists_objective_ge` for the zero objective
+at level `0`, whose multiplier drops out. -/
+theorem exists_isStandardCertificate_of_not_nonempty
+    {Row Col : Type*} [Fintype Row] [Fintype Col]
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜)
+    (hempty : ¬ (standardFeasibleSet A rhs).Nonempty) :
+    ∃ y : Row → 𝕜, IsStandardCertificate A rhs y := by
+  obtain ⟨y, lam, -, hcol, hlt⟩ := exists_scaledDual_of_not_exists_objective_ge A rhs 0 0
+    fun ⟨z, hz, _⟩ => hempty ⟨z, hz⟩
+  exact ⟨y, fun j => by simpa using hcol j, by simpa using hlt⟩
+
+/-- **Farkas' lemma**, standard form: the nonnegative affine fiber `{z | 0 ≤ z ∧ A *ᵥ z = rhs}`
+is empty exactly when a dual certificate `y` exists, with `Aᵀ *ᵥ y` nonnegative and
+`⟪y, rhs⟫` negative. -/
+theorem not_nonempty_standardFeasibleSet_iff
+    {Row Col : Type*} [Fintype Row] [Fintype Col]
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) :
+    ¬ (standardFeasibleSet A rhs).Nonempty ↔ ∃ y : Row → 𝕜, IsStandardCertificate A rhs y :=
+  ⟨exists_isStandardCertificate_of_not_nonempty A rhs, by
+    rintro ⟨y, hy⟩ ⟨z, hz⟩
+    exact not_isStandardCertificate_of_mem_standardFeasibleSet hz hy⟩
+
+/-- **Farkas' lemma**, standard form, stated positively: the fiber is nonempty exactly when no
+dual certificate exists. -/
+theorem nonempty_standardFeasibleSet_iff
+    {Row Col : Type*} [Fintype Row] [Fintype Col]
+    (A : Matrix Row Col 𝕜) (rhs : Row → 𝕜) :
+    (standardFeasibleSet A rhs).Nonempty ↔ ¬ ∃ y : Row → 𝕜, IsStandardCertificate A rhs y := by
+  rw [← not_nonempty_standardFeasibleSet_iff, not_not]
+
 /-! ### Strong duality -/
 
 /-- **Strong duality** in threshold form: a feasible point with objective at least `t` exists
@@ -260,16 +323,9 @@ theorem exists_objective_ge_iff_feasible_and_forall_isDualFeasible
       rw [← mul_assoc, inv_mul_cancel₀ hpos.ne', one_mul] at hstrict
       linarith
     · -- A Farkas certificate of primal infeasibility, contradicting the feasible `z`.
-      have hcol' (j : Col) : 0 ≤ ∑ i, y i * A i j := by
-        have := hcol j
-        rw [← hzero] at this
-        linarith
-      have := sum_dual_eq_of_mem_standardFeasibleSet hz y
-      have hnonneg : 0 ≤ ∑ j, (∑ i, y i * A i j) * z j :=
-        Finset.sum_nonneg fun j _ => mul_nonneg (hcol' j) (hz.1 j)
-      rw [← hzero] at hlt
-      simp only [zero_mul] at hlt
-      linarith
+      subst hzero
+      exact not_isStandardCertificate_of_mem_standardFeasibleSet hz
+        ⟨fun j => by simpa using hcol j, by simpa using hlt⟩
 
 /-- **Strong duality** for a feasible primal: a feasible point with objective at least `t`
 exists exactly when every dual feasible vector has objective at least `t`. -/

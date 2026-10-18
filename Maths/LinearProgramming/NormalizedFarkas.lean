@@ -18,8 +18,9 @@ the value `1`. The result is a standard-form polyhedron in the sense of
 meets every ray of it on which the mass is positive.
 
 This file is only the change of coordinates. Everything proved about the resulting set -
-closedness, Farkas duality, extreme points and their sparsity, attainment of linear optima -
-comes from `Maths.LinearProgramming.StandardForm`, which this file re-exports.
+closedness, extreme points and their sparsity, attainment of linear optima - comes from
+`Maths.LinearProgramming.StandardForm`, which this file re-exports; its Farkas duality is the
+standard-form Farkas lemma of `Maths.LinearProgramming.Duality`.
 
 ## Main definitions
 
