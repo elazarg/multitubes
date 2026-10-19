@@ -103,7 +103,7 @@ theorem exists_positive_normalizedCertificate_of_infeasible
       IsNormalizedCertificate delta coefficient ∧
         0 < certificateValue base coefficient := by
   classical
-  rcases exists_potential_or_nonnegative_incompatibility delta base with
+  rcases exists_potential_or_farkasCertificate delta base with
     hpotential | ⟨coefficient, hnonneg, hbalance, hpositive⟩
   · exact (hinfeasible hpotential).elim
   · have hmassNonneg : 0 ≤ ∑ row, coefficient row :=
@@ -142,7 +142,7 @@ theorem certificateValue_le_of_worstResidualAtMost
   have hrows (row) : base row - level ≤ dotProduct (delta row) potential := by
     have := hpotential row
     linarith
-  have hweak := not_nonnegative_incompatibility_of_potential
+  have hweak := sum_mul_base_nonpos_of_potential
     hrows hcertificate.1 hcertificate.2.2
   rw [weighted_shiftedBase_eq, hcertificate.2.1] at hweak
   linarith
@@ -221,7 +221,7 @@ theorem exists_potential_iff_exists_critical_potential
   · rintro ⟨potential, hpotential⟩
     exact ⟨potential, fun row _ => hpotential row⟩
   · rintro ⟨criticalPotential, hcriticalPotential⟩
-    rcases exists_potential_or_nonnegative_incompatibility delta base with
+    rcases exists_potential_or_farkasCertificate delta base with
       hpotential | ⟨coefficient, hnonneg, hbalance, hpositive⟩
     · exact hpotential
     · have hcertificate : IsBalancedNonnegative delta coefficient :=

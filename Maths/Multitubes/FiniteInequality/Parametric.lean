@@ -50,7 +50,7 @@ theorem isClosed_feasibleParameters [TopologicalSpace Parameter]
     (hbase : ∀ row, Continuous (fun parameter => base parameter row)) :
     IsClosed (feasibleParameters delta base) := by
   classical
-  simp only [feasibleParameters, exists_potential_iff_no_nonnegative_incompatibility,
+  simp only [feasibleParameters, exists_potential_iff_no_farkasCertificate,
     not_exists, not_and, not_lt, Set.ofPred_forall]
   refine isClosed_iInter fun coefficient => isClosed_iInter fun _ =>
     isClosed_iInter fun _ => ?_

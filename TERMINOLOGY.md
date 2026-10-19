@@ -76,7 +76,7 @@ docstring may mention it once as a gloss ("also called …") without adopting it
 | eigenvalue | A `lam` admitting an exact eigenvector. | |
 | maximum cycle mean | The supremum of mean weights of nonempty closed walks; also the max-plus Perron root and the tropical spectral radius. | |
 | critical | Only for the critical graph of a cycle mean (`IsCriticalEdge`, `IsCriticalVertex`). Other uses carry a qualifier: recession-critical rows, gauge-critical edges. | |
-| Farkas certificate | A nonnegative combination certifying infeasibility. | incompatibility, obstruction (as a name for the certificate) |
+| Farkas certificate | A nonnegative combination certifying infeasibility. | incompatibility certificate, obstruction (as a name for the certificate) |
 | theorem of the alternative | A statement that exactly one of a system and its certificate exists. | theorem of alternatives, strong duality |
 | feasible | Said of an inequality system. Equations are *solvable*. | solvable, for inequalities |
 | retention product | The product of retentions over a window (`retentionProd`, `pastRetentionProd`). | transport |

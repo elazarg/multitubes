@@ -37,7 +37,7 @@ finite and `shift e + slope e * φ (source e) ≤ φ (target e)` always -- the
 splitting of `Maths.MaxAffineTransport.Label.apply_le_target_iff`.  Whatever the
 signs of the slopes, this is a finite system of linear inequalities, so
 existence of a lax section is governed by the theorem of the alternative of
-`Maths.exists_potential_iff_no_nonnegative_incompatibility`.
+`Maths.exists_potential_iff_no_farkasCertificate`.
 
 ## Main definitions
 
@@ -63,7 +63,7 @@ existence of a lax section is governed by the theorem of the alternative of
 * `Maths.MaxAffineTransport.not_forall_cycle_prefixed_imp_exists_isLaxSection` --
   the two together: the cyclewise test is not sufficient, even for finitely many
   vertices and edges and nonnegative slopes.
-* `Maths.MaxAffineTransport.exists_isLaxSection_iff_no_nonnegative_certificate` --
+* `Maths.MaxAffineTransport.exists_isLaxSection_iff_no_farkasCertificate'` --
   the general duality: a lax section exists exactly when no nonnegative
   combination of the edge rows is balanced at every vertex with positive total
   bound.
@@ -222,7 +222,7 @@ graph with finitely many vertices and edges, every closed walk has a composite
 label with a pre-fixed point, and there is no lax section.  Under all slopes
 equal to one the implication does hold, by
 `Maths.MaxAffineTransport.exists_isLaxSection_iff_forall_cycle_exists_prefixed`;
-`Maths.MaxAffineTransport.exists_isLaxSection_iff_no_nonnegative_certificate` is
+`Maths.MaxAffineTransport.exists_isLaxSection_iff_no_farkasCertificate'` is
 the criterion that survives mixed slopes. -/
 theorem not_forall_cycle_prefixed_imp_exists_isLaxSection :
     ¬∀ (V E : Type) (_ : Fintype V) (_ : Fintype E) (G : EdgeGraph V E) (label : E → Label),
@@ -340,7 +340,7 @@ theorem isLaxSection_iff_forall_row (G : EdgeGraph V E) (label : E → Label) (�
 exists exactly when the rows of the lax-section system admit no nonnegative
 combination that is balanced at every vertex and has strictly positive total
 bound.  This is
-`Maths.exists_potential_iff_no_nonnegative_incompatibility` at the encoding of
+`Maths.exists_potential_iff_no_farkasCertificate` at the encoding of
 `Maths.MaxAffineTransport.rowDelta` and
 `Maths.MaxAffineTransport.rowBase`, so no sign condition on the slopes and no
 structure on the graph is used.
@@ -359,7 +359,7 @@ Cyclewise certificates alone are not complete, by
 `Maths.MaxAffineTransport.not_forall_cycle_prefixed_imp_exists_isLaxSection`.
 Literature: linear programming duality and Farkas' lemma; generalized network
 flows. -/
-theorem exists_isLaxSection_iff_no_nonnegative_certificate [Fintype E]
+theorem exists_isLaxSection_iff_no_farkasCertificate' [Fintype E]
     (G : EdgeGraph V E) (label : E → Label) :
     (∃ φ : V → ℝ, IsLaxSection G label φ) ↔
       ¬∃ coefficient : E ⊕ E → ℝ,
@@ -367,7 +367,7 @@ theorem exists_isLaxSection_iff_no_nonnegative_certificate [Fintype E]
         (∀ v : V, ∑ action, coefficient action * rowDelta G label action v = 0) ∧
         0 < ∑ action, coefficient action * rowBase label action := by
   rw [exists_congr fun φ => isLaxSection_iff_forall_row G label φ]
-  exact Maths.exists_potential_iff_no_nonnegative_incompatibility
+  exact Maths.exists_potential_iff_no_farkasCertificate
     (rowDelta G label) (rowBase label)
 
 /-- A **Farkas certificate** against the lax-section system of a labelled
@@ -387,7 +387,7 @@ theorem exists_isLaxSection_iff_no_farkasCertificate [Fintype E]
     (∃ φ : V → ℝ, IsLaxSection G label φ) ↔
       ¬∃ coefficient, IsFarkasCertificate G label coefficient := by
   simp only [IsFarkasCertificate]
-  exact exists_isLaxSection_iff_no_nonnegative_certificate G label
+  exact exists_isLaxSection_iff_no_farkasCertificate' G label
 
 /-- The certificate as a produced obstruction: when no lax section exists, a
 certificate does. -/

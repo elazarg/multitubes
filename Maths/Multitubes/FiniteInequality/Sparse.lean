@@ -365,7 +365,7 @@ theorem exists_rankSparse_rationalCertificate_of_real_infeasible
         simpa only [selected, restricted, selectedBase, baseR] using
           sum_supportSubtype realCoefficient baseR]
       exact hpositive
-    have hweak := Maths.not_nonnegative_incompatibility_of_potential
+    have hweak := Maths.sum_mul_base_nonpos_of_potential
       (fun row => by simpa only [dotProduct] using hpotential row)
       hnonnegative hbalance
     linarith

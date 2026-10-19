@@ -44,8 +44,8 @@ at the application boundary.
 
 * `Maths.LinearProgramming.rowEval`: the left-hand side of one row at a point.
 * `Maths.LinearProgramming.IsFeasible`: primal feasibility of `A x ≥ b`.
-* `Maths.LinearProgramming.IsCertificate`,
-  `Maths.LinearProgramming.HasCertificate`: Farkas certificates of infeasibility.
+* `Maths.LinearProgramming.IsFarkasCertificate`,
+  `Maths.LinearProgramming.HasFarkasCertificate`: Farkas certificates of infeasibility.
 * `Maths.LinearProgramming.FMRowIndex`, `Maths.LinearProgramming.fmA`,
   `Maths.LinearProgramming.fmB`: the Fourier-Motzkin reduced system.
 * `Maths.LinearProgramming.liftCoeff`, `Maths.LinearProgramming.liftCert`:
@@ -97,16 +97,16 @@ def IsFeasible {I : Type*} {n : ℕ} [Fintype I] (A : I → Fin n → 𝕜)
 
 /-- `u : I → 𝕜` is a Farkas certificate of infeasibility of `A x ≥ b`: it is nonnegative,
 annihilates every column of `A`, and pairs positively with `b`. -/
-def IsCertificate {I : Type*} {n : ℕ} [Fintype I] (A : I → Fin n → 𝕜)
+def IsFarkasCertificate {I : Type*} {n : ℕ} [Fintype I] (A : I → Fin n → 𝕜)
     (b : I → 𝕜) (u : I → 𝕜) : Prop :=
   (∀ i, 0 ≤ u i) ∧
   (∀ j : Fin n, ∑ i, u i * A i j = 0) ∧
   (0 < ∑ i, u i * b i)
 
 /-- Existence of a Farkas certificate of infeasibility of `A x ≥ b`. -/
-def HasCertificate {I : Type*} {n : ℕ} [Fintype I] (A : I → Fin n → 𝕜)
+def HasFarkasCertificate {I : Type*} {n : ℕ} [Fintype I] (A : I → Fin n → 𝕜)
     (b : I → 𝕜) : Prop :=
-  ∃ u : I → 𝕜, IsCertificate A b u
+  ∃ u : I → 𝕜, IsFarkasCertificate A b u
 
 omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
 /-- Weighting the row evaluations by `u` is evaluating the `u`-weighted row combination. -/
@@ -115,13 +115,13 @@ theorem sum_mul_rowEval {I : Type*} {n : ℕ} [Fintype I]
     ∑ i, u i * rowEval A i x = ∑ j, (∑ i, u i * A i j) * x j :=
   Matrix.dotProduct_mulVec u (Matrix.of A) x
 
-/-! ### Disjointness: `IsFeasible` and `HasCertificate` cannot both hold -/
+/-! ### Disjointness: `IsFeasible` and `HasFarkasCertificate` cannot both hold -/
 
 /-- A feasible system has no Farkas certificate: pairing a certificate `u` with `A x ≥ b`
 gives `⟨u, b⟩ ≤ ⟨u, A x⟩ = ⟨uᵀA, x⟩ = 0 < ⟨u, b⟩`. -/
 theorem feas_cert_disjoint {I : Type*} {n : ℕ} [Fintype I]
     (A : I → Fin n → 𝕜) (b : I → 𝕜)
-    (hfeas : IsFeasible A b) (hcert : HasCertificate A b) : False := by
+    (hfeas : IsFeasible A b) (hcert : HasFarkasCertificate A b) : False := by
   obtain ⟨x, hx⟩ := hfeas
   obtain ⟨u, hu_nn, hu_zero, hu_pos⟩ := hcert
   have hweighted : ∑ i, u i * b i ≤ ∑ i, u i * rowEval A i x := by
@@ -534,7 +534,7 @@ omit [DecidableEq I] in
 /-- **Farkas certificate lift**: if `u'` certifies the reduced system, then `liftCert A u'`
 certifies the original one. -/
 theorem fm_cert_lift (A : I → Fin (n + 1) → 𝕜) (b : I → 𝕜)
-    (hred : HasCertificate (fmA A) (fmB A b)) : HasCertificate A b := by
+    (hred : HasFarkasCertificate (fmA A) (fmB A b)) : HasFarkasCertificate A b := by
   classical
   obtain ⟨u', hu'_nn, hu'_zero, hu'_pos⟩ := hred
   refine ⟨liftCert A u', liftCert_nonneg A hu'_nn, ?_, ?_⟩
@@ -555,7 +555,7 @@ certificate. -/
 /-- The theorem of the alternative for a system with no variables. -/
 private theorem theorem_of_alternative_base
     {I : Type*} [Fintype I] (A : I → Fin 0 → 𝕜) (b : I → 𝕜) :
-    ¬ IsFeasible A b ↔ HasCertificate A b := by
+    ¬ IsFeasible A b ↔ HasFarkasCertificate A b := by
   classical
   refine ⟨?_, fun hcert hfeas => feas_cert_disjoint A b hfeas hcert⟩
   intro hinf
@@ -591,7 +591,7 @@ inductive hypothesis then produces a reduced certificate, which `fm_cert_lift` l
 private theorem theorem_of_alternative_aux :
     ∀ (n : ℕ) {I : Type*} [Fintype I]
       (A : I → Fin n → 𝕜) (b : I → 𝕜),
-      ¬ IsFeasible A b ↔ HasCertificate A b := by
+      ¬ IsFeasible A b ↔ HasFarkasCertificate A b := by
   intro n
   induction n with
   | zero =>
@@ -603,7 +603,7 @@ private theorem theorem_of_alternative_aux :
       intro hinf
       have h_red_inf : ¬ IsFeasible (fmA A) (fmB A b) :=
         fun h => hinf (feasible_of_fm_feasible A b h)
-      have h_red_cert : HasCertificate (fmA A) (fmB A b) :=
+      have h_red_cert : HasFarkasCertificate (fmA A) (fmB A b) :=
         (ih (fmA A) (fmB A b)).mp h_red_inf
       exact fm_cert_lift A b h_red_cert
 
@@ -617,7 +617,7 @@ This combines `feas_cert_disjoint` for disjointness with the existence direction
 Fourier-Motzkin elimination and induction on the number of variables. -/
 theorem theorem_of_alternative {I : Type*} [Fintype I] {n : ℕ}
     (A : I → Fin n → 𝕜) (b : I → 𝕜) :
-    ¬ IsFeasible A b ↔ HasCertificate A b :=
+    ¬ IsFeasible A b ↔ HasFarkasCertificate A b :=
   theorem_of_alternative_aux n A b
 
 /-! ### Gordan's transposition theorem
@@ -662,7 +662,7 @@ theorem exists_rowEval_pos_iff_not_hasBalancedCertificate
     rw [hzero] at hlt
     exact lt_irrefl 0 hlt
   · intro hnocert
-    have hnofarkas : ¬ HasCertificate A (fun _ : I => (1 : 𝕜)) := by
+    have hnofarkas : ¬ HasFarkasCertificate A (fun _ : I => (1 : 𝕜)) := by
       rintro ⟨u, hnonneg, hbalance, hposmass⟩
       refine hnocert ⟨u, hnonneg, hbalance, fun hzero => ?_⟩
       rw [hzero] at hposmass

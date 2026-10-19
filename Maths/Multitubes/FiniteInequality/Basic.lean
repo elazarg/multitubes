@@ -38,12 +38,12 @@ residual inequality.
 
 * `Maths.sum_mul_dotProduct`: weighting the pairings of the row vectors with a potential is
   pairing the weighted row combination with it.
-* `Maths.exists_potential_or_nonnegative_incompatibility`: the theorem of
-  alternatives - either one potential meets every lower bound, or a nonnegative balanced
+* `Maths.exists_potential_or_farkasCertificate`: the theorem of the
+  alternative - either one potential meets every lower bound, or a nonnegative balanced
   dependence among the rows has strictly positive weighted lower bound.
-* `Maths.not_nonnegative_incompatibility_of_potential`: the two alternatives
+* `Maths.sum_mul_base_nonpos_of_potential`: the two alternatives
   exclude each other.
-* `Maths.exists_potential_iff_no_nonnegative_incompatibility`: the two combined as
+* `Maths.exists_potential_iff_no_farkasCertificate`: the two combined as
   an equivalence.  This is the form other files use.
 * `Maths.exists_potential_or_bellmanResidual_obstruction`: under the residual
   hypothesis `base action + level action ≤ 0`, the failing branch additionally yields strictly
@@ -141,7 +141,7 @@ theorem finiteInequality_feasible_iff
 /-- **Finite inequality compatibility alternative.** Either all lower
 bounds are represented by one potential, or a nonnegative dependence among
 the vectors has strictly positive weighted lower bound. -/
-theorem exists_potential_or_nonnegative_incompatibility
+theorem exists_potential_or_farkasCertificate
     [Fintype State] [Fintype Action]
     (delta : Action → State → 𝕜) (base : Action → 𝕜) :
     (∃ potential : State → 𝕜,
@@ -167,9 +167,9 @@ theorem exists_potential_or_nonnegative_incompatibility
     have hcolumn := hbalance (Fintype.equivFin State state)
     simpa [finiteInequalityMatrix] using hcolumn
 
-/-- A feasible potential and a nonnegative incompatibility certificate
-cannot coexist. -/
-theorem not_nonnegative_incompatibility_of_potential
+/-- Against a feasible potential, every nonnegative balanced combination of the rows has
+nonpositive weighted lower bound, so no Farkas certificate exists. -/
+theorem sum_mul_base_nonpos_of_potential
     [Fintype State] [Fintype Action]
     {delta : Action → State → 𝕜} {base : Action → 𝕜}
     {potential : State → 𝕜}
@@ -196,9 +196,8 @@ theorem not_nonnegative_incompatibility_of_potential
           potential state := sum_mul_dotProduct delta coefficient potential
     _ = 0 := by simp [hbalance]
 
-/-- Potential feasibility is equivalent to the absence of a nonnegative
-incompatibility certificate. -/
-theorem exists_potential_iff_no_nonnegative_incompatibility
+/-- Potential feasibility is equivalent to the absence of a Farkas certificate. -/
+theorem exists_potential_iff_no_farkasCertificate
     [Fintype State] [Fintype Action]
     (delta : Action → State → 𝕜) (base : Action → 𝕜) :
     (∃ potential : State → 𝕜,
@@ -213,10 +212,10 @@ theorem exists_potential_iff_no_nonnegative_incompatibility
   · rintro ⟨potential, hpotential⟩
     rintro ⟨coefficient, hnonnegative, hbalance, hpositive⟩
     exact (not_lt_of_ge
-      (not_nonnegative_incompatibility_of_potential
+      (sum_mul_base_nonpos_of_potential
         hpotential hnonnegative hbalance)) hpositive
   · intro hnoCertificate
-    rcases exists_potential_or_nonnegative_incompatibility delta base with
+    rcases exists_potential_or_farkasCertificate delta base with
       hpotential | hcertificate
     · exact hpotential
     · exact False.elim (hnoCertificate hcertificate)
@@ -266,7 +265,7 @@ theorem exists_potential_or_bellmanResidual_obstruction
       ∑ action, coefficient action * level action < 0 ∧
       ∃ action, 0 < coefficient action ∧ 0 < base action) := by
   classical
-  rcases exists_potential_or_nonnegative_incompatibility delta base with
+  rcases exists_potential_or_farkasCertificate delta base with
     hpotential | ⟨coefficient, hnonnegative, hbalance, hbase⟩
   · exact Or.inl hpotential
   · right

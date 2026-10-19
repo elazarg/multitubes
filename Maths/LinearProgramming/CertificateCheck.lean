@@ -34,7 +34,7 @@ not establish the requested conclusion.
 * `Maths.LinearProgramming.checkRationalPoint_eq_true_iff`: the point check is equivalent to
   satisfaction of every row, and hence witnesses primal feasibility.
 * `Maths.LinearProgramming.checkRationalCertificate_eq_true_iff`: the certificate check is
-  equivalent to `Maths.LinearProgramming.IsCertificate`.
+  equivalent to `Maths.LinearProgramming.IsFarkasCertificate`.
 * `Maths.LinearProgramming.realFeasible_of_checkRationalPoint`: a checked rational point also
   supplies a feasible point after extending the system to the reals.
 * `Maths.LinearProgramming.not_realFeasible_of_checkRationalCertificate`: a checked rational
@@ -107,12 +107,12 @@ theorem realFeasible_of_checkRationalPoint {m n : ℕ}
 /-- The executable certificate check succeeds exactly for a Farkas certificate. -/
 theorem checkRationalCertificate_eq_true_iff {m n : ℕ} (A : Fin m → Fin n → ℚ)
     (b : Fin m → ℚ) (u : Fin m → ℚ) :
-    checkRationalCertificate A b u = true ↔ IsCertificate A b u := by
+    checkRationalCertificate A b u = true ↔ IsFarkasCertificate A b u := by
   change decide ((∀ i, 0 ≤ u i) ∧
     (∀ j : Fin n, (List.ofFn fun i => u i * A i j).sum = 0) ∧
     (0 < (List.ofFn fun i => u i * b i).sum)) = true ↔ _
   rw [decide_eq_true_eq]
-  simp only [IsCertificate, Fin.sum_ofFn]
+  simp only [IsFarkasCertificate, Fin.sum_ofFn]
 
 /-- A successful rational certificate check rules out rational primal feasibility. -/
 theorem not_isFeasible_of_checkRationalCertificate {m n : ℕ}
@@ -132,7 +132,7 @@ theorem not_realFeasible_of_checkRationalCertificate {m n : ℕ}
       (fun i j => (A i j : ℝ)) (fun i => (b i : ℝ)) := by
   intro hfeasible
   have hcertificateQ := (checkRationalCertificate_eq_true_iff A b u).mp hcheck
-  have hcertificateR : @IsCertificate ℝ _ _ (Fin m) n _
+  have hcertificateR : @IsFarkasCertificate ℝ _ _ (Fin m) n _
       (fun i j => (A i j : ℝ)) (fun i => (b i : ℝ)) (fun i => (u i : ℝ)) := by
     refine ⟨fun i => Rat.cast_nonneg.mpr (hcertificateQ.1 i), ?_, ?_⟩
     · intro j

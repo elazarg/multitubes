@@ -18,7 +18,7 @@ import Mathlib.Tactic.Ring
 /-!
 # Rational and integral finite-inequality certificates
 
-Fourier--Motzkin elimination over `ℚ` gives rational incompatibility
+Fourier--Motzkin elimination over `ℚ` gives rational Farkas
 certificates for rational finite systems.  For integral data, clearing the
 finitely many coefficient denominators gives an integral certificate.
 
@@ -61,7 +61,7 @@ variable {State : Type uS} {Row : Type uR}
 variable [Fintype State] [Fintype Row]
 
 /-- The finite theorem of the alternative directly over the rational field: the instance `𝕜 = ℚ`
-of `Maths.exists_potential_or_nonnegative_incompatibility`. -/
+of `Maths.exists_potential_or_farkasCertificate`. -/
 theorem exists_rationalPotential_or_rationalCertificate
     (delta : Row → State → ℚ) (base : Row → ℚ) :
     (∃ potential : State → ℚ,
@@ -70,7 +70,7 @@ theorem exists_rationalPotential_or_rationalCertificate
       (∀ row, 0 ≤ coefficient row) ∧
       (∀ state, ∑ row, coefficient row * delta row state = 0) ∧
       0 < ∑ row, coefficient row * base row) :=
-  exists_potential_or_nonnegative_incompatibility delta base
+  exists_potential_or_farkasCertificate delta base
 
 /-- Rational finite inequalities have a rational feasible point whenever they
 have a real feasible point.  Thus extending scalars from `ℚ` to `ℝ` does not
@@ -103,7 +103,7 @@ theorem exists_rationalPotential_iff_exists_realPotential
           (hbalance state)
         simpa only [Rat.cast_sum, Rat.cast_mul, Rat.cast_zero,
           coefficientR] using hcast
-      have hweak := not_nonnegative_incompatibility_of_potential
+      have hweak := sum_mul_base_nonpos_of_potential
         hrealPotential hnonnegR hbalanceR
       have hpositiveR : (0 : ℝ) <
           ∑ row, coefficientR row * (base row : ℝ) := by
