@@ -31,6 +31,7 @@ Multitubes was previously published as `directed-transport`, with its main modul
 | Namespaces `Maths.MaxPlusPotential`, `Maths.MixedAdditiveTransport`, `Maths.CycleCoboundary` | `Maths.AdditiveTransport`, with the same short names |
 | `Maths.finiteInequalityMatrix`, `finiteInequalityMatrix_rowEval`, `finiteInequality_feasible_iff` | `Maths.FiniteInequality.finMatrix`, `rowEval_finMatrix`, `isFeasible_finMatrix_iff` |
 | `Maths.exists_potential_or_bellmanResidual_obstruction` | `Maths.FiniteInequality.exists_potential_or_bellmanResidual_obstruction` |
+| `Maths.IsStronglyConnectedAt G base` and its lemmas | `Maths.EdgeGraph.IsStronglyConnected G`, the base-free form of mathlib's `Quiver.IsStronglyConnected`; `IsStronglyConnectedAt.nonempty_walk` is the definition itself |
 | Module `Maths.Multitubes.Additive.Circuits` | `Maths.Multitubes.Additive.SignedCycles` |
 | `circuit` in the names of `Maths.AdditiveTransport` declarations, as in `circuitCoefficient`, `signedCircuitVector`, `IsGenuineSignedCircuit`, `exists_simpleSignedCircuit_decomposition` | `cycle`: `cycleCoefficient`, `signedCycleVector`, `IsGenuineSignedCycle`, `exists_simpleSignedCycle_decomposition` |
 

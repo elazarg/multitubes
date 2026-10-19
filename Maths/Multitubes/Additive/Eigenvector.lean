@@ -71,13 +71,13 @@ eigenvector equation holds.
 ## Implementation notes
 
 The graph-level results are stated for an arbitrary `Maths.EdgeGraph` and ask
-explicitly for the reachability they use: `∀ vertex, Nonempty (G.Walk base vertex)`, one half of
-`Maths.IsStronglyConnectedAt`.  Only walks *out of* the base occur, so the
-return direction is never needed.  For the matrix reading no reachability hypothesis survives:
-`Maths.AdditiveTransport.matrixGraph` is the complete digraph, since a matrix with
-entries in a field has no `-∞` entries, so it is automatically irreducible.  This is why
-irreducibility, which the classical statement assumes, appears nowhere in the matrix theorems
-below; it is discharged, not dropped.
+explicitly for the reachability they use: `∀ vertex, Nonempty (G.Walk base vertex)`, which is
+`Maths.RootReaches` and is weaker than `Maths.EdgeGraph.IsStronglyConnected`.  Only walks *out
+of* the base occur, so the return direction is never needed.  For the matrix reading no
+reachability hypothesis survives: `Maths.AdditiveTransport.matrixGraph` is the complete
+digraph, since a matrix with entries in a field has no `-∞` entries, so it is automatically
+irreducible.  This is why irreducibility, which the classical statement assumes, appears
+nowhere in the matrix theorems below; it is discharged, not dropped.
 
 `Maths.AdditiveTransport.maxRootedWeight` is total, taking the junk value `0` when no
 walk from the base arrives, in the manner of

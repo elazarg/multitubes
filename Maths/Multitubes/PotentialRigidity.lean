@@ -49,15 +49,15 @@ variable {G : EdgeGraph V E} [Monoid M] {label : E → M}
 
 /-- On a strongly connected graph, global trivial cycle labels are equivalent
 to equality of every pair of parallel walk labels. -/
-theorem hasTrivialCycleLabels_iff_parallelLabels {base : V}
-    (hconnected : IsStronglyConnectedAt G base) :
+theorem hasTrivialCycleLabels_iff_parallelLabels
+    (hconnected : G.IsStronglyConnected) :
     HasTrivialCycleLabels G label ↔
       ∀ {start finish : V} (first second : G.Walk start finish),
         walkLabel label first = walkLabel label second := by
   constructor
   · intro hflat start finish first second
     exact walkLabel_eq_of_trivialCycleLabels_of_return (hflat _) (hflat _) first second
-      (hconnected.nonempty_walk finish start).some
+      (hconnected finish start).some
   · intro hparallel vertex cycle
     simpa using hparallel cycle (.nil : G.Walk vertex vertex)
 
@@ -128,14 +128,15 @@ theorem unitPotential_eq_of_rootReaches_of_eq_base {base : V}
 /-- Flat monoid transport on a strongly connected graph has one and only one
 base-normalized unit potential. -/
 theorem existsUnique_normalizedUnitPotential_of_trivialCycleLabels
-    {base : V} (hconnected : IsStronglyConnectedAt G base)
+    {base : V} (hconnected : G.IsStronglyConnected)
     (hflat : HasTrivialCycleLabels G label) :
     ∃! potential : V → Mˣ, potential base = 1 ∧ IsUnitPotential G label potential := by
   obtain ⟨potential, hpotential⟩ :=
-    exists_unitPotential_of_trivialCycleLabels hconnected.edgeEndpointsLinkedTo hflat
+    exists_unitPotential_of_trivialCycleLabels
+      (hconnected.edgeEndpointsLinkedTo (base := base)) hflat
   refine ⟨fun vertex => potential vertex * (potential base)⁻¹,
     ⟨mul_inv_cancel _, hpotential.mul_const _⟩, fun other hother => ?_⟩
-  exact unitPotential_eq_of_rootReaches_of_eq_base (fun vertex => (hconnected vertex).1)
+  exact unitPotential_eq_of_rootReaches_of_eq_base (fun vertex => (hconnected base vertex))
     hother.2 (hpotential.mul_const _) (hother.1.trans (mul_inv_cancel _).symm)
 
 end Maths

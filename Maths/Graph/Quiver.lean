@@ -8,6 +8,7 @@ module
 public import Maths.Graph.Morphism
 public import Maths.Graph.PathCategory
 public import Mathlib.CategoryTheory.PathCategory.Basic
+public import Mathlib.Combinatorics.Quiver.ConnectedComponent
 
 /-!
 # Edge graphs as quivers
@@ -37,6 +38,8 @@ Morphisms of edge graphs are prefunctors, and their action on walks is `Prefunct
 * `Maths.EdgeGraph.Walk.toPath_append`: concatenation is path composition.
 * `Maths.EdgeGraph.Walk.length_toPath`: the correspondence preserves length.
 * `Maths.EdgeGraph.Walk.toPath_map`: mapping a walk is mapping its path.
+* `Maths.EdgeGraph.isStronglyConnected_iff_quiver`: strong connectivity is mathlib's
+  `Quiver.IsStronglyConnected` of the quiver.
 * `Maths.PathCategory.toPaths_comp_ofPaths` and `Maths.PathCategory.ofPaths_comp_toPaths`: the
   two path categories are isomorphic.
 
@@ -151,6 +154,12 @@ theorem ofPath_comp {source middle target : G.Vertex} (first : Quiver.Path sourc
   | concat edge walk ih => exact congrArg (· + 1) ih
 
 end Walk
+
+/-- Strong connectivity of an edge graph is mathlib's strong connectivity of its quiver. -/
+theorem isStronglyConnected_iff_quiver :
+    G.IsStronglyConnected ↔ Quiver.IsStronglyConnected G.Vertex :=
+  ⟨fun hconnected start finish => (hconnected start.vertex finish.vertex).map Walk.toPath,
+    fun hconnected start finish => (hconnected ⟨start⟩ ⟨finish⟩).map Walk.ofPath⟩
 
 /-- A morphism of edge graphs as a prefunctor of their quivers. -/
 def Hom.toPrefunctor (f : G.Hom H) : G.Vertex ⥤q H.Vertex where

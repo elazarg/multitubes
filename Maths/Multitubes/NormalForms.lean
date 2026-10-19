@@ -100,7 +100,7 @@ variable [Group M]
 one-step extensions are automatic.  Flatness is equivalent to checking the
 path-potential equation on all other edges. -/
 theorem hasTrivialCycleLabels_iff_nonGeneratedEdges {base : V}
-    (hconnected : IsStronglyConnectedAt G base) (walks : ∀ vertex, G.Walk base vertex) :
+    (hconnected : G.IsStronglyConnected) (walks : ∀ vertex, G.Walk base vertex) :
     HasTrivialCycleLabels G label ↔
       ∀ edge : E, ¬IsGeneratedEdge walks edge →
         label edge * walkLabel label (walks (G.source edge)) =

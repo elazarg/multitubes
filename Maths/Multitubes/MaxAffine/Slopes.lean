@@ -604,12 +604,12 @@ theorem exists_expansiveGauge_iff_one_le_cycleProduct
 /-- Under multiplicative flatness and strong connectivity, every edge slope is
 forced to be positive; zero slopes cannot recur with product one. -/
 theorem slope_pos_of_cycleProduct_eq_one_of_stronglyConnected
-    {base : V} (hconnected : IsStronglyConnectedAt G base)
+    (hconnected : G.IsStronglyConnected)
     (hnonneg : ∀ edge, 0 ≤ slope edge)
     (hflat : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
       walkProd slope cycle = 1) (edge : E) :
     0 < slope edge := by
-  let back := (hconnected.nonempty_walk (G.target edge) (G.source edge)).some
+  let back := (hconnected (G.target edge) (G.source edge)).some
   have hcycle := hflat (G.source edge)
     ((EdgeGraph.Walk.singleton (G := G) edge).append back)
   rw [walkProd_append] at hcycle
@@ -632,7 +632,7 @@ theorem slope_pos_of_cycleProduct_eq_one_of_stronglyConnected
 multiplicatively flat nonnegative slopes are exact positive ratios of vertex
 gauges. -/
 theorem exists_slopeGauge_of_cycleProduct_eq_one_of_stronglyConnected
-    {base : V} (hconnected : IsStronglyConnectedAt G base)
+    (hconnected : G.IsStronglyConnected)
     (hnonneg : ∀ edge, 0 ≤ slope edge)
     (hflat : ∀ (vertex : V) (cycle : G.Walk vertex vertex),
       walkProd slope cycle = 1) :
@@ -686,7 +686,7 @@ theorem cycleProduct_eq_one_of_slopeGauge
 nonnegative slopes have unit product around every closed walk exactly when
 they are exact ratios of one positive vertex gauge. -/
 theorem cycleProduct_eq_one_iff_exists_slopeGauge_of_stronglyConnected
-    {base : V} (hconnected : IsStronglyConnectedAt G base)
+    (hconnected : G.IsStronglyConnected)
     (hnonneg : ∀ edge, 0 ≤ slope edge) :
     (∀ (vertex : V) (cycle : G.Walk vertex vertex),
       walkProd slope cycle = 1) ↔

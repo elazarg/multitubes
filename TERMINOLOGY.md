@@ -24,7 +24,7 @@ file maps them to the canonical term and the module that develops it.
 | trail | A walk with pairwise distinct edges. | |
 | return walk | A walk back from the target of a walk, or of an edge, to its start. | return map |
 | base, root | `base`: the base of a closed walk or a basepoint. A root is a base reaching every vertex (`RootReaches`). | |
-| strongly connected | Every vertex reaches every other; `LinkedTo` is mutual reachability of two vertices. | recurrent |
+| strongly connected | Every vertex reaches every other (`EdgeGraph.IsStronglyConnected`, matching mathlib's `Quiver.IsStronglyConnected`); `LinkedTo` is mutual reachability of two vertices. | recurrent |
 | weakly connected | Connected after forgetting edge directions, as for circulation supports. | connected, when the weak sense is meant |
 
 ## Transports

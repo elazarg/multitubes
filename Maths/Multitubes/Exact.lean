@@ -194,20 +194,19 @@ theorem walkMap_eq_of_trivialHolonomy_of_return {start finish : V}
 
 /-- Flat transport on a strongly connected graph is path-independent. -/
 theorem walkMap_eq_of_trivialHolonomy_of_stronglyConnected
-    (hflat : T.HasTrivialHolonomy) {base : V}
-    (hconnected : IsStronglyConnectedAt G base)
+    (hflat : T.HasTrivialHolonomy) (hconnected : G.IsStronglyConnected)
     {start finish : V} (first second : G.Walk start finish) :
     T.walkMap first = T.walkMap second :=
   T.walkMap_eq_of_trivialHolonomy_of_return (hflat start) (hflat finish) first second
-    (hconnected.nonempty_walk finish start).some
+    (hconnected finish start).some
 
 /-- Evaluation at any base has exactly one inverse extension for flat strongly
 connected transport. -/
 theorem existsUnique_section_of_trivialHolonomy_of_stronglyConnected
     (hflat : T.HasTrivialHolonomy) {base : V}
-    (hconnected : IsStronglyConnectedAt G base) (point : Fiber base) :
+    (hconnected : G.IsStronglyConnected) (point : Fiber base) :
     ∃! family, T.IsRootedSection base point family :=
-  (T.hasRootPathIndependence_iff_unique_section (fun vertex ↦ (hconnected vertex).1)).mp
+  (T.hasRootPathIndependence_iff_unique_section (fun vertex ↦ (hconnected base vertex))).mp
     (fun _ first second ↦
       T.walkMap_eq_of_trivialHolonomy_of_stronglyConnected hflat hconnected first second) point
 
@@ -243,12 +242,12 @@ variable {M : Type uM} [Monoid M] {label : E → M}
 graph propagates to every base. -/
 theorem hasTrivialCycleLabels_of_base_of_dedekindFinite
     [IsDedekindFiniteMonoid M] {base : V}
-    (hconnected : IsStronglyConnectedAt G base)
+    (hconnected : G.IsStronglyConnected)
     (hbase : HasTrivialCycleLabelsAt G label base) :
     HasTrivialCycleLabels G label := by
   intro vertex cycle
-  let out := (hconnected vertex).1.some
-  let back := (hconnected vertex).2.some
+  let out := (hconnected base vertex).some
+  let back := (hconnected vertex base).some
   have hbackOut : walkLabel label back * walkLabel label out = 1 := by
     simpa [out, back] using hbase (out.append back)
   have houtBack : walkLabel label out * walkLabel label back = 1 :=

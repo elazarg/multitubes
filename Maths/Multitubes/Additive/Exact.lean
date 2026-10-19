@@ -58,7 +58,7 @@ bounded range.
 
 The walk sum `Maths.walkSum` that this file consumes lives in
 `Maths.Multitubes.Basic`, and the reachability scopes
-`Maths.LinkedTo`, `Maths.IsStronglyConnectedAt`, and
+`Maths.LinkedTo`, `Maths.EdgeGraph.IsStronglyConnected`, and
 `Maths.EdgeEndpointsLinkedTo` live in
 `Maths.EdgeGraph`; both are generic walk calculus.
 
@@ -145,7 +145,7 @@ The converse construction needs the endpoints of every edge to lie on a closed
 walk through a fixed base vertex: a walk out to the endpoint and a walk back.
 In a directed graph neither direction follows from the other.  The scopes
 themselves - `Maths.LinkedTo`,
-`Maths.IsStronglyConnectedAt`, and
+`Maths.EdgeGraph.IsStronglyConnected`, and
 `Maths.EdgeEndpointsLinkedTo` - are walk-existence notions with no
 additive content and live in `Maths.EdgeGraph`. -/
 
@@ -200,13 +200,16 @@ theorem exists_coboundary_of_baseCycleSums_eq_zero {weight : E → A} {base : V}
 data valued in an additive commutative group is a coboundary exactly when every
 closed walk has cycle sum zero.  Also known as Kirchhoff's voltage law, or as
 the Kolmogorov cycle criterion in its multiplicative form. -/
-theorem isCoboundary_iff_hasZeroCycleSums {weight : E → A} {base : V}
-    (hconnected : IsStronglyConnectedAt G base) :
-    IsCoboundary G weight ↔ HasZeroCycleSums G weight :=
-  ⟨fun hweight => hweight.hasZeroCycleSums,
-    fun hzero =>
-      exists_coboundary_of_baseCycleSums_eq_zero
-        hconnected.edgeEndpointsLinkedTo (hzero base)⟩
+theorem isCoboundary_iff_hasZeroCycleSums {weight : E → A}
+    (hconnected : G.IsStronglyConnected) :
+    IsCoboundary G weight ↔ HasZeroCycleSums G weight := by
+  refine ⟨fun hweight => hweight.hasZeroCycleSums, fun hzero => ?_⟩
+  cases isEmpty_or_nonempty V with
+  | inl _ => exact ⟨isEmptyElim, fun edge => isEmptyElim (G.source edge)⟩
+  | inr hV =>
+    obtain ⟨base⟩ := hV
+    exact exists_coboundary_of_baseCycleSums_eq_zero
+      (base := base) hconnected.edgeEndpointsLinkedTo (hzero base)
 
 end Reconstruction
 
@@ -354,8 +357,8 @@ theorem hasZeroCycleSums_iff_hasTrivialHolonomy (G : EdgeGraph V E)
 
 /-- On a strongly connected graph, additive exactness is equivalent to trivial
 holonomy of the translation transport. -/
-theorem isCoboundary_iff_hasTrivialHolonomy {base : V}
-    (hconnected : IsStronglyConnectedAt G base) :
+theorem isCoboundary_iff_hasTrivialHolonomy
+    (hconnected : G.IsStronglyConnected) :
     IsCoboundary G weight ↔ (translationTransport G weight).HasTrivialHolonomy :=
   (isCoboundary_iff_hasZeroCycleSums hconnected).trans
     (hasZeroCycleSums_iff_hasTrivialHolonomy G weight)
@@ -372,8 +375,8 @@ variable {weight : E → ℝ} {start finish : V}
 /-- **Exactness as flatness.**  On a strongly connected graph, real edge data is
 a potential difference exactly when the translation labelling it defines has
 trivial cycle labels, that is, when its gain graph is balanced. -/
-theorem isCoboundary_iff_hasTrivialCycleLabels {base : V}
-    (hconnected : IsStronglyConnectedAt G base) :
+theorem isCoboundary_iff_hasTrivialCycleLabels
+    (hconnected : G.IsStronglyConnected) :
     IsCoboundary G weight ↔
       HasTrivialCycleLabels G (fun edge => Multiplicative.ofAdd (weight edge)) := by
   rw [hasTrivialCycleLabels_ofAdd_iff]

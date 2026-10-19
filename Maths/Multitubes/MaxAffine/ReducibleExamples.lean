@@ -181,9 +181,9 @@ theorem eq_true_of_walk_feedingGraph {finish : Bool}
 
 /-- The feeding graph is not strongly connected at its loop vertex. -/
 theorem not_isStronglyConnectedAt_feedingGraph :
-    ¬IsStronglyConnectedAt feedingGraph false := by
+    ¬feedingGraph.IsStronglyConnected := by
   intro hconnected
-  exact Bool.noConfusion (eq_true_of_walk_feedingGraph (hconnected true).2.some)
+  exact Bool.noConfusion (eq_true_of_walk_feedingGraph (hconnected true false).some)
 
 /-- The relaxation levels of the feeding example are exactly the levels at least `1`. -/
 theorem relaxationLevels_feedingLabel :

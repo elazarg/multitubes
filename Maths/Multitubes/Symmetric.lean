@@ -147,27 +147,27 @@ theorem isSection_ofEquivs_iff (family : ∀ vertex, Fiber vertex) :
 vertex is a bijection from the assignments satisfying every bijective constraint to the
 points fixed by every base holonomy of the symmetric transport. -/
 noncomputable def ofEquivsSectionEquiv {base : V}
-    (hconnected : IsStronglyConnectedAt G.symmetrization base) :
+    (hconnected : G.symmetrization.IsStronglyConnected) :
     {family : ∀ vertex, Fiber vertex // (ofEquivs constraint).IsSection family} ≃
       {point : Fiber base // (ofEquivs constraint).IsHolonomyFixedAt base point} where
   toFun family := ⟨family.1 base, fun cycle => family.2.holonomy_eq cycle⟩
   invFun point :=
     let hunique := existsUnique_section_of_base_fixed_of_injective_returns
-      (fun vertex => (hconnected vertex).1)
-      point.1 point.2 (fun vertex => (hconnected vertex).2.some)
+      (fun vertex => (hconnected base vertex))
+      point.1 point.2 (fun vertex => (hconnected vertex base).some)
       (fun vertex => walkMap_injective (ofEquivs_edgeMap_injective constraint) _)
     ⟨hunique.exists.choose, hunique.exists.choose_spec.1⟩
   left_inv family := by
     have hunique := existsUnique_section_of_base_fixed_of_injective_returns
-      (fun vertex => (hconnected vertex).1)
+      (fun vertex => (hconnected base vertex))
       (family.1 base) (fun cycle => family.2.holonomy_eq cycle)
-      (fun vertex => (hconnected vertex).2.some)
+      (fun vertex => (hconnected vertex base).some)
       (fun vertex => walkMap_injective (ofEquivs_edgeMap_injective constraint) _)
     exact Subtype.ext (hunique.unique hunique.exists.choose_spec ⟨family.2, rfl⟩)
   right_inv point := by
     have hunique := existsUnique_section_of_base_fixed_of_injective_returns
-      (fun vertex => (hconnected vertex).1)
-      point.1 point.2 (fun vertex => (hconnected vertex).2.some)
+      (fun vertex => (hconnected base vertex))
+      point.1 point.2 (fun vertex => (hconnected vertex base).some)
       (fun vertex => walkMap_injective (ofEquivs_edgeMap_injective constraint) _)
     exact Subtype.ext hunique.exists.choose_spec.2
 

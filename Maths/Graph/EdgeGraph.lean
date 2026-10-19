@@ -52,7 +52,7 @@ circulations, and application-specific semantics belong in files that import thi
   directed cycle.
 * `Maths.EdgeGraph.Walk.VertexSplit`: a witness that a walk visits a vertex,
   together with `splice` for inserting a closed walk there.
-* `Maths.RootReaches`, `Maths.LinkedTo`, `Maths.IsStronglyConnectedAt`,
+* `Maths.RootReaches`, `Maths.LinkedTo`, `Maths.EdgeGraph.IsStronglyConnected`,
   `Maths.EdgeEndpointsLinkedTo`, and `Maths.HasEdgeReturns`: walk-existence reachability
   conditions.
 
@@ -916,24 +916,31 @@ vertices lie in a common strongly connected component. -/
 def LinkedTo (G : EdgeGraph V E) (base vertex : V) : Prop :=
   Nonempty (G.Walk base vertex) ∧ Nonempty (G.Walk vertex base)
 
-/-- Every vertex is linked to `base`: the graph is strongly connected. -/
-def IsStronglyConnectedAt (G : EdgeGraph V E) (base : V) : Prop :=
-  ∀ vertex : V, LinkedTo G base vertex
+/-- Every vertex reaches every vertex: the graph is strongly connected.  This is the
+`EdgeGraph` form of mathlib's `Quiver.IsStronglyConnected`. -/
+def EdgeGraph.IsStronglyConnected (G : EdgeGraph V E) : Prop :=
+  ∀ start finish : V, Nonempty (G.Walk start finish)
 
-theorem IsStronglyConnectedAt.nonempty_walk {base : V}
-    (hconnected : IsStronglyConnectedAt G base) (start finish : V) :
-    Nonempty (G.Walk start finish) :=
-  ⟨((hconnected start).2.some).append ((hconnected finish).1.some)⟩
+/-- In a strongly connected graph any two vertices are linked. -/
+theorem EdgeGraph.IsStronglyConnected.linkedTo (hconnected : G.IsStronglyConnected)
+    (base vertex : V) : LinkedTo G base vertex :=
+  ⟨hconnected base vertex, hconnected vertex base⟩
+
+/-- A graph is strongly connected exactly when every vertex is linked to one base vertex. -/
+theorem EdgeGraph.isStronglyConnected_iff_forall_linkedTo (base : V) :
+    G.IsStronglyConnected ↔ ∀ vertex : V, LinkedTo G base vertex :=
+  ⟨fun hconnected => hconnected.linkedTo base, fun hlinked start finish =>
+    ⟨((hlinked start).2.some).append ((hlinked finish).1.some)⟩⟩
 
 /-- The endpoints of every edge are linked to `base`.  This is all the
 reachability the coboundary reconstruction consumes. -/
 def EdgeEndpointsLinkedTo (G : EdgeGraph V E) (base : V) : Prop :=
   ∀ edge : E, LinkedTo G base (G.source edge) ∧ LinkedTo G base (G.target edge)
 
-theorem IsStronglyConnectedAt.edgeEndpointsLinkedTo {base : V}
-    (hconnected : IsStronglyConnectedAt G base) :
-    EdgeEndpointsLinkedTo G base :=
-  fun _ => ⟨hconnected _, hconnected _⟩
+/-- In a strongly connected graph the endpoints of every edge are linked to any base. -/
+theorem EdgeGraph.IsStronglyConnected.edgeEndpointsLinkedTo {base : V}
+    (hconnected : G.IsStronglyConnected) : EdgeEndpointsLinkedTo G base :=
+  fun _ => ⟨hconnected.linkedTo _ _, hconnected.linkedTo _ _⟩
 
 /-- Every vertex is linked to itself by the empty walk. -/
 theorem LinkedTo.refl (vertex : V) : LinkedTo G vertex vertex :=
