@@ -21,6 +21,7 @@ Multitubes was previously published as `directed-transport`, with its main modul
 | `Maths.MaxAffineTransport.Label.HasCyclicSlack` and its lemmas `hasCyclicSlack_*` | `Maths.MaxAffineTransport.Label.IsCyclicRelaxationLevel`, `isCyclicRelaxationLevel_*` |
 | `Maths.MaxAffineTransport.Label.cyclicSlackThreshold`, `expansiveCyclicSlackThreshold` | `cyclicRelaxationThreshold`, `expansiveCyclicRelaxationThreshold` |
 | `Maths.MaxAffineTransport.Label.IsSlackChain` | `Maths.MaxAffineTransport.Label.IsRelaxedChain` |
+| `Maths.MaxAffineTransport.suffixWeight`, `suffixWeightSum`, and their lemmas | `Maths.MaxAffineTransport.suffixSlope`, `suffixSlopeSum`, and their lemmas |
 | Module `Maths.Multitubes.Additive.Circuits` | `Maths.Multitubes.Additive.SignedCycles` |
 | `circuit` in the names of `Maths.AdditiveTransport` declarations, as in `circuitCoefficient`, `signedCircuitVector`, `IsGenuineSignedCircuit`, `exists_simpleSignedCircuit_decomposition` | `cycle`: `cycleCoefficient`, `signedCycleVector`, `IsGenuineSignedCycle`, `exists_simpleSignedCycle_decomposition` |
 

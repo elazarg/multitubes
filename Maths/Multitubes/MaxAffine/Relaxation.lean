@@ -41,6 +41,8 @@ when all floors are absent.
   preserves the path slope and subtracts `level` times the relaxation mass from the shift.
 * `Maths.MaxAffineTransport.Label.one_le_pathRelaxationMass`: a nonempty path
   with nonnegative slopes has relaxation mass at least one.
+* `Maths.MaxAffineTransport.suffixSlopeSum_eq_pathRelaxationMass`: the relaxation mass of the
+  labels along an edge list is its suffix-slope sum.
 * `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_iff_cycleMean_le_of_pathSlope_eq_one`:
   a unit-product cycle attains the threshold `pathShift / pathRelaxationMass`.
 * `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_of_pathSlope_lt_one` and
@@ -651,6 +653,15 @@ theorem isCyclicRelaxationLevel_all_levels_iff_all
     _ ↔ _ := cyclicRelaxationThreshold_eq_bot_iff labels
 
 end Label
+
+/-- The suffix-slope sum of an edge list is the relaxation mass of its labels. -/
+theorem suffixSlopeSum_eq_pathRelaxationMass {E : Type*} (label : E → Label) :
+    ∀ l : List E, suffixSlopeSum label l = Label.pathRelaxationMass (l.map label)
+  | [] => rfl
+  | _ :: rest => by
+    rw [suffixSlopeSum_cons, List.map_cons, Label.pathRelaxationMass_cons,
+      suffixSlopeSum_eq_pathRelaxationMass label rest, slopeProd_eq_pathSlope, add_comm]
+
 end MaxAffineTransport
 
 end

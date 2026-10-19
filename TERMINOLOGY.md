@@ -91,5 +91,4 @@ which the library has always used.
 These identifiers predate the vocabulary above and keep their names until they are renamed.
 
 - `*Cycle*` in declaration names means *closed walk*.
-- `suffixWeight` and `suffixWeightSum` use *weight* for a product of slopes.
 - `MaxAffine/AnchoredEigenvalue.lean` is about eigenvectors from reachable lower bounds.

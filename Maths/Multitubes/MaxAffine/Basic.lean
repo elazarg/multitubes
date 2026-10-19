@@ -91,9 +91,9 @@ of a finite linear program, by `Maths.Multitubes.MaxAffine.LeastEigenvalue`.
   its slope and shift coefficients.
 * `Maths.MaxAffineTransport.toTransport` -- a labelling as a transport on `ℝ`.
 * `Maths.MaxAffineTransport.IsLaxSection`, `defect` -- the lax section of that transport and
-  its edgewise residual.
+  its edgewise defect.
 * `Maths.MaxAffineTransport.walkApply` -- the walk map of that transport.
-* `Maths.MaxAffineTransport.slopeProd`, `suffixWeight`, `suffixWeightSum`,
+* `Maths.MaxAffineTransport.slopeProd`, `suffixSlope`, `suffixSlopeSum`,
   `weightedDefect` -- the survival-weighted accounting along an edge list.
 * `Maths.MaxAffineTransport.cyclicLabel`, `cyclicChain`, `cyclicHolonomy` -- one
   turn of a cyclic max-affine system read as a composite label action.
@@ -106,9 +106,11 @@ of a finite linear program, by `Maths.Multitubes.MaxAffine.LeastEigenvalue`.
 * `Maths.MaxAffineTransport.Label.apply_add_le` -- the one-sided Lipschitz
   estimate `apply f (x + d) ≤ apply f x + slope * d` for `0 ≤ d`.
 * `Maths.MaxAffineTransport.walkApply_le_add_weightedDefect` -- the
-  **weighted-defect telescope**: transport along a walk is bounded by the value
+  **weighted-defect telescope**: the walk map is bounded by the value
   of the candidate at the far end plus the positive parts of the edge defects,
   each weighted by the product of the slopes traversed after it.
+* `Maths.MaxAffineTransport.slopeProd_eq_pathSlope` -- the slope product of an edge list is
+  the path slope of its labels.
 * `Maths.MaxAffineTransport.walkApply_cycle_le` -- a lax section makes
   its value at the base vertex a pre-fixed point of every cycle's composite
   action.
@@ -847,24 +849,29 @@ theorem slopeProd_nonneg {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label
   | [] => zero_le_one
   | e :: rest => mul_nonneg (hslope e) (slopeProd_nonneg hslope rest)
 
-/-- The **suffix weight** at a position of an edge list: the product of the
+/-- The slope product of an edge list is the path slope of its labels. -/
+theorem slopeProd_eq_pathSlope (label : E → Label) (l : List E) :
+    slopeProd label l = Label.pathSlope (l.map label) := by
+  simp [slopeProd, Label.pathSlope, Function.comp_def]
+
+/-- The **suffix slope** at a position of an edge list: the product of the
 slopes of the edges strictly after that position.  This is the abstract form of
 the survival weighting that a later slope applies to an earlier discrepancy. -/
-def suffixWeight (label : E → Label) (l : List E) (i : ℕ) : ℝ :=
+def suffixSlope (label : E → Label) (l : List E) (i : ℕ) : ℝ :=
   slopeProd label (l.drop (i + 1))
 
-/-- The sum of the suffix weights of an edge list. -/
-def suffixWeightSum (label : E → Label) : List E → ℝ
+/-- The sum of the suffix slopes of an edge list. -/
+def suffixSlopeSum (label : E → Label) : List E → ℝ
   | [] => 0
-  | _ :: rest => slopeProd label rest + suffixWeightSum label rest
+  | _ :: rest => slopeProd label rest + suffixSlopeSum label rest
 
-@[simp] theorem suffixWeightSum_nil (label : E → Label) :
-    suffixWeightSum label ([] : List E) = 0 := rfl
+@[simp] theorem suffixSlopeSum_nil (label : E → Label) :
+    suffixSlopeSum label ([] : List E) = 0 := rfl
 
-@[simp] theorem suffixWeightSum_cons (label : E → Label) (e : E) (rest : List E) :
-    suffixWeightSum label (e :: rest) = slopeProd label rest + suffixWeightSum label rest := rfl
+@[simp] theorem suffixSlopeSum_cons (label : E → Label) (e : E) (rest : List E) :
+    suffixSlopeSum label (e :: rest) = slopeProd label rest + suffixSlopeSum label rest := rfl
 
-/-- The suffix-weighted sum of the positive parts of the edge residuals. -/
+/-- The suffix-weighted sum of the positive parts of the edge defects. -/
 def weightedDefect (G : EdgeGraph V E) (label : E → Label) (φ : V → ℝ) : List E → ℝ
   | [] => 0
   | e :: rest =>
@@ -879,49 +886,49 @@ def weightedDefect (G : EdgeGraph V E) (label : E → Label) (φ : V → ℝ) : 
     weightedDefect G label φ (e :: rest)
       = slopeProd label rest * max 0 (defect G label φ e) + weightedDefect G label φ rest := rfl
 
-/-- The sum of the suffix weights is the sum over the positions of the list. -/
-theorem suffixWeightSum_eq_sum (label : E → Label) : ∀ l : List E,
-    suffixWeightSum label l = ∑ i : Fin l.length, suffixWeight label l i
+/-- The sum of the suffix slopes is the sum over the positions of the list. -/
+theorem suffixSlopeSum_eq_sum (label : E → Label) : ∀ l : List E,
+    suffixSlopeSum label l = ∑ i : Fin l.length, suffixSlope label l i
   | [] => by simp
   | e :: rest => by
-      have hsplit : ∑ i : Fin (e :: rest).length, suffixWeight label (e :: rest) i
-          = suffixWeight label (e :: rest) 0
-            + ∑ i : Fin rest.length, suffixWeight label (e :: rest) (i.succ : ℕ) :=
-        Fin.sum_univ_succ fun i : Fin (rest.length + 1) => suffixWeight label (e :: rest) i
-      have htail : ∑ i : Fin rest.length, suffixWeight label (e :: rest) (i.succ : ℕ)
-          = ∑ i : Fin rest.length, suffixWeight label rest i :=
-        Finset.sum_congr rfl fun i _ => by simp [suffixWeight]
-      rw [suffixWeightSum_cons, suffixWeightSum_eq_sum label rest, hsplit, htail]
-      simp [suffixWeight]
+      have hsplit : ∑ i : Fin (e :: rest).length, suffixSlope label (e :: rest) i
+          = suffixSlope label (e :: rest) 0
+            + ∑ i : Fin rest.length, suffixSlope label (e :: rest) (i.succ : ℕ) :=
+        Fin.sum_univ_succ fun i : Fin (rest.length + 1) => suffixSlope label (e :: rest) i
+      have htail : ∑ i : Fin rest.length, suffixSlope label (e :: rest) (i.succ : ℕ)
+          = ∑ i : Fin rest.length, suffixSlope label rest i :=
+        Finset.sum_congr rfl fun i _ => by simp [suffixSlope]
+      rw [suffixSlopeSum_cons, suffixSlopeSum_eq_sum label rest, hsplit, htail]
+      simp [suffixSlope]
 
 /-- **The weighted defect sum is the suffix-weighted sum of the positive parts
 of the edge residuals. -/
 theorem weightedDefect_eq_sum (G : EdgeGraph V E) (label : E → Label) (φ : V → ℝ) :
     ∀ l : List E, weightedDefect G label φ l
-      = ∑ i : Fin l.length, suffixWeight label l i * max 0 (defect G label φ (l.get i))
+      = ∑ i : Fin l.length, suffixSlope label l i * max 0 (defect G label φ (l.get i))
   | [] => by simp
   | e :: rest => by
       have hsplit : ∑ i : Fin (e :: rest).length,
-            suffixWeight label (e :: rest) i * max 0 (defect G label φ ((e :: rest).get i))
-          = suffixWeight label (e :: rest) 0 * max 0 (defect G label φ ((e :: rest).get 0))
-            + ∑ i : Fin rest.length, suffixWeight label (e :: rest) (i.succ : ℕ)
+            suffixSlope label (e :: rest) i * max 0 (defect G label φ ((e :: rest).get i))
+          = suffixSlope label (e :: rest) 0 * max 0 (defect G label φ ((e :: rest).get 0))
+            + ∑ i : Fin rest.length, suffixSlope label (e :: rest) (i.succ : ℕ)
                 * max 0 (defect G label φ ((e :: rest).get i.succ)) :=
         Fin.sum_univ_succ fun i : Fin (rest.length + 1) =>
-          suffixWeight label (e :: rest) i * max 0 (defect G label φ ((e :: rest).get i))
-      have htail : ∑ i : Fin rest.length, suffixWeight label (e :: rest) (i.succ : ℕ)
+          suffixSlope label (e :: rest) i * max 0 (defect G label φ ((e :: rest).get i))
+      have htail : ∑ i : Fin rest.length, suffixSlope label (e :: rest) (i.succ : ℕ)
               * max 0 (defect G label φ ((e :: rest).get i.succ))
           = ∑ i : Fin rest.length,
-              suffixWeight label rest i * max 0 (defect G label φ (rest.get i)) :=
-        Finset.sum_congr rfl fun i _ => by simp [suffixWeight]
+              suffixSlope label rest i * max 0 (defect G label φ (rest.get i)) :=
+        Finset.sum_congr rfl fun i _ => by simp [suffixSlope]
       rw [weightedDefect_cons, weightedDefect_eq_sum G label φ rest, hsplit, htail]
-      simp [suffixWeight]
+      simp [suffixSlope]
 
-theorem suffixWeightSum_append_singleton (label : E → Label) (e : E) : ∀ l : List E,
-    suffixWeightSum label (l ++ [e]) = (label e).slope * suffixWeightSum label l + 1
+theorem suffixSlopeSum_append_singleton (label : E → Label) (e : E) : ∀ l : List E,
+    suffixSlopeSum label (l ++ [e]) = (label e).slope * suffixSlopeSum label l + 1
   | [] => by simp
   | a :: rest => by
-      rw [List.cons_append, suffixWeightSum_cons, suffixWeightSum_append_singleton label e rest,
-        suffixWeightSum_cons, slopeProd_append]
+      rw [List.cons_append, suffixSlopeSum_cons, suffixSlopeSum_append_singleton label e rest,
+        suffixSlopeSum_cons, slopeProd_append]
       simp only [slopeProd_cons, slopeProd_nil]
       ring
 
@@ -935,22 +942,22 @@ theorem weightedDefect_append_singleton (G : EdgeGraph V E) (label : E → Label
       simp only [slopeProd_cons, slopeProd_nil]
       ring
 
-theorem suffixWeightSum_nonneg {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope) :
-    ∀ l : List E, 0 ≤ suffixWeightSum label l
+theorem suffixSlopeSum_nonneg {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope) :
+    ∀ l : List E, 0 ≤ suffixSlopeSum label l
   | [] => le_rfl
   | _ :: rest =>
-      add_nonneg (slopeProd_nonneg hslope rest) (suffixWeightSum_nonneg hslope rest)
+      add_nonneg (slopeProd_nonneg hslope rest) (suffixSlopeSum_nonneg hslope rest)
 
-/-- Nonnegative slopes already make every nonempty suffix-weight sum positive:
-the final edge always has suffix weight one. -/
-theorem suffixWeightSum_pos {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope) :
-    ∀ l : List E, l ≠ [] → 0 < suffixWeightSum label l
+/-- Nonnegative slopes already make every nonempty suffix-slope sum positive:
+the final edge always has suffix slope one. -/
+theorem suffixSlopeSum_pos {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope) :
+    ∀ l : List E, l ≠ [] → 0 < suffixSlopeSum label l
   | [], hne => (hne rfl).elim
   | [_], _ => by simp
   | _ :: next :: rest, _ => by
-      rw [suffixWeightSum_cons]
+      rw [suffixSlopeSum_cons]
       exact add_pos_of_nonneg_of_pos (slopeProd_nonneg hslope _)
-        (suffixWeightSum_pos hslope (next :: rest) (by simp))
+        (suffixSlopeSum_pos hslope (next :: rest) (by simp))
 
 theorem weightedDefect_nonneg {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (φ : V → ℝ) : ∀ l : List E, 0 ≤ weightedDefect G label φ l
@@ -964,12 +971,12 @@ theorem weightedDefect_nonneg {label : E → Label} (hslope : ∀ e : E, 0 ≤ (
       linarith
 
 /-- A uniform strict bound on the positive parts of the residuals caps the
-weighted sum by that bound times the total suffix weight.  Zero slopes are allowed:
-strictness survives because the last suffix weight is one. -/
+weighted sum by that bound times the total suffix slope.  Zero slopes are allowed:
+strictness survives because the last suffix slope is one. -/
 theorem weightedDefect_lt {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (φ : V → ℝ) {c : ℝ} : ∀ l : List E, l ≠ [] →
       (∀ e ∈ l, max 0 (defect G label φ e) < c) →
-      weightedDefect G label φ l < c * suffixWeightSum label l
+      weightedDefect G label φ l < c * suffixSlopeSum label l
   | [], hne, _ => (hne rfl).elim
   | [e], _, hbound => by simpa using hbound e (by simp)
   | e :: a :: rest, _, hbound => by
@@ -980,7 +987,7 @@ theorem weightedDefect_lt {label : E → Label} (hslope : ∀ e : E, 0 ≤ (labe
         mul_le_mul_of_nonneg_left he.le hprod
       have hrec := weightedDefect_lt hslope φ (a :: rest) (by simp)
         fun e' he' => hbound e' (List.mem_cons_of_mem _ he')
-      rw [weightedDefect_cons, suffixWeightSum_cons]
+      rw [weightedDefect_cons, suffixSlopeSum_cons]
       nlinarith
 
 /-! ### The weighted-defect telescope -/
@@ -1026,21 +1033,21 @@ theorem walkApply_cycle_le {label : E → Label} (hslope : ∀ e : E, 0 ≤ (lab
 
 /-- **The quantitative obstruction.**  A closed walk whose composite action
 moves the candidate up by at least `γ > 0` forces one of its edges to fail the
-section inequality by at least `γ` divided by the total suffix weight of the
-walk.  Zero slopes are allowed.  At all slopes `1` the total suffix weight is the length
+section inequality by at least `γ` divided by the total suffix slope of the
+walk.  Zero slopes are allowed.  At all slopes `1` the total suffix slope is the length
 of the walk, and the statement becomes that of `Maths.MaxPlusPotential.exists_edge_defect_ge`. -/
 theorem exists_edge_defect_ge {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (φ : V → ℝ) {base : V} (cycle : G.Walk base base) {γ : ℝ} (hγ : 0 < γ)
     (hcycle : φ base + γ ≤ walkApply label cycle (φ base)) :
-    ∃ e ∈ cycle.edges, γ / suffixWeightSum label cycle.edges ≤ defect G label φ e := by
+    ∃ e ∈ cycle.edges, γ / suffixSlopeSum label cycle.edges ≤ defect G label φ e := by
   have hne : cycle.edges ≠ [] := by
     intro hnil
     rw [walkApply_eq_foldl, hnil, List.foldl_nil] at hcycle
     linarith
-  have hsum : 0 < suffixWeightSum label cycle.edges := suffixWeightSum_pos hslope _ hne
+  have hsum : 0 < suffixSlopeSum label cycle.edges := suffixSlopeSum_pos hslope _ hne
   by_contra hcon
   have hstrict (e : E) (he : e ∈ cycle.edges) :
-      max 0 (defect G label φ e) < γ / suffixWeightSum label cycle.edges := by
+      max 0 (defect G label φ e) < γ / suffixSlopeSum label cycle.edges := by
     refine max_lt (div_pos hγ hsum) ?_
     by_contra hle
     exact hcon ⟨e, he, not_lt.mp hle⟩
