@@ -55,7 +55,7 @@ The concrete example has two heterogeneous state spaces and a noninjective reset
 * `SwitchedHybridControl.radius_feasible_iff` - bounded comparison radii are exactly a finite
   linear-inequality feasibility problem.
 * `SwitchedHybridControl.ErrorComparison.walk_error_le_geometric` - excess over an invariant
-  radius decays along every walk when measured in a contraction gauge.
+  radius decays along every walk when measured in a contractive gauge.
 * `SwitchedHybridControl.weightedExecution_walk_geometric` - the all-walk geometric estimate
   for the affine execution example with expansion gain two.
 * `SwitchedHybridControl.weightedRadius_le_of_isRadiusFamily` - the example radii are pointwise

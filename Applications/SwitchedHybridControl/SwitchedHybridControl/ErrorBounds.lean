@@ -21,7 +21,7 @@ family of radii imply an error bound along every shared execution path.
 
 For finite graphs, lower bounds, upper budgets, and affine edge constraints on
 the radii are represented exactly as a finite linear-inequality system.  Thus
-the general theorem of alternatives supplies certificates for infeasibility of
+the general theorem of the alternative supplies certificates for infeasibility of
 the comparison constraints.  Such a certificate does not assert that the
 physical system itself is unsafe.
 

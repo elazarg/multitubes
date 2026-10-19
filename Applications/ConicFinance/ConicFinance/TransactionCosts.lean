@@ -44,7 +44,7 @@ paths may leave the convex sets even when every individual transaction set is co
   feasibility is net-change membership in the pathwise Minkowski sum.
 * `ConicFinance.TransactionMarket.walkIncrement_append` - serial composition is Minkowski
   addition.
-* `Maths.RelationTransport.walkMap_eq_image_walkRelation` - powerset walk transport is exactly
+* `Maths.RelationTransport.walkMap_eq_image_walkRelation` - the powerset walk map is exactly
   native path feasibility.
 * `ConicFinance.TransactionMarket.convex_walkIncrement` - serial paths preserve convexity.
 * `ConicFinance.alternativeReachable_eq` and

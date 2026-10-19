@@ -1,7 +1,7 @@
 # Applications
 
 This directory records domain perspectives for Multitubes. Each subdirectory describes the
-interpretation a domain can give to its path actions and constraints; domain-specific
+interpretation a domain can give to its walk maps and constraints; domain-specific
 developments may live in a separate project.
 
 The [concept dictionary](CONCEPTS.md) maps abstract constructions to domain terminology,
@@ -72,7 +72,7 @@ Several dossiers contain standalone Lake packages with checked end-to-end exampl
   executions. A gauge with rate below one gives geometric excess decay even with an amplifying
   edge;
   bounded bias changes have an explicit radius margin, and strict contraction of every nonempty
-  cycle gives radius existence. On finite graphs, the contraction gauge criterion only needs
+  cycle gives radius existence. On finite graphs, the contractive gauge criterion only needs
   closed walks of length at most the number of modes. The least-radius construction gives an
   exact upper-budget criterion, and rational witness checks certify radii or infeasibility.
 

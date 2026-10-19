@@ -11,7 +11,7 @@ public import Maths.Multitubes.MaxAffine.RadiusFixedPoint
 /-!
 # Least invariant error radii
 
-A contraction gauge selects a canonical invariant radius above any prescribed lower data.  The
+A contractive gauge selects a canonical invariant radius above any prescribed lower data.  The
 selected radius is pointwise least, so an upper budget is feasible exactly when it contains this
 radius.  This file expresses the reusable max-affine fixed-point construction in the vocabulary
 of affine error comparisons.

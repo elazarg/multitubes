@@ -26,10 +26,10 @@ oplax sections and path closure constructs least attainable families.
 
 ## Main results
 
-* `Maths.RelationTransport.walkMap_eq_image_walkRelation` - powerset walk transport agrees with
+* `Maths.RelationTransport.walkMap_eq_image_walkRelation` - the powerset walk map agrees with
   native relational composition.
 * `Maths.RelationTransport.walkRelation_ofTransport` - the relational extension recovers ordinary
-  walk transport on functions.
+  walk maps on functions.
 * `Maths.RelationTransport.isOplaxSection_singleton_iff` - native compatible assignments are
   singleton-valued oplax sections.
 * `Maths.RelationTransport.IsSection.walkRelation` - local compatibility propagates along every

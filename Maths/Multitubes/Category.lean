@@ -97,7 +97,7 @@ def Transport.toPathFunctor (T : Transport G Fiber) :
     (point : Fiber start.vertex) :
     T.toPathFunctor.map walk point = T.walkMap walk point := rfl
 
-/-- **Walk transport is the extension of the edge maps.**  The path functor of a transport is
+/-- **Walk maps extend the edge maps.**  The path functor of a transport is
 the unique functor out of the path category taking each edge to its edge map. -/
 theorem Transport.toPathFunctor_eq_lift (T : Transport G Fiber) :
     T.toPathFunctor = PathCategory.lift Fiber fun edge => ↾(T.edgeMap edge) :=
