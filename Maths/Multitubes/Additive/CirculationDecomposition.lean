@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.Additive.Circuits
+public import Maths.Multitubes.Additive.SignedCycles
 public import Mathlib.Analysis.Convex.Combination
 
 import Mathlib.Algebra.BigOperators.Field
@@ -14,50 +14,50 @@ import Mathlib.Analysis.LocallyConvex.Separation
 import Mathlib.Data.Set.Finite.List
 
 /-!
-# Literal circuit decomposition for symmetric additive transport
+# Simple-cycle decomposition for symmetric additive transport
 
 A normalized nonnegative circulation on the doubled orientation graph is a
-convex combination of simple directed circuits.  Projecting the two copies of
+convex combination of simple cycles.  Projecting the two copies of
 each edge gives the usual signed circulation with `l1` norm at most one.
 
 The doubled graph has one harmless degeneracy: traversing an edge and
 immediately traversing the reverse copy is a simple two-edge cycle, but its
 projected circulation and objective are zero.  We identify these immediate
 backtracks explicitly.  Distinct antiparallel edge identities remain genuine
-multigraph circuits.
+multigraph cycles.
 
 ## Main definitions
 
 * `Maths.AdditiveTransport.IsUnitSignedCirculation`: the explicit signed-circulation
   polytope - vertex balance together with `l1` mass at most one.
-* `Maths.AdditiveTransport.signedProjection` and `signedCircuitVector`: the
+* `Maths.AdditiveTransport.signedProjection` and `signedCycleVector`: the
   difference of the forward and reverse masses over each original edge, and its value on a
-  doubled-graph circuit.
+  doubled-graph closed walk.
 * `Maths.AdditiveTransport.IsImmediateSignedBacktrack` and
-  `IsGenuineSignedCircuit`: the degenerate circuit traversing one edge identity and then its
-  own reverse copy, and a simple circuit that is not one of those.  Two *distinct* antiparallel
-  edge identities form a genuine circuit, not a backtrack.
+  `IsGenuineSignedCycle`: the degenerate cycle traversing one edge identity and then its
+  own reverse copy, and a simple cycle that is not one of those.  Two *distinct* antiparallel
+  edge identities form a genuine cycle, not a backtrack.
 * `Maths.AdditiveTransport.signedCirculationObjective` and
-  `absoluteSignedCircuitValues`: the objective pairing a circulation with edge data, and the
-  set of absolute genuine-circuit means together with the zero circulation's value.
+  `absoluteSignedCycleValues`: the objective pairing a circulation with edge data, and the
+  set of absolute genuine-cycle means together with the zero circulation's value.
 
 ## Main results
 
-* `Maths.AdditiveTransport.normalizedCertificate_mem_convexHull_simpleSignedCircuits`
-  and `exists_simpleSignedCircuit_decomposition`: every normalized certificate lies in the
-  convex hull of simple circuit certificates, in abstract and explicit finite-sum form.
+* `Maths.AdditiveTransport.normalizedCertificate_mem_convexHull_simpleSignedCycles`
+  and `exists_simpleSignedCycle_decomposition`: every normalized certificate lies in the
+  convex hull of simple-cycle certificates, in abstract and explicit finite-sum form.
 * `Maths.AdditiveTransport.isUnitSignedCirculation_iff_exists_normalizedLift`: the
   concrete balance-and-`l1` conditions are exactly the projections of normalized doubled-graph
   certificates.
-* `Maths.AdditiveTransport.exists_genuineSignedCircuitVector_decomposition`: the
+* `Maths.AdditiveTransport.exists_genuineSignedCycleVector_decomposition`: the
   literal decomposition with backtrack terms erased.  The surviving coefficients are
   nonnegative with total mass at most one - not exactly one, since erasing backtracks discards
-  mass - and every positively weighted cycle is a genuine multigraph circuit.
-* `Maths.AdditiveTransport.unitSignedCirculationObjective_le_iff_genuineCircuitMean_le`:
+  mass - and every positively weighted cycle is a genuine multigraph cycle.
+* `Maths.AdditiveTransport.unitSignedCirculationObjective_le_iff_genuineCycleMean_le`:
   the support function of the polytope is controlled exactly by absolute signed means of
-  genuine circuits.  The separate `0 ≤ level` conjunct is not redundant; it is the value
+  genuine cycles.  The separate `0 ≤ level` conjunct is not redundant; it is the value
   contributed by the zero circulation.
-* `Maths.AdditiveTransport.exists_absoluteSignedCircuitOptimum`: that support
+* `Maths.AdditiveTransport.exists_absoluteSignedCycleOptimum`: that support
   optimum is attained.
 
 The decomposition results above all assume `Nonempty E`, because the canonical lift needs an
@@ -82,24 +82,24 @@ variable {V : Type uV} {E : Type uE}
 def edgeListCoefficient [DecidableEq E] (edges : List E) (edge : E) : ℝ :=
   edges.count edge / edges.length
 
-theorem circuitCoefficient_eq_edgeListCoefficient [DecidableEq E]
+theorem cycleCoefficient_eq_edgeListCoefficient [DecidableEq E]
     {G : EdgeGraph V E} {base : V} (cycle : G.Walk base base) :
-    circuitCoefficient cycle = edgeListCoefficient cycle.edges := by
+    cycleCoefficient cycle = edgeListCoefficient cycle.edges := by
   funext edge
-  simp only [circuitCoefficient, edgeListCoefficient,
+  simp only [cycleCoefficient, edgeListCoefficient,
     cycle.edgeMultiplicity_eq_count, EdgeGraph.Walk.edges_length]
 
-/-- Coefficient vectors of nonempty simple circuits in the doubled graph. -/
-def simpleSignedCircuitCoefficients [DecidableEq E] (G : EdgeGraph V E) :
+/-- Coefficient vectors of nonempty simple cycles in the doubled graph. -/
+def simpleSignedCycleCoefficients [DecidableEq E] (G : EdgeGraph V E) :
     Set (SignedEdge E → ℝ) :=
   {coefficient | ∃ (base : V) (cycle : (signedGraph G).Walk base base),
-    cycle.IsSimpleCycle ∧ circuitCoefficient cycle = coefficient}
+    cycle.IsSimpleCycle ∧ cycleCoefficient cycle = coefficient}
 
 /-- There are only finitely many normalized coefficient vectors of simple
-signed circuits on a finite multigraph. -/
-theorem finite_simpleSignedCircuitCoefficients
+signed cycles on a finite multigraph. -/
+theorem finite_simpleSignedCycleCoefficients
     [Fintype V] [Fintype E] [DecidableEq E] (G : EdgeGraph V E) :
-    (simpleSignedCircuitCoefficients G).Finite := by
+    (simpleSignedCycleCoefficients G).Finite := by
   let boundedLists : Set (List (SignedEdge E)) :=
     {edges | edges.length ≤ Fintype.card V}
   have hfinite : boundedLists.Finite := List.finite_length_le _ _
@@ -108,7 +108,7 @@ theorem finite_simpleSignedCircuitCoefficients
   refine ⟨cycle.edges, ?_, ?_⟩
   · change cycle.edges.length ≤ Fintype.card V
     simpa only [EdgeGraph.Walk.edges_length] using hsimple.length_le_card
-  · exact (circuitCoefficient_eq_edgeListCoefficient cycle).symm
+  · exact (cycleCoefficient_eq_edgeListCoefficient cycle).symm
 
 private theorem continuousLinearMap_eq_certificateValue
     [Fintype E] [DecidableEq E]
@@ -132,19 +132,19 @@ private theorem continuousLinearMap_eq_certificateValue
 
 /-- **Literal normalized-circulation decomposition.**  Every normalized
 nonnegative circulation on the doubled orientation graph belongs to the
-convex hull of its simple-circuit coefficient vectors. -/
-theorem normalizedCertificate_mem_convexHull_simpleSignedCircuits
+convex hull of its simple-cycle coefficient vectors. -/
+theorem normalizedCertificate_mem_convexHull_simpleSignedCycles
     [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E]
     (G : EdgeGraph V E) (coefficient : SignedEdge E → ℝ)
     (hcoefficient :
       FiniteInequality.IsNormalizedCertificate (signedDelta G) coefficient) :
-    coefficient ∈ convexHull ℝ (simpleSignedCircuitCoefficients G) := by
+    coefficient ∈ convexHull ℝ (simpleSignedCycleCoefficients G) := by
   by_contra hnot
-  let circuits := simpleSignedCircuitCoefficients G
-  have hfinite : circuits.Finite := finite_simpleSignedCircuitCoefficients G
-  obtain ⟨functional, level, hcircuit, hcoefficientLevel⟩ :=
+  let simpleCycles := simpleSignedCycleCoefficients G
+  have hfinite : simpleCycles.Finite := finite_simpleSignedCycleCoefficients G
+  obtain ⟨functional, level, hseparate, hcoefficientLevel⟩ :=
     geometric_hahn_banach_closed_point
-      (convex_convexHull ℝ circuits)
+      (convex_convexHull ℝ simpleCycles)
       (hfinite.isClosed_convexHull ℝ) hnot
   let orientedWeight : SignedEdge E → ℝ :=
     fun edge => functional (Pi.single edge 1)
@@ -152,11 +152,11 @@ theorem normalizedCertificate_mem_convexHull_simpleSignedCircuits
       (hcycle : cycle.IsSimpleCycle) :
       walkSum orientedWeight cycle ≤
         cycle.length * level := by
-    have hmem : circuitCoefficient cycle ∈ circuits :=
+    have hmem : cycleCoefficient cycle ∈ simpleCycles :=
       ⟨base, cycle, hcycle, rfl⟩
-    have hstrict := hcircuit _ (subset_convexHull ℝ circuits hmem)
+    have hstrict := hseparate _ (subset_convexHull ℝ simpleCycles hmem)
     rw [continuousLinearMap_eq_certificateValue functional,
-      certificateValue_circuitCoefficient orientedWeight] at hstrict
+      certificateValue_cycleCoefficient orientedWeight] at hstrict
     have hlength : (0 : ℝ) < cycle.length := by
       exact_mod_cast hcycle.1
     simpa only [mul_comm] using ((div_lt_iff₀ hlength).mp hstrict).le
@@ -168,7 +168,7 @@ theorem normalizedCertificate_mem_convexHull_simpleSignedCircuits
 
 /-- An explicit finite convex decomposition of a normalized doubled-graph
 circulation into genuine simple directed cycles. -/
-theorem exists_simpleSignedCircuit_decomposition
+theorem exists_simpleSignedCycle_decomposition
     [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E]
     (G : EdgeGraph V E) (coefficient : SignedEdge E → ℝ)
     (hcoefficient :
@@ -180,9 +180,9 @@ theorem exists_simpleSignedCircuit_decomposition
       (∑ i, convexWeight i) = 1 ∧
       (∀ i, (cycle i).IsSimpleCycle) ∧
       ∀ edge, coefficient edge =
-        ∑ i, convexWeight i * circuitCoefficient (cycle i) edge := by
+        ∑ i, convexWeight i * cycleCoefficient (cycle i) edge := by
   have hmem :=
-    normalizedCertificate_mem_convexHull_simpleSignedCircuits
+    normalizedCertificate_mem_convexHull_simpleSignedCycles
       G coefficient hcoefficient
   rw [mem_convexHull_iff_exists_fintype] at hmem
   obtain ⟨ι, inst, convexWeight, point, hnonneg, hsum, hpoint, hcoefficientSum⟩ :=
@@ -192,7 +192,7 @@ theorem exists_simpleSignedCircuit_decomposition
     fun i => (hpoint i).choose_spec.choose
   have hcycle (i : ι) : (cycle i).IsSimpleCycle :=
     (hpoint i).choose_spec.choose_spec.1
-  have hpointEq (i : ι) : circuitCoefficient (cycle i) = point i :=
+  have hpointEq (i : ι) : cycleCoefficient (cycle i) = point i :=
     (hpoint i).choose_spec.choose_spec.2
   refine ⟨ι, inst, convexWeight, base, cycle, hnonneg, hsum, hcycle, ?_⟩
   intro edge
@@ -358,15 +358,15 @@ theorem isUnitSignedCirculation_iff_exists_normalizedLift
   · rintro ⟨coefficient, hcoefficient, rfl⟩
     exact isUnitSignedCirculation_signedProjection G coefficient hcoefficient
 
-/-! ## Genuine underlying-multigraph circuits -/
+/-! ## Genuine underlying-multigraph cycles -/
 
-/-- Signed incidence of an original edge in a doubled-graph circuit. -/
-def signedCircuitVector [DecidableEq E] {G : EdgeGraph V E} {base : V}
+/-- Signed incidence of an original edge in a doubled-graph closed walk. -/
+def signedCycleVector [DecidableEq E] {G : EdgeGraph V E} {base : V}
     (cycle : (signedGraph G).Walk base base) : E → ℝ :=
-  signedProjection (circuitCoefficient cycle)
+  signedProjection (cycleCoefficient cycle)
 
-/-- The degenerate doubled-graph circuit which traverses one edge identity and
-then its own reverse copy.  A two-edge circuit made from two distinct
+/-- The degenerate doubled-graph closed walk which traverses one edge identity and
+then its own reverse copy.  A two-edge cycle made from two distinct
 antiparallel edge identities does not satisfy this predicate. -/
 def IsImmediateSignedBacktrack {G : EdgeGraph V E} {base : V}
     (cycle : (signedGraph G).Walk base base) : Prop :=
@@ -374,18 +374,18 @@ def IsImmediateSignedBacktrack {G : EdgeGraph V E} {base : V}
     cycle.edges = [(edge, false), (edge, true)] ∨
       cycle.edges = [(edge, true), (edge, false)]
 
-/-- A genuine circuit of the underlying directed multigraph, equipped with a
+/-- A genuine cycle of the underlying directed multigraph, equipped with a
 choice of traversal direction for each edge. -/
-def IsGenuineSignedCircuit {G : EdgeGraph V E} {base : V}
+def IsGenuineSignedCycle {G : EdgeGraph V E} {base : V}
     (cycle : (signedGraph G).Walk base base) : Prop :=
   cycle.IsSimpleCycle ∧ ¬IsImmediateSignedBacktrack cycle
 
 /-- Immediate backtracks carry no signed circulation. -/
-theorem signedCircuitVector_eq_zero_of_immediateBacktrack
+theorem signedCycleVector_eq_zero_of_immediateBacktrack
     [DecidableEq E] {G : EdgeGraph V E} {base : V}
     {cycle : (signedGraph G).Walk base base}
     (hbacktrack : IsImmediateSignedBacktrack cycle) :
-    signedCircuitVector cycle = 0 := by
+    signedCycleVector cycle = 0 := by
   funext candidate
   /- The two orientations of the backtrack run the same argument against their own edge list. -/
   obtain ⟨edge, hedges | hedges⟩ := hbacktrack
@@ -395,7 +395,7 @@ theorem signedCircuitVector_eq_zero_of_immediateBacktrack
       simp
     by_cases hc : candidate = edge
     · subst candidate
-      simp [signedCircuitVector, signedProjection, circuitCoefficient,
+      simp [signedCycleVector, signedProjection, cycleCoefficient,
         cycle.edgeMultiplicity_eq_count, hedges, hlength]
     · have hzero : ∀ orientation : Bool,
           cycle.edgeMultiplicity (candidate, orientation) = 0 := by
@@ -403,33 +403,33 @@ theorem signedCircuitVector_eq_zero_of_immediateBacktrack
         apply Nat.eq_zero_of_not_pos
         rw [cycle.edgeMultiplicity_pos_iff_mem_edges, hedges]
         simp [Prod.ext_iff, hc]
-      simp only [signedCircuitVector, signedProjection, circuitCoefficient, hlength]
+      simp only [signedCycleVector, signedProjection, cycleCoefficient, hlength]
       rw [hzero false, hzero true]
       simp
 
-/-- Every nonempty doubled-graph circuit projects into the concrete signed
+/-- Every nonempty doubled-graph closed walk projects into the concrete signed
 circulation polytope. -/
-theorem isUnitSignedCirculation_signedCircuitVector
+theorem isUnitSignedCirculation_signedCycleVector
     [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E]
     (G : EdgeGraph V E) {base : V}
     (cycle : (signedGraph G).Walk base base) (hne : 0 < cycle.length) :
-    IsUnitSignedCirculation G (signedCircuitVector cycle) :=
+    IsUnitSignedCirculation G (signedCycleVector cycle) :=
   isUnitSignedCirculation_signedProjection G _
-    (circuitCoefficient_isNormalizedCertificate G cycle hne)
+    (cycleCoefficient_isNormalizedCertificate G cycle hne)
 
 /-- The objective pairing between a signed circulation and edge data. -/
 def signedCirculationObjective [Fintype E]
     (weight circulation : E → ℝ) : ℝ :=
   ∑ edge, circulation edge * weight edge
 
-/-- A circuit's signed-circulation objective is its signed mean weight. -/
-theorem signedCirculationObjective_signedCircuitVector
+/-- A closed walk's signed-circulation objective is its signed mean weight. -/
+theorem signedCirculationObjective_signedCycleVector
     [Fintype E] [DecidableEq E] (G : EdgeGraph V E) (weight : E → ℝ)
     {base : V} (cycle : (signedGraph G).Walk base base) :
-    signedCirculationObjective weight (signedCircuitVector cycle) =
+    signedCirculationObjective weight (signedCycleVector cycle) =
       walkSum (signedBase weight) cycle / cycle.length := by
-  rw [← certificateValue_circuitCoefficient (signedBase weight) cycle]
-  simp only [signedCirculationObjective, signedCircuitVector, signedProjection,
+  rw [← certificateValue_cycleCoefficient (signedBase weight) cycle]
+  simp only [signedCirculationObjective, signedCycleVector, signedProjection,
     FiniteInequality.certificateValue, Fintype.sum_prod_type, Fintype.sum_bool,
     signedBase]
   apply Finset.sum_congr rfl
@@ -438,9 +438,9 @@ theorem signedCirculationObjective_signedCircuitVector
 
 /-- **Literal signed-circulation decomposition.**  When the edge type is
 nonempty, every balanced `l1`-unit signed circulation is a convex combination
-of projected simple circuits.  The decomposition may use zero-valued immediate
+of projected simple cycles.  The decomposition may use zero-valued immediate
 backtracks to account for unused `l1` mass. -/
-theorem exists_simpleSignedCircuitVector_decomposition
+theorem exists_simpleSignedCycleVector_decomposition
     [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E] [Nonempty E]
     (G : EdgeGraph V E) (circulation : E → ℝ)
     (hcirculation : IsUnitSignedCirculation G circulation) :
@@ -451,12 +451,12 @@ theorem exists_simpleSignedCircuitVector_decomposition
       (∑ i, convexWeight i) = 1 ∧
       (∀ i, (cycle i).IsSimpleCycle) ∧
       ∀ edge, circulation edge =
-        ∑ i, convexWeight i * signedCircuitVector (cycle i) edge := by
+        ∑ i, convexWeight i * signedCycleVector (cycle i) edge := by
   obtain ⟨coefficient, hcoefficient, hprojection⟩ :=
     (isUnitSignedCirculation_iff_exists_normalizedLift G circulation).mp hcirculation
   obtain ⟨ι, inst, convexWeight, base, cycle, hnonneg, hsum, hsimple,
       hcoefficientSum⟩ :=
-    exists_simpleSignedCircuit_decomposition G coefficient hcoefficient
+    exists_simpleSignedCycle_decomposition G coefficient hcoefficient
   refine ⟨ι, inst, convexWeight, base, cycle, hnonneg, hsum, hsimple, ?_⟩
   intro edge
   have hforward := hcoefficientSum (edge, false)
@@ -464,62 +464,62 @@ theorem exists_simpleSignedCircuitVector_decomposition
   have hproject := congrFun hprojection.symm edge
   simp only [signedProjection] at hproject
   rw [hproject, hforward, hreverse]
-  simp only [signedCircuitVector, signedProjection, ← Finset.sum_sub_distrib]
+  simp only [signedCycleVector, signedProjection, ← Finset.sum_sub_distrib]
   apply Finset.sum_congr rfl
   intro i _
   ring
 
 /-- When the edge type is nonempty, immediate-backtrack terms can be erased.
 The surviving nonnegative coefficients have total mass at most one, and every
-positively weighted cycle is a genuine underlying-multigraph circuit. -/
-theorem exists_genuineSignedCircuitVector_decomposition
+positively weighted cycle is a genuine underlying-multigraph cycle. -/
+theorem exists_genuineSignedCycleVector_decomposition
     [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E] [Nonempty E]
     (G : EdgeGraph V E) (circulation : E → ℝ)
     (hcirculation : IsUnitSignedCirculation G circulation) :
-    ∃ (ι : Type) (_ : Fintype ι) (circuitWeight : ι → ℝ)
+    ∃ (ι : Type) (_ : Fintype ι) (cycleWeight : ι → ℝ)
       (base : ι → V)
       (cycle : ∀ i, (signedGraph G).Walk (base i) (base i)),
-      (∀ i, 0 ≤ circuitWeight i) ∧
-      (∑ i, circuitWeight i) ≤ 1 ∧
-      (∀ i, 0 < circuitWeight i → IsGenuineSignedCircuit (cycle i)) ∧
+      (∀ i, 0 ≤ cycleWeight i) ∧
+      (∑ i, cycleWeight i) ≤ 1 ∧
+      (∀ i, 0 < cycleWeight i → IsGenuineSignedCycle (cycle i)) ∧
       ∀ edge, circulation edge =
-        ∑ i, circuitWeight i * signedCircuitVector (cycle i) edge := by
+        ∑ i, cycleWeight i * signedCycleVector (cycle i) edge := by
   classical
   obtain ⟨ι, inst, convexWeight, base, cycle, hnonneg, hsum, hsimple,
       hcirculationSum⟩ :=
-    exists_simpleSignedCircuitVector_decomposition G circulation hcirculation
-  let circuitWeight : ι → ℝ := fun i =>
+    exists_simpleSignedCycleVector_decomposition G circulation hcirculation
+  let cycleWeight : ι → ℝ := fun i =>
     if IsImmediateSignedBacktrack (cycle i) then 0 else convexWeight i
-  have hcircuitNonneg (i : ι) : 0 ≤ circuitWeight i := by
-    dsimp only [circuitWeight]
+  have hcycleNonneg (i : ι) : 0 ≤ cycleWeight i := by
+    dsimp only [cycleWeight]
     split_ifs
     · exact le_rfl
     · exact hnonneg i
-  have hcircuitLe (i : ι) : circuitWeight i ≤ convexWeight i := by
-    dsimp only [circuitWeight]
+  have hcycleLe (i : ι) : cycleWeight i ≤ convexWeight i := by
+    dsimp only [cycleWeight]
     split_ifs
     · exact hnonneg i
     · exact le_rfl
-  refine ⟨ι, inst, circuitWeight, base, cycle, hcircuitNonneg, ?_, ?_, ?_⟩
+  refine ⟨ι, inst, cycleWeight, base, cycle, hcycleNonneg, ?_, ?_, ?_⟩
   · calc
-      ∑ i, circuitWeight i ≤ ∑ i, convexWeight i :=
-        Finset.sum_le_sum fun i _ => hcircuitLe i
+      ∑ i, cycleWeight i ≤ ∑ i, convexWeight i :=
+        Finset.sum_le_sum fun i _ => hcycleLe i
       _ = 1 := hsum
   · intro i hpositive
     refine ⟨hsimple i, ?_⟩
     intro hbacktrack
-    simp only [circuitWeight, ite_eq_left hbacktrack] at hpositive
+    simp only [cycleWeight, ite_eq_left hbacktrack] at hpositive
     exact (lt_irrefl 0) hpositive
   · intro edge
     rw [hcirculationSum edge]
     apply Finset.sum_congr rfl
     intro i _
     by_cases hbacktrack : IsImmediateSignedBacktrack (cycle i)
-    · rw [signedCircuitVector_eq_zero_of_immediateBacktrack hbacktrack]
-      simp [circuitWeight]
-    · simp [circuitWeight, hbacktrack]
+    · rw [signedCycleVector_eq_zero_of_immediateBacktrack hbacktrack]
+      simp [cycleWeight]
+    · simp [cycleWeight, hbacktrack]
 
-/-! ## Absolute circuit optimum -/
+/-! ## Absolute cycle optimum -/
 
 @[simp] theorem isUnitSignedCirculation_zero
     [Fintype E] [DecidableEq V] (G : EdgeGraph V E) :
@@ -528,11 +528,11 @@ theorem exists_genuineSignedCircuitVector_decomposition
 
 private theorem signedCirculationObjective_eq_sum_of_decomposition
     {ι : Type*} [Fintype E] [Fintype ι] (weight circulation : E → ℝ)
-    (circuitWeight : ι → ℝ) (circuit : ι → E → ℝ)
+    (cycleWeight : ι → ℝ) (vector : ι → E → ℝ)
     (hcirculation : ∀ edge, circulation edge =
-      ∑ i, circuitWeight i * circuit i edge) :
+      ∑ i, cycleWeight i * vector i edge) :
     signedCirculationObjective weight circulation =
-      ∑ i, circuitWeight i * signedCirculationObjective weight (circuit i) := by
+      ∑ i, cycleWeight i * signedCirculationObjective weight (vector i) := by
   simp only [signedCirculationObjective, hcirculation]
   simp_rw [Finset.sum_mul, Finset.mul_sum]
   rw [Finset.sum_comm]
@@ -542,19 +542,19 @@ private theorem signedCirculationObjective_eq_sum_of_decomposition
   intro edge _
   ring
 
-/-- **Absolute-circuit support formula, objective form.**  For a nonempty edge
+/-- **Absolute-cycle support formula, objective form.**  For a nonempty edge
 type, the absolute value of every `l1`-unit signed-circulation objective is at
 most `level` exactly when `level` is nonnegative and the same bound holds on
-genuine circuits. -/
-theorem unitSignedCirculationObjective_le_iff_genuineCircuitObjective_le
+genuine cycles. -/
+theorem unitSignedCirculationObjective_le_iff_genuineCycleObjective_le
     [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E] [Nonempty E]
     (G : EdgeGraph V E) (weight : E → ℝ) (level : ℝ) :
     (∀ circulation : E → ℝ, IsUnitSignedCirculation G circulation →
       |signedCirculationObjective weight circulation| ≤ level) ↔
       0 ≤ level ∧
         ∀ (base : V) (cycle : (signedGraph G).Walk base base),
-          IsGenuineSignedCircuit cycle →
-            |signedCirculationObjective weight (signedCircuitVector cycle)| ≤ level := by
+          IsGenuineSignedCycle cycle →
+            |signedCirculationObjective weight (signedCycleVector cycle)| ≤ level := by
   constructor
   · intro hall
     refine ⟨?_, ?_⟩
@@ -562,55 +562,55 @@ theorem unitSignedCirculationObjective_le_iff_genuineCircuitObjective_le
         hall 0 (isUnitSignedCirculation_zero G)
     · intro base cycle hcycle
       exact hall _
-        (isUnitSignedCirculation_signedCircuitVector G cycle hcycle.1.1)
-  · rintro ⟨hlevel, hcircuit⟩ circulation hcirculation
-    obtain ⟨ι, inst, circuitWeight, base, cycle, hnonneg, hsum, hgenuine,
+        (isUnitSignedCirculation_signedCycleVector G cycle hcycle.1.1)
+  · rintro ⟨hlevel, hgenuineMean⟩ circulation hcirculation
+    obtain ⟨ι, inst, cycleWeight, base, cycle, hnonneg, hsum, hgenuine,
         hdecomposition⟩ :=
-      exists_genuineSignedCircuitVector_decomposition G circulation hcirculation
+      exists_genuineSignedCycleVector_decomposition G circulation hcirculation
     rw [signedCirculationObjective_eq_sum_of_decomposition
-      weight circulation circuitWeight
-      (fun i => signedCircuitVector (cycle i)) hdecomposition]
+      weight circulation cycleWeight
+      (fun i => signedCycleVector (cycle i)) hdecomposition]
     calc
-      |∑ i, circuitWeight i *
-          signedCirculationObjective weight (signedCircuitVector (cycle i))| ≤
-          ∑ i, |circuitWeight i *
-            signedCirculationObjective weight (signedCircuitVector (cycle i))| :=
+      |∑ i, cycleWeight i *
+          signedCirculationObjective weight (signedCycleVector (cycle i))| ≤
+          ∑ i, |cycleWeight i *
+            signedCirculationObjective weight (signedCycleVector (cycle i))| :=
         Finset.abs_sum_le_sum_abs _ _
-      _ ≤ ∑ i, circuitWeight i * level := by
+      _ ≤ ∑ i, cycleWeight i * level := by
         apply Finset.sum_le_sum
         intro i _
-        by_cases hzero : circuitWeight i = 0
+        by_cases hzero : cycleWeight i = 0
         · simp [hzero]
-        · have hpositive : 0 < circuitWeight i :=
+        · have hpositive : 0 < cycleWeight i :=
             lt_of_le_of_ne (hnonneg i) (Ne.symm hzero)
           rw [abs_mul, abs_of_nonneg (hnonneg i)]
           exact mul_le_mul_of_nonneg_left
-            (hcircuit (base i) (cycle i) (hgenuine i hpositive)) (hnonneg i)
-      _ = (∑ i, circuitWeight i) * level := by rw [Finset.sum_mul]
+            (hgenuineMean (base i) (cycle i) (hgenuine i hpositive)) (hnonneg i)
+      _ = (∑ i, cycleWeight i) * level := by rw [Finset.sum_mul]
       _ ≤ 1 * level := mul_le_mul_of_nonneg_right hsum hlevel
       _ = level := one_mul level
 
-/-- **Absolute-circuit support formula, manuscript form.**  For a nonempty
+/-- **Absolute-cycle support formula, level form.**  For a nonempty
 edge type, the support function of balanced signed circulations of `l1` mass
 at most one is controlled exactly by the absolute signed mean of genuine
-underlying-multigraph circuits.  The separate `0 ≤ level` term is the value of
+underlying-multigraph cycles.  The separate `0 ≤ level` term is the value of
 the zero circulation. -/
-theorem unitSignedCirculationObjective_le_iff_genuineCircuitMean_le
+theorem unitSignedCirculationObjective_le_iff_genuineCycleMean_le
     [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E] [Nonempty E]
     (G : EdgeGraph V E) (weight : E → ℝ) (level : ℝ) :
     (∀ circulation : E → ℝ, IsUnitSignedCirculation G circulation →
       |signedCirculationObjective weight circulation| ≤ level) ↔
       0 ≤ level ∧
         ∀ (base : V) (cycle : (signedGraph G).Walk base base),
-          IsGenuineSignedCircuit cycle →
+          IsGenuineSignedCycle cycle →
             |walkSum (signedBase weight) cycle| ≤
               cycle.length * level := by
-  rw [unitSignedCirculationObjective_le_iff_genuineCircuitObjective_le]
+  rw [unitSignedCirculationObjective_le_iff_genuineCycleObjective_le]
   apply and_congr_right'
   constructor
   · intro hnormalized base cycle hgenuine
     have hbound := hnormalized base cycle hgenuine
-    rw [signedCirculationObjective_signedCircuitVector, abs_div,
+    rw [signedCirculationObjective_signedCycleVector, abs_div,
       show |(cycle.length : ℝ)| = cycle.length by
         exact abs_of_nonneg (Nat.cast_nonneg cycle.length)] at hbound
     have hlength : (0 : ℝ) < cycle.length := by
@@ -618,7 +618,7 @@ theorem unitSignedCirculationObjective_le_iff_genuineCircuitMean_le
     simpa only [mul_comm] using (div_le_iff₀ hlength).mp hbound
   · intro hraw base cycle hgenuine
     have hbound := hraw base cycle hgenuine
-    rw [signedCirculationObjective_signedCircuitVector, abs_div,
+    rw [signedCirculationObjective_signedCycleVector, abs_div,
       show |(cycle.length : ℝ)| = cycle.length by
         exact abs_of_nonneg (Nat.cast_nonneg cycle.length)]
     have hlength : (0 : ℝ) < cycle.length := by
@@ -626,55 +626,55 @@ theorem unitSignedCirculationObjective_le_iff_genuineCircuitMean_le
     apply (div_le_iff₀ hlength).mpr
     simpa only [mul_comm] using hbound
 
-/-- Absolute signed means of genuine circuits, together with the zero
+/-- Absolute signed means of genuine cycles, together with the zero
 circulation value. -/
-def absoluteSignedCircuitValues [Fintype E] [DecidableEq E]
+def absoluteSignedCycleValues [Fintype E] [DecidableEq E]
     (G : EdgeGraph V E) (weight : E → ℝ) : Set ℝ :=
   {0} ∪
     {value | ∃ (base : V) (cycle : (signedGraph G).Walk base base),
-      IsGenuineSignedCircuit cycle ∧
-        value = |signedCirculationObjective weight (signedCircuitVector cycle)|}
+      IsGenuineSignedCycle cycle ∧
+        value = |signedCirculationObjective weight (signedCycleVector cycle)|}
 
-/-- The absolute circuit-value set of a finite multigraph is finite. -/
-theorem finite_absoluteSignedCircuitValues
+/-- The absolute cycle-value set of a finite multigraph is finite. -/
+theorem finite_absoluteSignedCycleValues
     [Fintype V] [Fintype E] [DecidableEq E]
     (G : EdgeGraph V E) (weight : E → ℝ) :
-    (absoluteSignedCircuitValues G weight).Finite := by
+    (absoluteSignedCycleValues G weight).Finite := by
   let values : Set ℝ :=
     (fun coefficient =>
       |FiniteInequality.certificateValue (signedBase weight) coefficient|) ''
-        simpleSignedCircuitCoefficients G
+        simpleSignedCycleCoefficients G
   have hvalues : values.Finite :=
-    (finite_simpleSignedCircuitCoefficients G).image _
+    (finite_simpleSignedCycleCoefficients G).image _
   apply Set.Finite.union (Set.finite_singleton 0) hvalues |>.subset
   rintro value (rfl | ⟨base, cycle, hgenuine, rfl⟩)
   · exact Or.inl rfl
   · right
-    refine ⟨circuitCoefficient cycle, ⟨base, cycle, hgenuine.1, rfl⟩, ?_⟩
+    refine ⟨cycleCoefficient cycle, ⟨base, cycle, hgenuine.1, rfl⟩, ?_⟩
     change
       |FiniteInequality.certificateValue (signedBase weight)
-          (circuitCoefficient cycle)| =
-        |signedCirculationObjective weight (signedCircuitVector cycle)|
-    rw [certificateValue_circuitCoefficient (signedBase weight),
-      signedCirculationObjective_signedCircuitVector]
+          (cycleCoefficient cycle)| =
+        |signedCirculationObjective weight (signedCycleVector cycle)|
+    rw [certificateValue_cycleCoefficient (signedBase weight),
+      signedCirculationObjective_signedCycleVector]
 
-/-- **Attained absolute-circuit optimum.**  A finite multigraph with a
-nonempty edge type has a largest absolute genuine-circuit mean after adjoining
+/-- **Attained absolute-cycle optimum.**  A finite multigraph with a
+nonempty edge type has a largest absolute genuine-cycle mean after adjoining
 the zero circulation.  This number is exactly the support-function optimum
 over all balanced signed circulations of `l1` mass at most one. -/
-theorem exists_absoluteSignedCircuitOptimum
+theorem exists_absoluteSignedCycleOptimum
     [Fintype V] [DecidableEq V] [Fintype E] [DecidableEq E] [Nonempty E]
     (G : EdgeGraph V E) (weight : E → ℝ) :
-    ∃ optimum ∈ absoluteSignedCircuitValues G weight,
-      (∀ value ∈ absoluteSignedCircuitValues G weight, value ≤ optimum) ∧
+    ∃ optimum ∈ absoluteSignedCycleValues G weight,
+      (∀ value ∈ absoluteSignedCycleValues G weight, value ≤ optimum) ∧
       (∀ circulation : E → ℝ, IsUnitSignedCirculation G circulation →
         |signedCirculationObjective weight circulation| ≤ optimum) ∧
       ∀ level,
         (∀ circulation : E → ℝ, IsUnitSignedCirculation G circulation →
           |signedCirculationObjective weight circulation| ≤ level) ↔
             optimum ≤ level := by
-  let values := absoluteSignedCircuitValues G weight
-  have hfinite : values.Finite := finite_absoluteSignedCircuitValues G weight
+  let values := absoluteSignedCycleValues G weight
+  have hfinite : values.Finite := finite_absoluteSignedCycleValues G weight
   have hnonempty : values.Nonempty := ⟨0, Or.inl rfl⟩
   obtain ⟨optimum, hoptimumMem, hgreatest⟩ :=
     Set.exists_max_image values id hfinite hnonempty
@@ -682,17 +682,17 @@ theorem exists_absoluteSignedCircuitOptimum
     simpa using hgreatest value hvalue
   have hoptimumNonneg : 0 ≤ optimum :=
     hoptimumGreatest 0 (Or.inl rfl)
-  have hcircuit :
+  have hcycle :
       ∀ (base : V) (cycle : (signedGraph G).Walk base base),
-        IsGenuineSignedCircuit cycle →
-          |signedCirculationObjective weight (signedCircuitVector cycle)| ≤ optimum := by
+        IsGenuineSignedCycle cycle →
+          |signedCirculationObjective weight (signedCycleVector cycle)| ≤ optimum := by
     intro base cycle hgenuine
     exact hoptimumGreatest _ (Or.inr ⟨base, cycle, hgenuine, rfl⟩)
   have hsupport :
       ∀ circulation : E → ℝ, IsUnitSignedCirculation G circulation →
         |signedCirculationObjective weight circulation| ≤ optimum :=
-    (unitSignedCirculationObjective_le_iff_genuineCircuitObjective_le
-      G weight optimum).mpr ⟨hoptimumNonneg, hcircuit⟩
+    (unitSignedCirculationObjective_le_iff_genuineCycleObjective_le
+      G weight optimum).mpr ⟨hoptimumNonneg, hcycle⟩
   refine ⟨optimum, hoptimumMem, hoptimumGreatest, hsupport, ?_⟩
   intro level
   constructor
@@ -701,7 +701,7 @@ theorem exists_absoluteSignedCircuitOptimum
     · simpa [signedCirculationObjective] using
         hall 0 (isUnitSignedCirculation_zero G)
     · exact hall _
-        (isUnitSignedCirculation_signedCircuitVector G cycle hgenuine.1.1)
+        (isUnitSignedCirculation_signedCycleVector G cycle hgenuine.1.1)
   · intro hlevel circulation hcirculation
     exact (hsupport circulation hcirculation).trans hlevel
 

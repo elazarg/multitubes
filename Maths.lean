@@ -72,7 +72,7 @@ public import Maths.Multitubes.FiniteInequality.OptimalCertificate
 
 -- Transport: additive specialization and max-plus spectra
 public import Maths.Multitubes.Additive.Budget
-public import Maths.Multitubes.Additive.Circuits
+public import Maths.Multitubes.Additive.SignedCycles
 public import Maths.Multitubes.Additive.CirculationDecomposition
 public import Maths.Multitubes.Additive.Condensation
 public import Maths.Multitubes.Additive.CriticalGraph

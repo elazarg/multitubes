@@ -10,34 +10,34 @@ public import Maths.Graph.Circulation
 import Mathlib.Algebra.BigOperators.Field
 
 /-!
-# Circuit characterization of symmetric additive transport
+# Signed-cycle characterization of symmetric additive transport
 
 Doubling every edge by its reverse orientation turns the symmetric additive
 residual problem into an ordinary directed residual problem.  Hence its
 normalized signed-circulation dual is equivalent, at every threshold, to
-testing closed walks in the doubled graph, and then to testing simple circuits
+testing closed walks in the doubled graph, and then to testing simple cycles
 alone.
 
 ## Main definitions
 
 * `Maths.AdditiveTransport.signedGraph`: the doubled graph, whose edges are the two
   orientations of each original edge.
-* `Maths.AdditiveTransport.circuitCoefficient`: the normalized edge-multiplicity
-  vector of a circuit in the doubled graph, read as a signed-circulation certificate.
+* `Maths.AdditiveTransport.cycleCoefficient`: the normalized edge-multiplicity
+  vector of a closed walk in the doubled graph, read as a signed-circulation certificate.
 
 ## Main results
 
 * `Maths.AdditiveTransport.symmetricResidualAtMost_iff_signedGraph`: the structural
   step the rest of the file rests on - symmetric residual feasibility on `G` is ordinary
   directed residual feasibility on `signedGraph G`.  It needs no finiteness.
-* `Maths.AdditiveTransport.circuitCoefficient_isNormalizedCertificate`: every
-  nonempty circuit in the doubled graph is a normalized signed-circulation certificate.
+* `Maths.AdditiveTransport.cycleCoefficient_isNormalizedCertificate`: every
+  nonempty closed walk in the doubled graph is a normalized signed-circulation certificate.
 * `Maths.AdditiveTransport.symmetricResidualAtMost_iff_signedClosedWalk_le` and
   `symmetricResidualAtMost_iff_simpleSignedCycles_le`: symmetric feasibility is the mean bound
-  on every circuit of the doubled graph, and testing simple circuits alone suffices.
+  on every closed walk of the doubled graph, and testing simple cycles alone suffices.
 * `Maths.AdditiveTransport.normalizedSignedDual_le_iff_signedClosedWalk_le` and
   `normalizedSignedDual_le_iff_simpleSignedCycles_le`: the dual reading of the same pair -
-  normalized signed circulations and directed circuits impose exactly the same thresholds.
+  normalized signed circulations and nonempty closed walks impose exactly the same thresholds.
 -/
 
 @[expose] public section
@@ -83,7 +83,7 @@ theorem signedDelta_eq_signedGraph_incidence [DecidableEq V]
 
 /-- The probability distribution of edge occurrences in a nonempty closed
 walk. -/
-def circuitCoefficient [DecidableEq E] {G : EdgeGraph V E} {base : V}
+def cycleCoefficient [DecidableEq E] {G : EdgeGraph V E} {base : V}
     (cycle : G.Walk base base) (edge : E) : ℝ :=
   cycle.edgeMultiplicity edge / cycle.length
 
@@ -127,31 +127,31 @@ private theorem sum_edgeMultiplicity_mul_signedDelta_eq_zero
     · rw [ite_eq_right h, ite_eq_right (Ne.symm h)]
   rw [hfilter, hfilter, hbalanceReal, sub_self]
 
-/-- Every nonempty directed circuit in the doubled graph is a normalized
+/-- Every nonempty closed walk in the doubled graph is a normalized
 signed-circulation certificate. -/
-theorem circuitCoefficient_isNormalizedCertificate
+theorem cycleCoefficient_isNormalizedCertificate
     [DecidableEq V] [Fintype E] [DecidableEq E]
     (G : EdgeGraph V E) {base : V}
     (cycle : (signedGraph G).Walk base base) (hne : 0 < cycle.length) :
     FiniteInequality.IsNormalizedCertificate (signedDelta G)
-      (circuitCoefficient cycle) := by
+      (cycleCoefficient cycle) := by
   refine ⟨fun edge => div_nonneg (Nat.cast_nonneg _) (Nat.cast_nonneg _), ?_, ?_⟩
-  · simp only [circuitCoefficient, ← Finset.sum_div]
+  · simp only [cycleCoefficient, ← Finset.sum_div]
     rw [show (∑ edge, (cycle.edgeMultiplicity edge : ℝ)) = cycle.length by
       exact_mod_cast cycle.sum_edgeMultiplicity_eq_length]
     exact div_self (by exact_mod_cast hne.ne')
   · intro vertex
-    simp only [circuitCoefficient, div_mul_eq_mul_div, ← Finset.sum_div]
+    simp only [cycleCoefficient, div_mul_eq_mul_div, ← Finset.sum_div]
     rw [sum_edgeMultiplicity_mul_signedDelta_eq_zero G cycle vertex, zero_div]
 
-/-- The objective of a circuit certificate is the mean weight of its closed walk, in any graph
+/-- The objective of a closed-walk certificate is the mean weight of its closed walk, in any graph
 and for any edge weight. -/
-theorem certificateValue_circuitCoefficient
+theorem certificateValue_cycleCoefficient
     [Fintype E] [DecidableEq E] {G : EdgeGraph V E} (weight : E → ℝ)
     {base : V} (cycle : G.Walk base base) :
-    FiniteInequality.certificateValue weight (circuitCoefficient cycle) =
+    FiniteInequality.certificateValue weight (cycleCoefficient cycle) =
       walkSum weight cycle / cycle.length := by
-  simp only [FiniteInequality.certificateValue, circuitCoefficient,
+  simp only [FiniteInequality.certificateValue, cycleCoefficient,
     div_mul_eq_mul_div, ← Finset.sum_div]
   rw [sum_edgeMultiplicity_mul_eq_walkSum]
 
@@ -182,8 +182,8 @@ theorem worstDirectedResidualAtMost_signedGraph_iff_finiteInequality
   simp only [MaxPlusPotential.defect]
   constructor <;> intro h <;> linarith
 
-/-- **Full signed-circulation circuit duality.**  For every objective on the
-two oriented copies, normalized signed circulations and directed circuits
+/-- **Full signed-circulation cycle duality.**  For every objective on the
+two oriented copies, normalized signed circulations and nonempty closed walks
 impose exactly the same thresholds. -/
 theorem normalizedSignedCirculationDual_le_iff_closedWalk_le
     [Fintype V] [DecidableEq V] [Fintype E]
@@ -198,8 +198,8 @@ theorem normalizedSignedCirculationDual_le_iff_closedWalk_le
     ← worstDirectedResidualAtMost_signedGraph_iff_finiteInequality,
     worstDirectedResidualAtMost_iff_closedWalk_le]
 
-/-- The full signed-circulation dual can be restricted to simple directed
-circuits in the doubled graph. -/
+/-- The full signed-circulation dual can be restricted to simple
+cycles in the doubled graph. -/
 theorem normalizedSignedCirculationDual_le_iff_simpleCycles_le
     [Fintype V] [DecidableEq V] [Fintype E]
     (G : EdgeGraph V E) (orientedWeight : SignedEdge E → ℝ) (level : ℝ) :
@@ -239,8 +239,8 @@ theorem symmetricResidualAtMost_iff_signedGraph
       linarith
     · simpa using hdirected (edge, false)
 
-/-- **Exact symmetric circuit threshold.**  Symmetric residual feasibility is
-equivalent to the mean bound on every circuit in the doubled graph. -/
+/-- **Exact symmetric cycle threshold.**  Symmetric residual feasibility is
+equivalent to the mean bound on every closed walk in the doubled graph. -/
 theorem symmetricResidualAtMost_iff_signedClosedWalk_le
     [Finite E] (G : EdgeGraph V E) (weight : E → ℝ)
     (level : ℝ) :
@@ -251,7 +251,7 @@ theorem symmetricResidualAtMost_iff_signedClosedWalk_le
   rw [symmetricResidualAtMost_iff_signedGraph,
     worstDirectedResidualAtMost_iff_closedWalk_le]
 
-/-- It is enough to test simple circuits in the doubled graph. -/
+/-- It is enough to test simple cycles in the doubled graph. -/
 theorem symmetricResidualAtMost_iff_simpleSignedCycles_le
     [Fintype V] [Finite E] (G : EdgeGraph V E) (weight : E → ℝ)
     (level : ℝ) :
@@ -263,7 +263,7 @@ theorem symmetricResidualAtMost_iff_simpleSignedCycles_le
   rw [symmetricResidualAtMost_iff_signedClosedWalk_le,
     forall_closedWalk_mean_le_iff_simpleCycle]
 
-/-- Normalized signed circulations and directed circuits impose exactly the
+/-- Normalized signed circulations and nonempty closed walks impose exactly the
 same objective thresholds. -/
 theorem normalizedSignedDual_le_iff_signedClosedWalk_le
     [Fintype V] [DecidableEq V] [Fintype E]
@@ -279,7 +279,7 @@ theorem normalizedSignedDual_le_iff_signedClosedWalk_le
     symmetricResidualAtMost_iff_signedClosedWalk_le]
 
 /-- Normalized signed circulations can equivalently be tested through simple
-circuits alone. -/
+cycles alone. -/
 theorem normalizedSignedDual_le_iff_simpleSignedCycles_le
     [Fintype V] [DecidableEq V] [Fintype E]
     (G : EdgeGraph V E) (weight : E → ℝ) (level : ℝ) :

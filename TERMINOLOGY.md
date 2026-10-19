@@ -92,8 +92,6 @@ which the library has always used.
 These identifiers predate the vocabulary above and keep their names until they are renamed.
 
 - `*Cycle*` in declaration names means *closed walk*.
-- `circuitCoefficient` and `*SignedCircuit*` use *circuit* for a closed walk or a simple cycle
-  of the doubled graph.
 - `IsResidualFor` and `translationResidual` use *residual* for the reversing map.
 - `HasCyclicSlack`, `cyclicSlackThreshold`, and `IsSlackChain` use *slack* for a relaxation
   level.

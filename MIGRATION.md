@@ -15,6 +15,8 @@ Multitubes was previously published as `directed-transport`, with its main modul
 | `Maths.MaxAffineTransport.exists_sparse_farkas_certificate` and its rational and integral forms | `exists_sparse_farkasCertificate`, `exists_sparse_rational_farkasCertificate`, `exists_sparse_integral_farkasCertificate` |
 | `Maths.TransferSummary.transport` and its lemmas `transport_*` | `Maths.TransferSummary.retentionProd`, `retentionProd_*` |
 | `Maths.TransferSummary.pastTransport` and its lemmas | `Maths.TransferSummary.pastRetentionProd` and its lemmas |
+| Module `Maths.Multitubes.Additive.Circuits` | `Maths.Multitubes.Additive.SignedCycles` |
+| `circuit` in the names of `Maths.AdditiveTransport` declarations, as in `circuitCoefficient`, `signedCircuitVector`, `IsGenuineSignedCircuit`, `exists_simpleSignedCircuit_decomposition` | `cycle`: `cycleCoefficient`, `signedCycleVector`, `IsGenuineSignedCycle`, `exists_simpleSignedCycle_decomposition` |
 
 UniformEquilibrium, the original downstream client, may continue to refer to the former
 repository and module paths until its integration is updated. This note is the temporary record
