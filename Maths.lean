@@ -93,7 +93,7 @@ public import Maths.Multitubes.MaxAffine.Arithmetic
 public import Maths.Multitubes.MaxAffine.Basic
 public import Maths.Multitubes.MaxAffine.Contraction
 public import Maths.Multitubes.MaxAffine.ContractiveGauge
-public import Maths.Multitubes.MaxAffine.CycleSlack
+public import Maths.Multitubes.MaxAffine.CycleRelaxation
 public import Maths.Multitubes.MaxAffine.Duality
 public import Maths.Multitubes.MaxAffine.Eigenproblem
 public import Maths.Multitubes.MaxAffine.Farkas

@@ -71,7 +71,7 @@ docstring may mention it once as a gloss ("also called …") without adopting it
 | defect | The per-edge failure of an inequality: positive when violated, the negative of LP slack. | edge slack |
 | residual | The per-row or per-branch failure, as in `WorstResidualAtMost`. | |
 | slack | Only LP complementary slackness. | |
-| relaxation level | The uniform level `lam` subtracted from every label (`relaxationLevels`). | threshold, slack |
+| relaxation level | The uniform level `lam` subtracted from every label (`relaxationLevels`, `IsCyclicRelaxationLevel`). The least one, when it exists, is a *relaxation threshold* (`cyclicRelaxationThreshold`). | slack |
 | subeigenvector | `A ⊙ v ≤ lam + v`, following Butkovič. The set of such `lam` is a ray of *subeigenvalue levels*. | admissible eigenvalues |
 | eigenvalue | A `lam` admitting an exact eigenvector. | |
 | maximum cycle mean | The supremum of mean weights of nonempty closed walks; also the max-plus Perron root and the tropical spectral radius. | |
@@ -91,8 +91,6 @@ which the library has always used.
 These identifiers predate the vocabulary above and keep their names until they are renamed.
 
 - `*Cycle*` in declaration names means *closed walk*.
-- `HasCyclicSlack`, `cyclicSlackThreshold`, and `IsSlackChain` use *slack* for a relaxation
-  level.
 - In `RadiusFixedPoint` and `ContractiveGauge`, `gain` is a slope and `bias` is a shift.
 - `suffixWeight` and `suffixWeightSum` use *weight* for a product of slopes.
 - `MaxAffine/AnchoredEigenvalue.lean` is about eigenvectors from reachable lower bounds.

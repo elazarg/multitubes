@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.MaxAffine.CycleSlack
+public import Maths.Multitubes.MaxAffine.CycleRelaxation
 
 /-!
 # Closed relaxation formulas for max-affine cycles
@@ -13,7 +13,7 @@ public import Maths.Multitubes.MaxAffine.CycleSlack
 Uniformly subtracting `level` from every edge does not merely preserve the
 path slope.  It subtracts `level` times a canonical suffix-product mass from
 the composite shift.  The resulting formulas turn the coefficient trichotomy
-into closed cycle-slack criteria.
+into closed cyclic relaxation criteria.
 
 For a nonempty path with nonnegative slopes the relaxation mass is at least
 one, even when some slopes vanish.  Consequently a unit-product cycle has the
@@ -30,8 +30,8 @@ when all floors are absent.
   `Maths.MaxAffineTransport.Label.expansiveResetThresholds`,
   `Maths.MaxAffineTransport.Label.thresholdSup`: the per-reset thresholds of a
   superunit-product cycle and their supremum in `WithBot ℝ`.
-* `Maths.MaxAffineTransport.Label.expansiveCyclicSlackThreshold` and
-  `Maths.MaxAffineTransport.Label.cyclicSlackThreshold`: the exact cycle-slack
+* `Maths.MaxAffineTransport.Label.expansiveCyclicRelaxationThreshold` and
+  `Maths.MaxAffineTransport.Label.cyclicRelaxationThreshold`: the exact cyclic relaxation
   threshold, `⊥` when every level is feasible.
 
 ## Main results
@@ -41,13 +41,13 @@ when all floors are absent.
   preserves the path slope and subtracts `level` times the relaxation mass from the shift.
 * `Maths.MaxAffineTransport.Label.one_le_pathRelaxationMass`: a nonempty path
   with nonnegative slopes has relaxation mass at least one.
-* `Maths.MaxAffineTransport.Label.hasCyclicSlack_iff_cycleMean_le_of_pathSlope_eq_one`:
+* `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_iff_cycleMean_le_of_pathSlope_eq_one`:
   a unit-product cycle attains the threshold `pathShift / pathRelaxationMass`.
-* `Maths.MaxAffineTransport.Label.hasCyclicSlack_of_pathSlope_lt_one` and
-  `Maths.MaxAffineTransport.Label.hasCyclicSlack_of_one_lt_pathSlope_of_floorless`:
+* `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_of_pathSlope_lt_one` and
+  `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_of_one_lt_pathSlope_of_floorless`:
   the subunit and floorless superunit escape cases.
-* `Maths.MaxAffineTransport.Label.hasCyclicSlack_iff_cyclicSlackThreshold_le` and
-  `Maths.MaxAffineTransport.Label.cyclicSlackThreshold_eq_bot_iff_all_levels`:
+* `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_iff_cyclicRelaxationThreshold_le` and
+  `Maths.MaxAffineTransport.Label.cyclicRelaxationThreshold_eq_bot_iff_all_levels`:
   the closed criterion and the characterization of the all-levels case.
 -/
 
@@ -231,25 +231,25 @@ theorem pathCycleMean_rotate_of_product_one
       simpa only [List.take_append_drop] using hproduct)
   simpa only [List.take_append_drop] using hsplit.symm
 
-/-- A subunit-product cycle admits arbitrary negative slack.  Floors do not
+/-- A subunit-product cycle admits arbitrarily negative relaxation levels.  Floors do not
 obstruct this escape because a contractive max-affine self-map always has a
 pre-fixed point. -/
-theorem hasCyclicSlack_of_pathSlope_lt_one {labels : List Label}
+theorem isCyclicRelaxationLevel_of_pathSlope_lt_one {labels : List Label}
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
     (hproduct : pathSlope labels < 1) (level : ℝ) :
-    HasCyclicSlack labels level := by
-  rw [hasCyclicSlack_iff_coefficient_trichotomy hslope]
+    IsCyclicRelaxationLevel labels level := by
+  rw [isCyclicRelaxationLevel_iff_coefficient_trichotomy hslope]
   exact Or.inl (by simpa using hproduct)
 
-/-- At unit path product, arbitrary floors disappear from the exact slack
+/-- At unit path product, arbitrary floors disappear from the exact relaxation
 criterion.  The composite shift is the only obstruction. -/
-theorem hasCyclicSlack_iff_pathShift_le_of_pathSlope_eq_one
+theorem isCyclicRelaxationLevel_iff_pathShift_le_of_pathSlope_eq_one
     {labels : List Label}
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
     (hproduct : pathSlope labels = 1) (level : ℝ) :
-    HasCyclicSlack labels level ↔
+    IsCyclicRelaxationLevel labels level ↔
       pathShift labels ≤ level * pathRelaxationMass labels := by
-  rw [hasCyclicSlack_iff_coefficient_trichotomy hslope]
+  rw [isCyclicRelaxationLevel_iff_coefficient_trichotomy hslope]
   simp only [pathSlope_map_relax, pathShift_map_relax, hproduct,
     lt_self_iff_false, false_or, true_and]
   constructor
@@ -262,59 +262,60 @@ theorem hasCyclicSlack_iff_pathShift_le_of_pathSlope_eq_one
 /-- Closed cycle-mean formula for a nonempty unit-product cycle.  The
 relaxation mass is positive under nonnegative slopes, so this is an ordinary
 real quotient and the threshold is attained. -/
-theorem hasCyclicSlack_iff_cycleMean_le_of_pathSlope_eq_one
+theorem isCyclicRelaxationLevel_iff_cycleMean_le_of_pathSlope_eq_one
     {labels : List Label}
     (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
     (hproduct : pathSlope labels = 1) (level : ℝ) :
-    HasCyclicSlack labels level ↔
+    IsCyclicRelaxationLevel labels level ↔
       pathShift labels / pathRelaxationMass labels ≤ level := by
-  rw [hasCyclicSlack_iff_pathShift_le_of_pathSlope_eq_one hslope hproduct]
+  rw [isCyclicRelaxationLevel_iff_pathShift_le_of_pathSlope_eq_one hslope hproduct]
   exact (div_le_iff₀ (pathRelaxationMass_pos hne hslope)).symm
 
 /-- The exact unit-product cycle mean is feasible, not merely an infimum. -/
-theorem hasCyclicSlack_cycleMean_of_pathSlope_eq_one
+theorem isCyclicRelaxationLevel_cycleMean_of_pathSlope_eq_one
     {labels : List Label}
     (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
     (hproduct : pathSlope labels = 1) :
-    HasCyclicSlack labels
+    IsCyclicRelaxationLevel labels
       (pathShift labels / pathRelaxationMass labels) := by
-  rw [hasCyclicSlack_iff_cycleMean_le_of_pathSlope_eq_one
+  rw [isCyclicRelaxationLevel_iff_cycleMean_le_of_pathSlope_eq_one
     hne hslope hproduct]
 
-/-- A floorless superunit-product cycle also admits arbitrary negative slack:
+/-- A floorless superunit-product cycle also admits arbitrarily negative relaxation levels:
 its composite can escape toward negative infinity. -/
-theorem hasCyclicSlack_of_one_lt_pathSlope_of_floorless
+theorem isCyclicRelaxationLevel_of_one_lt_pathSlope_of_floorless
     {labels : List Label}
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
     (hfloor : ∀ label ∈ labels, label.floor = ⊥)
     (hproduct : 1 < pathSlope labels) (level : ℝ) :
-    HasCyclicSlack labels level := by
-  rw [hasCyclicSlack_iff_coefficient_trichotomy hslope]
+    IsCyclicRelaxationLevel labels level := by
+  rw [isCyclicRelaxationLevel_iff_coefficient_trichotomy hslope]
   refine Or.inr (Or.inr ⟨?_, ?_⟩)
   · simpa using hproduct
   · rw [pathFloor_map_relax_eq_bot hfloor]
     exact bot_le
 
-/-- Complete floorless closed form: the only finite slack threshold occurs at
+/-- Complete floorless closed form: the only finite relaxation threshold occurs at
 unit path product. -/
-theorem hasCyclicSlack_iff_of_floorless {labels : List Label}
+theorem isCyclicRelaxationLevel_iff_of_floorless {labels : List Label}
     (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
     (hfloor : ∀ label ∈ labels, label.floor = ⊥)
     (level : ℝ) :
-    HasCyclicSlack labels level ↔
+    IsCyclicRelaxationLevel labels level ↔
       pathSlope labels ≠ 1 ∨
         pathShift labels / pathRelaxationMass labels ≤ level := by
   rcases lt_trichotomy (pathSlope labels) 1 with hproduct | hproduct | hproduct
   · exact ⟨fun _ => Or.inl (ne_of_lt hproduct),
-      fun _ => hasCyclicSlack_of_pathSlope_lt_one hslope hproduct level⟩
+      fun _ => isCyclicRelaxationLevel_of_pathSlope_lt_one hslope hproduct level⟩
   · simpa [hproduct] using
-      (hasCyclicSlack_iff_cycleMean_le_of_pathSlope_eq_one
+      (isCyclicRelaxationLevel_iff_cycleMean_le_of_pathSlope_eq_one
         hne hslope hproduct level)
   · exact ⟨fun _ => Or.inl (ne_of_gt hproduct),
-      fun _ => hasCyclicSlack_of_one_lt_pathSlope_of_floorless hslope hfloor hproduct level⟩
+      fun _ => isCyclicRelaxationLevel_of_one_lt_pathSlope_of_floorless
+        hslope hfloor hproduct level⟩
 
 /-! ## Exact finite-floor threshold in the expansive regime -/
 
@@ -415,16 +416,16 @@ theorem pathFloor_relaxed_le_iff_expansiveResetThresholds
 /-- Complete closed threshold formula for a nonempty expansive cycle.  It is
 the maximum of the finite reset thresholds when floors occur, and is
 unbounded below when the list of thresholds is empty. -/
-theorem hasCyclicSlack_iff_expansiveResetThresholds
+theorem isCyclicRelaxationLevel_iff_expansiveResetThresholds
     {labels : List Label} (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
     (hproduct : 1 < pathSlope labels) (level : ℝ) :
-    HasCyclicSlack labels level ↔
+    IsCyclicRelaxationLevel labels level ↔
       ∀ threshold ∈ expansiveResetThresholds
         (pathSlope labels) (pathShift labels)
           (pathRelaxationMass labels) labels,
         threshold ≤ level := by
-  rw [hasCyclicSlack_iff_coefficient_trichotomy hslope]
+  rw [isCyclicRelaxationLevel_iff_coefficient_trichotomy hslope]
   simp only [pathSlope_map_relax, pathShift_map_relax,
     not_lt_of_ge hproduct.le, false_or, ne_of_gt hproduct, false_and,
     hproduct, true_and]
@@ -471,101 +472,101 @@ theorem expansiveResetThresholds_eq_nil_iff
 
 /-- Exact expansive optimum.  It is `⊥` precisely when no finite reset floor
 contributes a constraint. -/
-def expansiveCyclicSlackThreshold (labels : List Label) : WithBot ℝ :=
+def expansiveCyclicRelaxationThreshold (labels : List Label) : WithBot ℝ :=
   thresholdSup <| expansiveResetThresholds
     (pathSlope labels) (pathShift labels)
       (pathRelaxationMass labels) labels
 
-theorem expansiveCyclicSlackThreshold_eq_bot_iff (labels : List Label) :
-    expansiveCyclicSlackThreshold labels = ⊥ ↔
+theorem expansiveCyclicRelaxationThreshold_eq_bot_iff (labels : List Label) :
+    expansiveCyclicRelaxationThreshold labels = ⊥ ↔
       ∀ label ∈ labels, label.floor = ⊥ := by
-  rw [expansiveCyclicSlackThreshold, thresholdSup_eq_bot_iff,
+  rw [expansiveCyclicRelaxationThreshold, thresholdSup_eq_bot_iff,
     expansiveResetThresholds_eq_nil_iff]
 
-theorem hasCyclicSlack_iff_expansiveCyclicSlackThreshold_le
+theorem isCyclicRelaxationLevel_iff_expansiveCyclicRelaxationThreshold_le
     {labels : List Label} (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
     (hproduct : 1 < pathSlope labels) (level : ℝ) :
-    HasCyclicSlack labels level ↔
-      expansiveCyclicSlackThreshold labels ≤ (level : WithBot ℝ) := by
-  rw [hasCyclicSlack_iff_expansiveResetThresholds hne hslope hproduct]
+    IsCyclicRelaxationLevel labels level ↔
+      expansiveCyclicRelaxationThreshold labels ≤ (level : WithBot ℝ) := by
+  rw [isCyclicRelaxationLevel_iff_expansiveResetThresholds hne hslope hproduct]
   exact (thresholdSup_le_coe_iff _ _).symm
 
-/-- **One-cycle slack threshold.**  The empty list and contractive cycles have
+/-- **One-cycle relaxation threshold.**  The empty list and contractive cycles have
 threshold `⊥`; unit-product cycles have their weighted cycle mean; expansive
 cycles have the supremum of their finite reset thresholds.  The exact semantic
 theorem below assumes that every slope in the list is nonnegative. -/
-def cyclicSlackThreshold (labels : List Label) : WithBot ℝ :=
+def cyclicRelaxationThreshold (labels : List Label) : WithBot ℝ :=
   if labels = [] then ⊥
   else if pathSlope labels = 1 then
     (pathShift labels / pathRelaxationMass labels : ℝ)
   else if 1 < pathSlope labels then
-    expansiveCyclicSlackThreshold labels
+    expansiveCyclicRelaxationThreshold labels
   else ⊥
 
-@[simp] theorem cyclicSlackThreshold_nil : cyclicSlackThreshold [] = ⊥ := by
-  simp [cyclicSlackThreshold]
+@[simp] theorem cyclicRelaxationThreshold_nil : cyclicRelaxationThreshold [] = ⊥ := by
+  simp [cyclicRelaxationThreshold]
 
-/-- The value `cyclicSlackThreshold` is an exact lower cut for feasible
-uniform edge slack.  Its value is `⊥` when the optimum is unbounded below. -/
-theorem hasCyclicSlack_iff_cyclicSlackThreshold_le
+/-- The value `cyclicRelaxationThreshold` is an exact lower cut for feasible
+relaxation levels.  Its value is `⊥` when the optimum is unbounded below. -/
+theorem isCyclicRelaxationLevel_iff_cyclicRelaxationThreshold_le
     {labels : List Label} (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope) (level : ℝ) :
-    HasCyclicSlack labels level ↔
-      cyclicSlackThreshold labels ≤ (level : WithBot ℝ) := by
+    IsCyclicRelaxationLevel labels level ↔
+      cyclicRelaxationThreshold labels ≤ (level : WithBot ℝ) := by
   rcases lt_trichotomy (pathSlope labels) 1 with hproduct | hproduct | hproduct
   · have hneproduct : pathSlope labels ≠ 1 := ne_of_lt hproduct
     have hnexpansive : ¬1 < pathSlope labels := not_lt_of_ge hproduct.le
-    rw [cyclicSlackThreshold, ite_eq_right hne, ite_eq_right hneproduct,
+    rw [cyclicRelaxationThreshold, ite_eq_right hne, ite_eq_right hneproduct,
       ite_eq_right hnexpansive]
     simp only [bot_le, iff_true]
-    exact hasCyclicSlack_of_pathSlope_lt_one hslope hproduct level
-  · rw [cyclicSlackThreshold, ite_eq_right hne, ite_eq_left hproduct]
-    rw [hasCyclicSlack_iff_cycleMean_le_of_pathSlope_eq_one
+    exact isCyclicRelaxationLevel_of_pathSlope_lt_one hslope hproduct level
+  · rw [cyclicRelaxationThreshold, ite_eq_right hne, ite_eq_left hproduct]
+    rw [isCyclicRelaxationLevel_iff_cycleMean_le_of_pathSlope_eq_one
       hne hslope hproduct]
     simp
   · have hneproduct : pathSlope labels ≠ 1 := ne_of_gt hproduct
-    rw [cyclicSlackThreshold, ite_eq_right hne, ite_eq_right hneproduct,
+    rw [cyclicRelaxationThreshold, ite_eq_right hne, ite_eq_right hneproduct,
       ite_eq_left hproduct]
-    exact hasCyclicSlack_iff_expansiveCyclicSlackThreshold_le
+    exact isCyclicRelaxationLevel_iff_expansiveCyclicRelaxationThreshold_le
       hne hslope hproduct level
 
 /-- Exact threshold theorem including the empty cycle. -/
-theorem hasCyclicSlack_iff_cyclicSlackThreshold_le_all
+theorem isCyclicRelaxationLevel_iff_cyclicRelaxationThreshold_le_all
     {labels : List Label}
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope) (level : ℝ) :
-    HasCyclicSlack labels level ↔
-      cyclicSlackThreshold labels ≤ (level : WithBot ℝ) := by
+    IsCyclicRelaxationLevel labels level ↔
+      cyclicRelaxationThreshold labels ≤ (level : WithBot ℝ) := by
   by_cases hne : labels ≠ []
-  · exact hasCyclicSlack_iff_cyclicSlackThreshold_le hne hslope level
+  · exact isCyclicRelaxationLevel_iff_cyclicRelaxationThreshold_le hne hslope level
   · have hnil : labels = [] := Classical.not_not.mp hne
     subst labels
-    simp [HasCyclicSlack, chainLabels, chainTarget, IsSlackChain]
+    simp [IsCyclicRelaxationLevel, chainLabels, chainTarget, IsRelaxedChain]
 
-/-- Every finite optimum is attained by a cyclic slack witness. -/
-theorem hasCyclicSlack_of_cyclicSlackThreshold_eq_coe
+/-- Every finite optimum is attained by a cyclic relaxation witness. -/
+theorem isCyclicRelaxationLevel_of_cyclicRelaxationThreshold_eq_coe
     {labels : List Label} (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
     {optimal : ℝ}
-    (hoptimal : cyclicSlackThreshold labels = (optimal : WithBot ℝ)) :
-    HasCyclicSlack labels optimal := by
-  rw [hasCyclicSlack_iff_cyclicSlackThreshold_le hne hslope, hoptimal]
+    (hoptimal : cyclicRelaxationThreshold labels = (optimal : WithBot ℝ)) :
+    IsCyclicRelaxationLevel labels optimal := by
+  rw [isCyclicRelaxationLevel_iff_cyclicRelaxationThreshold_le hne hslope, hoptimal]
 
-/-- A bottom optimum means feasibility at every real slack threshold. -/
-theorem hasCyclicSlack_all_levels_of_cyclicSlackThreshold_eq_bot
+/-- A bottom optimum means feasibility at every real relaxation level. -/
+theorem isCyclicRelaxationLevel_all_levels_of_cyclicRelaxationThreshold_eq_bot
     {labels : List Label} (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope)
-    (hoptimal : cyclicSlackThreshold labels = ⊥) :
-    ∀ level : ℝ, HasCyclicSlack labels level := by
+    (hoptimal : cyclicRelaxationThreshold labels = ⊥) :
+    ∀ level : ℝ, IsCyclicRelaxationLevel labels level := by
   intro level
-  rw [hasCyclicSlack_iff_cyclicSlackThreshold_le hne hslope, hoptimal]
+  rw [isCyclicRelaxationLevel_iff_cyclicRelaxationThreshold_le hne hslope, hoptimal]
   exact bot_le
 
 /-- Exact characterization of the unbounded-below cases.  Floors are harmless
 for contractive cycle product but are precisely what stops expansive escape. -/
-theorem cyclicSlackThreshold_eq_bot_iff
+theorem cyclicRelaxationThreshold_eq_bot_iff
     (labels : List Label) :
-    cyclicSlackThreshold labels = ⊥ ↔
+    cyclicRelaxationThreshold labels = ⊥ ↔
       labels = [] ∨ pathSlope labels < 1 ∨
         (1 < pathSlope labels ∧
           ∀ label ∈ labels, label.floor = ⊥) := by
@@ -575,79 +576,79 @@ theorem cyclicSlackThreshold_eq_bot_iff
       hproduct | hproduct | hproduct
     · have hneproduct : pathSlope labels ≠ 1 := ne_of_lt hproduct
       have hnexpansive : ¬1 < pathSlope labels := not_lt_of_ge hproduct.le
-      simp [cyclicSlackThreshold, hlabels, hneproduct, hnexpansive, hproduct]
-    · simp [cyclicSlackThreshold, hlabels, hproduct]
+      simp [cyclicRelaxationThreshold, hlabels, hneproduct, hnexpansive, hproduct]
+    · simp [cyclicRelaxationThreshold, hlabels, hproduct]
     · have hneproduct : pathSlope labels ≠ 1 := ne_of_gt hproduct
       have hncontractive : ¬pathSlope labels < 1 :=
         not_lt_of_ge hproduct.le
-      simp [cyclicSlackThreshold, hlabels, hneproduct, hproduct, hncontractive,
-        expansiveCyclicSlackThreshold_eq_bot_iff]
+      simp [cyclicRelaxationThreshold, hlabels, hneproduct, hproduct, hncontractive,
+        expansiveCyclicRelaxationThreshold_eq_bot_iff]
 
 /-- Bottom is not just sufficient but necessary for feasibility at every real
 threshold. -/
-theorem cyclicSlackThreshold_eq_bot_iff_all_levels
+theorem cyclicRelaxationThreshold_eq_bot_iff_all_levels
     {labels : List Label} (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope) :
-    cyclicSlackThreshold labels = ⊥ ↔
-      ∀ level : ℝ, HasCyclicSlack labels level := by
+    cyclicRelaxationThreshold labels = ⊥ ↔
+      ∀ level : ℝ, IsCyclicRelaxationLevel labels level := by
   constructor
-  · exact hasCyclicSlack_all_levels_of_cyclicSlackThreshold_eq_bot
+  · exact isCyclicRelaxationLevel_all_levels_of_cyclicRelaxationThreshold_eq_bot
       hne hslope
   · intro hall
-    rcases Option.eq_none_or_eq_some (cyclicSlackThreshold labels) with
+    rcases Option.eq_none_or_eq_some (cyclicRelaxationThreshold labels) with
       hbot | ⟨optimal, hoptimal⟩
     · exact hbot
     · have himpossible := hall (optimal - 1)
-      have hoptimal' : cyclicSlackThreshold labels =
+      have hoptimal' : cyclicRelaxationThreshold labels =
           (optimal : WithBot ℝ) := hoptimal
-      rw [hasCyclicSlack_iff_cyclicSlackThreshold_le hne hslope,
+      rw [isCyclicRelaxationLevel_iff_cyclicRelaxationThreshold_le hne hslope,
         hoptimal'] at himpossible
       norm_num at himpossible
 
 /-- Bottom is equivalent to all-level feasibility for every list, including
 the empty cycle. -/
-theorem cyclicSlackThreshold_eq_bot_iff_all_levels_all
+theorem cyclicRelaxationThreshold_eq_bot_iff_all_levels_all
     {labels : List Label}
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope) :
-    cyclicSlackThreshold labels = ⊥ ↔
-      ∀ level : ℝ, HasCyclicSlack labels level := by
+    cyclicRelaxationThreshold labels = ⊥ ↔
+      ∀ level : ℝ, IsCyclicRelaxationLevel labels level := by
   by_cases hne : labels ≠ []
-  · exact cyclicSlackThreshold_eq_bot_iff_all_levels hne hslope
+  · exact cyclicRelaxationThreshold_eq_bot_iff_all_levels hne hslope
   · have hnil : labels = [] := Classical.not_not.mp hne
     subst labels
-    simp [HasCyclicSlack, chainLabels, chainTarget, IsSlackChain]
+    simp [IsCyclicRelaxationLevel, chainLabels, chainTarget, IsRelaxedChain]
 
-/-- Complete criterion for arbitrarily negative cyclic slack. -/
-theorem hasCyclicSlack_all_levels_iff
+/-- Complete criterion for arbitrarily negative cyclic relaxation levels. -/
+theorem isCyclicRelaxationLevel_all_levels_iff
     {labels : List Label} (hne : labels ≠ [])
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope) :
-    (∀ level : ℝ, HasCyclicSlack labels level) ↔
+    (∀ level : ℝ, IsCyclicRelaxationLevel labels level) ↔
       pathSlope labels < 1 ∨
         (1 < pathSlope labels ∧
           ∀ label ∈ labels, label.floor = ⊥) := by
   calc
-    (∀ level : ℝ, HasCyclicSlack labels level) ↔
-        cyclicSlackThreshold labels = ⊥ :=
-      (cyclicSlackThreshold_eq_bot_iff_all_levels hne hslope).symm
+    (∀ level : ℝ, IsCyclicRelaxationLevel labels level) ↔
+        cyclicRelaxationThreshold labels = ⊥ :=
+      (cyclicRelaxationThreshold_eq_bot_iff_all_levels hne hslope).symm
     _ ↔ labels = [] ∨ pathSlope labels < 1 ∨
         (1 < pathSlope labels ∧
           ∀ label ∈ labels, label.floor = ⊥) :=
-      cyclicSlackThreshold_eq_bot_iff labels
+      cyclicRelaxationThreshold_eq_bot_iff labels
     _ ↔ _ := by simp [hne]
 
-/-- Complete all-list criterion for arbitrarily negative cyclic slack. -/
-theorem hasCyclicSlack_all_levels_iff_all
+/-- Complete all-list criterion for arbitrarily negative cyclic relaxation levels. -/
+theorem isCyclicRelaxationLevel_all_levels_iff_all
     {labels : List Label}
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope) :
-    (∀ level : ℝ, HasCyclicSlack labels level) ↔
+    (∀ level : ℝ, IsCyclicRelaxationLevel labels level) ↔
       labels = [] ∨ pathSlope labels < 1 ∨
         (1 < pathSlope labels ∧
           ∀ label ∈ labels, label.floor = ⊥) := by
   calc
-    (∀ level : ℝ, HasCyclicSlack labels level) ↔
-        cyclicSlackThreshold labels = ⊥ :=
-      (cyclicSlackThreshold_eq_bot_iff_all_levels_all hslope).symm
-    _ ↔ _ := cyclicSlackThreshold_eq_bot_iff labels
+    (∀ level : ℝ, IsCyclicRelaxationLevel labels level) ↔
+        cyclicRelaxationThreshold labels = ⊥ :=
+      (cyclicRelaxationThreshold_eq_bot_iff_all_levels_all hslope).symm
+    _ ↔ _ := cyclicRelaxationThreshold_eq_bot_iff labels
 
 end Label
 end MaxAffineTransport

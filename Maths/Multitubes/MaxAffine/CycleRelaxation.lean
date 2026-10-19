@@ -8,10 +8,10 @@ module
 public import Maths.Multitubes.MaxAffine.Paths
 
 /-!
-# Exact uniform slack for one max-affine cycle
+# Exact uniform relaxation for one max-affine cycle
 
-Subtracting a common edge slack from both branches of every label converts the
-cyclic slack problem into an ordinary pre-fixed-point problem for one composite
+Subtracting a common level from both branches of every label converts the
+cyclic relaxation problem into an ordinary pre-fixed-point problem for one composite
 label.  The exact threshold equivalence also covers an optimum that is
 unbounded below.  Combining it with
 `Maths.MaxAffineTransport.Label.compList_eq_pathCoefficients` and the complete
@@ -20,21 +20,21 @@ scalar classification computes every finite cycle without introducing a fake rea
 
 ## Main definitions
 
-* `Maths.MaxAffineTransport.Label.relax`: a label with a common slack subtracted
+* `Maths.MaxAffineTransport.Label.relax`: a label with a common level subtracted
   from both branches.
-* `Maths.MaxAffineTransport.Label.IsSlackChain` and
-  `Maths.MaxAffineTransport.Label.HasCyclicSlack`: the cyclic slack problem.
+* `Maths.MaxAffineTransport.Label.IsRelaxedChain` and
+  `Maths.MaxAffineTransport.Label.IsCyclicRelaxationLevel`: the cyclic relaxation problem.
 * `Maths.MaxAffineTransport.Label.relaxedOrbitSteps` and
   `Maths.MaxAffineTransport.Label.closeLastTarget`: the canonical chain
-  realizing a slack level, and its closure at a chosen terminal value.
+  realizing a relaxation level, and its closure at a chosen terminal value.
 
 ## Main results
 
-* `Maths.MaxAffineTransport.Label.hasCyclicSlack_iff_compList_relaxed_prefixed`:
-  cyclic slack is a pre-fixed-point problem for one composite relaxed label.
-* `Maths.MaxAffineTransport.Label.hasCyclicSlack_iff_pathCoefficient_prefixed`:
+* `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_iff_compList_relaxed_prefixed`:
+  cyclic relaxation is a pre-fixed-point problem for one composite relaxed label.
+* `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_iff_pathCoefficient_prefixed`:
   the same test read off the path coefficients.
-* `Maths.MaxAffineTransport.Label.hasCyclicSlack_iff_coefficient_trichotomy`:
+* `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_iff_coefficient_trichotomy`:
   the complete scalar classification, covering the optimum unbounded below.
 -/
 
@@ -47,7 +47,7 @@ noncomputable section
 namespace MaxAffineTransport
 namespace Label
 
-/-- Subtract a common slack from the two output branches of a label. -/
+/-- Subtract a common level from the two output branches of a label. -/
 def relax (level : ℝ) (label : Label) : Label :=
   recenter label 0 level
 
@@ -59,18 +59,18 @@ theorem apply_relax (level : ℝ) (label : Label) (point : ℝ) :
     (relax level label).apply point = label.apply point - level := by
   simpa [relax] using apply_recenter label 0 level point
 
-/-- Edgewise slack inequalities along a proposed candidate chain. -/
-def IsSlackChain (level : ℝ) : ℝ → List CandidateStep → Prop
+/-- Edgewise relaxed inequalities along a proposed candidate chain. -/
+def IsRelaxedChain (level : ℝ) : ℝ → List CandidateStep → Prop
   | _, [] => True
   | source, (label, target) :: rest =>
-      label.apply source - target ≤ level ∧ IsSlackChain level target rest
+      label.apply source - target ≤ level ∧ IsRelaxedChain level target rest
 
 /-- A closed candidate chain for a chronological list of labels, with every
 edge residual at most `level`. -/
-def HasCyclicSlack (labels : List Label) (level : ℝ) : Prop :=
+def IsCyclicRelaxationLevel (labels : List Label) (level : ℝ) : Prop :=
   ∃ (source : ℝ) (steps : List CandidateStep),
     chainLabels steps = labels ∧
-      chainTarget source steps = source ∧ IsSlackChain level source steps
+      chainTarget source steps = source ∧ IsRelaxedChain level source steps
 
 /-- Exact orbit targets for the relaxed labels, retained together with the
 original labels. -/
@@ -103,13 +103,13 @@ theorem chainTarget_relaxedOrbitSteps (level source : ℝ) :
       exact chainTarget_relaxedOrbitSteps level
         ((relax level label).apply source) rest
 
-theorem isSlackChain_relaxedOrbitSteps (level source : ℝ)
+theorem isRelaxedChain_relaxedOrbitSteps (level source : ℝ)
     (labels : List Label) :
-    IsSlackChain level source (relaxedOrbitSteps level source labels) := by
+    IsRelaxedChain level source (relaxedOrbitSteps level source labels) := by
   induction labels generalizing source with
   | nil => trivial
   | cons label rest ih =>
-      simp only [relaxedOrbitSteps, IsSlackChain]
+      simp only [relaxedOrbitSteps, IsRelaxedChain]
       refine ⟨?_, ih ((relax level label).apply source)⟩
       rw [apply_relax]
       linarith
@@ -142,12 +142,12 @@ def closeLastTarget (terminal : ℝ) : List CandidateStep → List CandidateStep
       rw [chainTarget_closeLastTarget terminal step.2 (next :: rest)]
       simp
 
-/-- Raising the terminal target to a larger value preserves all slack
+/-- Raising the terminal target to a larger value preserves all relaxed
 inequalities and makes the chain literally close. -/
-theorem isSlackChain_closeLastTarget {level source terminal : ℝ}
-    {steps : List CandidateStep} (hchain : IsSlackChain level source steps)
+theorem isRelaxedChain_closeLastTarget {level source terminal : ℝ}
+    {steps : List CandidateStep} (hchain : IsRelaxedChain level source steps)
     (hterminal : chainTarget source steps ≤ terminal) :
-    IsSlackChain level source (closeLastTarget terminal steps) := by
+    IsRelaxedChain level source (closeLastTarget terminal steps) := by
   induction steps generalizing source with
   | nil => trivial
   | cons first rest ih =>
@@ -156,17 +156,17 @@ theorem isSlackChain_closeLastTarget {level source terminal : ℝ}
       cases rest with
       | nil =>
           simp only [chainTarget] at hterminal
-          simp only [closeLastTarget, IsSlackChain]
+          simp only [closeLastTarget, IsRelaxedChain]
           exact ⟨by linarith, trivial⟩
       | cons next tail =>
-          simp only [closeLastTarget, IsSlackChain]
+          simp only [closeLastTarget, IsRelaxedChain]
           refine ⟨hfirst, ih hrest ?_⟩
           simpa only [chainTarget] using hterminal
 
 private theorem relaxed_foldl_le_chainTarget {level source : ℝ}
     {steps : List CandidateStep}
     (hslope : ∀ step ∈ steps, 0 ≤ step.1.slope)
-    (hchain : IsSlackChain level source steps) :
+    (hchain : IsRelaxedChain level source steps) :
     ((chainLabels steps).map (relax level)).foldl
         (fun point label => label.apply point) source ≤
       chainTarget source steps := by
@@ -190,12 +190,12 @@ private theorem relaxed_foldl_le_chainTarget {level source : ℝ}
       exact (hmono hstep).trans
         (ih (fun step hstepMem => hslope step (List.mem_cons_of_mem _ hstepMem)) hrest)
 
-/-- **Exact cycle-slack reduction.**  A cyclic candidate with every edge
+/-- **Exact cyclic relaxation reduction.**  A cyclic candidate with every edge
 residual at most `level` exists exactly when the composite of the uniformly
 relaxed labels has a pre-fixed point. -/
-theorem hasCyclicSlack_iff_compList_relaxed_prefixed {labels : List Label}
+theorem isCyclicRelaxationLevel_iff_compList_relaxed_prefixed {labels : List Label}
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope) (level : ℝ) :
-    HasCyclicSlack labels level ↔
+    IsCyclicRelaxationLevel labels level ↔
       ∃ source : ℝ,
         (compList (labels.map (relax level))).apply source ≤ source := by
   constructor
@@ -218,23 +218,23 @@ theorem hasCyclicSlack_iff_compList_relaxed_prefixed {labels : List Label}
       refine ⟨source, steps, ?_, ?_, ?_⟩
       · simp [steps, orbit]
       · simp [steps, orbit]
-      · apply isSlackChain_closeLastTarget
-          (isSlackChain_relaxedOrbitSteps level source labels)
+      · apply isRelaxedChain_closeLastTarget
+          (isRelaxedChain_relaxedOrbitSteps level source labels)
         rw [chainTarget_relaxedOrbitSteps]
         exact hprefixed
     · intro relaxedLabel hrelaxed
       obtain ⟨original, horiginal, rfl⟩ := List.mem_map.mp hrelaxed
       simpa using hslope original horiginal
 
-/-- Coefficient-level decision form of the exact cycle-slack reduction. -/
-theorem hasCyclicSlack_iff_pathCoefficient_prefixed {labels : List Label}
+/-- Coefficient-level decision form of the exact cyclic relaxation reduction. -/
+theorem isCyclicRelaxationLevel_iff_pathCoefficient_prefixed {labels : List Label}
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope) (level : ℝ) :
-    HasCyclicSlack labels level ↔
+    IsCyclicRelaxationLevel labels level ↔
       ∃ source : ℝ,
         (⟨pathFloor (labels.map (relax level)),
           pathShift (labels.map (relax level)),
           pathSlope (labels.map (relax level))⟩ : Label).apply source ≤ source := by
-  rw [hasCyclicSlack_iff_compList_relaxed_prefixed hslope]
+  rw [isCyclicRelaxationLevel_iff_compList_relaxed_prefixed hslope]
   apply exists_congr
   intro source
   rw [compList_eq_pathCoefficients]
@@ -242,12 +242,12 @@ theorem hasCyclicSlack_iff_pathCoefficient_prefixed {labels : List Label}
   obtain ⟨original, horiginal, rfl⟩ := List.mem_map.mp hrelaxed
   simpa using hslope original horiginal
 
-/-- Complete scalar trichotomy for an arbitrary cycle at a fixed slack
-threshold.  The coefficients are explicit path coefficients of the relaxed
+/-- Complete scalar trichotomy for an arbitrary cycle at a fixed relaxation
+level.  The coefficients are explicit path coefficients of the relaxed
 labels. -/
-theorem hasCyclicSlack_iff_coefficient_trichotomy {labels : List Label}
+theorem isCyclicRelaxationLevel_iff_coefficient_trichotomy {labels : List Label}
     (hslope : ∀ label ∈ labels, 0 ≤ label.slope) (level : ℝ) :
-    HasCyclicSlack labels level ↔
+    IsCyclicRelaxationLevel labels level ↔
       pathSlope (labels.map (relax level)) < 1 ∨
       (pathSlope (labels.map (relax level)) = 1 ∧
         pathShift (labels.map (relax level)) ≤ 0) ∨
@@ -255,7 +255,7 @@ theorem hasCyclicSlack_iff_coefficient_trichotomy {labels : List Label}
         pathFloor (labels.map (relax level)) ≤
           ((-pathShift (labels.map (relax level)) /
             (pathSlope (labels.map (relax level)) - 1) : ℝ) : WithBot ℝ)) := by
-  rw [hasCyclicSlack_iff_pathCoefficient_prefixed hslope]
+  rw [isCyclicRelaxationLevel_iff_pathCoefficient_prefixed hslope]
   simpa using
     (exists_apply_le_self_iff
       (⟨pathFloor (labels.map (relax level)),

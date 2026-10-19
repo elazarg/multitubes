@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.MaxAffine.CycleSlack
+public import Maths.Multitubes.MaxAffine.CycleRelaxation
 public import Maths.Multitubes.MaxAffine.Eigenproblem
 public import Maths.Multitubes.MaxAffine.Farkas
 public import Maths.Multitubes.MaxAffine.Slopes

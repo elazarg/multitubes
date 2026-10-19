@@ -19,7 +19,7 @@ path coefficients.  On a critical path, the raw slope is the endpoint gauge
 ratio, the raw shift is the terminal gauge times the normalized walk weight,
 and the uniform-relaxation mass is the terminal gauge times a reciprocal-target
 mass.  In particular, a critical cycle has raw slope one and its exact uniform
-slack mean is the normalized shift sum divided by the reciprocal-target mass.
+relaxation mean is the normalized shift sum divided by the reciprocal-target mass.
 
 ## Main definitions
 
@@ -39,8 +39,8 @@ slack mean is the normalized shift sum divided by the reciprocal-target mass.
 * `Maths.MaxAffineTransport.rawCycleMean_eq_gaugeCriticalCycleRatio`: the raw max-affine
   cycle mean is the `gaugeCriticalCycleRatio` used by the quantitative feasibility theorems. Both
   sides take the value `0` on the empty cycle by totalized division.
-* `Maths.MaxAffineTransport.hasCyclicSlack_gaugeCriticalCycle_iff_cycleRatio_le`: on a
-  nonempty critical cycle, the exact original slack criterion is that ratio bound. Floors stay
+* `Maths.MaxAffineTransport.isCyclicRelaxationLevel_gaugeCriticalCycle_iff_cycleRatio_le`: on a
+  nonempty critical cycle, the exact original relaxation criterion is that ratio bound. Floors stay
   arbitrary - at raw product one they do not move the threshold.
 * `Maths.MaxAffineTransport.exists_isLaxSection_iff_prefixedCycleHolonomies_of_nonexpansiveGauge`,
   `Maths.MaxAffineTransport.exists_isLaxSection_iff_prefixedCycleHolonomies_of_expansiveGauge`:
@@ -224,15 +224,15 @@ theorem rawCycleMean_eq_gaugeCriticalCycleRatio
     pathRelaxationMass_gaugeCriticalLabelList hgauge]
   field_simp [(hgauge base).ne']
 
-/-- Exact original max-affine slack criterion on a nonempty gauge-critical
+/-- Exact original max-affine relaxation criterion on a nonempty gauge-critical
 cycle.  Floors remain arbitrary: at raw product one they do not affect the
 threshold. -/
-theorem hasCyclicSlack_gaugeCriticalCycle_iff_cycleRatio_le
+theorem isCyclicRelaxationLevel_gaugeCriticalCycle_iff_cycleRatio_le
     (hgauge : ∀ vertex, 0 < gauge vertex)
     {base : V}
     (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base)
     (hcycle : 0 < cycle.length) (level : ℝ) :
-    Label.HasCyclicSlack (gaugeCriticalLabelList cycle) level ↔
+    Label.IsCyclicRelaxationLevel (gaugeCriticalLabelList cycle) level ↔
       gaugeCriticalCycleRatio label gauge cycle ≤ level := by
   have hne : gaugeCriticalLabelList cycle ≠ [] := by
     intro hnil
@@ -248,7 +248,7 @@ theorem hasCyclicSlack_gaugeCriticalCycle_iff_cycleRatio_le
   have hproduct : Label.pathSlope (gaugeCriticalLabelList cycle) = 1 := by
     rw [pathSlope_gaugeCriticalLabelList hgauge,
       div_self (hgauge base).ne']
-  rw [Label.hasCyclicSlack_iff_cycleMean_le_of_pathSlope_eq_one
+  rw [Label.isCyclicRelaxationLevel_iff_cycleMean_le_of_pathSlope_eq_one
     hne hslope hproduct]
   rw [rawCycleMean_eq_gaugeCriticalCycleRatio hgauge cycle]
 

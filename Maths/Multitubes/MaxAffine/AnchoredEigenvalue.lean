@@ -6,7 +6,7 @@ Authors: Elazar Gershuni
 module
 
 public import Maths.Multitubes.MaxAffine.LeastEigenvalue
-public import Maths.Multitubes.MaxAffine.CycleSlack
+public import Maths.Multitubes.MaxAffine.CycleRelaxation
 
 /-!
 # Eigenvectors from reachable lower bounds
