@@ -14,6 +14,6 @@ Complete positivity, tensor products, states, operator topology, and physical in
 part of the quantum application.
 
 The independent Lake package in this directory constructs transport from heterogeneous finite
-Kraus families. It also proves that the discard channel has no order residual, so its oplax
+Kraus families. It also proves that the discard channel has no lower adjoint, so its oplax
 constraint cannot be reduced to lax transport by reversing the edge. Run `lake build` from this
 directory to check the client.

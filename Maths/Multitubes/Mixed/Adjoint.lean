@@ -11,10 +11,10 @@ public import Maths.Multitubes.Mixed.Walk
 # Adjoint reversal of mixed transport
 
 An oplax constraint for a map can be read as a lax constraint after reversing
-the edge, provided a residual map is supplied.  This file constructs the
+the edge, provided a lower adjoint is supplied.  This file constructs the
 reversed graph and proves the resulting reduction without assuming an order.
 The relation-parametric theorem records exactly the three laws it uses:
-reflexivity, the residual equivalence, and separation of the two relation
+reflexivity, the adjunction equivalence, and separation of the two relation
 directions on an exact edge.
 
 ## Main definitions
@@ -22,10 +22,10 @@ directions on an exact edge.
 * `Maths.Transport.LaxificationEdge` - the forward and reversed copies of
   the edges selected by a mode assignment.
 * `Maths.Transport.laxificationGraph` - the graph carrying those copies.
-* `Maths.Transport.laxification` - the transport using original and residual
-  maps.
-* `Maths.Transport.IsResidualFor` - the relation equivalence that makes a
-  residual reverse an oplax constraint.
+* `Maths.Transport.laxification` - the transport using original maps and
+  their lower adjoints.
+* `Maths.Transport.IsLowerAdjointFor` - a lower adjoint relative to a relation:
+  the equivalence that reverses an oplax constraint.
 * `Maths.Transport.IsExactSeparated` - the local separation law that recovers
   equality from the two constraints on an exact edge.
 
@@ -40,7 +40,7 @@ directions on an exact edge.
 
 ## Tags
 
-transport, mixed section, adjoint, residual, reversal
+transport, mixed section, lower adjoint, Galois connection, reversal
 -/
 
 @[expose] public section
@@ -102,51 +102,51 @@ def laxificationGraph (G : EdgeGraph V E) (mode : E → EdgeMode) :
     (laxificationGraph G mode).target (.inr edge) = G.source edge.1 :=
   rfl
 
-/-- A residual map for the edge maps, expressed by the relation needed to
-reverse an oplax constraint. -/
-def IsResidualFor (T : Transport G Fiber)
+/-- `adjoint` is a lower adjoint of the edge maps relative to `relation`: the equivalence needed
+to reverse an oplax constraint.  For an order relation it is a Galois connection. -/
+def IsLowerAdjointFor (T : Transport G Fiber)
     (relation : ∀ vertex : V, Fiber vertex → Fiber vertex → Prop)
     (mode : E → EdgeMode)
-    (residual : ∀ edge : LaxificationReverseEdge mode,
+    (adjoint : ∀ edge : LaxificationReverseEdge mode,
       Fiber (G.target edge.1) → Fiber (G.source edge.1)) : Prop :=
   ∀ (edge : LaxificationReverseEdge mode)
     (sourcePoint : Fiber (G.source edge.1))
     (targetPoint : Fiber (G.target edge.1)),
     relation (G.target edge.1) targetPoint (T.edgeMap edge.1 sourcePoint) ↔
-      relation (G.source edge.1) (residual edge targetPoint) sourcePoint
+      relation (G.source edge.1) (adjoint edge targetPoint) sourcePoint
 
 /-- The transport on the laxification graph, using an original map on forward
-edges and its supplied residual map on reversed edges. -/
+edges and its supplied lower adjoint on reversed edges. -/
 def laxification (T : Transport G Fiber)
     (mode : E → EdgeMode)
-    (residual : ∀ edge : LaxificationReverseEdge mode,
+    (adjoint : ∀ edge : LaxificationReverseEdge mode,
       Fiber (G.target edge.1) → Fiber (G.source edge.1)) :
     Transport (laxificationGraph G mode) Fiber where
   edgeMap edge := match edge with
     | Sum.inl edge => T.edgeMap edge.1
-    | Sum.inr edge => residual edge
+    | Sum.inr edge => adjoint edge
 
 /-- Laxification retains the original map on a forward edge. -/
 @[simp] theorem laxification_edgeMap_forward (T : Transport G Fiber)
     (mode : E → EdgeMode)
-    (residual : ∀ edge : LaxificationReverseEdge mode,
+    (adjoint : ∀ edge : LaxificationReverseEdge mode,
       Fiber (G.target edge.1) → Fiber (G.source edge.1))
     (edge : LaxificationForwardEdge mode) :
-    (T.laxification mode residual).edgeMap (.inl edge) = T.edgeMap edge.1 :=
+    (T.laxification mode adjoint).edgeMap (.inl edge) = T.edgeMap edge.1 :=
   rfl
 
-/-- Laxification uses the supplied residual map on a reversed edge. -/
+/-- Laxification uses the supplied lower adjoint on a reversed edge. -/
 @[simp] theorem laxification_edgeMap_reverse (T : Transport G Fiber)
     (mode : E → EdgeMode)
-    (residual : ∀ edge : LaxificationReverseEdge mode,
+    (adjoint : ∀ edge : LaxificationReverseEdge mode,
       Fiber (G.target edge.1) → Fiber (G.source edge.1))
     (edge : LaxificationReverseEdge mode) :
-    (T.laxification mode residual).edgeMap (.inr edge) = residual edge :=
+    (T.laxification mode adjoint).edgeMap (.inr edge) = adjoint edge :=
   rfl
 
 variable {relation : ∀ vertex : V, Fiber vertex → Fiber vertex → Prop}
 variable {mode : E → EdgeMode}
-variable {residual : ∀ edge : LaxificationReverseEdge mode,
+variable {adjoint : ∀ edge : LaxificationReverseEdge mode,
   Fiber (G.target edge.1) → Fiber (G.source edge.1)}
 variable {family : ∀ vertex : V, Fiber vertex}
 
@@ -169,9 +169,9 @@ theorem isMixedSectionFor_laxification
     (T : Transport G Fiber)
     (hreflexive : ∀ (edge : {edge : E // mode edge = .exact}),
       relation (G.target edge.1) (family (G.target edge.1)) (family (G.target edge.1)))
-    (hresidual : T.IsResidualFor relation mode residual) :
+    (hadjoint : T.IsLowerAdjointFor relation mode adjoint) :
     T.IsMixedSectionFor relation mode family →
-      (T.laxification mode residual).IsMixedSectionFor relation (fun _ => .lax) family := by
+      (T.laxification mode adjoint).IsMixedSectionFor relation (fun _ => .lax) family := by
   intro hfamily edge
   rcases edge with edge | edge
   · rcases edge.property with hmode | hmode
@@ -183,7 +183,7 @@ theorem isMixedSectionFor_laxification
       exact hreflexive ⟨edge.1, hmode⟩
   · rcases edge.property with hmode | hmode
     · have hconstraint := hfamily.oplax hmode
-      have hconverted := (hresidual edge (family (G.source edge.1))
+      have hconverted := (hadjoint edge (family (G.source edge.1))
         (family (G.target edge.1))).mp hconstraint
       simpa [laxification, laxificationGraph] using hconverted
     · have heq := hfamily.exact hmode
@@ -191,18 +191,18 @@ theorem isMixedSectionFor_laxification
           (T.edgeMap edge.1 (family (G.source edge.1))) := by
         rw [heq]
         exact hreflexive ⟨edge.1, hmode⟩
-      have hconverted := (hresidual edge (family (G.source edge.1))
+      have hconverted := (hadjoint edge (family (G.source edge.1))
         (family (G.target edge.1))).mp hconstraint
       simpa [laxification, laxificationGraph] using hconverted
 
 /-- An all-lax section on the laxification graph gives a mixed section.  The
-residual equivalence handles oplax edges, while exact edges use both copies
+adjunction equivalence handles oplax edges, while exact edges use both copies
 and `IsExactSeparated` to recover equality. -/
 theorem laxification_isMixedSectionFor
     (T : Transport G Fiber)
-    (hresidual : T.IsResidualFor relation mode residual)
+    (hadjoint : T.IsLowerAdjointFor relation mode adjoint)
     (hseparated : T.IsExactSeparated relation mode) :
-    (T.laxification mode residual).IsMixedSectionFor relation (fun _ => .lax) family →
+    (T.laxification mode adjoint).IsMixedSectionFor relation (fun _ => .lax) family →
       T.IsMixedSectionFor relation mode family := by
   intro hfamily edge
   cases hmode : mode edge with
@@ -215,15 +215,15 @@ theorem laxification_isMixedSectionFor
     change relation (G.target edge) (T.edgeMap edge (family (G.source edge)))
       (family (G.target edge)) at hforward
     change relation (G.source edge)
-      (residual ⟨edge, Or.inr hmode⟩ (family (G.target edge)))
+      (adjoint ⟨edge, Or.inr hmode⟩ (family (G.target edge)))
       (family (G.source edge)) at hreverse
-    have hbackward := (hresidual ⟨edge, Or.inr hmode⟩ (family (G.source edge))
+    have hbackward := (hadjoint ⟨edge, Or.inr hmode⟩ (family (G.source edge))
       (family (G.target edge))).mpr hreverse
     exact hseparated ⟨edge, hmode⟩ (family (G.source edge)) (family (G.target edge))
       hforward hbackward
   | oplax =>
     have hconstraint := hfamily (.inr ⟨edge, Or.inl hmode⟩)
-    have hconverted := (hresidual ⟨edge, Or.inl hmode⟩ (family (G.source edge))
+    have hconverted := (hadjoint ⟨edge, Or.inl hmode⟩ (family (G.source edge))
       (family (G.target edge))).mpr hconstraint
     simpa [laxification, laxificationGraph] using hconverted
 
@@ -234,13 +234,13 @@ theorem isMixedSectionFor_iff_laxification
     (T : Transport G Fiber)
     (hreflexive : ∀ (edge : {edge : E // mode edge = .exact}),
       relation (G.target edge.1) (family (G.target edge.1)) (family (G.target edge.1)))
-    (hresidual : T.IsResidualFor relation mode residual)
+    (hadjoint : T.IsLowerAdjointFor relation mode adjoint)
     (hseparated : T.IsExactSeparated relation mode) :
     T.IsMixedSectionFor relation mode family ↔
-      (T.laxification mode residual).IsMixedSectionFor relation (fun _ => .lax) family := by
+      (T.laxification mode adjoint).IsMixedSectionFor relation (fun _ => .lax) family := by
   constructor
-  · exact isMixedSectionFor_laxification T hreflexive hresidual
-  · exact laxification_isMixedSectionFor T hresidual hseparated
+  · exact isMixedSectionFor_laxification T hreflexive hadjoint
+  · exact laxification_isMixedSectionFor T hadjoint hseparated
 
 end Transport
 

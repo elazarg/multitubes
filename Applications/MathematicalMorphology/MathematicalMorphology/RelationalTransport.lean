@@ -79,8 +79,8 @@ variable {relation : (edge : E) →
 variable {mode : E → EdgeMode}
 variable {family : ∀ vertex, Set (Signal vertex)}
 
-/-- Dilation is the residual of erosion on every reversed edge. -/
-def dilationResidual (G : EdgeGraph V E)
+/-- Dilation is the lower adjoint of erosion on every reversed edge. -/
+def dilationLowerAdjoint (G : EdgeGraph V E)
     (relation : (edge : E) →
       SetRel (Signal (G.source edge)) (Signal (G.target edge)))
     (mode : E → EdgeMode) :
@@ -96,7 +96,7 @@ theorem mixedErosionLaxification_iff
     (mode : E → EdgeMode) (family : ∀ vertex, Set (Signal vertex)) :
     (erosionTransport G relation).IsMixedSection mode family ↔
       ((erosionTransport G relation).laxification mode
-        (dilationResidual G relation mode)).IsLaxSection family := by
+        (dilationLowerAdjoint G relation mode)).IsLaxSection family := by
   apply Transport.isMixedSection_iff_laxification_of_galoisConnection
   intro edge
   exact SetRel.image_core_gc

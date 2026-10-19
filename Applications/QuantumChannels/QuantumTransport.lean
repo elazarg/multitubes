@@ -11,7 +11,7 @@ public import QuantumTransport.Discard
 # Quantum transport
 
 This is the umbrella module for transport by finite-dimensional Kraus maps and
-for the discard-channel obstruction to residual reversal.
+for the discard-channel obstruction to adjoint reversal.
 
 ## Main definitions
 
@@ -24,10 +24,10 @@ for the discard-channel obstruction to residual reversal.
 
 * `QuantumTransport.walkMap_le_of_lax_or_exact` - propagation of lower bounds.
 * `QuantumTransport.le_walkMap_of_oplax_or_exact` - propagation of upper bounds.
-* `QuantumTransport.not_exists_discardResidual` - the discard edge cannot be
-  reversed by an order residual.
+* `QuantumTransport.not_exists_discardLowerAdjoint` - the discard edge cannot
+  be reversed by a lower adjoint.
 
 ## Tags
 
-quantum channel, Kraus map, transport, Löwner order, residual
+quantum channel, Kraus map, transport, Löwner order, lower adjoint
 -/

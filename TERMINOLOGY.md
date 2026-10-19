@@ -56,8 +56,7 @@ docstring may mention it once as a gloss ("also called …") without adopting it
 | oplax section | `x t ≤ T.edgeMap e (x s)` on every edge; a post-fixed point `x ≤ incomingInf x`. | supersolution, post-invariant |
 | pre-fixed point, post-fixed point | `f a ≤ a` and `a ≤ f a`, as in mathlib. | sub-fixed point |
 | mode | The per-edge choice `EdgeMode`: `lax`, `exact`, or `oplax`. A *mixed section* satisfies each edge's mode. | polarity |
-| residual | In `Maths.Multitubes.Mixed.Adjoint`, a map reversing an oplax constraint; over ordered fibers it is the lower adjoint of the edge map. | left residual |
-| lower adjoint, upper adjoint | The two sides of a `GaloisConnection`, as in mathlib. | left adjoint, right adjoint |
+| lower adjoint, upper adjoint | The two sides of a `GaloisConnection`, as in mathlib. Relative to a relation, `IsLowerAdjointFor` is the map that reverses an oplax constraint. | residual, left adjoint, right adjoint |
 | laxification | The graph and transport that turn a mixed section into an all-lax one. | adjoint reversal, as a name for the construction |
 | path closure | The join over all walks of transported lower data (`pathClosure`, `maxIncomingWeight`). | path envelope |
 | least lax majorant | The least lax section above given lower data (`leastLaxMajorant`). | |
@@ -92,7 +91,6 @@ which the library has always used.
 These identifiers predate the vocabulary above and keep their names until they are renamed.
 
 - `*Cycle*` in declaration names means *closed walk*.
-- `IsResidualFor` and `translationResidual` use *residual* for the reversing map.
 - `HasCyclicSlack`, `cyclicSlackThreshold`, and `IsSlackChain` use *slack* for a relaxation
   level.
 - In `RadiusFixedPoint` and `ContractiveGauge`, `gain` is a slope and `bias` is a shift.

@@ -15,7 +15,7 @@ public import ProgramSemantics.Octagon
 
 Predicate transformers give a small program-semantics client for transport.  A
 state transition acts contravariantly on predicates by inverse image.  Its direct image is
-the residual supplied when an oplax predicate constraint is reversed.  This works for
+the lower adjoint supplied when an oplax predicate constraint is reversed.  This works for
 noninjective transitions, where the two predicate transformers are not inverse functions.
 
 ## Main definitions

@@ -88,8 +88,8 @@ variable {step : (edge : E) → State (G.source edge) → State (G.target edge)}
 variable {mode : E → EdgeMode}
 variable {family : ∀ vertex, Set (State vertex)}
 
-/-- Direct image is the residual for inverse-image transport on every reversed edge. -/
-def directImageResidual (G : EdgeGraph V E)
+/-- Direct image is the lower adjoint of inverse-image transport on every reversed edge. -/
+def directImageLowerAdjoint (G : EdgeGraph V E)
     (step : (edge : E) → State (G.source edge) → State (G.target edge))
     (mode : E → EdgeMode) :
     ∀ _edge : Transport.LaxificationReverseEdge mode,
@@ -106,7 +106,7 @@ theorem mixedPredicateLaxification_iff
     (mode : E → EdgeMode) (family : ∀ vertex, Set (State vertex)) :
     (predicateTransport G step).IsMixedSection mode family ↔
       ((predicateTransport G step).laxification mode
-        (directImageResidual G step mode)).IsLaxSection family := by
+        (directImageLowerAdjoint G step mode)).IsLaxSection family := by
   apply Transport.isMixedSection_iff_laxification_of_galoisConnection
   intro edge
   exact Set.image_preimage

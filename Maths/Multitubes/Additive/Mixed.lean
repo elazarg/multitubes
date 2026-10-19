@@ -22,8 +22,8 @@ potentials on the laxification graph.
 
 * `Maths.MixedAdditiveTransport.laxifiedWeight` - the signed label on the
   laxification graph.
-* `Maths.MixedAdditiveTransport.translationResidual` - the subtraction residual
-  for a reverse-compatible edge.
+* `Maths.MixedAdditiveTransport.translationLowerAdjoint` - subtraction, the lower
+  adjoint of a reverse-compatible edge.
 * `Maths.MixedAdditiveTransport.laxifiedTranslationTransport` - translation
   transport on the laxification graph.
 * `Maths.MixedAdditiveTransport.mixedMaxIncomingWeight` - the unrooted incoming
@@ -31,8 +31,8 @@ potentials on the laxification graph.
 
 ## Main results
 
-* `Maths.MixedAdditiveTransport.translationResidual_galoisConnection` - the
-  residual/addition Galois connection.
+* `Maths.MixedAdditiveTransport.translationLowerAdjoint_galoisConnection` - the
+  subtraction/addition Galois connection.
 * `Maths.MixedAdditiveTransport.isMixedSection_iff_isLaxSection_laxified` - the
   partial-order reduction to signed lax transport.
 * `Maths.MixedAdditiveTransport.isMixedSection_iff_isPotential_laxified` - the
@@ -87,24 +87,24 @@ def laxifiedWeight (mode : E → EdgeMode) (weight : E → A) :
     laxifiedWeight mode weight (.inr edge) = -weight edge.1 :=
   rfl
 
-/-- The subtraction residual of an additive translation on a
+/-- Subtraction, the lower adjoint of an additive translation on a
 reverse-compatible edge. -/
-def translationResidual (mode : E → EdgeMode) (weight : E → A)
+def translationLowerAdjoint (mode : E → EdgeMode) (weight : E → A)
     (edge : Transport.LaxificationReverseEdge mode) : A → A :=
   fun point => point - weight edge.1
 
-/-- The residual evaluates by subtracting the original edge label. -/
-@[simp] theorem translationResidual_apply (mode : E → EdgeMode) (weight : E → A)
+/-- The lower adjoint subtracts the original edge label. -/
+@[simp] theorem translationLowerAdjoint_apply (mode : E → EdgeMode) (weight : E → A)
     (edge : Transport.LaxificationReverseEdge mode) (point : A) :
-    translationResidual mode weight edge point = point - weight edge.1 :=
+    translationLowerAdjoint mode weight edge point = point - weight edge.1 :=
   rfl
 
-/-- The subtraction residual is the lower adjoint of addition in the orientation
+/-- Subtraction is the lower adjoint of addition in the orientation
 used by the mixed laxification theorem. -/
-theorem translationResidual_galoisConnection (mode : E → EdgeMode) (weight : E → A)
+theorem translationLowerAdjoint_galoisConnection (mode : E → EdgeMode) (weight : E → A)
     [Preorder A] [IsOrderedAddMonoid A]
     (edge : Transport.LaxificationReverseEdge mode) :
-    GaloisConnection (translationResidual mode weight edge)
+    GaloisConnection (translationLowerAdjoint mode weight edge)
       (fun point : A => point + weight edge.1) := by
   intro sourcePoint targetPoint
   exact sub_le_iff_le_add
@@ -139,7 +139,7 @@ theorem laxifiedTranslationTransport_eq_laxification
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A) :
     laxifiedTranslationTransport G mode weight =
       (translationTransport G weight).laxification mode
-        (translationResidual mode weight) := by
+        (translationLowerAdjoint mode weight) := by
   change Transport.mk _ = Transport.mk _
   rw [Transport.mk.injEq]
   funext edge
@@ -160,7 +160,7 @@ theorem isMixedSection_iff_isLaxSection_laxified
   rw [laxifiedTranslationTransport_eq_laxification]
   exact Transport.isMixedSection_iff_laxification_of_galoisConnection
     (translationTransport G weight)
-    (fun edge => translationResidual_galoisConnection mode weight edge)
+    (fun edge => translationLowerAdjoint_galoisConnection mode weight edge)
 
 /-- A mixed additive section is exactly an ordinary additive potential on the
 laxification graph with its signed weighting. -/

@@ -9,15 +9,15 @@ public import Maths.Multitubes.Mixed.AdjointOrder
 public import QuantumTransport.Kraus
 
 /-!
-# The discard channel has no order residual
+# The discard channel has no order adjoint
 
 The quantum discard operation sends a positive operator to its trace. In
 finite coordinates it is a heterogeneous Kraus map from an arbitrary finite
 system to a one-dimensional system. It is positive and monotone for the
-Löwner order, but it has neither a left nor a right order adjoint on the
+Löwner order, but it has neither a lower nor an upper adjoint on the
 positive cones when the source has at least two coordinates.
 
-The failed left adjoint is precisely the residual required to turn an oplax
+The missing lower adjoint is precisely the map required to turn an oplax
 transport edge into a reversed lax edge. Thus adjoint reversal is not
 available for every completely positive map, even in finite dimension.
 
@@ -46,11 +46,11 @@ available for every completely positive map, even in finite dimension.
 * `QuantumTransport.not_exists_galoisConnection_traceDiscard_right` - discard
   has no right order adjoint in nontrivial dimension.
 * `QuantumTransport.not_exists_galoisConnection_discard` - discard has no
-  left order adjoint.
+  lower adjoint.
 * `QuantumTransport.not_exists_galoisConnection_discard_right` - discard has
-  no right order adjoint.
-* `QuantumTransport.not_exists_discardResidual` - the oplax discard edge has
-  no residual suitable for laxification.
+  no upper adjoint.
+* `QuantumTransport.not_exists_discardLowerAdjoint` - the oplax discard edge
+  has no lower adjoint suitable for laxification.
 
 ## Implementation notes
 
@@ -61,7 +61,7 @@ contradicting its trace bound.
 
 ## Tags
 
-quantum channel, discard, trace, Löwner order, Galois connection, residual
+quantum channel, discard, trace, Löwner order, Galois connection, adjoint
 -/
 
 @[expose] public section
@@ -235,8 +235,8 @@ private theorem not_positiveOne_le_positiveZero :
 dimension. -/
 theorem not_exists_galoisConnection_traceDiscard
     {I : Type*} [Fintype I] [DecidableEq I] [Nontrivial I] :
-    ¬ ∃ residual : PositiveMatrix (Fin 1) → PositiveMatrix I,
-      GaloisConnection residual traceDiscard := by
+    ¬ ∃ adjoint : PositiveMatrix (Fin 1) → PositiveMatrix I,
+      GaloisConnection adjoint traceDiscard := by
   apply Maths.Transport.not_exists_galoisConnection_left_of_witnesses
     traceDiscard positiveOne positiveCoordinateProjection
   · intro i
@@ -247,18 +247,18 @@ theorem not_exists_galoisConnection_traceDiscard
 
 /-- The two-dimensional discard channel has no left order adjoint. -/
 theorem not_exists_galoisConnection_discard :
-    ¬ ∃ residual : PositiveMatrix (Fin 1) → PositiveMatrix (Fin 2),
-      GaloisConnection residual discard := by
-  change ¬ ∃ residual : PositiveMatrix (Fin 1) → PositiveMatrix (Fin 2),
-    GaloisConnection residual (@traceDiscard (Fin 2) _ _)
+    ¬ ∃ adjoint : PositiveMatrix (Fin 1) → PositiveMatrix (Fin 2),
+      GaloisConnection adjoint discard := by
+  change ¬ ∃ adjoint : PositiveMatrix (Fin 1) → PositiveMatrix (Fin 2),
+    GaloisConnection adjoint (@traceDiscard (Fin 2) _ _)
   exact not_exists_galoisConnection_traceDiscard (I := Fin 2)
 
 /-- The trace discard channel has no right order adjoint in nontrivial
 finite dimension. -/
 theorem not_exists_galoisConnection_traceDiscard_right
     {I : Type*} [Fintype I] [DecidableEq I] [Nontrivial I] :
-    ¬ ∃ residual : PositiveMatrix (Fin 1) → PositiveMatrix I,
-      GaloisConnection traceDiscard residual := by
+    ¬ ∃ adjoint : PositiveMatrix (Fin 1) → PositiveMatrix I,
+      GaloisConnection traceDiscard adjoint := by
   apply Maths.Transport.not_exists_galoisConnection_right_of_witnesses
     traceDiscard positiveOne positiveCoordinateProjection
   · intro i
@@ -283,10 +283,10 @@ theorem not_exists_galoisConnection_traceDiscard_right
 
 /-- The two-dimensional discard channel has no right order adjoint. -/
 theorem not_exists_galoisConnection_discard_right :
-    ¬ ∃ residual : PositiveMatrix (Fin 1) → PositiveMatrix (Fin 2),
-      GaloisConnection discard residual := by
-  change ¬ ∃ residual : PositiveMatrix (Fin 1) → PositiveMatrix (Fin 2),
-    GaloisConnection (@traceDiscard (Fin 2) _ _) residual
+    ¬ ∃ adjoint : PositiveMatrix (Fin 1) → PositiveMatrix (Fin 2),
+      GaloisConnection discard adjoint := by
+  change ¬ ∃ adjoint : PositiveMatrix (Fin 1) → PositiveMatrix (Fin 2),
+    GaloisConnection (@traceDiscard (Fin 2) _ _) adjoint
   exact not_exists_galoisConnection_traceDiscard_right (I := Fin 2)
 
 /-- The graph with one edge from the two-dimensional system to the
@@ -314,20 +314,20 @@ def discardTransport : Transport discardGraph discardFiber where
 def discardMode : Unit → EdgeMode :=
   fun _ => .oplax
 
-/-- The oplax discard edge admits no residual family satisfying the reversal
+/-- The oplax discard edge admits no family of lower adjoints satisfying the reversal
 law used by transport laxification. -/
-theorem not_exists_discardResidual :
-    ¬ ∃ residual : ∀ edge : Transport.LaxificationReverseEdge discardMode,
+theorem not_exists_discardLowerAdjoint :
+    ¬ ∃ adjoint : ∀ edge : Transport.LaxificationReverseEdge discardMode,
         discardFiber (discardGraph.target edge.1) →
           discardFiber (discardGraph.source edge.1),
-      discardTransport.IsResidualFor discardOrder discardMode residual := by
-  rintro ⟨residual, hresidual⟩
+      discardTransport.IsLowerAdjointFor discardOrder discardMode adjoint := by
+  rintro ⟨adjoint, hadjoint⟩
   apply not_exists_galoisConnection_discard
-  refine ⟨fun target => residual ⟨(), Or.inl rfl⟩ target, ?_⟩
+  refine ⟨fun target => adjoint ⟨(), Or.inl rfl⟩ target, ?_⟩
   intro target source
-  change (residual ⟨(), Or.inl rfl⟩ target).1 ≤ source.1 ↔
+  change (adjoint ⟨(), Or.inl rfl⟩ target).1 ≤ source.1 ↔
     target.1 ≤ (discard source).1
   simpa [discardGraph, discardFiber, discardOrder, discardTransport,
-    discardMode] using (hresidual ⟨(), Or.inl rfl⟩ source target).symm
+    discardMode] using (hadjoint ⟨(), Or.inl rfl⟩ source target).symm
 
 end QuantumTransport
