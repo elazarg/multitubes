@@ -53,9 +53,9 @@ universe uV uE
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 
 /-- A radius satisfies its vertex lower bounds and every affine edge demand. -/
-def IsFeasibleRadius (bias gain : E → ℝ) (lower radius : V → ℝ) : Prop :=
+def IsFeasibleRadius (shift slope : E → ℝ) (lower radius : V → ℝ) : Prop :=
   (∀ vertex, lower vertex ≤ radius vertex) ∧
-    ∀ edge, bias edge + gain edge * radius (G.source edge) ≤ radius (G.target edge)
+    ∀ edge, shift edge + slope edge * radius (G.source edge) ≤ radius (G.target edge)
 
 /-- Add one constant lower-bound edge entering every vertex. -/
 def radiusGraph (G : EdgeGraph V E) : EdgeGraph V (E ⊕ V) where
@@ -67,27 +67,27 @@ def radiusGraph (G : EdgeGraph V E) : EdgeGraph V (E ⊕ V) where
     | Sum.inr vertex => vertex
 
 /-- Gauge-normalized labels for affine demands and vertex lower bounds. -/
-def normalizedRadiusLabel (G : EdgeGraph V E) (bias gain : E → ℝ)
+def normalizedRadiusLabel (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower gauge : V → ℝ) : E ⊕ V → Label
   | Sum.inl edge =>
-      ⟨⊥, bias edge / gauge (G.target edge),
-        gain edge * gauge (G.source edge) / gauge (G.target edge)⟩
+      ⟨⊥, shift edge / gauge (G.target edge),
+        slope edge * gauge (G.source edge) / gauge (G.target edge)⟩
   | Sum.inr vertex => ⟨⊥, lower vertex / gauge vertex, 0⟩
 
 /-- Labels for affine demands together with constant vertex lower bounds. -/
-def radiusLabel (bias gain : E → ℝ) (lower : V → ℝ) : E ⊕ V → Label
-  | Sum.inl edge => ⟨⊥, bias edge, gain edge⟩
+def radiusLabel (shift slope : E → ℝ) (lower : V → ℝ) : E ⊕ V → Label
+  | Sum.inl edge => ⟨⊥, shift edge, slope edge⟩
   | Sum.inr vertex => ⟨⊥, lower vertex, 0⟩
 
 /-- The Bellman radius operator: the maximum of the lower bound and incoming affine demands. -/
 def radiusOperator [Fintype E] [Fintype V] [DecidableEq V]
-    (G : EdgeGraph V E) (bias gain : E → ℝ) (lower radius : V → ℝ) : V → ℝ :=
-  vertexOperator (radiusGraph G) (radiusLabel bias gain lower) radius
+    (G : EdgeGraph V E) (shift slope : E → ℝ) (lower radius : V → ℝ) : V → ℝ :=
+  vertexOperator (radiusGraph G) (radiusLabel shift slope lower) radius
 
 /-- The radius operator after division of each coordinate by a positive gauge. -/
 def normalizedRadiusOperator [Fintype E] [Fintype V] [DecidableEq V]
-    (G : EdgeGraph V E) (bias gain : E → ℝ) (lower gauge scaled : V → ℝ) : V → ℝ :=
-  vertexOperator (radiusGraph G) (normalizedRadiusLabel G bias gain lower gauge) scaled
+    (G : EdgeGraph V E) (shift slope : E → ℝ) (lower gauge scaled : V → ℝ) : V → ℝ :=
+  vertexOperator (radiusGraph G) (normalizedRadiusLabel G shift slope lower gauge) scaled
 
 section Finite
 
@@ -99,12 +99,12 @@ theorem incoming_radiusGraph_nonempty (G : EdgeGraph V E) (vertex : V) :
   exact ⟨Sum.inr vertex, mem_incoming.2 rfl⟩
 
 /-- The Bellman inequality is exactly lower-bound and edge feasibility. -/
-theorem radiusOperator_le_iff (G : EdgeGraph V E) (bias gain : E → ℝ)
+theorem radiusOperator_le_iff (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower radius : V → ℝ) :
-    (∀ vertex, radiusOperator G bias gain lower radius vertex ≤ radius vertex) ↔
-      IsFeasibleRadius (G := G) bias gain lower radius := by
+    (∀ vertex, radiusOperator G shift slope lower radius vertex ≤ radius vertex) ↔
+      IsFeasibleRadius (G := G) shift slope lower radius := by
   rw [radiusOperator, ← isLaxSection_iff_vertexOperator_le
-    (radiusGraph G) (radiusLabel bias gain lower) radius (incoming_radiusGraph_nonempty G)]
+    (radiusGraph G) (radiusLabel shift slope lower) radius (incoming_radiusGraph_nonempty G)]
   constructor
   · intro h
     constructor
@@ -124,10 +124,10 @@ theorem radiusOperator_le_iff (G : EdgeGraph V E) (bias gain : E → ℝ)
           hlower vertex
 
 /-- Gauge conjugation identifies the normalized and original Bellman operators. -/
-theorem radiusOperator_gauge_conjugate (G : EdgeGraph V E) (bias gain : E → ℝ)
+theorem radiusOperator_gauge_conjugate (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower gauge scaled : V → ℝ) (hgauge : ∀ vertex, 0 < gauge vertex) (vertex : V) :
-    radiusOperator G bias gain lower (fun v => gauge v * scaled v) vertex =
-      gauge vertex * normalizedRadiusOperator G bias gain lower gauge scaled vertex := by
+    radiusOperator G shift slope lower (fun v => gauge v * scaled v) vertex =
+      gauge vertex * normalizedRadiusOperator G shift slope lower gauge scaled vertex := by
   rw [radiusOperator, normalizedRadiusOperator,
     vertexOperator_eq_sup' (incoming_radiusGraph_nonempty G vertex),
     vertexOperator_eq_sup' (incoming_radiusGraph_nonempty G vertex),
@@ -151,11 +151,11 @@ theorem radiusOperator_gauge_conjugate (G : EdgeGraph V E) (bias gain : E → �
       field_simp [(hgauge target).ne']
 
 /-- A contractive gauge makes the normalized radius operator a contraction. -/
-theorem contractingWith_normalizedRadiusOperator (G : EdgeGraph V E) (bias gain : E → ℝ)
+theorem contractingWith_normalizedRadiusOperator (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower gauge : V → ℝ) {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
-    (hgain : ∀ edge, 0 ≤ gain edge)
-    (hgauge : IsContractiveGauge (G := G) gain rate gauge) :
-    ContractingWith ⟨rate, hrate⟩ (normalizedRadiusOperator G bias gain lower gauge) := by
+    (hslope : ∀ edge, 0 ≤ slope edge)
+    (hgauge : IsContractiveGauge (G := G) slope rate gauge) :
+    ContractingWith ⟨rate, hrate⟩ (normalizedRadiusOperator G shift slope lower gauge) := by
   apply contractingWith_vertexOperator
   · exact hlt
   · intro action
@@ -164,53 +164,53 @@ theorem contractingWith_normalizedRadiusOperator (G : EdgeGraph V E) (bias gain 
         simp only [normalizedRadiusLabel]
         rw [abs_of_nonneg]
         · exact (div_le_iff₀ (hgauge.1 (G.target edge))).2 (hgauge.2 edge)
-        · exact div_nonneg (mul_nonneg (hgain edge) (hgauge.1 (G.source edge)).le)
+        · exact div_nonneg (mul_nonneg (hslope edge) (hgauge.1 (G.source edge)).le)
             (hgauge.1 (G.target edge)).le
     | inr vertex =>
         simp only [normalizedRadiusLabel, abs_zero]
         exact hrate
 
 /-- The least radius selected by Banach's fixed-point theorem in gauge coordinates. -/
-def leastRadius (G : EdgeGraph V E) (bias gain : E → ℝ) (lower gauge : V → ℝ)
+def leastRadius (G : EdgeGraph V E) (shift slope : E → ℝ) (lower gauge : V → ℝ)
     {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
-    (hgain : ∀ edge, 0 ≤ gain edge)
-    (hgauge : IsContractiveGauge (G := G) gain rate gauge) : V → ℝ :=
-  let contraction := contractingWith_normalizedRadiusOperator G bias gain lower gauge hrate hlt
-    hgain hgauge
+    (hslope : ∀ edge, 0 ≤ slope edge)
+    (hgauge : IsContractiveGauge (G := G) slope rate gauge) : V → ℝ :=
+  let contraction := contractingWith_normalizedRadiusOperator G shift slope lower gauge hrate hlt
+    hslope hgauge
   fun vertex => gauge vertex *
     (@ContractingWith.fixedPoint (V → ℝ) _ _ _ contraction) vertex
 
 /-- The selected least radius is a fixed point of the Bellman radius operator. -/
-theorem leastRadius_fixedPoint (G : EdgeGraph V E) (bias gain : E → ℝ)
+theorem leastRadius_fixedPoint (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower gauge : V → ℝ) {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
-    (hgain : ∀ edge, 0 ≤ gain edge)
-    (hgauge : IsContractiveGauge (G := G) gain rate gauge) :
-    radiusOperator G bias gain lower
-        (leastRadius G bias gain lower gauge hrate hlt hgain hgauge) =
-      leastRadius G bias gain lower gauge hrate hlt hgain hgauge := by
-  let contraction := contractingWith_normalizedRadiusOperator G bias gain lower gauge hrate hlt
-    hgain hgauge
+    (hslope : ∀ edge, 0 ≤ slope edge)
+    (hgauge : IsContractiveGauge (G := G) slope rate gauge) :
+    radiusOperator G shift slope lower
+        (leastRadius G shift slope lower gauge hrate hlt hslope hgauge) =
+      leastRadius G shift slope lower gauge hrate hlt hslope hgauge := by
+  let contraction := contractingWith_normalizedRadiusOperator G shift slope lower gauge hrate hlt
+    hslope hgauge
   let fixed := @ContractingWith.fixedPoint (V → ℝ) _ _ _ contraction
-  have hfixed : normalizedRadiusOperator G bias gain lower gauge fixed = fixed :=
+  have hfixed : normalizedRadiusOperator G shift slope lower gauge fixed = fixed :=
     contraction.fixedPoint_isFixedPt
   funext vertex
   rw [leastRadius]
-  change radiusOperator G bias gain lower (fun v => gauge v * fixed v) vertex = _
-  rw [radiusOperator_gauge_conjugate G bias gain lower gauge fixed hgauge.1, hfixed]
+  change radiusOperator G shift slope lower (fun v => gauge v * fixed v) vertex = _
+  rw [radiusOperator_gauge_conjugate G shift slope lower gauge fixed hgauge.1, hfixed]
 
 /-- The selected fixed point is the unique Bellman fixed point. -/
-theorem leastRadius_unique (G : EdgeGraph V E) (bias gain : E → ℝ)
+theorem leastRadius_unique (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower gauge : V → ℝ) {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
-    (hgain : ∀ edge, 0 ≤ gain edge)
-    (hgauge : IsContractiveGauge (G := G) gain rate gauge) {radius : V → ℝ}
-    (hradius : radiusOperator G bias gain lower radius = radius) :
-    radius = leastRadius G bias gain lower gauge hrate hlt hgain hgauge := by
-  let contraction := contractingWith_normalizedRadiusOperator G bias gain lower gauge hrate hlt
-    hgain hgauge
+    (hslope : ∀ edge, 0 ≤ slope edge)
+    (hgauge : IsContractiveGauge (G := G) slope rate gauge) {radius : V → ℝ}
+    (hradius : radiusOperator G shift slope lower radius = radius) :
+    radius = leastRadius G shift slope lower gauge hrate hlt hslope hgauge := by
+  let contraction := contractingWith_normalizedRadiusOperator G shift slope lower gauge hrate hlt
+    hslope hgauge
   let scaled := fun vertex => radius vertex / gauge vertex
-  have hscaled : normalizedRadiusOperator G bias gain lower gauge scaled = scaled := by
+  have hscaled : normalizedRadiusOperator G shift slope lower gauge scaled = scaled := by
     funext vertex
-    have hconj := radiusOperator_gauge_conjugate G bias gain lower gauge scaled hgauge.1 vertex
+    have hconj := radiusOperator_gauge_conjugate G shift slope lower gauge scaled hgauge.1 vertex
     have hradiusVertex := congrFun hradius vertex
     have hg : gauge vertex ≠ 0 := (hgauge.1 vertex).ne'
     have hunscale : (fun v => gauge v * scaled v) = radius := by
@@ -233,46 +233,46 @@ theorem leastRadius_unique (G : EdgeGraph V E) (bias gain : E → ℝ)
   field_simp [(hgauge.1 vertex).ne']
 
 /-- The selected fixed point satisfies all lower and affine radius constraints. -/
-theorem leastRadius_feasible (G : EdgeGraph V E) (bias gain : E → ℝ)
+theorem leastRadius_feasible (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower gauge : V → ℝ) {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
-    (hgain : ∀ edge, 0 ≤ gain edge)
-    (hgauge : IsContractiveGauge (G := G) gain rate gauge) :
-    IsFeasibleRadius (G := G) bias gain lower
-      (leastRadius G bias gain lower gauge hrate hlt hgain hgauge) := by
+    (hslope : ∀ edge, 0 ≤ slope edge)
+    (hgauge : IsContractiveGauge (G := G) slope rate gauge) :
+    IsFeasibleRadius (G := G) shift slope lower
+      (leastRadius G shift slope lower gauge hrate hlt hslope hgauge) := by
   rw [← radiusOperator_le_iff]
   intro vertex
   exact le_of_eq (congrFun
-    (leastRadius_fixedPoint G bias gain lower gauge hrate hlt hgain hgauge) vertex)
+    (leastRadius_fixedPoint G shift slope lower gauge hrate hlt hslope hgauge) vertex)
 
-/-- The normalized Bellman operator is monotone when the gains are nonnegative. -/
-theorem monotone_normalizedRadiusOperator (G : EdgeGraph V E) (bias gain : E → ℝ)
-    (lower gauge : V → ℝ) (hgain : ∀ edge, 0 ≤ gain edge)
+/-- The normalized Bellman operator is monotone when the slopes are nonnegative. -/
+theorem monotone_normalizedRadiusOperator (G : EdgeGraph V E) (shift slope : E → ℝ)
+    (lower gauge : V → ℝ) (hslope : ∀ edge, 0 ≤ slope edge)
     (hgauge : ∀ vertex, 0 < gauge vertex) :
-    Monotone (normalizedRadiusOperator G bias gain lower gauge) := by
+    Monotone (normalizedRadiusOperator G shift slope lower gauge) := by
   apply monotone_vertexOperator
   intro action
   cases action with
   | inl edge =>
-      exact div_nonneg (mul_nonneg (hgain edge) (hgauge (G.source edge)).le)
+      exact div_nonneg (mul_nonneg (hslope edge) (hgauge (G.source edge)).le)
         (hgauge (G.target edge)).le
   | inr vertex => exact le_rfl
 
 /-- The selected radius is pointwise below every feasible radius. -/
-theorem leastRadius_le (G : EdgeGraph V E) (bias gain : E → ℝ)
+theorem leastRadius_le (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower gauge : V → ℝ) {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
-    (hgain : ∀ edge, 0 ≤ gain edge)
-    (hgauge : IsContractiveGauge (G := G) gain rate gauge) {radius : V → ℝ}
-    (hfeasible : IsFeasibleRadius (G := G) bias gain lower radius) :
-    leastRadius G bias gain lower gauge hrate hlt hgain hgauge ≤ radius := by
-  let operator := normalizedRadiusOperator G bias gain lower gauge
-  let contraction := contractingWith_normalizedRadiusOperator G bias gain lower gauge hrate hlt
-    hgain hgauge
+    (hslope : ∀ edge, 0 ≤ slope edge)
+    (hgauge : IsContractiveGauge (G := G) slope rate gauge) {radius : V → ℝ}
+    (hfeasible : IsFeasibleRadius (G := G) shift slope lower radius) :
+    leastRadius G shift slope lower gauge hrate hlt hslope hgauge ≤ radius := by
+  let operator := normalizedRadiusOperator G shift slope lower gauge
+  let contraction := contractingWith_normalizedRadiusOperator G shift slope lower gauge hrate hlt
+    hslope hgauge
   let scaled := fun vertex => radius vertex / gauge vertex
   have hscaled : operator scaled ≤ scaled := by
     rw [Pi.le_def]
     intro vertex
-    have hconj := radiusOperator_gauge_conjugate G bias gain lower gauge scaled hgauge.1 vertex
-    have horiginal := (radiusOperator_le_iff G bias gain lower radius).2 hfeasible vertex
+    have hconj := radiusOperator_gauge_conjugate G shift slope lower gauge scaled hgauge.1 vertex
+    have horiginal := (radiusOperator_le_iff G shift slope lower radius).2 hfeasible vertex
     have hg : gauge vertex ≠ 0 := (hgauge.1 vertex).ne'
     have hunscale : (fun v => gauge v * scaled v) = radius := by
       funext v
@@ -288,8 +288,8 @@ theorem leastRadius_le (G : EdgeGraph V E) (bias gain : E → ℝ)
     | zero => exact le_rfl
     | succ n ih =>
         rw [Function.iterate_succ_apply']
-        exact le_trans (monotone_normalizedRadiusOperator G bias gain lower gauge hgain hgauge.1 ih)
-          hscaled
+        exact le_trans
+          (monotone_normalizedRadiusOperator G shift slope lower gauge hslope hgauge.1 ih) hscaled
   have htendsto := contraction.tendsto_iterate_fixedPoint scaled
   rw [Pi.le_def]
   intro vertex
@@ -306,18 +306,18 @@ theorem leastRadius_le (G : EdgeGraph V E) (bias gain : E → ℝ)
       field_simp [(hgauge.1 vertex).ne']
 
 /-- Bellman iteration from any initial radius converges to the least radius. -/
-theorem tendsto_iterate_radiusOperator (G : EdgeGraph V E) (bias gain : E → ℝ)
+theorem tendsto_iterate_radiusOperator (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower gauge initial : V → ℝ) {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
-    (hgain : ∀ edge, 0 ≤ gain edge)
-    (hgauge : IsContractiveGauge (G := G) gain rate gauge) :
+    (hslope : ∀ edge, 0 ≤ slope edge)
+    (hgauge : IsContractiveGauge (G := G) slope rate gauge) :
     Filter.Tendsto
-      (fun n => (radiusOperator G bias gain lower)^[n] initial)
+      (fun n => (radiusOperator G shift slope lower)^[n] initial)
       Filter.atTop
-      (nhds (leastRadius G bias gain lower gauge hrate hlt hgain hgauge)) := by
-  let operator := radiusOperator G bias gain lower
-  let normalized := normalizedRadiusOperator G bias gain lower gauge
-  let contraction := contractingWith_normalizedRadiusOperator G bias gain lower gauge hrate hlt
-    hgain hgauge
+      (nhds (leastRadius G shift slope lower gauge hrate hlt hslope hgauge)) := by
+  let operator := radiusOperator G shift slope lower
+  let normalized := normalizedRadiusOperator G shift slope lower gauge
+  let contraction := contractingWith_normalizedRadiusOperator G shift slope lower gauge hrate hlt
+    hslope hgauge
   let scaled := fun vertex => initial vertex / gauge vertex
   have hiterate (n : ℕ) :
       operator^[n] initial = fun vertex => gauge vertex * (normalized^[n] scaled) vertex := by
@@ -329,7 +329,7 @@ theorem tendsto_iterate_radiusOperator (G : EdgeGraph V E) (bias gain : E → �
     | succ n ih =>
         rw [Function.iterate_succ_apply', Function.iterate_succ_apply', ih]
         funext vertex
-        exact radiusOperator_gauge_conjugate G bias gain lower gauge
+        exact radiusOperator_gauge_conjugate G shift slope lower gauge
           (normalized^[n] scaled) hgauge.1 vertex
   have htendsto := contraction.tendsto_iterate_fixedPoint scaled
   rw [tendsto_pi_nhds]
@@ -342,31 +342,31 @@ theorem tendsto_iterate_radiusOperator (G : EdgeGraph V E) (bias gain : E → �
 
 /-- Quantitative convergence in normalized sup distance. -/
 theorem dist_iterate_normalizedRadiusOperator_le (G : EdgeGraph V E)
-    (bias gain : E → ℝ) (lower gauge initial : V → ℝ) {rate : ℝ}
-    (hrate : 0 ≤ rate) (hlt : rate < 1) (hgain : ∀ edge, 0 ≤ gain edge)
-    (hgauge : IsContractiveGauge (G := G) gain rate gauge) (n : ℕ) :
-    dist ((normalizedRadiusOperator G bias gain lower gauge)^[n] initial)
-        ((contractingWith_normalizedRadiusOperator G bias gain lower gauge hrate hlt hgain
+    (shift slope : E → ℝ) (lower gauge initial : V → ℝ) {rate : ℝ}
+    (hrate : 0 ≤ rate) (hlt : rate < 1) (hslope : ∀ edge, 0 ≤ slope edge)
+    (hgauge : IsContractiveGauge (G := G) slope rate gauge) (n : ℕ) :
+    dist ((normalizedRadiusOperator G shift slope lower gauge)^[n] initial)
+        ((contractingWith_normalizedRadiusOperator G shift slope lower gauge hrate hlt hslope
           hgauge).fixedPoint) ≤
-      dist initial (normalizedRadiusOperator G bias gain lower gauge initial) * rate ^ n /
+      dist initial (normalizedRadiusOperator G shift slope lower gauge initial) * rate ^ n /
         (1 - rate) := by
-  exact (contractingWith_normalizedRadiusOperator G bias gain lower gauge hrate hlt hgain
+  exact (contractingWith_normalizedRadiusOperator G shift slope lower gauge hrate hlt hslope
     hgauge).apriori_dist_iterate_fixedPoint_le initial n
 
 /-- A feasible radius within an upper budget exists exactly when the least radius is within it. -/
-theorem exists_feasible_bounded_iff_leastRadius_le (G : EdgeGraph V E) (bias gain : E → ℝ)
+theorem exists_feasible_bounded_iff_leastRadius_le (G : EdgeGraph V E) (shift slope : E → ℝ)
     (lower gauge upper : V → ℝ) {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
-    (hgain : ∀ edge, 0 ≤ gain edge)
-    (hgauge : IsContractiveGauge (G := G) gain rate gauge) :
+    (hslope : ∀ edge, 0 ≤ slope edge)
+    (hgauge : IsContractiveGauge (G := G) slope rate gauge) :
     (∃ radius : V → ℝ,
-      IsFeasibleRadius (G := G) bias gain lower radius ∧ radius ≤ upper) ↔
-      leastRadius G bias gain lower gauge hrate hlt hgain hgauge ≤ upper := by
+      IsFeasibleRadius (G := G) shift slope lower radius ∧ radius ≤ upper) ↔
+      leastRadius G shift slope lower gauge hrate hlt hslope hgauge ≤ upper := by
   constructor
   · rintro ⟨radius, hfeasible, hupper⟩
-    exact (leastRadius_le G bias gain lower gauge hrate hlt hgain hgauge hfeasible).trans hupper
+    exact (leastRadius_le G shift slope lower gauge hrate hlt hslope hgauge hfeasible).trans hupper
   · intro hupper
-    exact ⟨leastRadius G bias gain lower gauge hrate hlt hgain hgauge,
-      leastRadius_feasible G bias gain lower gauge hrate hlt hgain hgauge, hupper⟩
+    exact ⟨leastRadius G shift slope lower gauge hrate hlt hslope hgauge,
+      leastRadius_feasible G shift slope lower gauge hrate hlt hslope hgauge, hupper⟩
 
 end Finite
 

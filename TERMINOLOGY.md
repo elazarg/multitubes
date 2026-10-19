@@ -44,7 +44,7 @@ docstring may mention it once as a gloss ("also called …") without adopting it
 | label | Monoid-valued edge data `E → M`, with walk label `walkLabel`. | |
 | weight | Additive edge data `E → A`. | `w`, cost, length |
 | charge | Group-valued edge data whose walk sums measure circulation imbalance (Graph layer). | |
-| gain | Only in the Zaslavsky files, for unit-valued labels. | gain for a real slope |
+| gain | In the Zaslavsky files, a unit-valued label. In *gain flow* and *generalized flow*, the factor by which a branch scales the flow it carries, which is the slope of that branch. | gain for the slope of a label |
 | potential | A vertex function that is an additive lax section (`IsPotential`), or an exact one when said (`basePotential`). A *unit potential* is a multiplicative exact one. | |
 | gauge | A positive vertex scaling of slopes (`IsContractiveGauge`, `IsNonexpansiveGauge`). *Gauge transformation* in Switching is the standard name for a fiberwise isomorphism and is unrelated. | contraction gauge |
 
@@ -91,6 +91,5 @@ which the library has always used.
 These identifiers predate the vocabulary above and keep their names until they are renamed.
 
 - `*Cycle*` in declaration names means *closed walk*.
-- In `RadiusFixedPoint` and `ContractiveGauge`, `gain` is a slope and `bias` is a shift.
 - `suffixWeight` and `suffixWeightSum` use *weight* for a product of slopes.
 - `MaxAffine/AnchoredEigenvalue.lean` is about eigenvectors from reachable lower bounds.
