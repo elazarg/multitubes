@@ -149,18 +149,18 @@ section Translation
 
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E} {A : Type*}
 
-/-- The constant-fiber transport whose edge `e` acts by translation by `w e`. -/
-def translationTransport [Add A] (G : EdgeGraph V E) (w : E → A) :
+/-- The constant-fiber transport whose edge `e` acts by translation by `weight e`. -/
+def translationTransport [Add A] (G : EdgeGraph V E) (weight : E → A) :
     Transport G (fun _ : V => A) :=
-  ofEdgeAct G A fun edge point => point + w edge
+  ofEdgeAct G A fun edge point => point + weight edge
 
-@[simp] theorem translationTransport_edgeMap [Add A] (w : E → A) (edge : E) (point : A) :
-    (translationTransport G w).edgeMap edge point = point + w edge := rfl
+@[simp] theorem translationTransport_edgeMap [Add A] (weight : E → A) (edge : E) (point : A) :
+    (translationTransport G weight).edgeMap edge point = point + weight edge := rfl
 
 /-- Transport by additive edge data is translation by the walk sum. -/
-@[simp] theorem walkMap_translationTransport [AddMonoid A] (w : E → A) {start finish : V}
+@[simp] theorem walkMap_translationTransport [AddMonoid A] (weight : E → A) {start finish : V}
     (walk : G.Walk start finish) (point : A) :
-    (translationTransport G w).walkMap walk point = point + walkSum w walk := by
+    (translationTransport G weight).walkMap walk point = point + walkSum weight walk := by
   induction walk with
   | nil => simp
   | concat edge walkSoFar ih =>
@@ -169,8 +169,8 @@ def translationTransport [Add A] (G : EdgeGraph V E) (w : E → A) :
 
 /-- Every edge map of an ordered translation transport is monotone. -/
 theorem monotone_edgeMap_translationTransport [Add A] [Preorder A] [AddRightMono A]
-    (w : E → A) (edge : E) : Monotone ((translationTransport G w).edgeMap edge) :=
-  fun _ _ hle => add_le_add_left hle (w edge)
+    (weight : E → A) (edge : E) : Monotone ((translationTransport G weight).edgeMap edge) :=
+  fun _ _ hle => add_le_add_left hle (weight edge)
 
 end Translation
 

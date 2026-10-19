@@ -53,7 +53,7 @@ variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 def ReachabilityVertex (_G : EdgeGraph V E) := V
 
 instance ReachabilityVertex.instPreorder : Preorder (ReachabilityVertex G) where
-  le source target := Nonempty (G.Walk source target)
+  le start finish := Nonempty (G.Walk start finish)
   le_refl vertex := ⟨.nil⟩
   le_trans _ _ _ first second := ⟨first.some.append second.some⟩
 
@@ -70,14 +70,14 @@ instance SCC.instPartialOrder : PartialOrder (SCC G) :=
 def toSCC (G : EdgeGraph V E) (vertex : V) : SCC G :=
   toAntisymmetrization (· ≤ ·) (vertex : ReachabilityVertex G)
 
-theorem toSCC_le_toSCC_iff {source target : V} :
-    toSCC G source ≤ toSCC G target ↔ Nonempty (G.Walk source target) :=
+theorem toSCC_le_toSCC_iff {start finish : V} :
+    toSCC G start ≤ toSCC G finish ↔ Nonempty (G.Walk start finish) :=
   toAntisymmetrization_le_toAntisymmetrization_iff
 
 /-- Two vertices determine the same component exactly when they are mutually
 reachable. -/
-theorem toSCC_eq_toSCC_iff_linkedTo {source target : V} :
-    toSCC G source = toSCC G target ↔ LinkedTo G source target := by
+theorem toSCC_eq_toSCC_iff_linkedTo {start finish : V} :
+    toSCC G start = toSCC G finish ↔ LinkedTo G start finish := by
   constructor
   · intro hequal
     constructor

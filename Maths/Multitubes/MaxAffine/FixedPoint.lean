@@ -392,7 +392,7 @@ theorem exists_isEigenvector_of_translation [Fintype V] [Nonempty V] (G : EdgeGr
     {label : E → Label} (hslope : ∀ e : E, (label e).slope = 1)
     (hfloor : ∀ e : E, (label e).floor = ⊥)
     (hinEdge : ∀ vertex : V, ∃ e : E, G.target e = vertex)
-    (hconnected : ∀ source target : V, Nonempty (G.Walk source target)) :
+    (hconnected : ∀ start finish : V, Nonempty (G.Walk start finish)) :
     ∃ (lam : ℝ) (base : V) (best : G.Walk base base),
       0 < best.length ∧ best.length ≤ Fintype.card V ∧
         lam = walkSum (fun e => (label e).shift) best / best.length ∧

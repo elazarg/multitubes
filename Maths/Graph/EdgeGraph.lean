@@ -921,9 +921,9 @@ def IsStronglyConnectedAt (G : EdgeGraph V E) (base : V) : Prop :=
   ∀ vertex : V, LinkedTo G base vertex
 
 theorem IsStronglyConnectedAt.nonempty_walk {base : V}
-    (hconnected : IsStronglyConnectedAt G base) (source target : V) :
-    Nonempty (G.Walk source target) :=
-  ⟨((hconnected source).2.some).append ((hconnected target).1.some)⟩
+    (hconnected : IsStronglyConnectedAt G base) (start finish : V) :
+    Nonempty (G.Walk start finish) :=
+  ⟨((hconnected start).2.some).append ((hconnected finish).1.some)⟩
 
 /-- The endpoints of every edge are linked to `base`.  This is all the
 reachability the coboundary reconstruction consumes. -/

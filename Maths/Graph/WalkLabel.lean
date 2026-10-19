@@ -202,8 +202,8 @@ end Product
 
 /-- Every closed walk has zero sum: Kirchhoff's voltage law, or path independence of the walk
 sum. -/
-def HasZeroCycleSums {A : Type*} [AddMonoid A] (G : EdgeGraph V E) (w : E → A) : Prop :=
-  ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum w cycle = 0
+def HasZeroCycleSums {A : Type*} [AddMonoid A] (G : EdgeGraph V E) (weight : E → A) : Prop :=
+  ∀ (vertex : V) (cycle : G.Walk vertex vertex), walkSum weight cycle = 0
 
 section Opposite
 
@@ -240,19 +240,20 @@ end CommMonoid
 
 section Additive
 
-variable {A : Type*} [AddCommMonoid A] {w : E → A}
+variable {A : Type*} [AddCommMonoid A] {weight : E → A}
 
 /-- Additive edge data, read multiplicatively through the type tag `Multiplicative.ofAdd`, has
 the walk sum as its walk label. -/
 @[simp] theorem walkLabel_ofAdd (walk : G.Walk start finish) :
-    walkLabel (fun edge => Multiplicative.ofAdd (w edge)) walk =
-      Multiplicative.ofAdd (walkSum w walk) := by
+    walkLabel (fun edge => Multiplicative.ofAdd (weight edge)) walk =
+      Multiplicative.ofAdd (walkSum weight walk) := by
   rw [walkLabel_eq_walkProd]
   rfl
 
 /-- Zero cycle sums are trivial cycle labels of the multiplicative reading. -/
 theorem hasTrivialCycleLabels_ofAdd_iff :
-    HasTrivialCycleLabels G (fun edge => Multiplicative.ofAdd (w edge)) ↔ HasZeroCycleSums G w :=
+    HasTrivialCycleLabels G (fun edge => Multiplicative.ofAdd (weight edge)) ↔
+      HasZeroCycleSums G weight :=
   forall₂_congr fun _ _ => by rw [walkLabel_ofAdd, ofAdd_eq_one]
 
 end Additive
@@ -326,17 +327,17 @@ variable {A : Type*} [AddCommMonoid A] [PartialOrder A] [IsOrderedAddMonoid A]
 /-- If every edge with property `P` carries at least `threshold` and every edge carries a
 nonnegative datum, then `threshold` times the number of traversals of `P`-edges is at most the
 walk sum.  A repeated edge is counted once per traversal. -/
-theorem countP_nsmul_le_walkSum (w : E → A) (hw : ∀ edge, 0 ≤ w edge) (P : E → Prop)
-    [DecidablePred P] (threshold : A) (hthreshold : ∀ edge, P edge → threshold ≤ w edge)
+theorem countP_nsmul_le_walkSum (weight : E → A) (hweight : ∀ edge, 0 ≤ weight edge) (P : E → Prop)
+    [DecidablePred P] (threshold : A) (hthreshold : ∀ edge, P edge → threshold ≤ weight edge)
     (walk : G.Walk start finish) :
-    walk.edges.countP (fun edge => P edge) • threshold ≤ walkSum w walk := by
+    walk.edges.countP (fun edge => P edge) • threshold ≤ walkSum weight walk := by
   induction walk with
   | nil => simp
   | concat edge walkSoFar ih =>
       rw [EdgeGraph.Walk.edges_concat, List.countP_append, walkSum_concat, add_nsmul]
       by_cases hedge : P edge
       · simpa [hedge, one_nsmul] using add_le_add ih (hthreshold edge hedge)
-      · simpa [hedge] using add_le_add ih (hw edge)
+      · simpa [hedge] using add_le_add ih (hweight edge)
 
 end Ordered
 

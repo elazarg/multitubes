@@ -422,32 +422,32 @@ The equations are inverse-free, and direct finiteness manufactures the missing
 reverse identities during the proof. -/
 theorem hasTrivialCycleLabels_of_chosen_tests
     [IsDedekindFiniteMonoid M] {base : V}
-    (paths : ∀ vertex, G.Walk base vertex)
+    (walks : ∀ vertex, G.Walk base vertex)
     (returns : ∀ vertex, G.Walk vertex base)
     (hreturn : ∀ vertex,
-      walkLabel label (returns vertex) * walkLabel label (paths vertex) = 1)
+      walkLabel label (returns vertex) * walkLabel label (walks vertex) = 1)
     (hedge : ∀ edge,
       walkLabel label (returns (G.target edge)) * label edge *
-          walkLabel label (paths (G.source edge)) = 1) :
+          walkLabel label (walks (G.source edge)) = 1) :
     HasTrivialCycleLabels G label := by
   have hreverse (vertex : V) :
-      walkLabel label (paths vertex) * walkLabel label (returns vertex) = 1 :=
+      walkLabel label (walks vertex) * walkLabel label (returns vertex) = 1 :=
     mul_eq_one_comm.mp (hreturn vertex)
   let potential : V → Mˣ := fun vertex ↦
-    { val := walkLabel label (paths vertex)
+    { val := walkLabel label (walks vertex)
       inv := walkLabel label (returns vertex)
       val_inv := hreverse vertex
       inv_val := hreturn vertex }
   refine hasTrivialCycleLabels_of_unitPotential potential fun edge ↦ ?_
-  change label edge * walkLabel label (paths (G.source edge)) =
-    walkLabel label (paths (G.target edge))
-  calc label edge * walkLabel label (paths (G.source edge))
-      = (walkLabel label (paths (G.target edge)) * walkLabel label (returns (G.target edge))) *
-          (label edge * walkLabel label (paths (G.source edge))) := by rw [hreverse, one_mul]
-    _ = walkLabel label (paths (G.target edge)) *
+  change label edge * walkLabel label (walks (G.source edge)) =
+    walkLabel label (walks (G.target edge))
+  calc label edge * walkLabel label (walks (G.source edge))
+      = (walkLabel label (walks (G.target edge)) * walkLabel label (returns (G.target edge))) *
+          (label edge * walkLabel label (walks (G.source edge))) := by rw [hreverse, one_mul]
+    _ = walkLabel label (walks (G.target edge)) *
           (walkLabel label (returns (G.target edge)) * label edge *
-            walkLabel label (paths (G.source edge))) := by simp only [mul_assoc]
-    _ = walkLabel label (paths (G.target edge)) := by rw [hedge, mul_one]
+            walkLabel label (walks (G.source edge))) := by simp only [mul_assoc]
+    _ = walkLabel label (walks (G.target edge)) := by rw [hedge, mul_one]
 
 end Monoid
 

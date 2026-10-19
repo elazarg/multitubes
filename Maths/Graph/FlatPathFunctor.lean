@@ -98,11 +98,11 @@ theorem map_eq_of_isFlatAt_of_return {start finish : V} (hstart : IsFlatAt F sta
     (isoOfIsFlatAt F hstart hfinish second back)).1 rfl
 
 /-- The chosen morphism from the base object to one vertex object. -/
-def categoricalIngress (paths : ∀ vertex, G.Walk base vertex)
+def categoricalIngress (walks : ∀ vertex, G.Walk base vertex)
     (vertex : V) :
     F.obj (PathCategory.ofVertex G base) ⟶
       F.obj (PathCategory.ofVertex G vertex) :=
-  F.map (paths vertex)
+  F.map (walks vertex)
 
 /-- The chosen morphism from one vertex object back to the base object. -/
 def categoricalReturn (returns : ∀ vertex, G.Walk vertex base)
@@ -112,59 +112,59 @@ def categoricalReturn (returns : ∀ vertex, G.Walk vertex base)
   F.map (returns vertex)
 
 /-- The split idempotent on a vertex object determined by chosen ingress and
-return paths. -/
+return walks. -/
 def categoricalRetractProjector
-    (paths : ∀ vertex, G.Walk base vertex)
+    (walks : ∀ vertex, G.Walk base vertex)
     (returns : ∀ vertex, G.Walk vertex base) (vertex : V) :
     F.obj (PathCategory.ofVertex G vertex) ⟶
       F.obj (PathCategory.ofVertex G vertex) :=
-  categoricalReturn F returns vertex ≫ categoricalIngress F paths vertex
+  categoricalReturn F returns vertex ≫ categoricalIngress F walks vertex
 
 theorem categoricalIngress_comp_return
     (hflat : IsFlatAt F base)
-    (paths : ∀ vertex, G.Walk base vertex)
+    (walks : ∀ vertex, G.Walk base vertex)
     (returns : ∀ vertex, G.Walk vertex base) (vertex : V) :
-    categoricalIngress F paths vertex ≫
+    categoricalIngress F walks vertex ≫
         categoricalReturn F returns vertex = 𝟙 _ := by
   rw [categoricalIngress, categoricalReturn, ← map_append]
-  exact hflat ((paths vertex).append (returns vertex))
+  exact hflat ((walks vertex).append (returns vertex))
 
 /-- The base object as a retract of a vertex object, along the chosen ingress and return
 morphisms.  Its idempotent `r ≫ i` is `Maths.categoricalRetractProjector`. -/
-def categoricalRetract (hflat : IsFlatAt F base) (paths : ∀ vertex, G.Walk base vertex)
+def categoricalRetract (hflat : IsFlatAt F base) (walks : ∀ vertex, G.Walk base vertex)
     (returns : ∀ vertex, G.Walk vertex base) (vertex : V) :
     Retract (F.obj (PathCategory.ofVertex G base)) (F.obj (PathCategory.ofVertex G vertex)) where
-  i := categoricalIngress F paths vertex
+  i := categoricalIngress F walks vertex
   r := categoricalReturn F returns vertex
-  retract := categoricalIngress_comp_return F hflat paths returns vertex
+  retract := categoricalIngress_comp_return F hflat walks returns vertex
 
 theorem categoricalRetractProjector_idempotent
     (hflat : IsFlatAt F base)
-    (paths : ∀ vertex, G.Walk base vertex)
+    (walks : ∀ vertex, G.Walk base vertex)
     (returns : ∀ vertex, G.Walk vertex base) (vertex : V) :
-    categoricalRetractProjector F paths returns vertex ≫
-        categoricalRetractProjector F paths returns vertex =
-      categoricalRetractProjector F paths returns vertex := by
+    categoricalRetractProjector F walks returns vertex ≫
+        categoricalRetractProjector F walks returns vertex =
+      categoricalRetractProjector F walks returns vertex := by
   simp only [categoricalRetractProjector]
   slice_lhs 2 3 =>
-    rw [categoricalIngress_comp_return F hflat paths returns vertex]
+    rw [categoricalIngress_comp_return F hflat walks returns vertex]
   simp
 
-/-- **Categorical retract-flatness.**  Compressing a path by its endpoint
-projectors gives the path-independent core morphism from return at the source
-to ingress at the target. -/
+/-- **Categorical retract-flatness.**  Compressing a walk by its endpoint
+projectors gives the path-independent core morphism from return at `start`
+to ingress at `finish`. -/
 theorem categorical_compressed_map_eq
     (hflat : IsFlatAt F base)
-    (paths : ∀ vertex, G.Walk base vertex)
+    (walks : ∀ vertex, G.Walk base vertex)
     (returns : ∀ vertex, G.Walk vertex base)
-    {source target : V} (walk : G.Walk source target) :
-    categoricalRetractProjector F paths returns source ≫ F.map walk ≫
-        categoricalRetractProjector F paths returns target =
-      categoricalReturn F returns source ≫
-        categoricalIngress F paths target := by
+    {start finish : V} (walk : G.Walk start finish) :
+    categoricalRetractProjector F walks returns start ≫ F.map walk ≫
+        categoricalRetractProjector F walks returns finish =
+      categoricalReturn F returns start ≫
+        categoricalIngress F walks finish := by
   have hmiddle :
-      categoricalIngress F paths source ≫ F.map walk ≫
-          categoricalReturn F returns target = 𝟙 _ := by
+      categoricalIngress F walks start ≫ F.map walk ≫
+          categoricalReturn F returns finish = 𝟙 _ := by
     unfold categoricalIngress categoricalReturn
     rw [← map_append, ← map_append]
     exact hflat _
@@ -172,36 +172,36 @@ theorem categorical_compressed_map_eq
   slice_lhs 2 4 => rw [hmiddle]
   simp
 
-/-- The two path-independent core morphisms compose to the source
-projector. -/
+/-- The two path-independent core morphisms compose to the projector at
+`start`. -/
 theorem categorical_coreMap_comp_reverse
     (hflat : IsFlatAt F base)
-    (paths : ∀ vertex, G.Walk base vertex)
+    (walks : ∀ vertex, G.Walk base vertex)
     (returns : ∀ vertex, G.Walk vertex base)
-    (source target : V) :
-    (categoricalReturn F returns source ≫
-        categoricalIngress F paths target) ≫
-      (categoricalReturn F returns target ≫
-        categoricalIngress F paths source) =
-      categoricalRetractProjector F paths returns source := by
+    (start finish : V) :
+    (categoricalReturn F returns start ≫
+        categoricalIngress F walks finish) ≫
+      (categoricalReturn F returns finish ≫
+        categoricalIngress F walks start) =
+      categoricalRetractProjector F walks returns start := by
   simp only [categoricalRetractProjector]
   slice_lhs 2 3 =>
-    rw [categoricalIngress_comp_return F hflat paths returns target]
+    rw [categoricalIngress_comp_return F hflat walks returns finish]
   simp
 
-/-- The reverse core morphism composed with the forward one gives the target
-projector. -/
+/-- The reverse core morphism composed with the forward one gives the projector
+at `finish`. -/
 theorem categorical_reverse_comp_coreMap
     (hflat : IsFlatAt F base)
-    (paths : ∀ vertex, G.Walk base vertex)
+    (walks : ∀ vertex, G.Walk base vertex)
     (returns : ∀ vertex, G.Walk vertex base)
-    (source target : V) :
-    (categoricalReturn F returns target ≫
-        categoricalIngress F paths source) ≫
-      (categoricalReturn F returns source ≫
-        categoricalIngress F paths target) =
-      categoricalRetractProjector F paths returns target :=
-  categorical_coreMap_comp_reverse F hflat paths returns target source
+    (start finish : V) :
+    (categoricalReturn F returns finish ≫
+        categoricalIngress F walks start) ≫
+      (categoricalReturn F returns start ≫
+        categoricalIngress F walks finish) =
+      categoricalRetractProjector F walks returns finish :=
+  categorical_coreMap_comp_reverse F hflat walks returns finish start
 
 end
 
