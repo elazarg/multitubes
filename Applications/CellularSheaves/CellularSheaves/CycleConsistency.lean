@@ -57,7 +57,7 @@ abbrev signedComparisonGraph (network : RationalSensorNetwork n m) :=
 /-- Signed real offsets on the doubled comparison graph. -/
 def signedComparisonWeight (network : RationalSensorNetwork n m) :
     Transport.LaxificationEdge (exactMode (m := m)) → ℝ :=
-  AdditiveTransport.laxifiedWeight (exactMode (m := m))
+  AdditiveTransport.laxificationWeight (exactMode (m := m))
     fun edge => (network.offset edge : ℝ)
 
 private theorem exists_isConsistent_uniform_iff_mixedResidual
@@ -103,7 +103,7 @@ theorem exists_isConsistent_uniform_iff_closedWalk_le
       · simp only [forgetSign, Sum.inr.injEq] at heq
         exact congrArg Sum.inr (Subtype.ext heq))
   rw [network.exists_isConsistent_uniform_iff_mixedResidual hsource htarget]
-  exact AdditiveTransport.mixedResidualAtMost_iff_laxified_closedWalk_le
+  exact AdditiveTransport.mixedResidualAtMost_iff_laxification_closedWalk_le
     network.graph (exactMode (m := m)) (fun edge => (network.offset edge : ℝ)) level
 
 /-- A nonnegative level belongs to the uniform-tolerance set exactly when every signed closed

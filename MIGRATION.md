@@ -32,6 +32,7 @@ Multitubes was previously published as `directed-transport`, with its main modul
 | `Maths.finiteInequalityMatrix`, `finiteInequalityMatrix_rowEval`, `finiteInequality_feasible_iff` | `Maths.FiniteInequality.finMatrix`, `rowEval_finMatrix`, `isFeasible_finMatrix_iff` |
 | `Maths.exists_potential_or_bellmanResidual_obstruction` | `Maths.FiniteInequality.exists_potential_or_bellmanResidual_obstruction` |
 | `Maths.IsStronglyConnectedAt G base` and its lemmas | `Maths.EdgeGraph.IsStronglyConnected G`, the base-free form of mathlib's `Quiver.IsStronglyConnected`; `IsStronglyConnectedAt.nonempty_walk` is the definition itself |
+| `laxified` in the names of `Maths.AdditiveTransport` declarations, as in `laxifiedWeight`, `laxifiedTranslationTransport`, `isMixedSection_iff_isPotential_laxified` | `laxification`: `laxificationWeight`, `laxificationTranslationTransport`, `isMixedSection_iff_isPotential_laxification` |
 | Module `Maths.Multitubes.Additive.Circuits` | `Maths.Multitubes.Additive.SignedCycles` |
 | `circuit` in the names of `Maths.AdditiveTransport` declarations, as in `circuitCoefficient`, `signedCircuitVector`, `IsGenuineSignedCircuit`, `exists_simpleSignedCircuit_decomposition` | `cycle`: `cycleCoefficient`, `signedCycleVector`, `IsGenuineSignedCycle`, `exists_simpleSignedCycle_decomposition` |
 

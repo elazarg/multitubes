@@ -28,13 +28,13 @@ threshold on the laxification graph with signed edge weights.
 
 * `Maths.AdditiveTransport.mixedResidualAtMost_iff_worstDirectedResidualAtMost` -
   the residual threshold is the directed threshold on the signed laxification.
-* `Maths.AdditiveTransport.mixedResidualAtMost_iff_laxified_closedWalk_le` -
+* `Maths.AdditiveTransport.mixedResidualAtMost_iff_laxification_closedWalk_le` -
   the closed-walk characterization of the mixed threshold.
-* `Maths.AdditiveTransport.mixedResidualAtMost_iff_laxified_simpleCycle_le` -
+* `Maths.AdditiveTransport.mixedResidualAtMost_iff_laxification_simpleCycle_le` -
   the simple-cycle characterization of the mixed threshold.
 * `Maths.AdditiveTransport.exists_isMixedSection_iff_mixedResidualAtMost_zero` -
   the zero-threshold specialization to mixed sections.
-* `Maths.AdditiveTransport.exists_isMixedSection_iff_forall_laxified_simpleCycle_nonpos` -
+* `Maths.AdditiveTransport.exists_isMixedSection_iff_forall_laxification_simpleCycle_nonpos` -
   the finite-edge simple-cycle feasibility criterion.
 
 ## Tags
@@ -69,20 +69,20 @@ theorem mixedResidualAtMost_iff_worstDirectedResidualAtMost
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → ℝ) (level : ℝ) :
     MixedResidualAtMost G mode weight level ↔
       AdditiveTransport.WorstDirectedResidualAtMost
-        (Transport.laxificationGraph G mode) (laxifiedWeight mode weight) level := by
+        (Transport.laxificationGraph G mode) (laxificationWeight mode weight) level := by
   apply exists_congr
   intro potential
   have hforward_defect (edge : Transport.LaxificationForwardEdge mode) :
       AdditiveTransport.defect (Transport.laxificationGraph G mode)
-          (laxifiedWeight mode weight) potential (.inl edge) =
+          (laxificationWeight mode weight) potential (.inl edge) =
         AdditiveTransport.defect G weight potential edge.1 := by
     rfl
   have hreverse_defect (edge : Transport.LaxificationReverseEdge mode) :
       AdditiveTransport.defect (Transport.laxificationGraph G mode)
-          (laxifiedWeight mode weight) potential (.inr edge) =
+          (laxificationWeight mode weight) potential (.inr edge) =
         -AdditiveTransport.defect G weight potential edge.1 := by
     simp only [AdditiveTransport.defect, Transport.laxificationGraph,
-      laxifiedWeight]
+      laxificationWeight]
     ring
   constructor
   · intro h edge
@@ -120,27 +120,27 @@ theorem mixedResidualAtMost_iff_worstDirectedResidualAtMost
 
 /-- The mixed residual threshold is equivalent to the signed closed-walk
 inequality on the laxification graph. -/
-theorem mixedResidualAtMost_iff_laxified_closedWalk_le
+theorem mixedResidualAtMost_iff_laxification_closedWalk_le
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → ℝ) (level : ℝ)
     [Finite (Transport.LaxificationEdge mode)] :
     MixedResidualAtMost G mode weight level ↔
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-        walkSum (laxifiedWeight mode weight) cycle ≤
+        walkSum (laxificationWeight mode weight) cycle ≤
           cycle.length * level := by
   rw [mixedResidualAtMost_iff_worstDirectedResidualAtMost,
     AdditiveTransport.worstDirectedResidualAtMost_iff_closedWalk_le]
 
 /-- The mixed residual threshold is equivalent to the signed simple-cycle
 inequality on the laxification graph. -/
-theorem mixedResidualAtMost_iff_laxified_simpleCycle_le
+theorem mixedResidualAtMost_iff_laxification_simpleCycle_le
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → ℝ) (level : ℝ)
     [Finite (Transport.LaxificationEdge mode)] :
     MixedResidualAtMost G mode weight level ↔
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
         cycle.IsSimpleCycle →
-        walkSum (laxifiedWeight mode weight) cycle ≤
+        walkSum (laxificationWeight mode weight) cycle ≤
           cycle.length * level := by
   rw [mixedResidualAtMost_iff_worstDirectedResidualAtMost,
     AdditiveTransport.worstDirectedResidualAtMost_iff_simpleCycles_le]
@@ -158,17 +158,17 @@ theorem exists_isMixedSection_iff_mixedResidualAtMost_zero
         (translationTransport G weight).IsMixedSection mode potential) ↔
         ∃ potential : V → ℝ,
           AdditiveTransport.IsPotential (Transport.laxificationGraph G mode)
-            (laxifiedWeight mode weight) potential := by
-      simp only [isMixedSection_iff_isPotential_laxified]
+            (laxificationWeight mode weight) potential := by
+      simp only [isMixedSection_iff_isPotential_laxification]
     _ ↔ AdditiveTransport.WorstDirectedResidualAtMost
-        (Transport.laxificationGraph G mode) (laxifiedWeight mode weight) 0 := by
+        (Transport.laxificationGraph G mode) (laxificationWeight mode weight) 0 := by
       apply exists_congr
       intro potential
       rw [AdditiveTransport.isPotential_iff_forall_defect_nonpos]
 
 /-- A real mixed additive section exists exactly when every signed simple
 cycle in the laxification graph has nonpositive weight. -/
-theorem exists_isMixedSection_iff_forall_laxified_simpleCycle_nonpos
+theorem exists_isMixedSection_iff_forall_laxification_simpleCycle_nonpos
     (G : EdgeGraph V E) (mode : E → EdgeMode)
     [Finite (Transport.LaxificationEdge mode)] (weight : E → ℝ) :
     (∃ potential : V → ℝ,
@@ -176,9 +176,9 @@ theorem exists_isMixedSection_iff_forall_laxified_simpleCycle_nonpos
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
         cycle.IsSimpleCycle →
-          walkSum (laxifiedWeight mode weight) cycle ≤ 0 := by
+          walkSum (laxificationWeight mode weight) cycle ≤ 0 := by
   rw [exists_isMixedSection_iff_mixedResidualAtMost_zero,
-    mixedResidualAtMost_iff_laxified_simpleCycle_le]
+    mixedResidualAtMost_iff_laxification_simpleCycle_le]
   simp
 
 end AdditiveTransport

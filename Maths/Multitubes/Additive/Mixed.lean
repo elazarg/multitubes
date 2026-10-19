@@ -20,11 +20,11 @@ potentials on the laxification graph.
 
 ## Main definitions
 
-* `Maths.AdditiveTransport.laxifiedWeight` - the signed label on the
+* `Maths.AdditiveTransport.laxificationWeight` - the signed label on the
   laxification graph.
 * `Maths.AdditiveTransport.translationLowerAdjoint` - subtraction, the lower
   adjoint of a reverse-compatible edge.
-* `Maths.AdditiveTransport.laxifiedTranslationTransport` - translation
+* `Maths.AdditiveTransport.laxificationTranslationTransport` - translation
   transport on the laxification graph.
 * `Maths.AdditiveTransport.mixedMaxIncomingWeight` - the unrooted incoming
   path closure on the laxification graph.
@@ -33,21 +33,21 @@ potentials on the laxification graph.
 
 * `Maths.AdditiveTransport.translationLowerAdjoint_galoisConnection` - the
   subtraction/addition Galois connection.
-* `Maths.AdditiveTransport.isMixedSection_iff_isLaxSection_laxified` - the
+* `Maths.AdditiveTransport.isMixedSection_iff_isLaxSection_laxification` - the
   partial-order reduction to signed lax transport.
-* `Maths.AdditiveTransport.isMixedSection_iff_isPotential_laxified` - the
+* `Maths.AdditiveTransport.isMixedSection_iff_isPotential_laxification` - the
   mixed-section/potential correspondence.
 * `Maths.AdditiveTransport.walkSum_eq_zero_of_exact`,
   `Maths.AdditiveTransport.walkSum_nonpos_of_lax_or_exact`, and
   `Maths.AdditiveTransport.walkSum_nonneg_of_oplax_or_exact` - the
   original-orientation cycle consequences.
-* `Maths.AdditiveTransport.exists_isMixedSection_iff_forall_laxified_closedWalk_nonpos` -
+* `Maths.AdditiveTransport.exists_isMixedSection_iff_forall_laxification_closedWalk_nonpos` -
   the finite-edge cycle feasibility criterion.
 * `Maths.AdditiveTransport.mixedMaxIncomingWeight_isMixedSection` - the
   canonical mixed section supplied by the incoming envelope.
 * `Maths.AdditiveTransport.isLeast_nonnegativeMixedSections` - the
   envelope is the least nonnegative mixed section.
-* `Maths.AdditiveTransport.isGreatest_laxifiedIncomingWeights` - the
+* `Maths.AdditiveTransport.isGreatest_laxificationIncomingWeights` - the
   path-closure characterization.
 
 ## Tags
@@ -70,21 +70,21 @@ variable {A : Type*} [AddCommGroup A]
 
 /-- The signed additive label on a laxification edge: forward copies have the
 original label, while reverse copies have its negative. -/
-def laxifiedWeight (mode : E → EdgeMode) (weight : E → A) :
+def laxificationWeight (mode : E → EdgeMode) (weight : E → A) :
     Transport.LaxificationEdge mode → A
   | .inl edge => weight edge.1
   | .inr edge => -weight edge.1
 
 /-- The forward copy retains the original additive label. -/
-@[simp] theorem laxifiedWeight_forward (mode : E → EdgeMode) (weight : E → A)
+@[simp] theorem laxificationWeight_forward (mode : E → EdgeMode) (weight : E → A)
     (edge : Transport.LaxificationForwardEdge mode) :
-    laxifiedWeight mode weight (.inl edge) = weight edge.1 :=
+    laxificationWeight mode weight (.inl edge) = weight edge.1 :=
   rfl
 
 /-- The reverse copy receives the negative additive label. -/
-@[simp] theorem laxifiedWeight_reverse (mode : E → EdgeMode) (weight : E → A)
+@[simp] theorem laxificationWeight_reverse (mode : E → EdgeMode) (weight : E → A)
     (edge : Transport.LaxificationReverseEdge mode) :
-    laxifiedWeight mode weight (.inr edge) = -weight edge.1 :=
+    laxificationWeight mode weight (.inr edge) = -weight edge.1 :=
   rfl
 
 /-- Subtraction, the lower adjoint of an additive translation on a
@@ -111,33 +111,33 @@ theorem translationLowerAdjoint_galoisConnection (mode : E → EdgeMode) (weight
 
 /-- Translation transport on the laxification graph with the signed additive
 label. -/
-def laxifiedTranslationTransport (G : EdgeGraph V E) (mode : E → EdgeMode)
+def laxificationTranslationTransport (G : EdgeGraph V E) (mode : E → EdgeMode)
     (weight : E → A) :
     Transport (Transport.laxificationGraph G mode) (fun _ : V => A) :=
   translationTransport
-    (Transport.laxificationGraph G mode) (laxifiedWeight mode weight)
+    (Transport.laxificationGraph G mode) (laxificationWeight mode weight)
 
 /-- A forward transformed edge acts by translation by its original label. -/
-@[simp] theorem laxifiedTranslationTransport_edgeMap_forward
+@[simp] theorem laxificationTranslationTransport_edgeMap_forward
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A)
     (edge : Transport.LaxificationForwardEdge mode) (point : A) :
-    (laxifiedTranslationTransport G mode weight).edgeMap (.inl edge) point =
+    (laxificationTranslationTransport G mode weight).edgeMap (.inl edge) point =
       point + weight edge.1 := by
   rfl
 
 /-- A reverse transformed edge acts by translation by the negative label. -/
-@[simp] theorem laxifiedTranslationTransport_edgeMap_reverse
+@[simp] theorem laxificationTranslationTransport_edgeMap_reverse
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A)
     (edge : Transport.LaxificationReverseEdge mode) (point : A) :
-    (laxifiedTranslationTransport G mode weight).edgeMap (.inr edge) point =
+    (laxificationTranslationTransport G mode weight).edgeMap (.inr edge) point =
       point - weight edge.1 := by
   change point + -weight edge.1 = point - weight edge.1
   exact (sub_eq_add_neg _ _).symm
 
 /-- The signed translation transport agrees with the generic laxification. -/
-theorem laxifiedTranslationTransport_eq_laxification
+theorem laxificationTranslationTransport_eq_laxification
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A) :
-    laxifiedTranslationTransport G mode weight =
+    laxificationTranslationTransport G mode weight =
       (translationTransport G weight).laxification mode
         (translationLowerAdjoint mode weight) := by
   change Transport.mk _ = Transport.mk _
@@ -152,25 +152,25 @@ theorem laxifiedTranslationTransport_eq_laxification
 
 /-- A mixed section is exactly a lax section of the signed translation
 transport on the laxification graph. -/
-theorem isMixedSection_iff_isLaxSection_laxified
+theorem isMixedSection_iff_isLaxSection_laxification
     [PartialOrder A] [IsOrderedAddMonoid A]
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A) (potential : V → A) :
     (translationTransport G weight).IsMixedSection mode potential ↔
-      (laxifiedTranslationTransport G mode weight).IsLaxSection potential := by
-  rw [laxifiedTranslationTransport_eq_laxification]
+      (laxificationTranslationTransport G mode weight).IsLaxSection potential := by
+  rw [laxificationTranslationTransport_eq_laxification]
   exact Transport.isMixedSection_iff_laxification_of_galoisConnection
     (translationTransport G weight)
     (fun edge => translationLowerAdjoint_galoisConnection mode weight edge)
 
 /-- A mixed additive section is exactly an ordinary additive potential on the
 laxification graph with its signed weighting. -/
-theorem isMixedSection_iff_isPotential_laxified
+theorem isMixedSection_iff_isPotential_laxification
     [PartialOrder A] [IsOrderedAddMonoid A]
     (G : EdgeGraph V E) (mode : E → EdgeMode) (weight : E → A) (potential : V → A) :
     (translationTransport G weight).IsMixedSection mode potential ↔
       AdditiveTransport.IsPotential (Transport.laxificationGraph G mode)
-        (laxifiedWeight mode weight) potential := by
-  rw [isMixedSection_iff_isLaxSection_laxified]
+        (laxificationWeight mode weight) potential := by
+  rw [isMixedSection_iff_isLaxSection_laxification]
   rfl
 
 /-- An exact-mode closed walk has zero original signed weight. -/
@@ -225,7 +225,7 @@ variable [LinearOrder A] [IsOrderedAddMonoid A]
 def mixedMaxIncomingWeight (G : EdgeGraph V E) (mode : E → EdgeMode)
     [Finite (Transport.LaxificationEdge mode)] (weight : E → A) (vertex : V) : A :=
   AdditiveTransport.maxIncomingWeight
-    (Transport.laxificationGraph G mode) (laxifiedWeight mode weight) vertex
+    (Transport.laxificationGraph G mode) (laxificationWeight mode weight) vertex
 
 /-- Every transformed walk is bounded by the incoming envelope when all
 transformed closed walks have nonpositive weight. -/
@@ -234,24 +234,24 @@ theorem walkSum_le_mixedMaxIncomingWeight
     {weight : E → A}
     (hcycle : ∀ (vertex : V)
       (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-      walkSum (laxifiedWeight mode weight) cycle ≤ 0)
+      walkSum (laxificationWeight mode weight) cycle ≤ 0)
     {start finish : V} (walk : (Transport.laxificationGraph G mode).Walk start finish) :
-    walkSum (laxifiedWeight mode weight) walk ≤
+    walkSum (laxificationWeight mode weight) walk ≤
       mixedMaxIncomingWeight G mode weight finish := by
   exact AdditiveTransport.walkSum_le_maxIncomingWeight hcycle walk
 
 /-- The incoming envelope is the greatest weight of a transformed walk ending
 at the specified vertex, under the nonpositive closed-walk condition. -/
-theorem isGreatest_laxifiedIncomingWeights
+theorem isGreatest_laxificationIncomingWeights
     (mode : E → EdgeMode) [Finite (Transport.LaxificationEdge mode)]
     {weight : E → A}
     (hcycle : ∀ (vertex : V)
       (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-      walkSum (laxifiedWeight mode weight) cycle ≤ 0)
+      walkSum (laxificationWeight mode weight) cycle ≤ 0)
     (vertex : V) :
     IsGreatest
       (AdditiveTransport.incomingWeights (Transport.laxificationGraph G mode)
-        (laxifiedWeight mode weight) vertex)
+        (laxificationWeight mode weight) vertex)
       (mixedMaxIncomingWeight G mode weight vertex) := by
   exact AdditiveTransport.isGreatest_incomingWeights hcycle vertex
 
@@ -262,10 +262,10 @@ theorem mixedMaxIncomingWeight_isMixedSection
     {weight : E → A}
     (hcycle : ∀ (vertex : V)
       (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-      walkSum (laxifiedWeight mode weight) cycle ≤ 0) :
+      walkSum (laxificationWeight mode weight) cycle ≤ 0) :
     (translationTransport G weight).IsMixedSection mode
       (mixedMaxIncomingWeight G mode weight) := by
-  apply (isMixedSection_iff_isPotential_laxified G mode weight _).2
+  apply (isMixedSection_iff_isPotential_laxification G mode weight _).2
   exact AdditiveTransport.maxIncomingWeight_isPotential hcycle
 
 /-- The signed incoming path closure is the least nonnegative mixed section.
@@ -276,7 +276,7 @@ theorem isLeast_nonnegativeMixedSections
     {weight : E → A}
     (hcycle : ∀ (vertex : V)
       (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-      walkSum (laxifiedWeight mode weight) cycle ≤ 0) :
+      walkSum (laxificationWeight mode weight) cycle ≤ 0) :
     IsLeast
       {potential : V → A | (0 : V → A) ≤ potential ∧
         (translationTransport G weight).IsMixedSection mode potential}
@@ -284,27 +284,27 @@ theorem isLeast_nonnegativeMixedSections
   have hleast := AdditiveTransport.isLeast_nonnegativePotentials hcycle
   constructor
   · exact ⟨hleast.1.1,
-      (isMixedSection_iff_isPotential_laxified G mode weight _).2 hleast.1.2⟩
+      (isMixedSection_iff_isPotential_laxification G mode weight _).2 hleast.1.2⟩
   · rintro potential ⟨hnonnegative, hfamily⟩
     exact hleast.2 ⟨hnonnegative,
-      (isMixedSection_iff_isPotential_laxified G mode weight _).1 hfamily⟩
+      (isMixedSection_iff_isPotential_laxification G mode weight _).1 hfamily⟩
 
 /-- A mixed additive section exists exactly when every transformed closed walk
 has nonpositive signed weight. -/
-theorem exists_isMixedSection_iff_forall_laxified_closedWalk_nonpos
+theorem exists_isMixedSection_iff_forall_laxification_closedWalk_nonpos
     (G : EdgeGraph V E) (mode : E → EdgeMode)
     [Finite (Transport.LaxificationEdge mode)] (weight : E → A) :
     (∃ potential : V → A,
       (translationTransport G weight).IsMixedSection mode potential) ↔
       ∀ (vertex : V)
         (cycle : (Transport.laxificationGraph G mode).Walk vertex vertex),
-        walkSum (laxifiedWeight mode weight) cycle ≤ 0 := by
+        walkSum (laxificationWeight mode weight) cycle ≤ 0 := by
   rw [show (∃ potential : V → A,
       (translationTransport G weight).IsMixedSection mode potential) ↔
       ∃ potential : V → A,
         AdditiveTransport.IsPotential (Transport.laxificationGraph G mode)
-          (laxifiedWeight mode weight) potential by
-        simp only [isMixedSection_iff_isPotential_laxified]]
+          (laxificationWeight mode weight) potential by
+        simp only [isMixedSection_iff_isPotential_laxification]]
   exact AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos _
 
 end Finite
