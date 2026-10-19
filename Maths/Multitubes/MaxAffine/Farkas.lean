@@ -37,7 +37,7 @@ finite and `shift e + slope e * φ (source e) ≤ φ (target e)` always -- the
 splitting of `Maths.MaxAffineTransport.Label.apply_le_target_iff`.  Whatever the
 signs of the slopes, this is a finite system of linear inequalities, so
 existence of a lax section is governed by the theorem of the alternative of
-`Maths.exists_potential_iff_no_farkasCertificate`.
+`Maths.FiniteInequality.exists_potential_iff_no_farkasCertificate`.
 
 ## Main definitions
 
@@ -339,7 +339,7 @@ theorem isLaxSection_iff_forall_row (G : EdgeGraph V E) (label : E → Label) (�
 exists exactly when the rows of the lax-section system admit no nonnegative
 combination that is balanced at every vertex and has strictly positive total
 bound.  This is
-`Maths.exists_potential_iff_no_farkasCertificate` at the encoding of
+`Maths.FiniteInequality.exists_potential_iff_no_farkasCertificate` at the encoding of
 `Maths.MaxAffineTransport.rowDelta` and
 `Maths.MaxAffineTransport.rowBase`, so no sign condition on the slopes and no
 structure on the graph is used.
@@ -366,7 +366,7 @@ theorem exists_isLaxSection_iff_no_farkasCertificate' [Fintype E]
         (∀ v : V, ∑ action, coefficient action * rowDelta G label action v = 0) ∧
         0 < ∑ action, coefficient action * rowBase label action := by
   rw [exists_congr fun φ => isLaxSection_iff_forall_row G label φ]
-  exact Maths.exists_potential_iff_no_farkasCertificate
+  exact Maths.FiniteInequality.exists_potential_iff_no_farkasCertificate
     (rowDelta G label) (rowBase label)
 
 /-- A **Farkas certificate** against the lax-section system of a labelled

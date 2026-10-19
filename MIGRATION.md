@@ -24,11 +24,13 @@ Multitubes was previously published as `directed-transport`, with its main modul
 | `Maths.MaxAffineTransport.suffixWeight`, `suffixWeightSum`, and their lemmas | `Maths.MaxAffineTransport.suffixSlope`, `suffixSlopeSum`, and their lemmas |
 | Module `Maths.Multitubes.MaxAffine.AnchoredEigenvalue` | `Maths.Multitubes.MaxAffine.ReachableLowerBounds` |
 | `Maths.LinearProgramming.IsCertificate`, `HasCertificate` | `Maths.LinearProgramming.IsFarkasCertificate`, `HasFarkasCertificate` |
-| `Maths.exists_potential_or_nonnegative_incompatibility` | `Maths.exists_potential_or_farkasCertificate` |
-| `Maths.not_nonnegative_incompatibility_of_potential` | `Maths.sum_mul_base_nonpos_of_potential` |
-| `Maths.exists_potential_iff_no_nonnegative_incompatibility` | `Maths.exists_potential_iff_no_farkasCertificate` |
+| `Maths.exists_potential_or_nonnegative_incompatibility` | `Maths.FiniteInequality.exists_potential_or_farkasCertificate` |
+| `Maths.not_nonnegative_incompatibility_of_potential` | `Maths.FiniteInequality.sum_mul_base_nonpos_of_potential` |
+| `Maths.exists_potential_iff_no_nonnegative_incompatibility` | `Maths.FiniteInequality.exists_potential_iff_no_farkasCertificate` |
 | `Maths.MaxAffineTransport.exists_isLaxSection_iff_no_nonnegative_certificate` | `Maths.MaxAffineTransport.exists_isLaxSection_iff_no_farkasCertificate'` |
 | Namespaces `Maths.MaxPlusPotential`, `Maths.MixedAdditiveTransport`, `Maths.CycleCoboundary` | `Maths.AdditiveTransport`, with the same short names |
+| `Maths.finiteInequalityMatrix`, `finiteInequalityMatrix_rowEval`, `finiteInequality_feasible_iff` | `Maths.FiniteInequality.finMatrix`, `rowEval_finMatrix`, `isFeasible_finMatrix_iff` |
+| `Maths.exists_potential_or_bellmanResidual_obstruction` | `Maths.FiniteInequality.exists_potential_or_bellmanResidual_obstruction` |
 | Module `Maths.Multitubes.Additive.Circuits` | `Maths.Multitubes.Additive.SignedCycles` |
 | `circuit` in the names of `Maths.AdditiveTransport` declarations, as in `circuitCoefficient`, `signedCircuitVector`, `IsGenuineSignedCircuit`, `exists_simpleSignedCircuit_decomposition` | `cycle`: `cycleCoefficient`, `signedCycleVector`, `IsGenuineSignedCycle`, `exists_simpleSignedCycle_decomposition` |
 

@@ -201,7 +201,7 @@ theorem exists_sparse_farkasCertificate
     rintro ⟨potential, hpotential⟩
     apply hinfeasibleSelected
     exact ⟨potential, fun branch hbranch => hpotential ⟨branch, hbranch⟩⟩
-  rcases exists_potential_or_farkasCertificate delta base with
+  rcases FiniteInequality.exists_potential_or_farkasCertificate delta base with
     hpotential | ⟨coefficient, hnonneg, hbalance, hpositive⟩
   · exact (hnotPotential hpotential).elim
   · exact ⟨selected, coefficient, hcard, hnonneg, hbalance, hpositive⟩

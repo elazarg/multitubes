@@ -30,7 +30,7 @@ residual inequality.
 
 ## Main definitions
 
-* `Maths.finiteInequalityMatrix`: the row data transported along the canonical
+* `Maths.FiniteInequality.finMatrix`: the row data transported along the canonical
   equivalence `State ≃ Fin (Fintype.card State)`, which is what lets the `Fin`-indexed
   Fourier--Motzkin theorem apply to an arbitrary finite state type.
 
@@ -38,14 +38,14 @@ residual inequality.
 
 * `Maths.sum_mul_dotProduct`: weighting the pairings of the row vectors with a potential is
   pairing the weighted row combination with it.
-* `Maths.exists_potential_or_farkasCertificate`: the theorem of the
+* `Maths.FiniteInequality.exists_potential_or_farkasCertificate`: the theorem of the
   alternative - either one potential meets every lower bound, or a nonnegative balanced
   dependence among the rows has strictly positive weighted lower bound.
-* `Maths.sum_mul_base_nonpos_of_potential`: the two alternatives
+* `Maths.FiniteInequality.sum_mul_base_nonpos_of_potential`: the two alternatives
   exclude each other.
-* `Maths.exists_potential_iff_no_farkasCertificate`: the two combined as
+* `Maths.FiniteInequality.exists_potential_iff_no_farkasCertificate`: the two combined as
   an equivalence.  This is the form other files use.
-* `Maths.exists_potential_or_bellmanResidual_obstruction`: under the residual
+* `Maths.FiniteInequality.exists_potential_or_bellmanResidual_obstruction`: under the residual
   hypothesis `base action + level action ≤ 0`, the failing branch additionally yields strictly
   negative weighted level and one positively weighted action of positive base.
 
@@ -70,9 +70,11 @@ open scoped BigOperators
 variable {𝕜 : Type*} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
 variable {State Action : Type*}
 
+namespace FiniteInequality
+
 /-- The matrix obtained by transporting state coordinates along the
 canonical equivalence with `Fin`. -/
-noncomputable def finiteInequalityMatrix [Fintype State]
+noncomputable def finMatrix [Fintype State]
     (delta : Action → State → 𝕜) :
     Action → Fin (Fintype.card State) → 𝕜 :=
   fun action coordinate =>
@@ -80,33 +82,34 @@ noncomputable def finiteInequalityMatrix [Fintype State]
 
 omit [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜] in
 /-- Evaluating a transported row is pairing the original row with the transported point. -/
-theorem finiteInequalityMatrix_rowEval [Fintype State] [Fintype Action]
+theorem rowEval_finMatrix [Fintype State] [Fintype Action]
     (delta : Action → State → 𝕜) (action : Action)
     (x : Fin (Fintype.card State) → 𝕜) :
-    LinearProgramming.rowEval (finiteInequalityMatrix delta) action x =
+    LinearProgramming.rowEval (finMatrix delta) action x =
       dotProduct (delta action)
         (fun state => x (Fintype.equivFin State state)) := by
   classical
   let e := Fintype.equivFin State
   unfold LinearProgramming.rowEval
   calc
-    (∑ coordinate, finiteInequalityMatrix delta action coordinate *
+    (∑ coordinate, finMatrix delta action coordinate *
         x coordinate) =
-        ∑ state, finiteInequalityMatrix delta action (e state) *
+        ∑ state, finMatrix delta action (e state) *
           x (e state) := by
             simpa [e] using
               (e.sum_comp
                 (fun coordinate =>
-                  finiteInequalityMatrix delta action coordinate *
+                  finMatrix delta action coordinate *
                     x coordinate)).symm
     _ = dotProduct (delta action) (fun state => x (e state)) := by
           apply Finset.sum_congr rfl
           intro state _
-          simp [finiteInequalityMatrix, e]
+          simp [finMatrix, e]
 
 /-- Weighting the pairings of the vectors `delta action` with `potential` by `coefficient` is
 pairing the `coefficient`-weighted combination of the vectors with `potential`. -/
-theorem sum_mul_dotProduct {R : Type*} [NonUnitalSemiring R] [Fintype State] [Fintype Action]
+theorem _root_.Maths.sum_mul_dotProduct {R : Type*} [NonUnitalSemiring R]
+    [Fintype State] [Fintype Action]
     (delta : Action → State → R) (coefficient : Action → R) (potential : State → R) :
     ∑ action, coefficient action * dotProduct (delta action) potential =
       ∑ state, (∑ action, coefficient action * delta action state) * potential state :=
@@ -115,10 +118,10 @@ theorem sum_mul_dotProduct {R : Type*} [NonUnitalSemiring R] [Fintype State] [Fi
 omit [IsStrictOrderedRing 𝕜] in
 /-- Feasibility after transport to `Fin` is exactly feasibility by a
 potential on the original finite state type. -/
-theorem finiteInequality_feasible_iff
+theorem isFeasible_finMatrix_iff
     [Fintype State] [Fintype Action]
     (delta : Action → State → 𝕜) (base : Action → 𝕜) :
-    LinearProgramming.IsFeasible (finiteInequalityMatrix delta) base ↔
+    LinearProgramming.IsFeasible (finMatrix delta) base ↔
       ∃ potential : State → 𝕜,
         ∀ action, base action ≤
           dotProduct (delta action) potential := by
@@ -128,14 +131,14 @@ theorem finiteInequality_feasible_iff
     refine ⟨fun state => x (Fintype.equivFin State state), ?_⟩
     intro action
     have haction := hx action
-    rw [finiteInequalityMatrix_rowEval] at haction
+    rw [rowEval_finMatrix] at haction
     exact haction
   · rintro ⟨potential, hpotential⟩
     let x : Fin (Fintype.card State) → 𝕜 :=
       fun coordinate => potential ((Fintype.equivFin State).symm coordinate)
     refine ⟨x, ?_⟩
     intro action
-    rw [finiteInequalityMatrix_rowEval]
+    rw [rowEval_finMatrix]
     simpa [x] using hpotential action
 
 /-- **Finite inequality compatibility alternative.** Either all lower
@@ -155,17 +158,17 @@ theorem exists_potential_or_farkasCertificate
   classical
   by_cases hfeasible :
       LinearProgramming.IsFeasible
-        (finiteInequalityMatrix delta) base
+        (finMatrix delta) base
   · left
-    exact (finiteInequality_feasible_iff delta base).mp hfeasible
+    exact (isFeasible_finMatrix_iff delta base).mp hfeasible
   · right
     obtain ⟨coefficient, hnonnegative, hbalance, hpositive⟩ :=
       (LinearProgramming.theorem_of_alternative
-        (finiteInequalityMatrix delta) base).mp hfeasible
+        (finMatrix delta) base).mp hfeasible
     refine ⟨coefficient, hnonnegative, ?_, hpositive⟩
     intro state
     have hcolumn := hbalance (Fintype.equivFin State state)
-    simpa [finiteInequalityMatrix] using hcolumn
+    simpa [finMatrix] using hcolumn
 
 /-- Against a feasible potential, every nonnegative balanced combination of the rows has
 nonpositive weighted lower bound, so no Farkas certificate exists. -/
@@ -290,5 +293,7 @@ theorem exists_potential_or_bellmanResidual_obstruction
       linarith
     exact ⟨coefficient, hnonnegative, hbalance, hbase, hlevel,
       exists_positive_weighted_term hnonnegative hbase⟩
+
+end FiniteInequality
 
 end Maths

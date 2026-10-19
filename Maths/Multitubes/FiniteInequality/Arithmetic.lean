@@ -65,7 +65,7 @@ variable {State : Type uS} {Row : Type uR}
 variable [Fintype State] [Fintype Row]
 
 /-- The finite theorem of the alternative directly over the rational field: the instance `𝕜 = ℚ`
-of `Maths.exists_potential_or_farkasCertificate`. -/
+of `Maths.FiniteInequality.exists_potential_or_farkasCertificate`. -/
 theorem exists_rationalPotential_or_rationalCertificate
     (delta : Row → State → ℚ) (base : Row → ℚ) :
     (∃ potential : State → ℚ,

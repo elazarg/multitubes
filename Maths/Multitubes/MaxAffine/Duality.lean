@@ -257,7 +257,7 @@ theorem branchCertificateValue_le_of_worstResidualAtMost
       branchBase label branch - level ≤
         dotProduct (branchDelta G label branch) potential :=
     (branchResidual_le_iff potential branch level).mp (hpotential branch)
-  have hweak := sum_mul_base_nonpos_of_potential
+  have hweak := FiniteInequality.sum_mul_base_nonpos_of_potential
     (delta := branchDelta G label)
     (base := fun branch ↦ branchBase label branch - level)
     hrows hcertificate.1 hcertificate.2.2

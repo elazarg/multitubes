@@ -158,14 +158,14 @@ bounds and closed under every affine edge comparison. -/
 theorem radius_feasible_iff [Fintype V] [Fintype E] [DecidableEq V]
     (G : Maths.EdgeGraph V E) (gain bias : E → ℝ) (lower upper : V → ℝ) :
     Maths.LinearProgramming.IsFeasible
-        (Maths.finiteInequalityMatrix (radiusDelta G gain))
+        (Maths.FiniteInequality.finMatrix (radiusDelta G gain))
         (radiusBase lower upper bias) ↔
       ∃ radius : V → ℝ,
         (∀ vertex, lower vertex ≤ radius vertex) ∧
         (∀ vertex, radius vertex ≤ upper vertex) ∧
         ∀ edge, bias edge + gain edge * radius (G.source edge) ≤
           radius (G.target edge) := by
-  rw [Maths.finiteInequality_feasible_iff]
+  rw [Maths.FiniteInequality.isFeasible_finMatrix_iff]
   constructor
   · rintro ⟨radius, hradius⟩
     refine ⟨radius, fun vertex => ?_, fun vertex => ?_, fun edge => ?_⟩
@@ -194,7 +194,7 @@ theorem exists_sparse_radius_certificate_of_infeasible
     [Fintype V] [Fintype E] [DecidableEq V]
     (G : Maths.EdgeGraph V E) (gain bias : E → ℝ) (lower upper : V → ℝ)
     (hinfeasible : ¬Maths.LinearProgramming.IsFeasible
-      (Maths.finiteInequalityMatrix (radiusDelta G gain))
+      (Maths.FiniteInequality.finMatrix (radiusDelta G gain))
       (radiusBase lower upper bias)) :
     ∃ coefficient : RadiusRow V E → ℝ,
       Maths.FiniteInequality.IsNormalizedCertificate (radiusDelta G gain) coefficient ∧
@@ -207,7 +207,7 @@ theorem exists_sparse_radius_certificate_of_infeasible
         dotProduct (radiusDelta G gain row) radius := by
     intro hexists
     exact hinfeasible <|
-      (Maths.finiteInequality_feasible_iff _ _).mpr hexists
+      (Maths.FiniteInequality.isFeasible_finMatrix_iff _ _).mpr hexists
   obtain ⟨coefficient, hcertificate, hpositive, hcard⟩ :=
     Maths.FiniteInequality.exists_positive_normalizedCertificate_support_card_le_rank_add_one
       (radiusDelta G gain) (radiusBase lower upper bias) hpotential
@@ -314,7 +314,7 @@ at least two, contradicting its budget `3 / 2`.  This rejects this comparison
 model and does not assert physical unsafety. -/
 theorem exampleTightBudget_infeasible :
     ¬Maths.LinearProgramming.IsFeasible
-      (Maths.finiteInequalityMatrix
+      (Maths.FiniteInequality.finMatrix
         (radiusDelta examplePhysicalGraph exampleErrorComparison.gain))
       (radiusBase exampleLowerRadius exampleTightUpperRadius
         exampleErrorComparison.bias) := by
