@@ -16,7 +16,7 @@ Multitubes was previously published as `directed-transport`, with its main modul
 | `Maths.TransferSummary.transport` and its lemmas `transport_*` | `Maths.TransferSummary.retentionProd`, `retentionProd_*` |
 | `Maths.TransferSummary.pastTransport` and its lemmas | `Maths.TransferSummary.pastRetentionProd` and its lemmas |
 | `Maths.Transport.IsResidualFor` | `Maths.Transport.IsLowerAdjointFor` |
-| `Maths.MixedAdditiveTransport.translationResidual` and its lemmas | `Maths.MixedAdditiveTransport.translationLowerAdjoint` and its lemmas |
+| `Maths.MixedAdditiveTransport.translationResidual` and its lemmas | `Maths.AdditiveTransport.translationLowerAdjoint` and its lemmas |
 | Module `Maths.Multitubes.MaxAffine.CycleSlack` | `Maths.Multitubes.MaxAffine.CycleRelaxation` |
 | `Maths.MaxAffineTransport.Label.HasCyclicSlack` and its lemmas `hasCyclicSlack_*` | `Maths.MaxAffineTransport.Label.IsCyclicRelaxationLevel`, `isCyclicRelaxationLevel_*` |
 | `Maths.MaxAffineTransport.Label.cyclicSlackThreshold`, `expansiveCyclicSlackThreshold` | `cyclicRelaxationThreshold`, `expansiveCyclicRelaxationThreshold` |
@@ -28,6 +28,7 @@ Multitubes was previously published as `directed-transport`, with its main modul
 | `Maths.not_nonnegative_incompatibility_of_potential` | `Maths.sum_mul_base_nonpos_of_potential` |
 | `Maths.exists_potential_iff_no_nonnegative_incompatibility` | `Maths.exists_potential_iff_no_farkasCertificate` |
 | `Maths.MaxAffineTransport.exists_isLaxSection_iff_no_nonnegative_certificate` | `Maths.MaxAffineTransport.exists_isLaxSection_iff_no_farkasCertificate'` |
+| Namespaces `Maths.MaxPlusPotential`, `Maths.MixedAdditiveTransport`, `Maths.CycleCoboundary` | `Maths.AdditiveTransport`, with the same short names |
 | Module `Maths.Multitubes.Additive.Circuits` | `Maths.Multitubes.Additive.SignedCycles` |
 | `circuit` in the names of `Maths.AdditiveTransport` declarations, as in `circuitCoefficient`, `signedCircuitVector`, `IsGenuineSignedCircuit`, `exists_simpleSignedCircuit_decomposition` | `cycle`: `cycleCoefficient`, `signedCycleVector`, `IsGenuineSignedCycle`, `exists_simpleSignedCycle_decomposition` |
 

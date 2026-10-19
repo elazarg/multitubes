@@ -72,7 +72,7 @@ variable {V : Type uV} {E : Type uE}
 def WorstDirectedResidualAtMost (G : EdgeGraph V E) (weight : E → ℝ)
     (level : ℝ) : Prop :=
   ∃ potential : V → ℝ,
-    ∀ edge, MaxPlusPotential.defect G weight potential edge ≤ level
+    ∀ edge, AdditiveTransport.defect G weight potential edge ≤ level
 
 /-- **Exact one-sided Chebyshev threshold.**  A residual threshold is
 attainable exactly when every closed walk has mean at most that threshold.
@@ -85,7 +85,7 @@ theorem worstDirectedResidualAtMost_iff_closedWalk_le
         walkSum weight cycle ≤ cycle.length * level := by
   have hpotential : WorstDirectedResidualAtMost G weight level ↔
       ∃ potential : V → ℝ,
-        MaxPlusPotential.IsPotential G (fun edge => weight edge - level) potential := by
+        AdditiveTransport.IsPotential G (fun edge => weight edge - level) potential := by
     apply exists_congr
     intro potential
     constructor
@@ -93,16 +93,16 @@ theorem worstDirectedResidualAtMost_iff_closedWalk_le
       have := h edge
       change potential (G.source edge) + (weight edge - level) ≤
         potential (G.target edge)
-      simp only [MaxPlusPotential.defect] at this
+      simp only [AdditiveTransport.defect] at this
       linarith
     · intro h edge
       have := h edge
       change potential (G.source edge) + (weight edge - level) ≤
         potential (G.target edge) at this
-      simp only [MaxPlusPotential.defect]
+      simp only [AdditiveTransport.defect]
       linarith
   rw [hpotential,
-    MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos]
+    AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos]
   apply forall_congr'
   intro vertex
   apply forall_congr'
@@ -146,7 +146,7 @@ theorem dotProduct_signedDelta_true [Fintype V] [DecidableEq V]
 def SymmetricResidualAtMost (G : EdgeGraph V E) (weight : E → ℝ)
     (level : ℝ) : Prop :=
   ∃ potential : V → ℝ,
-    ∀ edge, |MaxPlusPotential.defect G weight potential edge| ≤ level
+    ∀ edge, |AdditiveTransport.defect G weight potential edge| ≤ level
 
 /-- Symmetric signed-row feasibility is exactly the doubled finite row
 system. -/
@@ -165,23 +165,23 @@ theorem symmetricResidualAtMost_iff_finiteInequality
     | false =>
         rw [signedBase, dotProduct_signedDelta_false]
         have hedge := (abs_le.mp (h edge)).2
-        simp only [MaxPlusPotential.defect] at hedge
+        simp only [AdditiveTransport.defect] at hedge
         linarith
     | true =>
         rw [signedBase, dotProduct_signedDelta_true]
         have hedge := (abs_le.mp (h edge)).1
-        simp only [MaxPlusPotential.defect] at hedge
+        simp only [AdditiveTransport.defect] at hedge
         linarith
   · intro h edge
     apply abs_le.mpr
     constructor
     · have hedge := h (edge, true)
       rw [signedBase, dotProduct_signedDelta_true] at hedge
-      simp only [MaxPlusPotential.defect]
+      simp only [AdditiveTransport.defect]
       linarith
     · have hedge := h (edge, false)
       rw [signedBase, dotProduct_signedDelta_false] at hedge
-      simp only [MaxPlusPotential.defect]
+      simp only [AdditiveTransport.defect]
       linarith
 
 /-- **Exact symmetric normalized dual.**  The best signed-row additive
@@ -204,7 +204,7 @@ theorem exists_zero_defect_iff_normalizedSignedDual_nonpos
     [Fintype V] [DecidableEq V] [Fintype E]
     (G : EdgeGraph V E) (weight : E → ℝ) :
     (∃ potential : V → ℝ,
-      ∀ edge, MaxPlusPotential.defect G weight potential edge = 0) ↔
+      ∀ edge, AdditiveTransport.defect G weight potential edge = 0) ↔
       ∀ coefficient : SignedEdge E → ℝ,
         FiniteInequality.IsNormalizedCertificate (signedDelta G) coefficient →
           FiniteInequality.certificateValue (signedBase weight) coefficient ≤ 0 := by

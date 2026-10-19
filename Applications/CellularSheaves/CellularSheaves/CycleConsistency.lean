@@ -57,7 +57,7 @@ abbrev signedComparisonGraph (network : RationalSensorNetwork n m) :=
 /-- Signed real offsets on the doubled comparison graph. -/
 def signedComparisonWeight (network : RationalSensorNetwork n m) :
     Transport.LaxificationEdge (exactMode (m := m)) → ℝ :=
-  MixedAdditiveTransport.laxifiedWeight (exactMode (m := m))
+  AdditiveTransport.laxifiedWeight (exactMode (m := m))
     fun edge => (network.offset edge : ℝ)
 
 private theorem exists_isConsistent_uniform_iff_mixedResidual
@@ -65,13 +65,13 @@ private theorem exists_isConsistent_uniform_iff_mixedResidual
     (hsource : ∀ edge, network.sourceScale edge = 1)
     (htarget : ∀ edge, network.targetScale edge = 1) (level : ℝ) :
     (∃ reading, network.IsConsistent (fun _ => level) reading) ↔
-      MixedAdditiveTransport.MixedResidualAtMost network.graph (exactMode (m := m))
+      AdditiveTransport.MixedResidualAtMost network.graph (exactMode (m := m))
         (fun edge => (network.offset edge : ℝ)) level := by
   apply exists_congr
   intro reading
   apply forall_congr'
   intro edge
-  simp only [exactMode, MaxPlusPotential.defect]
+  simp only [exactMode, AdditiveTransport.defect]
   rw [hsource edge, htarget edge]
   norm_num
   rw [abs_sub_comm]
@@ -103,7 +103,7 @@ theorem exists_isConsistent_uniform_iff_closedWalk_le
       · simp only [forgetSign, Sum.inr.injEq] at heq
         exact congrArg Sum.inr (Subtype.ext heq))
   rw [network.exists_isConsistent_uniform_iff_mixedResidual hsource htarget]
-  exact MixedAdditiveTransport.mixedResidualAtMost_iff_laxified_closedWalk_le
+  exact AdditiveTransport.mixedResidualAtMost_iff_laxified_closedWalk_le
     network.graph (exactMode (m := m)) (fun edge => (network.offset edge : ℝ)) level
 
 /-- A nonnegative level belongs to the uniform-tolerance set exactly when every signed closed

@@ -709,7 +709,7 @@ end Main
 
 section Regimes
 
-open MaxPlusPotential
+open AdditiveTransport
 
 /-- **At floorless unit slopes the least eigenvalue is the maximum cycle mean.**  The mean of a
 mean-maximizing closed walk is a relaxation level, because it carries an eigenvector, and it is

@@ -55,7 +55,7 @@ and the attained cycle-mean characterization is
 `Maths.Multitubes.Additive.CycleMean`.  The critical graph as a subgraph in its
 own right, the description of the whole eigenspace, and the Kleene-star
 (all-pairs longest-walk) operator, of which `maxIncomingWeight` is one row by
-`Maths.MaxPlusPotential.isGreatest_range_maxRootedWeight`, are
+`Maths.AdditiveTransport.isGreatest_range_maxRootedWeight`, are
 `Maths.Multitubes.Additive.CriticalGraph`, as are the strongly connected
 components of the critical graph and both the sufficiency and the *minimality*
 of one Kleene-star column per component, the latter once a vertex of the
@@ -64,36 +64,36 @@ component in question reaches the whole graph.
 ## Main definitions
 
 - `Maths.translationTransport` - additive edge data acting by translation
-- `Maths.MaxPlusPotential.IsPotential` - the edge increment inequality, a lax section of the
+- `Maths.AdditiveTransport.IsPotential` - the edge increment inequality, a lax section of the
   translation transport
-- `Maths.MaxPlusPotential.defect` - the amount by which one edge fails it
-- `Maths.MaxPlusPotential.incomingWeights`,
-  `Maths.MaxPlusPotential.nodupIncomingWeights` - the weights of the walks
+- `Maths.AdditiveTransport.defect` - the amount by which one edge fails it
+- `Maths.AdditiveTransport.incomingWeights`,
+  `Maths.AdditiveTransport.nodupIncomingWeights` - the weights of the walks
   arriving at a vertex, and of those among them that repeat no edge
-- `Maths.MaxPlusPotential.maxIncomingWeight` - the canonical potential, the
+- `Maths.AdditiveTransport.maxIncomingWeight` - the canonical potential, the
   greatest weight of a walk arriving at a vertex without repeating an edge
-- `Maths.MaxPlusPotential.matrixGraph`,
-  `Maths.MaxPlusPotential.matrixWeight`,
-  `Maths.MaxPlusPotential.IsSubeigenvector` - the max-plus matrix reading
+- `Maths.AdditiveTransport.matrixGraph`,
+  `Maths.AdditiveTransport.matrixWeight`,
+  `Maths.AdditiveTransport.IsSubeigenvector` - the max-plus matrix reading
 
 ## Main results
 
-- `Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos` - the
+- `Maths.AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos` - the
   duality, for finitely many edges, an arbitrary vertex type and ordered
   additive commutative monoid with cancellation of weights
-- `Maths.MaxPlusPotential.walkSum_add_le_of_forall_mem_edges` and
-  `Maths.MaxPlusPotential.IsPotential.walkSum_add_le` - the additive-monoid
+- `Maths.AdditiveTransport.walkSum_add_le_of_forall_mem_edges` and
+  `Maths.AdditiveTransport.IsPotential.walkSum_add_le` - the additive-monoid
   walk propagation inequality, from the edge inequality on one walk's edges
-- `Maths.MaxPlusPotential.isGreatest_incomingWeights` - with no positive closed
+- `Maths.AdditiveTransport.isGreatest_incomingWeights` - with no positive closed
   walk, `maxIncomingWeight` is the greatest weight of a walk arriving at a vertex
-- `Maths.MaxPlusPotential.isLeast_nonnegativePotentials` - the same envelope is
+- `Maths.AdditiveTransport.isLeast_nonnegativePotentials` - the same envelope is
   the least nonnegative potential
-- `Maths.MaxPlusPotential.maxIncomingWeight_eq_sSup` - over `ℝ` it is therefore
+- `Maths.AdditiveTransport.maxIncomingWeight_eq_sSup` - over `ℝ` it is therefore
   the supremum of the weights of all arriving walks
-- `Maths.MaxPlusPotential.exists_edge_defect_ge` - a closed walk of weight at
+- `Maths.AdditiveTransport.exists_edge_defect_ge` - a closed walk of weight at
   least `γ` forces some edge to fail the inequality by at least `γ` divided by
   the length of that walk, for every candidate function
-- `Maths.MaxPlusPotential.exists_subeigenvector_iff_forall_closedWalk_le` - for a
+- `Maths.AdditiveTransport.exists_subeigenvector_iff_forall_closedWalk_le` - for a
   max-plus matrix, a subeigenvector for `lam` exists exactly when every cycle has
   mean weight at most `lam`
 
@@ -175,7 +175,7 @@ theorem monotone_edgeMap_translationTransport [Add A] [Preorder A] [AddRightMono
 
 end Translation
 
-namespace MaxPlusPotential
+namespace AdditiveTransport
 
 variable {𝕜 : Type*} [AddCommMonoid 𝕜] [LinearOrder 𝕜] [IsOrderedAddMonoid 𝕜]
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
@@ -683,7 +683,7 @@ end MatrixQuantitative
 
 end Matrix
 
-end MaxPlusPotential
+end AdditiveTransport
 
 end
 

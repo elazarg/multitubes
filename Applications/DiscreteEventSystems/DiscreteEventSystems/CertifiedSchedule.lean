@@ -53,7 +53,7 @@ timed event graph, max-plus, critical cycle, cycle mean, certified schedule
 namespace DiscreteEventSystems
 
 open Maths
-open Maths.MaxPlusPotential
+open Maths.AdditiveTransport
 open Maths.MaxAffineTransport
 
 universe uV uE
@@ -109,7 +109,7 @@ theorem cycleMean_le_of_feasibleCycleTime (network : TimedNetwork V E)
   have hpotential : IsPotential network.graph
       (fun edge => network.delay edge - cycleTime) phase := by
     intro edge
-    dsimp [MaxPlusPotential.defect]
+    dsimp [AdditiveTransport.defect]
     linarith [hfeasible edge]
   have hclosed := hpotential.closedWalk_nonpos cycle
   rw [walkSum_sub_const, nsmul_eq_mul] at hclosed
@@ -212,7 +212,7 @@ theorem exampleShiftedPhase_isPotential :
       exampleShiftedPhase := by
   intro edge
   cases edge <;>
-    norm_num [MaxPlusPotential.defect, exampleGraph, exampleNetwork, exampleShiftedPhase]
+    norm_num [AdditiveTransport.defect, exampleGraph, exampleNetwork, exampleShiftedPhase]
 
 /-- Every example cycle has mean at most three. -/
 theorem example_cycle_bound (vertex : ExampleEvent)

@@ -311,7 +311,7 @@ For the finite-edge additive cycle criterion:
 ```lean
 import Maths.Multitubes.Additive.Potentials
 
-#check Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
+#check Maths.AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos
 ```
 
 Use `import Maths` only when you want the complete library. Narrow imports avoid unrelated

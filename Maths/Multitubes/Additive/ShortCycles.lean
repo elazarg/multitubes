@@ -65,7 +65,7 @@ universe uV uE
 
 variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 
-open MaxPlusPotential
+open AdditiveTransport
 
 /-- It is enough to check closed-walk affine bounds on cycles of length at
 most the number of vertices. -/

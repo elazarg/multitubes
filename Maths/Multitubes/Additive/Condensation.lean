@@ -17,7 +17,7 @@ A potential for a real edge weighting exists exactly when every strongly connect
 component admits one on its induced subgraph.  Closed walks never leave a component:
 splitting a closed walk at any traversed edge links the endpoints of that edge to the
 base vertex.  The closed-walk test of the tropical Farkas duality
-`Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos` is
+`Maths.AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos` is
 therefore intrinsically componentwise, and edges between distinct components are never
 an obstruction.  No topological stitching along the acyclic condensation
 `Maths.sccCondensation` is performed: the componentwise potentials certify
@@ -37,18 +37,18 @@ condition holds vacuously.
 
 ## Main definitions
 
-* `Maths.MaxPlusPotential.HasSCCPotentialAt` and
-  `Maths.MaxPlusPotential.HasSCCPotentials`: a potential on one strongly
+* `Maths.AdditiveTransport.HasSCCPotentialAt` and
+  `Maths.AdditiveTransport.HasSCCPotentials`: a potential on one strongly
   connected component, respectively on every component.
 
 ## Main results
 
-* `Maths.MaxPlusPotential.exists_isPotential_iff_forall_scc_induce`: a
+* `Maths.AdditiveTransport.exists_isPotential_iff_forall_scc_induce`: a
   potential exists exactly when the induced subgraph of every strongly connected
   component admits one.
-* `Maths.MaxPlusPotential.exists_isPotential_iff_hasSCCPotentials`: the
+* `Maths.AdditiveTransport.exists_isPotential_iff_hasSCCPotentials`: the
   same decomposition phrased through componentwise constrained potentials.
-* `Maths.MaxPlusPotential.hasSCCPotentialAt_iff_exists_isPotential_induce`:
+* `Maths.AdditiveTransport.hasSCCPotentialAt_iff_exists_isPotential_induce`:
   the two componentwise phrasings agree, without any finiteness hypothesis.
 
 ## Tags
@@ -67,7 +67,7 @@ variable {V : Type uV} {E : Type uE} {G : EdgeGraph V E}
 
 /-! ## Componentwise potentials -/
 
-namespace MaxPlusPotential
+namespace AdditiveTransport
 
 /-- A potential restricts to a potential on every induced subgraph. -/
 theorem IsPotential.induce {weight : E → ℝ} {φ : V → ℝ}
@@ -151,6 +151,6 @@ theorem exists_isPotential_iff_forall_scc_induce [Finite E] (weight : E → ℝ)
     exact (hasSCCPotentialAt_iff_exists_isPotential_induce weight base).mpr
       (hcomponents (toSCC G base))
 
-end MaxPlusPotential
+end AdditiveTransport
 
 end Maths

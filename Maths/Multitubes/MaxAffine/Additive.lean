@@ -46,26 +46,26 @@ variable {V : Type uV} {E : Type uE} {G : Maths.EdgeGraph V E}
 theorem isLaxSection_translationLabel_iff
     (G : EdgeGraph V E) (weight : E → ℝ) (potential : V → ℝ) :
     IsLaxSection G (fun edge => translationLabel (weight edge)) potential ↔
-      Maths.MaxPlusPotential.IsPotential G weight potential := by
-  simp only [isLaxSection_iff, Maths.MaxPlusPotential.isPotential_iff, apply_translationLabel]
+      Maths.AdditiveTransport.IsPotential G weight potential := by
+  simp only [isLaxSection_iff, Maths.AdditiveTransport.isPotential_iff, apply_translationLabel]
   exact forall_congr' fun edge => ⟨fun h => by linarith, fun h => by linarith⟩
 
 @[simp] theorem defect_translationLabel
     (G : EdgeGraph V E) (weight : E → ℝ) (potential : V → ℝ) (edge : E) :
     defect G (fun next => translationLabel (weight next)) potential edge =
-      Maths.MaxPlusPotential.defect G weight potential edge := by
-  simp only [defect, Maths.MaxPlusPotential.defect, apply_translationLabel]
+      Maths.AdditiveTransport.defect G weight potential edge := by
+  simp only [defect, Maths.AdditiveTransport.defect, apply_translationLabel]
   ring
 
 /-- Edge data is a coboundary exactly when some translation-labelled candidate
 has zero defect on every edge. -/
 theorem isCoboundary_iff_exists_translation_defect_eq_zero
     (G : EdgeGraph V E) (weight : E → ℝ) :
-    Maths.CycleCoboundary.IsCoboundary G weight ↔
+    Maths.AdditiveTransport.IsCoboundary G weight ↔
       ∃ potential : V → ℝ,
         ∀ edge : E,
           defect G (fun next => translationLabel (weight next)) potential edge = 0 := by
-  rw [Maths.CycleCoboundary.isCoboundary_iff_exists_defect_eq_zero]
+  rw [Maths.AdditiveTransport.isCoboundary_iff_exists_defect_eq_zero]
   simp only [defect_translationLabel]
 
 /-- Translation transport is addition of the walk weight. -/

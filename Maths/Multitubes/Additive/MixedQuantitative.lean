@@ -21,20 +21,20 @@ threshold on the laxification graph with signed edge weights.
 
 ## Main definitions
 
-* `Maths.MixedAdditiveTransport.MixedResidualAtMost` - existence of a
+* `Maths.AdditiveTransport.MixedResidualAtMost` - existence of a
   potential satisfying a prescribed mixed residual threshold.
 
 ## Main results
 
-* `Maths.MixedAdditiveTransport.mixedResidualAtMost_iff_worstDirectedResidualAtMost` -
+* `Maths.AdditiveTransport.mixedResidualAtMost_iff_worstDirectedResidualAtMost` -
   the residual threshold is the directed threshold on the signed laxification.
-* `Maths.MixedAdditiveTransport.mixedResidualAtMost_iff_laxified_closedWalk_le` -
+* `Maths.AdditiveTransport.mixedResidualAtMost_iff_laxified_closedWalk_le` -
   the closed-walk characterization of the mixed threshold.
-* `Maths.MixedAdditiveTransport.mixedResidualAtMost_iff_laxified_simpleCycle_le` -
+* `Maths.AdditiveTransport.mixedResidualAtMost_iff_laxified_simpleCycle_le` -
   the simple-cycle characterization of the mixed threshold.
-* `Maths.MixedAdditiveTransport.exists_isMixedSection_iff_mixedResidualAtMost_zero` -
+* `Maths.AdditiveTransport.exists_isMixedSection_iff_mixedResidualAtMost_zero` -
   the zero-threshold specialization to mixed sections.
-* `Maths.MixedAdditiveTransport.exists_isMixedSection_iff_forall_laxified_simpleCycle_nonpos` -
+* `Maths.AdditiveTransport.exists_isMixedSection_iff_forall_laxified_simpleCycle_nonpos` -
   the finite-edge simple-cycle feasibility criterion.
 
 ## Tags
@@ -46,7 +46,7 @@ transport, additive transport, mixed section, residual, cycle mean
 
 namespace Maths
 
-namespace MixedAdditiveTransport
+namespace AdditiveTransport
 
 universe uV uE
 
@@ -59,9 +59,9 @@ def MixedResidualAtMost (G : EdgeGraph V E) (mode : E → EdgeMode)
     (weight : E → ℝ) (level : ℝ) : Prop :=
   ∃ potential : V → ℝ, ∀ edge : E,
     match mode edge with
-    | .lax => MaxPlusPotential.defect G weight potential edge ≤ level
-    | .exact => |MaxPlusPotential.defect G weight potential edge| ≤ level
-    | .oplax => -MaxPlusPotential.defect G weight potential edge ≤ level
+    | .lax => AdditiveTransport.defect G weight potential edge ≤ level
+    | .exact => |AdditiveTransport.defect G weight potential edge| ≤ level
+    | .oplax => -AdditiveTransport.defect G weight potential edge ≤ level
 
 /-- The mixed residual threshold is the ordinary directed residual threshold on
 the signed laxification graph. -/
@@ -73,15 +73,15 @@ theorem mixedResidualAtMost_iff_worstDirectedResidualAtMost
   apply exists_congr
   intro potential
   have hforward_defect (edge : Transport.LaxificationForwardEdge mode) :
-      MaxPlusPotential.defect (Transport.laxificationGraph G mode)
+      AdditiveTransport.defect (Transport.laxificationGraph G mode)
           (laxifiedWeight mode weight) potential (.inl edge) =
-        MaxPlusPotential.defect G weight potential edge.1 := by
+        AdditiveTransport.defect G weight potential edge.1 := by
     rfl
   have hreverse_defect (edge : Transport.LaxificationReverseEdge mode) :
-      MaxPlusPotential.defect (Transport.laxificationGraph G mode)
+      AdditiveTransport.defect (Transport.laxificationGraph G mode)
           (laxifiedWeight mode weight) potential (.inr edge) =
-        -MaxPlusPotential.defect G weight potential edge.1 := by
-    simp only [MaxPlusPotential.defect, Transport.laxificationGraph,
+        -AdditiveTransport.defect G weight potential edge.1 := by
+    simp only [AdditiveTransport.defect, Transport.laxificationGraph,
       laxifiedWeight]
     ring
   constructor
@@ -96,7 +96,7 @@ theorem mixedResidualAtMost_iff_worstDirectedResidualAtMost
     · rcases edge.property with hmode | hmode
       · rw [hreverse_defect]
         simpa [hmode] using h edge.1
-      · have hbound : |MaxPlusPotential.defect G weight potential edge.1| ≤ level := by
+      · have hbound : |AdditiveTransport.defect G weight potential edge.1| ≤ level := by
           simpa [hmode] using h edge.1
         have hneg := neg_le_of_abs_le hbound
         rw [hreverse_defect]
@@ -157,14 +157,14 @@ theorem exists_isMixedSection_iff_mixedResidualAtMost_zero
     (∃ potential : V → ℝ,
         (translationTransport G weight).IsMixedSection mode potential) ↔
         ∃ potential : V → ℝ,
-          MaxPlusPotential.IsPotential (Transport.laxificationGraph G mode)
+          AdditiveTransport.IsPotential (Transport.laxificationGraph G mode)
             (laxifiedWeight mode weight) potential := by
       simp only [isMixedSection_iff_isPotential_laxified]
     _ ↔ AdditiveTransport.WorstDirectedResidualAtMost
         (Transport.laxificationGraph G mode) (laxifiedWeight mode weight) 0 := by
       apply exists_congr
       intro potential
-      rw [MaxPlusPotential.isPotential_iff_forall_defect_nonpos]
+      rw [AdditiveTransport.isPotential_iff_forall_defect_nonpos]
 
 /-- A real mixed additive section exists exactly when every signed simple
 cycle in the laxification graph has nonpositive weight. -/
@@ -181,6 +181,6 @@ theorem exists_isMixedSection_iff_forall_laxified_simpleCycle_nonpos
     mixedResidualAtMost_iff_laxified_simpleCycle_le]
   simp
 
-end MixedAdditiveTransport
+end AdditiveTransport
 
 end Maths

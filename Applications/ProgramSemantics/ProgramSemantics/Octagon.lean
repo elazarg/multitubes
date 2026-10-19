@@ -20,7 +20,7 @@ The octagon abstract domain tracks unit two-variable inequalities `±x ± y ≤ 
 
 The doubled graph has one vertex per literal.  A constraint `p - q ≤ c` contributes two edges of
 weight `-c` in the convention `φ source + weight ≤ φ target` of
-`Maths.MaxPlusPotential.IsPotential`: one from `p` to `q`, and one from `-q` to `-p`.  Literal
+`Maths.AdditiveTransport.IsPotential`: one from `p` to `q`, and one from `-q` to `-p`.  Literal
 negation with edge reversal is an involution of this graph, so it is skew-symmetric.
 
 Over a linearly ordered field, a constraint system is feasible exactly when the doubled graph
@@ -71,7 +71,7 @@ octagon, UTVPI, abstract interpretation, difference constraints, potential, Bell
 
 namespace ProgramSemantics.Octagon
 
-open Maths Maths.MaxPlusPotential
+open Maths Maths.AdditiveTransport
 
 universe uV uI
 

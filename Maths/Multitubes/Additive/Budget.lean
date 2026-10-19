@@ -15,7 +15,7 @@ import Mathlib.Order.ConditionallyCompleteLattice.Basic
 
 Let `weight` be real edge data on an arbitrary directed multigraph.  The **budget** is the
 supremum of the weights of all finite walks.  A potential in the sense of
-`Maths.MaxPlusPotential.IsPotential` rises by at least the weight across every edge; it is
+`Maths.AdditiveTransport.IsPotential` rises by at least the weight across every edge; it is
 *bounded* when its range is bounded above and below, and its **oscillation** is
 `sSup (range φ) - sInf (range φ)`.
 
@@ -24,7 +24,7 @@ exists exactly when the walk weights are bounded above, and then the budget is t
 oscillation of a bounded potential.  The least value is attained by the supremum of the weights
 of the walks arriving at each vertex, which is also the least nonnegative potential.
 
-`Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos` characterizes the
+`Maths.AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos` characterizes the
 existence of a possibly unbounded potential by the absence of a positive closed walk, and needs
 finitely many edges; boundedness of the potential is what replaces that finiteness here.  The
 two criteria differ: a bounded potential forbids every positive closed walk, but it also
@@ -32,31 +32,31 @@ forbids arbitrarily heavy open walks.
 
 ## Main definitions
 
-* `Maths.MaxPlusPotential.oscillation`: the spread of the range of a real function.
-* `Maths.MaxPlusPotential.walkWeights`: the weights of all finite walks.
-* `Maths.MaxPlusPotential.HasFiniteBudget` and `Maths.MaxPlusPotential.budget`: the walk
+* `Maths.AdditiveTransport.oscillation`: the spread of the range of a real function.
+* `Maths.AdditiveTransport.walkWeights`: the weights of all finite walks.
+* `Maths.AdditiveTransport.HasFiniteBudget` and `Maths.AdditiveTransport.budget`: the walk
   weights are bounded above, and their supremum.
-* `Maths.MaxPlusPotential.budgetEN`: the same budget as a totally defined `ℝ≥0∞`.
-* `Maths.MaxPlusPotential.supIncomingWeight`: the supremum of the weights of the walks
+* `Maths.AdditiveTransport.budgetEN`: the same budget as a totally defined `ℝ≥0∞`.
+* `Maths.AdditiveTransport.supIncomingWeight`: the supremum of the weights of the walks
   arriving at a vertex.
-* `Maths.MaxPlusPotential.IsBoundedPotential`: a potential with bounded range.
+* `Maths.AdditiveTransport.IsBoundedPotential`: a potential with bounded range.
 
 ## Main results
 
-* `Maths.MaxPlusPotential.hasFiniteBudget_iff_exists_boundedPotential`: the budget is finite
+* `Maths.AdditiveTransport.hasFiniteBudget_iff_exists_boundedPotential`: the budget is finite
   exactly when a bounded potential exists.
-* `Maths.MaxPlusPotential.budget_eq_oscillation_supIncomingWeight` and
-  `Maths.MaxPlusPotential.isLeast_oscillation`: strong duality, the budget is the minimum
+* `Maths.AdditiveTransport.budget_eq_oscillation_supIncomingWeight` and
+  `Maths.AdditiveTransport.isLeast_oscillation`: strong duality, the budget is the minimum
   oscillation of a bounded potential, attained by `supIncomingWeight`.  The two inequalities
-  `Maths.MaxPlusPotential.budget_le_oscillation` and
-  `Maths.MaxPlusPotential.oscillation_supIncomingWeight_le_budget` hold separately.
-* `Maths.MaxPlusPotential.budgetEN_eq_iInf_oscillation`: the same duality with no finiteness
+  `Maths.AdditiveTransport.budget_le_oscillation` and
+  `Maths.AdditiveTransport.oscillation_supIncomingWeight_le_budget` hold separately.
+* `Maths.AdditiveTransport.budgetEN_eq_iInf_oscillation`: the same duality with no finiteness
   hypothesis, in `ℝ≥0∞`, both sides being `⊤` in the unbounded case.
-* `Maths.MaxPlusPotential.isLeast_supIncomingWeight` and
-  `Maths.MaxPlusPotential.supIncomingWeight_le_iff`: Bellman characterization,
+* `Maths.AdditiveTransport.isLeast_supIncomingWeight` and
+  `Maths.AdditiveTransport.supIncomingWeight_le_iff`: Bellman characterization,
   `supIncomingWeight` is the least nonnegative potential.
-* `Maths.MaxPlusPotential.not_hasFiniteBudget_of_positive_cycle` and
-  `Maths.MaxPlusPotential.not_exists_boundedPotential_of_positive_cycle`: a closed walk of
+* `Maths.AdditiveTransport.not_hasFiniteBudget_of_positive_cycle` and
+  `Maths.AdditiveTransport.not_exists_boundedPotential_of_positive_cycle`: a closed walk of
   positive weight forces an infinite budget, hence excludes bounded potentials.
 
 ## Implementation notes
@@ -80,7 +80,7 @@ potential, budget, oscillation, duality, max-plus, Bellman equation
 
 namespace Maths
 
-namespace MaxPlusPotential
+namespace AdditiveTransport
 
 open scoped ENNReal
 
@@ -423,6 +423,6 @@ theorem budgetEN_eq_iInf_oscillation :
       ⟨fun φ => h φ.2.hasFiniteBudget⟩
     rw [budgetEN_eq_top_iff.2 h, iInf_of_isEmpty, sInf_empty]
 
-end MaxPlusPotential
+end AdditiveTransport
 
 end Maths

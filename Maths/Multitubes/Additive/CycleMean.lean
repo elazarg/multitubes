@@ -31,32 +31,32 @@ along exactly `k` edges.  Karp's identity is
 `max cycle mean = max over v of min over 0 ≤ k < n of (D n v - D k v) / (n - k)`.
 
 The `k`-step table is genuinely new here: the potential file records only the all-walks
-maximum `Maths.MaxPlusPotential.maxIncomingWeight`, which is the value of the
+maximum `Maths.AdditiveTransport.maxIncomingWeight`, which is the value of the
 same recursion run to stationarity.
 
 ## Main definitions
 
-* `Maths.MaxPlusPotential.lengthIncomingWeights`: the weights realized by the
+* `Maths.AdditiveTransport.lengthIncomingWeights`: the weights realized by the
   walks arriving at a vertex along a prescribed number of edges.
-* `Maths.MaxPlusPotential.stepValue`: the `k`-step Bellman value, the greatest
+* `Maths.AdditiveTransport.stepValue`: the `k`-step Bellman value, the greatest
   element of that finite set.
 
 ## Main results
 
-* `Maths.MaxPlusPotential.exists_stepValue_sub_le`: the upper half of Karp's
+* `Maths.AdditiveTransport.exists_stepValue_sub_le`: the upper half of Karp's
   formula.  At every vertex some `k < n` makes the Karp difference quotient at most the
   cycle-mean bound, obtained by deleting a closed subwalk from a maximizing walk of length
   `n`.
-* `Maths.MaxPlusPotential.exists_le_stepValue_sub`: the lower half.  If the
+* `Maths.AdditiveTransport.exists_le_stepValue_sub`: the lower half.  If the
   bound is attained by some closed walk then at some vertex every Karp difference quotient
   is at least the bound; the vertex is read off an optimal walk prolonged along the
   attaining cycle.
-* `Maths.MaxPlusPotential.sup'_inf'_stepValue_div`: **Karp's formula**, over an
+* `Maths.AdditiveTransport.sup'_inf'_stepValue_div`: **Karp's formula**, over an
   arbitrary linearly ordered field, relative to a given mean-maximizing cycle.
-* `Maths.MaxPlusPotential.exists_short_closedWalk_sup'_inf'_stepValue_div`: over
+* `Maths.AdditiveTransport.exists_short_closedWalk_sup'_inf'_stepValue_div`: over
   the reals the maximizing cycle need not be assumed, since it is supplied by
   `Maths.AdditiveTransport.exists_short_closedWalk_maximizing_mean`.
-* `Maths.MaxPlusPotential.exists_critical_cycle_subeigenvector_iff`: the
+* `Maths.AdditiveTransport.exists_critical_cycle_subeigenvector_iff`: the
   attained max-plus spectral threshold, a short cycle deciding subeigenvector existence for
   every candidate eigenvalue.
 
@@ -71,7 +71,7 @@ on at least two vertices.  Connectivity is used nowhere else: the value table he
 from the zero vector, not from a source, so no vertex needs to be reachable from any
 other.
 
-`Maths.MaxPlusPotential.stepValue` is total, taking the junk value `0` when no
+`Maths.AdditiveTransport.stepValue` is total, taking the junk value `0` when no
 walk of the given length arrives, which the incoming-edge hypothesis rules out.  This keeps
 it a plain function, not one depending on a proof.
 
@@ -99,7 +99,7 @@ namespace Maths
 
 noncomputable section
 
-namespace MaxPlusPotential
+namespace AdditiveTransport
 
 universe uV uE
 
@@ -312,7 +312,7 @@ theorem exists_le_stepValue_sub [Fintype V] [Finite E]
 weighted directed multigraph have an incoming edge, and let `best` be a nonempty closed walk
 of maximum mean weight.  Then that maximum cycle mean is
 `max_v min_{0 ≤ k < n} (D n v - D k v) / (n - k)`, where `n` is the number of vertices and
-`D` is the step-value table `Maths.MaxPlusPotential.stepValue`. -/
+`D` is the step-value table `Maths.AdditiveTransport.stepValue`. -/
 theorem sup'_inf'_stepValue_div [Fintype V] [Nonempty V] [Finite E]
     (hin : ∀ vertex : V, ∃ e : E, G.target e = vertex) (weight : E → 𝕜)
     {base : V} (best : G.Walk base base) (hpos : 0 < best.length)
@@ -439,7 +439,7 @@ theorem exists_critical_cycle_subeigenvector_iff
       rw [div_le_iff₀ hlenPos] at hcycleMean
       linarith [hcycleMean]
 
-end MaxPlusPotential
+end AdditiveTransport
 
 end
 

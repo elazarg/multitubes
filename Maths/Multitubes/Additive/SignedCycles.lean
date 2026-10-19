@@ -74,16 +74,16 @@ theorem signedDelta_eq_signedGraph_incidence [DecidableEq V]
 
 @[simp] theorem defect_signedGraph_false (G : EdgeGraph V E)
     (weight : E → ℝ) (potential : V → ℝ) (edge : E) :
-    MaxPlusPotential.defect (signedGraph G) (signedBase weight) potential
+    AdditiveTransport.defect (signedGraph G) (signedBase weight) potential
         (edge, false) =
-      MaxPlusPotential.defect G weight potential edge := rfl
+      AdditiveTransport.defect G weight potential edge := rfl
 
 @[simp] theorem defect_signedGraph_true (G : EdgeGraph V E)
     (weight : E → ℝ) (potential : V → ℝ) (edge : E) :
-    MaxPlusPotential.defect (signedGraph G) (signedBase weight) potential
+    AdditiveTransport.defect (signedGraph G) (signedBase weight) potential
         (edge, true) =
-      -MaxPlusPotential.defect G weight potential edge := by
-  simp [MaxPlusPotential.defect, signedBase]
+      -AdditiveTransport.defect G weight potential edge := by
+  simp [AdditiveTransport.defect, signedBase]
   ring
 
 /-- The probability distribution of edge occurrences in a nonempty closed
@@ -184,7 +184,7 @@ theorem worstDirectedResidualAtMost_signedGraph_iff_finiteInequality
   apply forall_congr'
   intro edge
   rw [dotProduct_signedDelta_eq_signedGraph_difference]
-  simp only [MaxPlusPotential.defect]
+  simp only [AdditiveTransport.defect]
   constructor <;> intro h <;> linarith
 
 /-- **Full signed-circulation cycle duality.**  For every objective on the

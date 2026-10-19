@@ -51,7 +51,7 @@ bounded range.
 
 ## Main definitions
 
-* `Maths.CycleCoboundary.IsCoboundary` - edge data that is the `Maths.coboundary` of a
+* `Maths.AdditiveTransport.IsCoboundary` - edge data that is the `Maths.coboundary` of a
   vertex potential.
 * `Maths.translationTransport` - the direct additive reading as
   a `Maths.Transport`.
@@ -64,18 +64,18 @@ The walk sum `Maths.walkSum` that this file consumes lives in
 
 ## Main results
 
-* `Maths.CycleCoboundary.exists_coboundary_of_baseCycleSums_eq_zero` - reconstruct
+* `Maths.AdditiveTransport.exists_coboundary_of_baseCycleSums_eq_zero` - reconstruct
   a potential from path sums based at one vertex.
-* `Maths.CycleCoboundary.isCoboundary_iff_hasZeroCycleSums` - exactness iff all
+* `Maths.AdditiveTransport.isCoboundary_iff_hasZeroCycleSums` - exactness iff all
   cycle sums vanish on a strongly connected graph.
-* `Maths.CycleCoboundary.isCoboundary_iff_exists_isSection` - exactness iff the
+* `Maths.AdditiveTransport.isCoboundary_iff_exists_isSection` - exactness iff the
   translation transport has a section, without a connectivity hypothesis.
-* `Maths.CycleCoboundary.hasZeroCycleSums_iff_hasTrivialHolonomy` - cycle sums are
+* `Maths.AdditiveTransport.hasZeroCycleSums_iff_hasTrivialHolonomy` - cycle sums are
   precisely translation holonomy.
 * `Maths.monotone_edgeMap_translationTransport` - ordered
   translations are monotone edge maps.
-* `Maths.CycleCoboundary.exists_edge_defect_ge_of_pos` and
-  `Maths.CycleCoboundary.exists_edge_abs_defect_ge` - quantitative obstruction
+* `Maths.AdditiveTransport.exists_edge_defect_ge_of_pos` and
+  `Maths.AdditiveTransport.exists_edge_abs_defect_ge` - quantitative obstruction
   bounds from a positive cycle sum.
 
 ## Implementation notes
@@ -104,7 +104,7 @@ namespace Maths
 noncomputable section
 
 
-namespace CycleCoboundary
+namespace AdditiveTransport
 
 universe uV uE
 
@@ -214,12 +214,12 @@ end Reconstruction
 A closed walk of positive cycle sum is not merely an obstruction to exactness:
 it forces every candidate potential to be wrong on some edge of that walk, by
 an amount inversely proportional to the walk's length.
-The residual of a candidate potential at one edge is `Maths.MaxPlusPotential.defect`,
-and the one-sided existence statement is `Maths.MaxPlusPotential.exists_edge_defect_ge`.
+The residual of a candidate potential at one edge is `Maths.AdditiveTransport.defect`,
+and the one-sided existence statement is `Maths.AdditiveTransport.exists_edge_defect_ge`.
 Exactness is the case where that residual vanishes on every edge. -/
 section Quantitative
 
-open Maths.MaxPlusPotential
+open Maths.AdditiveTransport
 
 variable {weight : E → ℝ} {φ : V → ℝ} {vertex : V}
 
@@ -275,7 +275,7 @@ theorem cycleSum_le_length_mul_of_defect_le {δ : ℝ}
 /-- **One-sided obstruction class.**  A closed walk whose cycle sum is at least
 `γ > 0` forces, for every candidate potential, some edge on that walk to exceed
 the potential difference by at least `γ` divided by the walk's length.  This is
-`Maths.MaxPlusPotential.exists_edge_defect_ge` with the length hypothesis
+`Maths.AdditiveTransport.exists_edge_defect_ge` with the length hypothesis
 supplied by positivity of `γ`. -/
 theorem exists_edge_defect_ge_of_pos {γ : ℝ} (hγ : 0 < γ)
     (cycle : G.Walk vertex vertex) (hcycle : γ ≤ walkSum weight cycle) :
@@ -382,7 +382,7 @@ theorem isCoboundary_iff_hasTrivialCycleLabels {base : V}
 end Translation
 
 /-! ### The inequality form
-A potential in the sense of `Maths.MaxPlusPotential.IsPotential` is a vertex function whose
+A potential in the sense of `Maths.AdditiveTransport.IsPotential` is a vertex function whose
 coboundary dominates the edge data; an exact potential is the equality case. -/
 section Inequality
 
@@ -390,19 +390,19 @@ variable {A : Type*} [AddCommGroup A] [PartialOrder A] [IsOrderedAddMonoid A] {w
 
 /-- A potential is a vertex function whose coboundary dominates the edge data. -/
 theorem isPotential_iff_le_coboundary (φ : V → A) :
-    MaxPlusPotential.IsPotential G weight φ ↔ ∀ edge : E, weight edge ≤ coboundary G φ edge :=
-  MaxPlusPotential.isPotential_iff.trans <|
+    AdditiveTransport.IsPotential G weight φ ↔ ∀ edge : E, weight edge ≤ coboundary G φ edge :=
+  AdditiveTransport.isPotential_iff.trans <|
     forall_congr' fun _ => by rw [coboundary_apply, le_sub_iff_add_le']
 
 /-- A potential difference is a potential, with equality on every edge. -/
 theorem isPotential_of_eq_coboundary {φ : V → A}
     (hφ : ∀ edge : E, weight edge = coboundary G φ edge) :
-    MaxPlusPotential.IsPotential G weight φ :=
+    AdditiveTransport.IsPotential G weight φ :=
   (isPotential_iff_le_coboundary φ).2 fun edge => (hφ edge).le
 
 end Inequality
 
-end CycleCoboundary
+end AdditiveTransport
 
 end
 

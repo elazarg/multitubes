@@ -202,13 +202,13 @@ theorem exists_isLaxSection_of_slope_lt_one [Finite E] {label : E → Label}
 the floors only raise the action, so the translation inequality is implied. -/
 theorem isPotential_of_isLaxSection {label : E → Label} (hslope : ∀ e : E, (label e).slope = 1)
     {φ : V → ℝ} (hφ : IsLaxSection G label φ) :
-    Maths.MaxPlusPotential.IsPotential G (fun e => (label e).shift) φ := fun e =>
+    Maths.AdditiveTransport.IsPotential G (fun e => (label e).shift) φ := fun e =>
   (Label.add_shift_le_apply (hslope e) (φ (G.source e))).trans (hφ e)
 
 /-- A potential for the shifts that clears every floor at the target of its edge
 is a lax section, at unit slopes. -/
 theorem isLaxSection_of_isPotential {label : E → Label} (hslope : ∀ e : E, (label e).slope = 1)
-    {φ : V → ℝ} (hφ : Maths.MaxPlusPotential.IsPotential G (fun e => (label e).shift) φ)
+    {φ : V → ℝ} (hφ : Maths.AdditiveTransport.IsPotential G (fun e => (label e).shift) φ)
     (hfloor : ∀ e : E, (label e).floor ≤ ((φ (G.target e) : ℝ) : WithBot ℝ)) :
     IsLaxSection G label φ := by
   intro e
@@ -221,7 +221,7 @@ theorem isLaxSection_of_isPotential {label : E → Label} (hslope : ∀ e : E, (
 being one, a lax section exists exactly when no closed walk has strictly
 positive shift sum.  This is the mean-payoff feasibility criterion,
 equivalently the Bellman--Ford criterion, lifted from the translations of
-`Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos` to
+`Maths.AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos` to
 floored labels.  The translation inequalities are unchanged by adding a
 constant and the floor inequalities only improve upward, and that is what
 carries the lift: a potential for the shifts, raised by a constant large
@@ -238,7 +238,7 @@ theorem exists_isLaxSection_iff_forall_cycle_shift_nonpos [Finite E]
     exact (isPotential_of_isLaxSection hslope hφ).closedWalk_nonpos cycle
   · intro hcycle
     obtain ⟨base, hbase⟩ :=
-      (Maths.MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
+      (Maths.AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos
         (G := G) fun e => (label e).shift).2 hcycle
     obtain ⟨lift, hlift⟩ :=
       Finite.exists_le fun e : E => (label e).floor.unbotD 0 - base (G.target e)

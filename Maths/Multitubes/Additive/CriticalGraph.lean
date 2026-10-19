@@ -45,61 +45,61 @@ the two roots to be opposite, which happens only inside a single component.
 
 ## Main definitions
 
-* `Maths.MaxPlusPotential.IsCriticalEdge`,
-  `Maths.MaxPlusPotential.criticalEdges`: an edge lying on a closed walk of mean
+* `Maths.AdditiveTransport.IsCriticalEdge`,
+  `Maths.AdditiveTransport.criticalEdges`: an edge lying on a closed walk of mean
   weight `lam`, and the set of these.
-* `Maths.MaxPlusPotential.criticalGraph`,
-  `Maths.MaxPlusPotential.criticalWeight`: the critical subgraph and the restriction
-  of the weighting to it, with `Maths.MaxPlusPotential.liftCriticalWalk` reading a
+* `Maths.AdditiveTransport.criticalGraph`,
+  `Maths.AdditiveTransport.criticalWeight`: the critical subgraph and the restriction
+  of the weighting to it, with `Maths.AdditiveTransport.liftCriticalWalk` reading a
   walk of the former in the ambient graph.
-* `Maths.MaxPlusPotential.IsGraphEigenvector`: the max-plus eigenvalue equation on a
+* `Maths.AdditiveTransport.IsGraphEigenvector`: the max-plus eigenvalue equation on a
   weighted directed multigraph, namely the subeigenvector inequality together with an
   incoming tight edge at every vertex.
-* `Maths.MaxPlusPotential.CriticalClass`,
-  `Maths.MaxPlusPotential.toCriticalClass`: the critical classes, that is the strongly
+* `Maths.AdditiveTransport.CriticalClass`,
+  `Maths.AdditiveTransport.toCriticalClass`: the critical classes, that is the strongly
   connected components of the critical graph, and the class of a vertex.
-* `Maths.MaxPlusPotential.GeneratesEigenspace`: a set of vertices whose Kleene-star
+* `Maths.AdditiveTransport.GeneratesEigenspace`: a set of vertices whose Kleene-star
   columns express every eigenvector.
 
 ## Main results
 
-* `Maths.MaxPlusPotential.defect_eq_zero_of_isCriticalEdge`: a critical edge is tight
+* `Maths.AdditiveTransport.defect_eq_zero_of_isCriticalEdge`: a critical edge is tight
   for *every* potential of the shifted weighting.
-* `Maths.MaxPlusPotential.walkSum_criticalGraph_eq`: **the characteristic property
+* `Maths.AdditiveTransport.walkSum_criticalGraph_eq`: **the characteristic property
   of the critical graph**, every closed walk of it has mean exactly `lam`.
-* `Maths.MaxPlusPotential.isCriticalVertex_of_criticalGraph_closedWalk`: consequently
+* `Maths.AdditiveTransport.isCriticalVertex_of_criticalGraph_closedWalk`: consequently
   every vertex of a nonempty closed walk of the critical graph is a critical vertex.
-* `Maths.MaxPlusPotential.add_maxRootedWeight_le_maxRootedWeight`: the triangle
+* `Maths.AdditiveTransport.add_maxRootedWeight_le_maxRootedWeight`: the triangle
   inequality of the Kleene star, and
-  `Maths.MaxPlusPotential.isGreatest_range_maxRootedWeight`: the canonical potential
-  `Maths.MaxPlusPotential.maxIncomingWeight` is the largest Kleene-star entry in its
+  `Maths.AdditiveTransport.isGreatest_range_maxRootedWeight`: the canonical potential
+  `Maths.AdditiveTransport.maxIncomingWeight` is the largest Kleene-star entry in its
   column, so it is one row of the all-pairs operator.
-* `Maths.MaxPlusPotential.isGraphEigenvector_maxRootedWeight`: **every critical
+* `Maths.AdditiveTransport.isGraphEigenvector_maxRootedWeight`: **every critical
   Kleene-star column is an eigenvector.**
-* `Maths.MaxPlusPotential.isGreatest_criticalColumns`: **every eigenvector is the
+* `Maths.AdditiveTransport.isGreatest_criticalColumns`: **every eigenvector is the
   max-plus combination of the critical Kleene-star columns**, with its own values as
   coefficients; with finitely many vertices and edges and no further hypothesis.
-* `Maths.MaxPlusPotential.isGreatest_criticalColumns_matrix`: the same for a max-plus
+* `Maths.AdditiveTransport.isGreatest_criticalColumns_matrix`: the same for a max-plus
   matrix, where the reachability side conditions are automatic.
-* `Maths.MaxPlusPotential.isCriticalVertex_of_toCriticalClass_eq`: criticality is a
+* `Maths.AdditiveTransport.isCriticalVertex_of_toCriticalClass_eq`: criticality is a
   property of a whole critical class.
-* `Maths.MaxPlusPotential.maxRootedWeight_eq_add_of_toCriticalClass_eq`: **two
+* `Maths.AdditiveTransport.maxRootedWeight_eq_add_of_toCriticalClass_eq`: **two
   Kleene-star columns rooted in the same critical class differ by a constant**, namely by
-  `Maths.MaxPlusPotential.maxRootedWeight_add_maxRootedWeight_eq_zero`, the Kleene-star
+  `Maths.AdditiveTransport.maxRootedWeight_add_maxRootedWeight_eq_zero`, the Kleene-star
   entry between the two roots.
-* `Maths.MaxPlusPotential.isGreatest_criticalClassColumns`: **one column per critical
+* `Maths.AdditiveTransport.isGreatest_criticalClassColumns`: **one column per critical
   class suffices** to express every eigenvector, restated as
-  `Maths.MaxPlusPotential.generatesEigenspace_of_forall_exists_mem`.
-* `Maths.MaxPlusPotential.toCriticalClass_eq_of_maxRootedWeight_add_eq_zero`:
+  `Maths.AdditiveTransport.generatesEigenspace_of_forall_exists_mem`.
+* `Maths.AdditiveTransport.toCriticalClass_eq_of_maxRootedWeight_add_eq_zero`:
   conversely, two mutually reachable vertices whose Kleene-star entries are opposite lie in one
   critical class.
-* `Maths.MaxPlusPotential.not_isGreatest_criticalColumns_of_forall_toCriticalClass_ne`:
+* `Maths.AdditiveTransport.not_isGreatest_criticalColumns_of_forall_toCriticalClass_ne`:
   **a column is not the max-plus combination of the columns rooted in other critical classes**,
   whatever coefficients are used.
-* `Maths.MaxPlusPotential.exists_mem_toCriticalClass_eq_of_generatesEigenspace`:
+* `Maths.AdditiveTransport.exists_mem_toCriticalClass_eq_of_generatesEigenspace`:
   **minimality**, every generating set meets the critical class of every critical vertex reaching
   the whole graph; with
-  `Maths.MaxPlusPotential.generatesEigenspace_iff` identifying the generating sets, in
+  `Maths.AdditiveTransport.generatesEigenspace_iff` identifying the generating sets, in
   that situation, with the transversals of the critical classes.
 
 ## Implementation notes
@@ -113,11 +113,11 @@ a specific eigenvalue.
 The eigenspace description asks for finitely many vertices and finitely many edges and nothing
 else - no irreducibility, no strong connectivity, and no attainment.  Reachability enters only as
 the side condition `Nonempty (G.Walk base vertex)` attached to a Kleene-star entry, which is what
-keeps `Maths.MaxPlusPotential.maxRootedWeight` away from its junk value; the critical
+keeps `Maths.AdditiveTransport.maxRootedWeight` away from its junk value; the critical
 vertex produced by the backward tight walk always satisfies it, so the description is a genuine
 `IsGreatest` and not a conditional one.
 
-`Maths.MaxPlusPotential.CriticalClass` is `Maths.SCC` of the critical
+`Maths.AdditiveTransport.CriticalClass` is `Maths.SCC` of the critical
 graph, so the reachability order on classes and the acyclicity of their condensation come with it
 and mutual reachability inside the critical graph is not redefined here.
 
@@ -125,7 +125,7 @@ The family indexed by the critical classes is *sufficient* and *minimal*.  Suffi
 nothing beyond finiteness.  Minimality asks, for the class being recovered, that one of its
 vertices reach every vertex of the graph: that reachability is exactly what makes the column
 rooted there an eigenvector, by
-`Maths.MaxPlusPotential.isGraphEigenvector_maxRootedWeight`, and without an
+`Maths.AdditiveTransport.isGraphEigenvector_maxRootedWeight`, and without an
 eigenvector attached to a class there is nothing a generating family could fail to express.
 Nothing further is assumed - in particular the generating set is not required to consist of
 critical vertices, and the walks from its members back to the class are read off the generating
@@ -160,7 +160,7 @@ variable {V : Type uV} {E : Type uE}
 
 /-! ### Edge subgraphs -/
 
-namespace MaxPlusPotential
+namespace AdditiveTransport
 
 variable {𝕜 : Type*} [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
 variable {G : EdgeGraph V E}
@@ -337,11 +337,11 @@ theorem isCriticalVertex_of_criticalGraph_closedWalk [Finite E] {weight : E → 
 
 /-! ### The Kleene star
 
-`Maths.MaxPlusPotential.maxRootedWeight` is the all-pairs longest-walk operator, the
+`Maths.AdditiveTransport.maxRootedWeight` is the all-pairs longest-walk operator, the
 Kleene star of the weight matrix, read as a function of both its base and its endpoint.  Its
 max-plus algebra is the following: the diagonal is zero
-(`Maths.MaxPlusPotential.maxRootedWeight_self`), composition is subadditive, and
-`Maths.MaxPlusPotential.maxIncomingWeight` is the largest entry of a column. -/
+(`Maths.AdditiveTransport.maxRootedWeight_self`), composition is subadditive, and
+`Maths.AdditiveTransport.maxIncomingWeight` is the largest entry of a column. -/
 
 section Kleene
 
@@ -392,8 +392,8 @@ end Kleene
 /-- The max-plus eigenvalue equation on a weighted directed multigraph: the shifted weighting
 `weight - lam` admits `φ` as a potential, and at every vertex some incoming edge makes the
 inequality an equality.  On the complete digraph of a matrix this is
-`Maths.MaxPlusPotential.IsEigenvector`, by
-`Maths.MaxPlusPotential.isEigenvector_iff_isGraphEigenvector`. -/
+`Maths.AdditiveTransport.IsEigenvector`, by
+`Maths.AdditiveTransport.isEigenvector_iff_isGraphEigenvector`. -/
 def IsGraphEigenvector (G : EdgeGraph V E) (weight : E → 𝕜) (lam : 𝕜) (φ : V → 𝕜) : Prop :=
   IsPotential G (fun e => weight e - lam) φ ∧
     ∀ vertex : V, ∃ edge : E, G.target edge = vertex ∧
@@ -511,7 +511,7 @@ section CriticalClass
 variable [Finite E]
 
 /-- The **critical classes**: the strongly connected components of the critical graph.  This is
-`Maths.SCC` of `Maths.MaxPlusPotential.criticalGraph`, so it carries the
+`Maths.SCC` of `Maths.AdditiveTransport.criticalGraph`, so it carries the
 reachability partial order of the components and the acyclicity of their condensation. -/
 def CriticalClass (G : EdgeGraph V E) (weight : E → 𝕜) (lam : 𝕜) : Type uV :=
   SCC (criticalGraph G weight lam)
@@ -588,7 +588,7 @@ theorem maxRootedWeight_add_maxRootedWeight_eq_zero {weight : E → 𝕜} {lam :
   linarith [hsplit ▸ hzero]
 
 /-- **Opposite Kleene-star entries detect the critical class.**  This is the converse of
-`Maths.MaxPlusPotential.maxRootedWeight_add_maxRootedWeight_eq_zero`: if the two
+`Maths.AdditiveTransport.maxRootedWeight_add_maxRootedWeight_eq_zero`: if the two
 entries between two mutually reachable vertices sum to zero, then greatest walks realizing them
 concatenate to a closed walk of shifted weight zero, hence of mean exactly `lam`; every edge of
 that closed walk is critical, so each of the two walks is a walk of the critical graph and the
@@ -658,7 +658,7 @@ theorem maxRootedWeight_eq_add_of_toCriticalClass_eq {weight : E → 𝕜} {lam 
 
 /-- Within one critical class the value of an eigenvector at a vertex is recovered exactly from
 its value at any other vertex of the class: the inequality of
-`Maths.MaxPlusPotential.add_maxRootedWeight_le` holds in both directions, because the
+`Maths.AdditiveTransport.add_maxRootedWeight_le` holds in both directions, because the
 two Kleene-star entries between the roots are opposite. -/
 theorem add_maxRootedWeight_eq_of_toCriticalClass_eq {weight : E → 𝕜} {lam : 𝕜} {φ : V → 𝕜}
     (hφ : IsGraphEigenvector G weight lam φ) {base base' : V}
@@ -680,7 +680,7 @@ is a set of critical vertices meeting every critical class that contains a criti
 every eigenvector is already, at every vertex, the max-plus combination of the columns rooted at
 `reps`, with its own values as coefficients, and the maximum is attained.  This is sufficiency of
 the family; its minimality is
-`Maths.MaxPlusPotential.exists_mem_toCriticalClass_eq_of_generatesEigenspace`. -/
+`Maths.AdditiveTransport.exists_mem_toCriticalClass_eq_of_generatesEigenspace`. -/
 theorem isGreatest_criticalClassColumns [Fintype V] {weight : E → 𝕜} {lam : 𝕜} {φ : V → 𝕜}
     (hφ : IsGraphEigenvector G weight lam φ) {reps : Set V}
     (hreps : ∀ base : V, IsCriticalVertex G weight lam base →
@@ -714,8 +714,8 @@ def GeneratesEigenspace (G : EdgeGraph V E) (weight : E → 𝕜) (lam : 𝕜) (
       r = φ root + maxRootedWeight G (fun e => weight e - lam) root vertex} (φ vertex)
 
 /-- **Sufficiency.**  A set of vertices meeting every critical class generates the eigenspace.
-This is `Maths.MaxPlusPotential.isGreatest_criticalClassColumns` read through
-`Maths.MaxPlusPotential.GeneratesEigenspace`. -/
+This is `Maths.AdditiveTransport.isGreatest_criticalClassColumns` read through
+`Maths.AdditiveTransport.GeneratesEigenspace`. -/
 theorem generatesEigenspace_of_forall_exists_mem [Fintype V] {weight : E → 𝕜} {lam : 𝕜}
     {reps : Set V}
     (hreps : ∀ base : V, IsCriticalVertex G weight lam base →
@@ -761,12 +761,12 @@ theorem not_isGreatest_criticalColumns_of_forall_toCriticalClass_ne {weight : E 
 /-- **Minimality of the family indexed by the critical classes.**  Every generating set contains a
 vertex of the critical class of `base`, for every critical vertex `base` that reaches the whole
 graph.  Together with
-`Maths.MaxPlusPotential.generatesEigenspace_of_forall_exists_mem` this says that no
+`Maths.AdditiveTransport.generatesEigenspace_of_forall_exists_mem` this says that no
 proper subfamily of the one-column-per-critical-class family generates: dropping the class of
 `base` costs the eigenvector rooted at `base`.
 
 The reachability hypothesis is what makes the column rooted at `base` an eigenvector at all, by
-`Maths.MaxPlusPotential.isGraphEigenvector_maxRootedWeight`, and it is the only
+`Maths.AdditiveTransport.isGraphEigenvector_maxRootedWeight`, and it is the only
 hypothesis beyond finiteness and the bound on the cycle means; neither strong connectivity nor
 attainment of the maximum cycle mean is used. -/
 theorem exists_mem_toCriticalClass_eq_of_generatesEigenspace {weight : E → 𝕜}
@@ -844,7 +844,7 @@ theorem isGreatest_criticalColumns_matrix [Fintype ι] [Nonempty ι] {A : ι →
 
 end Matrix
 
-end MaxPlusPotential
+end AdditiveTransport
 
 end
 

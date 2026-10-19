@@ -1035,7 +1035,7 @@ theorem walkApply_cycle_le {label : E → Label} (hslope : ∀ e : E, 0 ≤ (lab
 moves the candidate up by at least `γ > 0` forces one of its edges to fail the
 section inequality by at least `γ` divided by the total suffix slope of the
 walk.  Zero slopes are allowed.  At all slopes `1` the total suffix slope is the length
-of the walk, and the statement becomes that of `Maths.MaxPlusPotential.exists_edge_defect_ge`. -/
+of the walk, and the statement becomes that of `Maths.AdditiveTransport.exists_edge_defect_ge`. -/
 theorem exists_edge_defect_ge {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (φ : V → ℝ) {base : V} (cycle : G.Walk base base) {γ : ℝ} (hγ : 0 < γ)
     (hcycle : φ base + γ ≤ walkApply label cycle (φ base)) :

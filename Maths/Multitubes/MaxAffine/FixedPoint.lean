@@ -37,7 +37,7 @@ class, and only there, that this file calls the vertex operator topical.
 
 For a topical vertex operator the eigenvalue equation `F x = lam + x` is solved.  The solution is
 not reproved: a translation labelling is a max-plus weighting by the shifts, so
-`Maths.MaxPlusPotential.maxRootedWeight` -- the column of the Kleene star of
+`Maths.AdditiveTransport.maxRootedWeight` -- the column of the Kleene star of
 `shift - lam` rooted at a critical vertex -- is an eigenvector, its subeigenvector half being the
 potential property and its tightness half the last-edge argument of the max-plus eigenvector
 theory.  The eigenvalue is the maximum cycle mean of the shifts.
@@ -89,7 +89,7 @@ eigenvalues is in `Maths.Multitubes.MaxAffine.Spectrum`.
 ## Implementation notes
 
 `Maths.MaxAffineTransport.vertexOperator` takes the junk value `0` at a vertex with
-no incoming edge, in the manner of `Maths.MaxPlusPotential.maxRootedWeight`; the
+no incoming edge, in the manner of `Maths.AdditiveTransport.maxRootedWeight`; the
 `WithBot`-valued `Maths.MaxAffineTransport.vertexOperatorBot` is the honest object
 there, and the two agree wherever an incoming edge exists.  The lax-section reformulation is
 stated in both forms, and only the `WithBot` form is free of nonemptiness hypotheses.
@@ -302,7 +302,7 @@ def IsEigenvector (G : EdgeGraph V E) (label : E → Label) (lam : ℝ) (x : V �
 
 /-- The eigenvalue equation splits into the edgewise inequality and **tightness**: at every
 vertex some incoming edge attains the value.  This is the max-affine form of
-`Maths.MaxPlusPotential.isEigenvector_iff`. -/
+`Maths.AdditiveTransport.isEigenvector_iff`. -/
 theorem isEigenvector_iff (G : EdgeGraph V E) (label : E → Label) (lam : ℝ) (x : V → ℝ)
     (hin : ∀ vertex : V, (incoming G vertex).Nonempty) :
     IsEigenvector G label lam x ↔
@@ -330,7 +330,7 @@ section Translation
 
 variable [Fintype E] [DecidableEq V]
 
-open MaxPlusPotential
+open AdditiveTransport
 
 /-- **A fixed point of the topical vertex operator.**  For a translation labelling -- every slope
 one and every floor absent -- the column of the Kleene star of `shift - lam` rooted at the base

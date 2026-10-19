@@ -180,7 +180,7 @@ identity read at some level. -/
 theorem defect_gaugeConjugate (label : E → Label) (gauge : V → ℝ)
     (hgauge : ∀ vertex, 0 < gauge vertex) (level : ℝ) (potential : V → ℝ)
     (edge : GaugeCriticalEdge (G := G) label gauge) :
-    MaxPlusPotential.defect (gaugeCriticalGraph (G := G) label gauge)
+    AdditiveTransport.defect (gaugeCriticalGraph (G := G) label gauge)
         (gaugeCriticalRelaxedShift label gauge level)
         (fun vertex => potential vertex / gauge vertex) edge =
       ((label edge.1).shift + (label edge.1).slope * potential (G.source edge.1) -
@@ -190,7 +190,7 @@ theorem defect_gaugeConjugate (label : E → Label) (gauge : V → ℝ)
   have hslope : (label edge.1).slope =
       gauge (G.target edge.1) / gauge (G.source edge.1) :=
     ((div_eq_iff hsource).2 edge.2.symm).symm
-  simp only [MaxPlusPotential.defect, gaugeCriticalRelaxedShift]
+  simp only [AdditiveTransport.defect, gaugeCriticalRelaxedShift]
   rw [hslope]
   field_simp
   ring
@@ -258,10 +258,10 @@ private theorem criticalAffineResidualAtMost_iff_isPotential
     (level : ℝ) :
     CriticalAffineResidualAtMost (G := G) label gauge level ↔
       ∃ scaled : V → ℝ,
-        MaxPlusPotential.IsPotential
+        AdditiveTransport.IsPotential
           (gaugeCriticalGraph (G := G) label gauge)
           (gaugeCriticalRelaxedShift label gauge level) scaled := by
-  simp only [MaxPlusPotential.isPotential_iff_forall_defect_nonpos]
+  simp only [AdditiveTransport.isPotential_iff_forall_defect_nonpos]
   constructor
   · rintro ⟨potential, hpotential⟩
     refine ⟨fun vertex => potential vertex / gauge vertex, fun edge => ?_⟩
@@ -312,7 +312,7 @@ theorem criticalAffineResidualAtMost_iff_closedWalk_ratio_mul_le
           level * walkSum
             (gaugeCriticalMass gauge) cycle := by
   rw [criticalAffineResidualAtMost_iff_isPotential gauge hgauge,
-    MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos]
+    AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos]
   apply forall_congr'
   intro base
   apply forall_congr'
@@ -500,7 +500,7 @@ theorem exists_criticalAffinePotential_iff_gaugeCriticalCycles_nonpos
   have hzero := criticalAffineResidualAtMost_iff_isPotential
     (G := G) (label := label) gauge hgauge 0
   rw [gaugeCriticalRelaxedShift_zero] at hzero
-  rw [← MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos, ← hzero]
+  rw [← AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos, ← hzero]
   exact exists_congr fun _ =>
     forall_congr' fun _ => imp_congr_right fun _ => sub_nonpos.symm
 

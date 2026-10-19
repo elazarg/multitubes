@@ -118,7 +118,7 @@ theorem exists_contractiveGauge_iff_shortCycleProduct_lt_one [Fintype V] [Finite
     · intro edge
       by_cases hedge : 0 < slope edge
       · have hrow := hpotential (⟨edge, hedge⟩ : PositiveSlopeEdge slope)
-        simp only [MaxPlusPotential.defect] at hrow
+        simp only [AdditiveTransport.defect] at hrow
         have hexp := Real.exp_le_exp.mpr (show
             Real.log (slope edge) + potential (G.source edge) ≤
               level + potential (G.target edge) by linarith)

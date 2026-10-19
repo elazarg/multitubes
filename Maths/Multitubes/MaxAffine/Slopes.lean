@@ -216,14 +216,14 @@ theorem exists_unitSlopePotential_iff_unitSlopeCycles_nonpos :
         walkSum (unitSlopeShift label) cycle ≤ 0 := by
   constructor
   · rintro ⟨potential, hpotential⟩
-    apply (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
+    apply (AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos
       (G := unitSlopeGraph G label) (unitSlopeShift label)).mp
     exact ⟨potential, fun edge ↦ by
       simpa [unitSlopeGraph, unitSlopeShift, add_comm] using
         hpotential edge.1 edge.2⟩
   · intro hcycles
     obtain ⟨potential, hpotential⟩ :=
-      (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
+      (AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos
         (G := unitSlopeGraph G label) (unitSlopeShift label)).mpr hcycles
     exact ⟨potential, fun edge hedge ↦ by
       simpa [unitSlopeGraph, unitSlopeShift, add_comm] using
@@ -437,7 +437,7 @@ theorem exists_nonexpansiveGauge_iff_cycleProduct_le_one
       rw [← walkProd_ofRestrictEdges]
       exact hcycle base cycle.ofRestrictEdges
     obtain ⟨potential, hpotential⟩ :=
-      (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
+      (AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos
         (G := positiveSlopeGraph (G := G) slope)
         (fun edge : PositiveSlopeEdge slope ↦ Real.log (slope edge.1))).mpr hlogCycle
     let gauge : V → ℝ := fun vertex ↦ Real.exp (potential vertex)
@@ -582,7 +582,7 @@ theorem exists_expansiveGauge_iff_one_le_cycleProduct
       rw [walkSum_neg]
       linarith
     obtain ⟨potential, hpotential⟩ :=
-      (MaxPlusPotential.exists_isPotential_iff_forall_closedWalk_nonpos
+      (AdditiveTransport.exists_isPotential_iff_forall_closedWalk_nonpos
         (G := G) (fun edge => -Real.log (slope edge))).mpr hlogCycle
     let gauge : V → ℝ := fun vertex => Real.exp (-potential vertex)
     refine ⟨gauge, fun vertex => Real.exp_pos _, fun edge => ?_⟩
@@ -646,7 +646,7 @@ theorem exists_slopeGauge_of_cycleProduct_eq_one_of_stronglyConnected
     apply Real.exp_injective
     rw [Real.exp_zero, exp_walkSum_log_eq_walkProd slope hpos cycle, hflat vertex cycle]
   obtain ⟨potential, hpotential⟩ :=
-    (CycleCoboundary.isCoboundary_iff_hasZeroCycleSums hconnected).mpr hzero
+    (AdditiveTransport.isCoboundary_iff_hasZeroCycleSums hconnected).mpr hzero
   let gauge : V → ℝ := fun vertex ↦ Real.exp (potential vertex)
   refine ⟨gauge, fun vertex ↦ Real.exp_pos _, fun edge ↦ ?_⟩
   have hedge := hpotential edge
