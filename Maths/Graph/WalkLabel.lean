@@ -61,7 +61,8 @@ trivial label.
 
 ## Tags
 
-walk label, gain graph, voltage graph, balance, walk sum, tension, cycle sum
+walk label, gain graph, voltage graph, balance, walk sum, tension, cycle sum, flat labelling,
+Zaslavsky
 -/
 
 @[expose] public section

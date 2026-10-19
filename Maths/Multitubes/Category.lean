@@ -58,6 +58,11 @@ the categorical ones.
 * `Maths.Transport.isFlatAt_toPathFunctor_iff` and `Maths.isFlatAt_labelFunctor_iff`: one-base
   flatness of a transport or of a labelling is flatness of its path functor, in the sense of
   `Maths.IsFlatAt`.
+
+## Tags
+
+path category, free category, quiver representation, functor, universal property,
+category of relations
 -/
 
 @[expose] public section

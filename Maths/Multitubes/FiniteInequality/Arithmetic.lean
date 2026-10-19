@@ -43,6 +43,10 @@ finitely many coefficient denominators gives an integral certificate.
   denominators are cleared - the intermediate
   `exists_integralCoefficientCertificate_of_real_infeasible` still states its balance and
   objective over `ℚ`.
+
+## Tags
+
+Farkas certificate, rational certificate, integral certificate, Fourier-Motzkin, exact arithmetic
 -/
 
 @[expose] public section

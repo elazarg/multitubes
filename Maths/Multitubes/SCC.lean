@@ -29,6 +29,10 @@ unconstrained.
 
 * `Maths.Transport.hasTrivialHolonomy_iff_hasSCCTrivializations`: trivial
   holonomy is exactly componentwise triviality.
+
+## Tags
+
+strongly connected component, trivial holonomy, trivialization, local system, normal form
 -/
 
 @[expose] public section

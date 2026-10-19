@@ -78,8 +78,7 @@ arguments in `Maths.FiniteInequality` and `Maths.Multitubes.MaxAffine` consume.
 
 ## Tags
 
-linear programming, standard form, polyhedron, basic feasible solution,
-extreme point, Krein-Milman
+linear programming, standard form, polyhedron, basic feasible solution, extreme point, Krein-Milman
 -/
 
 open Finset Matrix Set

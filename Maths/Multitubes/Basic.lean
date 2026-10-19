@@ -132,7 +132,8 @@ those layers have no operator-valued analogue, while the layers below them do.
 ## Tags
 
 transport, quiver, gain graph, voltage graph, holonomy, parallel transport,
-labelled transition system
+labelled transition system, lax section, inductive invariant, superharmonic function, subsolution,
+supersolution, discrete connection
 -/
 
 @[expose] public section

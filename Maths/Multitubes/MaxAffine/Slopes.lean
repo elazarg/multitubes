@@ -70,6 +70,10 @@ satisfy every cycle-product equation vacuously while carrying a zero slope.
   **multiplicative holonomy equivalence** - on a strongly connected graph, nonnegative slopes
   have unit product around every closed walk exactly when they are ratios of one positive
   vertex gauge. Strong connectivity is needed: see the DAG remark above.
+
+## Tags
+
+recession direction, slope gauge, critical subsystem, unit slope, cycle product, max-affine
 -/
 
 @[expose] public section

@@ -47,6 +47,10 @@ walk witness of length at most `Fintype.card V`.
   every real threshold is attainable.
 * `Maths.AdditiveTransport.exists_negative_residual_bound`: strictly negative nonempty cycle
   weights admit one uniformly negative residual bound on a finite graph.
+
+## Tags
+
+short cycle, simple cycle, closed walk, cycle mean, Bellman-Ford, pigeonhole
 -/
 
 @[expose] public section

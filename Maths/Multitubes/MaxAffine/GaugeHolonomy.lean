@@ -46,6 +46,10 @@ relaxation mean is the normalized shift sum divided by the reciprocal-target mas
   `Maths.MaxAffineTransport.exists_isLaxSection_iff_prefixedCycleHolonomies_of_expansiveGauge`:
   feasibility is equivalent to pre-fixedness of every *original* cycle holonomy, not only the
   critical ones. The expansive form assumes floors absent.
+
+## Tags
+
+holonomy, gauge, critical path, path coefficients, cycle mean, max-affine
 -/
 
 @[expose] public section

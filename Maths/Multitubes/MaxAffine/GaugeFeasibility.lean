@@ -52,6 +52,10 @@ At a raw residual level, the exact critical-cycle bound is `T_C / S_C`, where
 * At threshold zero, the quantitative gauge theorems characterize feasibility by nonpositive
   normalized shifts on every critical cycle. Equivalently, every normalized critical-cycle
   holonomy has a pre-fixed point. The expansive statements require absent floors.
+
+## Tags
+
+gauge, critical graph, recession direction, cycle mean, max-affine feasibility
 -/
 
 @[expose] public section

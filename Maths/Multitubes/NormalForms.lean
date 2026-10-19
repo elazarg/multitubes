@@ -35,6 +35,10 @@ path family need not be an arborescence.
   group-valued labels, flatness reduces to the non-generated edges.
 * `Maths.hasTrivialCycleLabels_iff_chosen_return_nonGeneratedEdges`: the same
   reduction over a directly finite monoid, using chosen return walks.
+
+## Tags
+
+coboundary, flatness, rooted walks, arborescence, strongly connected component, gain graph, balance
 -/
 
 @[expose] public section

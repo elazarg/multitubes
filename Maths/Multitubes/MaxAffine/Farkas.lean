@@ -90,8 +90,7 @@ bounds its size.
 
 ## Tags
 
-Farkas lemma, theorem of the alternative, generalized flow, gain flow,
-max-affine, lax section
+Farkas lemma, theorem of the alternative, generalized flow, gain flow, max-affine, lax section
 -/
 
 @[expose] public section

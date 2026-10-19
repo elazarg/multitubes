@@ -38,6 +38,10 @@ special case.
   agrees with composition of their actions.
 * `Maths.JoinSemidirectTransport.Label.instMulAction`: labels act on the
   underlying semilattice through `apply`.
+
+## Tags
+
+semidirect product, join-semilattice, monoid action, max-affine, tropical, label algebra
 -/
 
 @[expose] public section

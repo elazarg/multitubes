@@ -46,6 +46,11 @@ sections forward.
   morphisms extend along walks.
 * `Maths.Transport.LaxHom.map_isLaxSection` and `Maths.Transport.OplaxHom.map_isOplaxSection` -
   directed section preservation.
+
+## Tags
+
+morphism, lax morphism, oplax morphism, natural transformation, abstract interpretation, soundness,
+simulation
 -/
 
 @[expose] public section

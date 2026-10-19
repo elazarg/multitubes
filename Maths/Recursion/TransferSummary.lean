@@ -130,8 +130,8 @@ its case of an inactive upper clamp.
 
 ## Tags
 
-transfer summary, affine map, max-affine map, tropical, Lindley recursion, Skorokhod
-reflection, network calculus
+transfer summary, affine map, max-affine map, tropical, Lindley recursion, Skorokhod reflection,
+network calculus
 -/
 
 @[expose] public section

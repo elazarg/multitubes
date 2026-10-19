@@ -43,6 +43,10 @@ evaluated over `ℚ`.
   `exists_rankSparse_rationalBranchCertificate_of_real_infeasible` and
   `exists_rankSparse_integralBranchCertificate_of_real_infeasible`: the same certificates
   with support bounded by the rank.
+
+## Tags
+
+rational arithmetic, integral certificate, Farkas certificate, max-affine
 -/
 
 @[expose] public section

@@ -2,7 +2,9 @@
 
 The canonical vocabulary of the library. Docstrings, comments, and the README use these terms
 and avoid the ones marked *not*. When a domain or a classical source uses another name, a
-docstring may mention it once as a gloss ("also called …") without adopting it.
+docstring may mention it once as a gloss ("also called …") without adopting it. The `## Tags`
+section of each module lists such names as search keywords, and the index at the end of this
+file maps them to the canonical term and the module that develops it.
 
 ## Graphs and walks
 
@@ -91,3 +93,48 @@ which the library has always used.
 `Cycle` in a declaration name means an arbitrary closed walk, as the implementation notes of
 `Maths/Graph/EdgeGraph.lean` state; prose says *closed walk*. Simple cycles are
 `IsSimpleCycle`.
+
+## Index of classical and domain names
+
+Names a reader may search for, with the canonical term used here and the module to start from.
+Domain readings in the application packages are collected in
+[`Applications/CONCEPTS.md`](Applications/CONCEPTS.md) and
+[`Applications/THEORY_DICTIONARY.md`](Applications/THEORY_DICTIONARY.md).
+
+| Name | Here | Start at |
+| --- | --- | --- |
+| abstract interpretation, soundness | lax morphism | [`Multitubes/Morphism`](Maths/Multitubes/Morphism.lean) |
+| balance (gain graphs) | flat labelling | [`Graph/WalkLabel`](Maths/Graph/WalkLabel.lean), [`Multitubes/Switching`](Maths/Multitubes/Switching.lean) |
+| Bellman equation, Bellman operator | Bellman operator | [`Multitubes/Closure`](Maths/Multitubes/Closure.lean), [`Mixed/Bellman`](Maths/Multitubes/Mixed/Bellman.lean) |
+| Bellman-Ford criterion, difference constraints, feasible potential | potential | [`Additive/Potentials`](Maths/Multitubes/Additive/Potentials.lean) |
+| chaotic iteration, worklist | fair local relaxation | [`Multitubes/Worklist`](Maths/Multitubes/Worklist.lean) |
+| circuit (of a graph), cycle | closed walk, simple cycle | [`Graph/EdgeGraph`](Maths/Graph/EdgeGraph.lean), [`Additive/Cycles`](Maths/Multitubes/Additive/Cycles.lean) |
+| circulation, flow decomposition | circulation | [`Graph/Circulation`](Maths/Graph/Circulation.lean), [`Additive/CirculationDecomposition`](Maths/Multitubes/Additive/CirculationDecomposition.lean) |
+| closure operator, Moore family, least fixed point | least lax majorant | [`Multitubes/Closure`](Maths/Multitubes/Closure.lean) |
+| coboundary, tension, Kirchhoff voltage law | section of translation transport | [`Additive/Exact`](Maths/Multitubes/Additive/Exact.lean) |
+| connection, parallel transport, holonomy, monodromy | transport, walk map, holonomy | [`Multitubes/Basic`](Maths/Multitubes/Basic.lean), [`Multitubes/ElementsGraph`](Maths/Multitubes/ElementsGraph.lean) |
+| covering graph, derived graph, graph of elements | graph of elements | [`Multitubes/ElementsGraph`](Maths/Multitubes/ElementsGraph.lean) |
+| critical graph, Kleene star, max-plus eigenvector | critical graph, eigenvector | [`Additive/CriticalGraph`](Maths/Multitubes/Additive/CriticalGraph.lean), [`Additive/Eigenvector`](Maths/Multitubes/Additive/Eigenvector.lean) |
+| Euler circuit, Hierholzer | Eulerian trail | [`Graph/EulerianTrail`](Maths/Graph/EulerianTrail.lean) |
+| Farkas lemma, Fourier-Motzkin, infeasibility certificate | Farkas certificate, theorem of the alternative | [`LinearProgramming/FourierMotzkin`](Maths/LinearProgramming/FourierMotzkin.lean), [`FiniteInequality/Basic`](Maths/Multitubes/FiniteInequality/Basic.lean) |
+| frustration index | frustration | [`Multitubes/Frustration`](Maths/Multitubes/Frustration.lean) |
+| gain graph, voltage graph, switching | monoid labelling, switching | [`Multitubes/Switching`](Maths/Multitubes/Switching.lean), [`Multitubes/Symmetric`](Maths/Multitubes/Symmetric.lean) |
+| Galois connection, residuation, residual | lower adjoint, laxification | [`Mixed/AdjointOrder`](Maths/Multitubes/Mixed/AdjointOrder.lean), [`Mixed/Adjoint`](Maths/Multitubes/Mixed/Adjoint.lean) |
+| generalized flow, gain flow | Farkas certificate of a max-affine system | [`MaxAffine/Farkas`](Maths/Multitubes/MaxAffine/Farkas.lean) |
+| harmonic, superharmonic, subharmonic | section, lax section, oplax section | [`Multitubes/Basic`](Maths/Multitubes/Basic.lean) |
+| Helly's theorem, sparse certificate | sparse Farkas certificate | [`MaxAffine/Sparse`](Maths/Multitubes/MaxAffine/Sparse.lean), [`FiniteInequality/Sparse`](Maths/Multitubes/FiniteInequality/Sparse.lean) |
+| inductive invariant, pre-invariant, subsolution, supersolution | lax section, oplax section | [`Multitubes/Basic`](Maths/Multitubes/Basic.lean), [`Mixed/Basic`](Maths/Multitubes/Mixed/Basic.lean) |
+| Karp's formula, maximum cycle mean, Perron root, tropical spectral radius | maximum cycle mean | [`Additive/CycleMean`](Maths/Multitubes/Additive/CycleMean.lean) |
+| Lindley recursion, Loynes construction, Skorokhod reflection | reflection | [`Recursion/TransferSummary`](Maths/Recursion/TransferSummary.lean), [`Recursion/LoynesConstruction`](Maths/Recursion/LoynesConstruction.lean), [`Recursion/TwoSidedReflection`](Maths/Recursion/TwoSidedReflection.lean) |
+| linear programming duality, complementary slackness | standard-form duality | [`LinearProgramming/Duality`](Maths/LinearProgramming/Duality.lean) |
+| local system, trivialization | trivial holonomy on a component | [`Multitubes/SCC`](Maths/Multitubes/SCC.lean) |
+| max-affine eigenvalue, spectrum | eigenvalue, relaxation level | [`MaxAffine/Spectrum`](Maths/Multitubes/MaxAffine/Spectrum.lean), [`MaxAffine/Eigenproblem`](Maths/Multitubes/MaxAffine/Eigenproblem.lean) |
+| mean payoff | maximum cycle mean | [`Additive/CycleMean`](Maths/Multitubes/Additive/CycleMean.lean), [`MaxAffine/Sections`](Maths/Multitubes/MaxAffine/Sections.lean) |
+| path independence, integrability, flat connection | flat | [`Multitubes/Exact`](Maths/Multitubes/Exact.lean) |
+| polarity | mode | [`Mixed/Basic`](Maths/Multitubes/Mixed/Basic.lean) |
+| quiver representation, path category | transport, path category | [`Multitubes/Category`](Maths/Multitubes/Category.lean), [`Graph/PathCategory`](Maths/Graph/PathCategory.lean) |
+| reduced cost, Johnson reweighting | defect | [`Additive/Potentials`](Maths/Multitubes/Additive/Potentials.lean) |
+| shortest path, longest path | path closure | [`Additive/Potentials`](Maths/Multitubes/Additive/Potentials.lean), [`Additive/Budget`](Maths/Multitubes/Additive/Budget.lean) |
+| strongly connected component, condensation | strongly connected component | [`Graph/Condensation`](Maths/Graph/Condensation.lean) |
+| subeigenvector, subinvariant vector | subeigenvector | [`Additive/Potentials`](Maths/Multitubes/Additive/Potentials.lean) |
+| transition system, nondeterministic transition | transport, relation-labelled transport | [`Multitubes/Basic`](Maths/Multitubes/Basic.lean), [`Multitubes/Relational`](Maths/Multitubes/Relational.lean) |

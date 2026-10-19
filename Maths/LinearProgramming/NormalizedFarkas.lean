@@ -37,6 +37,10 @@ standard-form Farkas lemma of `Maths.LinearProgramming.Duality`.
   into the balance and unit-mass conditions.
 * `Maths.LinearProgramming.isClosed_normalizedFarkasCertificateSet`: the certificate
   set is closed.
+
+## Tags
+
+Farkas lemma, Farkas certificate, normalization, standard form, polyhedron, extreme point, cone
 -/
 
 open Finset Matrix Set

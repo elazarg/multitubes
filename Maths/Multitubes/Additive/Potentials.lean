@@ -131,8 +131,9 @@ only place where completeness is used, and it is a corollary, not a step.
 
 ## Tags
 
-potential, subeigenvector, max-plus, tropical, mean payoff, Bellman-Ford,
-cycle mean
+potential, subeigenvector, max-plus, tropical, mean payoff, Bellman-Ford, cycle mean,
+difference constraints, shortest path, longest path, reduced cost, Johnson reweighting,
+feasible potential
 -/
 
 @[expose] public section

@@ -26,6 +26,11 @@ by the rank of the row vectors plus one.
   and normalized certificate certify global optimality.
 * `Maths.FiniteInequality.exists_rankSparse_normalizedCertificate_of_isLeast`: an optimal
   certificate can be chosen active at a supplied optimal point and rank-sparse.
+
+## Tags
+
+complementary slackness, active constraints, Chebyshev approximation, minimax, sparse certificate,
+rank
 -/
 
 @[expose] public section

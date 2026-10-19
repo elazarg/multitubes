@@ -32,6 +32,10 @@ mean inequalities can be checked on simple cycles alone.
   additive worst-residual threshold can be tested on simple cycles alone.  Unlike the two
   results above, this one assumes `Finite E`, inherited from the residual duality it
   rewrites through.
+
+## Tags
+
+simple cycle, closed walk, cycle mean, mean weight, difference constraints
 -/
 
 @[expose] public section

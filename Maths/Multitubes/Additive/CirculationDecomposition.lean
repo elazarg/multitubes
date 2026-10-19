@@ -62,6 +62,11 @@ multigraph cycles.
 
 The decomposition results above all assume `Nonempty E`, because the canonical lift needs an
 edge on which to park unused `l1` mass.
+
+## Tags
+
+circulation, flow decomposition, cycle decomposition, signed circulation, simple cycle, convex hull,
+l1 norm
 -/
 
 @[expose] public section

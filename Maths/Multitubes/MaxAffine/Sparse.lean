@@ -46,6 +46,10 @@ the generic finite-inequality theory.
   normals, which can be sharper than the ambient `Fintype.card V + 1` bound.
 * `Maths.MaxAffineTransport.exists_positiveBranchCircuit_of_infeasible`:
   infeasibility yields a positive-objective circuit of genuine branch normals.
+
+## Tags
+
+Helly's theorem, sparse certificate, infeasible subsystem, Farkas lemma, max-affine
 -/
 
 @[expose] public section

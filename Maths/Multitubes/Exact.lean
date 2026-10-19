@@ -69,6 +69,11 @@ connected component.  Additive edge data are the same theory read through `Multi
 * `Maths.exists_addUnitPotential_of_zeroCycleSums` and
   `Maths.isAddUnit_edge_of_zeroCycleSums`: the additive commutative-monoid versions, requiring
   no ambient subtraction or group completion.
+
+## Tags
+
+path independence, flat connection, trivial holonomy, integrability, groupoid, unit,
+Dedekind-finite monoid, rooted section
 -/
 
 @[expose] public section

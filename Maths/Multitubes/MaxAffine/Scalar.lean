@@ -43,6 +43,10 @@ point.  These statements determine the extended-real infimum exactly.
 * `Maths.MaxAffineTransport.isFixedPt_foldl_rotate` and
   `Maths.MaxAffineTransport.isPrefixed_foldl_rotate`: forward rotation of exact
   and lax cyclic certificates, using no inverse maps.
+
+## Tags
+
+fixed point, pre-fixed point, max-affine map, expansive map, contraction, cyclic rotation
 -/
 
 @[expose] public section

@@ -38,6 +38,11 @@ alone.
 * `Maths.AdditiveTransport.normalizedSignedDual_le_iff_signedClosedWalk_le` and
   `normalizedSignedDual_le_iff_simpleSignedCycles_le`: the dual reading of the same pair -
   normalized signed circulations and nonempty closed walks impose exactly the same thresholds.
+
+## Tags
+
+signed circulation, doubled graph, symmetric difference constraints, sup norm, duality,
+simple cycle
 -/
 
 @[expose] public section

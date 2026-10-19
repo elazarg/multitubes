@@ -26,6 +26,10 @@ potentials, coboundaries, and walk sums.
   defect on every edge.
 * `Maths.MaxAffineTransport.walkApply_translationLabel`: translation transport
   along a walk is addition of the walk weight.
+
+## Tags
+
+translation, unit slope, potential, coboundary, difference constraints, max-affine
 -/
 
 @[expose] public section

@@ -93,8 +93,8 @@ quotient or split arbitrary edge data into exact and circulating parts.
 
 ## Tags
 
-coboundary, tension, potential difference, cycle sum, Kirchhoff voltage law,
-gain graph, holonomy
+coboundary, tension, potential difference, cycle sum, Kirchhoff voltage law, gain graph, holonomy,
+path independence, graph cohomology
 -/
 
 @[expose] public section

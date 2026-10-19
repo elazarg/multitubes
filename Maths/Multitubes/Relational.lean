@@ -48,7 +48,8 @@ section condition (`Maths.RelationTransport.ofSectionFor`).
 
 ## Tags
 
-relation, quiver, transport, relational composition, powerset
+relation, quiver, transport, relational composition, powerset, nondeterministic transition,
+labelled transition system
 -/
 
 @[expose] public section

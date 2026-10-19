@@ -78,6 +78,10 @@ is the stronger form.
 
 Neither `p k ≤ 1` nor `0 < q k` is ever needed. `0 < L` is not assumed either: `P < 1` already
 rules out `L = 0`, whose empty product is `1`.
+
+## Tags
+
+cyclic system, max-affine recurrence, survival weighting, fixed point
 -/
 
 @[expose] public section

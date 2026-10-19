@@ -52,6 +52,10 @@ columns, which is at most the coordinate rank plus one.
   support is still computed after extending the row normals to `ℝ`.  Its integral companion
   `exists_rankSparse_integralCoefficientCertificate_of_real_infeasible` clears only the
   certificate denominators, stating balance and objective over `ℚ`.
+
+## Tags
+
+Caratheodory, sparse certificate, rank, support, Farkas certificate
 -/
 
 @[expose] public section

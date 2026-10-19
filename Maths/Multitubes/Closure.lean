@@ -73,6 +73,11 @@ boundedness that finiteness hypotheses supply.
 `Maths.MaxPlusPotential.supIncomingWeight` are the conditionally complete
 counterparts of `Maths.Transport.pathClosure`, and their least-solution theorems
 are proved in their own files directly from maximum and `csSup` bounds.
+
+## Tags
+
+Moore family, closure operator, least fixed point, Knaster-Tarski, Kleene iteration,
+Bellman operator, complete lattice, path closure, inductive invariant
 -/
 
 @[expose] public section

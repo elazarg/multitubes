@@ -30,6 +30,10 @@ additive residual bound. Finiteness makes a uniform strict margin possible.
   criterion for a strict contractive gauge, including zero-slope edges.
 * `Maths.MaxAffineTransport.exists_contractiveGauge_iff_shortCycleProduct_lt_one`: it suffices
   to check nonempty closed walks up to the number of vertices.
+
+## Tags
+
+contraction, contractive gauge, diagonal scaling, weighted sup norm, cycle product, spectral radius
 -/
 
 @[expose] public section

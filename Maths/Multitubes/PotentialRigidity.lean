@@ -30,6 +30,10 @@ form a torsor for the unit group, even though the ambient labels live in an arbi
 * `Maths.existsUnique_normalizedUnitPotential_of_trivialCycleLabels`: the
   potential normalized at the root is unique, so the potential space is a torsor for the
   unit group.
+
+## Tags
+
+potential, coboundary, torsor, unit group, rigidity, uniqueness
 -/
 
 @[expose] public section

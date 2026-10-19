@@ -36,6 +36,10 @@ scalar classification computes every finite cycle without introducing a fake rea
   the same test read off the path coefficients.
 * `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_iff_coefficient_trichotomy`:
   the complete scalar classification, covering the optimum unbounded below.
+
+## Tags
+
+max-affine cycle, relaxation level, pre-fixed point, threshold, cyclic system
 -/
 
 @[expose] public section

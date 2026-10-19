@@ -80,8 +80,7 @@ linearly ordered field.
 
 ## Tags
 
-linear programming, duality, weak duality, strong duality, complementary slackness, Farkas
-lemma
+linear programming, duality, weak duality, strong duality, complementary slackness, Farkas lemma
 -/
 
 open Finset Matrix

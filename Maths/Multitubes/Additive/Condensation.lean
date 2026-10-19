@@ -50,6 +50,11 @@ condition holds vacuously.
   same decomposition phrased through componentwise constrained potentials.
 * `Maths.MaxPlusPotential.hasSCCPotentialAt_iff_exists_isPotential_induce`:
   the two componentwise phrasings agree, without any finiteness hypothesis.
+
+## Tags
+
+potential, difference constraints, strongly connected component, condensation, Bellman-Ford,
+max-plus
 -/
 
 @[expose] public section

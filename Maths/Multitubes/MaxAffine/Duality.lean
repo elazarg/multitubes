@@ -53,6 +53,10 @@ that critical subsystem.
   be `-∞`.
 * `Maths.MaxAffineTransport.exists_isLaxSection_iff_normalizedBranchCertificate_nonpos`:
   existence of a lax section at threshold zero.
+
+## Tags
+
+strong duality, Farkas lemma, recession direction, normalized certificate, max-affine, threshold
 -/
 
 @[expose] public section

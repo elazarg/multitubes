@@ -32,6 +32,10 @@ on finite points.
 
 * `Maths.MaxAffineJoinAdapter.abstractApply_eq_applyBot`: the join-semidirect
   action agrees with max-affine evaluation on finite points.
+
+## Tags
+
+semidirect product, monoid equivalence, max-affine, tropical
 -/
 
 @[expose] public section

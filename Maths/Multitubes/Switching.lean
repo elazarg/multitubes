@@ -75,7 +75,7 @@ balance on the symmetrization, treated in `Maths.Multitubes.Symmetric`.
 
 ## Tags
 
-gain graph, voltage graph, switching, balance, biased graph
+gain graph, voltage graph, switching, balance, biased graph, Zaslavsky
 -/
 
 @[expose] public section

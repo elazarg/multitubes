@@ -38,6 +38,10 @@ also supply the required bounds.
   above an eigenvalue is again an eigenvalue under the same reachability condition.
 * `Maths.MaxAffineTransport.isLeast_eigenvalues_of_reachable_certificate`: optimal
   certificate criticality and reachable lower bounds replace strong connectivity.
+
+## Tags
+
+eigenvector, eigenvalue, reducible graph, reachability, lower bound, spectrum, max-affine
 -/
 
 @[expose] public section

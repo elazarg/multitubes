@@ -50,6 +50,10 @@ branches into a nonlinear defect identity.
 * `Maths.MaxAffineTransport.Label.exact_defect_normal_form` and
   `Maths.MaxAffineTransport.Label.coe_exact_defect_eq_resetBranchSup_sup_affineSum`:
   the exact defect identity and its branch decomposition.
+
+## Tags
+
+path coefficients, composite label, telescoping sum, last reset, defect normal form, max-affine
 -/
 
 @[expose] public section

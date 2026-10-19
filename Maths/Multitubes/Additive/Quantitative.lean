@@ -45,6 +45,11 @@ convention `max ∅ = -∞`, so every real threshold is feasible.
 * `Maths.AdditiveTransport.exists_zero_defect_iff_normalizedSignedDual_nonpos`: at
   threshold zero the symmetric theory becomes exact additive transport, with all edge defects
   vanishing.
+
+## Tags
+
+maximum cycle mean, duality, threshold, difference constraints, sup norm, max-plus,
+signed circulation
 -/
 
 @[expose] public section

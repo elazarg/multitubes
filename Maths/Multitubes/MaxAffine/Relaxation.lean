@@ -51,6 +51,10 @@ when all floors are absent.
 * `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_iff_cyclicRelaxationThreshold_le` and
   `Maths.MaxAffineTransport.Label.cyclicRelaxationThreshold_eq_bot_iff_all_levels`:
   the closed criterion and the characterization of the all-levels case.
+
+## Tags
+
+relaxation level, max-affine cycle, cycle mean, path slope, threshold
 -/
 
 @[expose] public section

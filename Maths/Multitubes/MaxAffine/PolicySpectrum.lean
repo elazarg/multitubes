@@ -38,6 +38,10 @@ only finiteness and an incoming edge at every vertex are required.
 * `Maths.MaxAffineTransport.isClosed_eigenvalues` - the entire spectrum is closed.
 * `Maths.MaxAffineTransport.isLeast_csInf_eigenvalues` - a nonempty spectrum bounded below
   attains its infimum, even with negative slopes or without strong connectivity.
+
+## Tags
+
+policy, strategy, spectrum, eigenvalue, max-affine, linear inequality system
 -/
 
 @[expose] public section
