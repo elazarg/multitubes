@@ -108,7 +108,7 @@ It is likely a good fit if you need to formalize one of the following.
 | Balanced active certificates for least residual levels | [`FiniteInequality.OptimalCertificate`](Maths/Multitubes/FiniteInequality/OptimalCertificate.lean) |
 | Maps of the form `x ↦ max a (b + c * x)` | [`Maths.Multitubes.MaxAffine`](Maths/Multitubes/MaxAffine/Basic.lean) |
 | Finite-policy description of max-affine spectra | [`MaxAffine.PolicySpectrum`](Maths/Multitubes/MaxAffine/PolicySpectrum.lean) |
-| Reachability criteria for max-affine eigenvectors | [`MaxAffine.AnchoredEigenvalue`](Maths/Multitubes/MaxAffine/AnchoredEigenvalue.lean) and [`ReducibleExamples`](Maths/Multitubes/MaxAffine/ReducibleExamples.lean) |
+| Reachability criteria for max-affine eigenvectors | [`MaxAffine.ReachableLowerBounds`](Maths/Multitubes/MaxAffine/ReachableLowerBounds.lean) and [`ReducibleExamples`](Maths/Multitubes/MaxAffine/ReducibleExamples.lean) |
 | Strict contractive gauges from finite cycle checks | [`MaxAffine.ContractiveGauge`](Maths/Multitubes/MaxAffine/ContractiveGauge.lean) |
 | Least max-affine radii and contractive Bellman iteration | [`MaxAffine.RadiusFixedPoint`](Maths/Multitubes/MaxAffine/RadiusFixedPoint.lean) |
 | Executable finite-state reachability | [`ProgramSemantics.FiniteReachability`](Applications/ProgramSemantics/ProgramSemantics/FiniteReachability.lean) |

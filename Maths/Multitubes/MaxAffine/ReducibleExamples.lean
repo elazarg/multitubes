@@ -5,7 +5,7 @@ Authors: Elazar Gershuni
 -/
 module
 
-public import Maths.Multitubes.MaxAffine.AnchoredEigenvalue
+public import Maths.Multitubes.MaxAffine.ReachableLowerBounds
 
 /-!
 # Reducible max-affine spectral examples

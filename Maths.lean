@@ -88,7 +88,7 @@ public import Maths.Multitubes.Additive.ShortCycles
 
 -- Transport: max-affine specialization
 public import Maths.Multitubes.MaxAffine.Additive
-public import Maths.Multitubes.MaxAffine.AnchoredEigenvalue
+public import Maths.Multitubes.MaxAffine.ReachableLowerBounds
 public import Maths.Multitubes.MaxAffine.Arithmetic
 public import Maths.Multitubes.MaxAffine.Basic
 public import Maths.Multitubes.MaxAffine.Contraction

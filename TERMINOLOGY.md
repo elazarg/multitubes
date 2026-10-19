@@ -86,9 +86,8 @@ docstring may mention it once as a gloss ("also called …") without adopting it
 American spelling throughout (*fiber*, *-ize*, *-ization*), except *labelled* and *labelling*,
 which the library has always used.
 
-## Identifier exceptions
+## Identifier conventions
 
-These identifiers predate the vocabulary above and keep their names until they are renamed.
-
-- `*Cycle*` in declaration names means *closed walk*.
-- `MaxAffine/AnchoredEigenvalue.lean` is about eigenvectors from reachable lower bounds.
+`Cycle` in a declaration name means an arbitrary closed walk, as the implementation notes of
+`Maths/Graph/EdgeGraph.lean` state; prose says *closed walk*. Simple cycles are
+`IsSimpleCycle`.
