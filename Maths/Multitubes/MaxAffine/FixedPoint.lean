@@ -21,10 +21,10 @@ A max-affine labelling of a finite directed multigraph assembles into a single s
 `F x v = ⨆ {e // G.target e = v}, (label e).apply (x (G.source e))`,
 
 whose value at a vertex is the best demand placed on that vertex by its incoming edges.  The
-first result of this file is that a lax section is exactly a sub-fixed point of `F`:
+first result of this file is that a lax section is exactly a pre-fixed point of `F`:
 `Maths.MaxAffineTransport.IsLaxSection` holds for `x` if and only if `F x ≤ x`
 pointwise.  The obstruction theory already developed for lax sections is therefore the
-sub-fixed-point theory of `F`, and what remains is the passage from `≤` to `=`.
+pre-fixed-point theory of `F`, and what remains is the passage from `≤` to `=`.
 
 `F` is monotone as soon as every slope is nonnegative, and *subhomogeneous*: raising the argument
 by a nonnegative constant raises the value by at most that constant, provided the slopes lie in
@@ -69,7 +69,7 @@ eigenvalues is in `Maths.Multitubes.MaxAffine.Spectrum`.
 
 * `Maths.MaxAffineTransport.isLaxSection_iff_vertexOperatorBot_le` and
   `Maths.MaxAffineTransport.isLaxSection_iff_vertexOperator_le`: **a lax section is
-  precisely a sub-fixed point of the vertex operator.**
+  precisely a pre-fixed point of the vertex operator.**
 * `Maths.MaxAffineTransport.monotone_vertexOperator`: monotonicity at nonnegative
   slopes.
 * `Maths.MaxAffineTransport.vertexOperator_add_const_le`: subhomogeneity for slopes
@@ -95,7 +95,7 @@ there, and the two agree wherever an incoming edge exists.  The lax-section refo
 stated in both forms, and only the `WithBot` form is free of nonemptiness hypotheses.
 
 Fixed points are obtained only in the topical regime.  Nothing here upgrades a lax section to a
-section for mixed slopes; the sub-fixed-point theory of that case remains what
+section for mixed slopes; the pre-fixed-point theory of that case remains what
 `Maths.Multitubes.MaxAffine.Farkas` and `Maths.Multitubes.MaxAffine.Slopes` provide.
 
 ## References
@@ -188,9 +188,9 @@ theorem exists_incoming_vertexOperator_eq {vertex : V} (hne : (incoming G vertex
     Finset.exists_mem_eq_sup' hne fun e => (label e).apply (x (G.source e))
   exact ⟨e, mem_incoming.1 he, by rw [vertexOperator_eq_sup' hne, hvalue]⟩
 
-/-! ## Lax sections are sub-fixed points -/
+/-! ## Lax sections are pre-fixed points -/
 
-/-- **A lax section is precisely a sub-fixed point of the vertex operator.**  Stated in
+/-- **A lax section is precisely a pre-fixed point of the vertex operator.**  Stated in
 `WithBot ℝ`, so that vertices with no incoming edge need no hypothesis: there the operator is
 `⊥` and the condition is vacuous, exactly as the edgewise condition is. -/
 theorem isLaxSection_iff_vertexOperatorBot_le (G : EdgeGraph V E) (label : E → Label)
@@ -207,7 +207,7 @@ theorem isLaxSection_iff_vertexOperatorBot_le (G : EdgeGraph V E) (label : E →
       (hx (G.target e))
     exact_mod_cast this
 
-/-- **A lax section is precisely a sub-fixed point of the vertex operator**, in real-valued
+/-- **A lax section is precisely a pre-fixed point of the vertex operator**, in real-valued
 form.  Every vertex is asked to have an incoming edge, which is what makes the real-valued
 operator faithful. -/
 theorem isLaxSection_iff_vertexOperator_le (G : EdgeGraph V E) (label : E → Label) (x : V → ℝ)
@@ -295,7 +295,7 @@ theorem monotone_vertexOperator_of_translation (G : EdgeGraph V E) {label : E �
 /-! ## Fixed points -/
 
 /-- An **eigenvector** of the vertex operator: `F x = lam + x` pointwise.  At `lam = 0` this is a
-genuine fixed point, and the inequality `F x ≤ x` defining a lax section is its sub-fixed-point
+genuine fixed point, and the inequality `F x ≤ x` defining a lax section is its pre-fixed-point
 relaxation. -/
 def IsEigenvector (G : EdgeGraph V E) (label : E → Label) (lam : ℝ) (x : V → ℝ) : Prop :=
   ∀ vertex : V, vertexOperator G label x vertex = lam + x vertex

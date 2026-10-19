@@ -31,8 +31,8 @@ threshold is attainable, which is precisely the unbounded-below case.
   worst row residual is at most a given level.
 * `Maths.FiniteInequality.Recession.IsBalancedNonnegative` and
   `Maths.FiniteInequality.Recession.IsCritical`: a balanced nonnegative combination
-  without the mass-one normalization, and the rows on which a recession direction has zero
-  gain.
+  without the mass-one normalization, and the rows whose coefficient vector pairs to zero with a
+  recession direction.
 
 ## Main results
 
@@ -178,7 +178,7 @@ def IsBalancedNonnegative
   (∀ row, 0 ≤ coefficient row) ∧
     ∀ state, ∑ row, coefficient row * delta row state = 0
 
-/-- Rows on which a recession direction has zero gain. -/
+/-- Rows whose coefficient vector pairs to zero with a recession direction. -/
 def IsCritical (delta : Row → State → ℝ) (direction : State → ℝ)
     (row : Row) : Prop :=
   dotProduct (delta row) direction = 0

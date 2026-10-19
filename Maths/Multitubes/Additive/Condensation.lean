@@ -130,7 +130,7 @@ theorem exists_isPotential_iff_hasSCCPotentials [Finite E] (weight : E → ℝ) 
     simpa using walkSum_add_le_of_forall_mem_edges cycle hedge
 
 /-- **Condensation decomposition of lax feasibility.**  Over finitely many edges a
-potential for a weighted digraph exists exactly when the induced subgraph of every
+potential for a weighted directed multigraph exists exactly when the induced subgraph of every
 strongly connected component admits one.  Feasibility is thereby decided one component
 at a time, and no compatibility between the componentwise potentials is required. -/
 theorem exists_isPotential_iff_forall_scc_induce [Finite E] (weight : E → ℝ) :

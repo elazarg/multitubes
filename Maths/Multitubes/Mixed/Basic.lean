@@ -8,7 +8,7 @@ module
 public import Maths.Multitubes.Basic
 
 /-!
-# Mixed-polarity sections
+# Mixed sections
 
 An edge of a transport can impose a lower constraint, an equality, or
 an upper constraint.  `Maths.EdgeMode` records this choice, while
@@ -19,8 +19,8 @@ edge maps.
 
 ## Main definitions
 
-* `Maths.EdgeMode` - the three edge constraint polarities.
-* `Maths.EdgeMode.satisfies` - the relation constraint selected by a polarity.
+* `Maths.EdgeMode` - the three edge constraint modes.
+* `Maths.EdgeMode.satisfies` - the relation constraint selected by a mode.
 * `Maths.Transport.IsMixedSectionFor` - a mixed section for arbitrary
   fiberwise relations.
 
@@ -63,7 +63,7 @@ theorem fiberCast_relation {Fiber : V → Type uF}
   subst hvertex
   exact hrel
 
-/-- The polarity of an edge constraint in a mixed section. -/
+/-- The mode of an edge constraint in a mixed section. -/
 inductive EdgeMode : Type
   | /-- The transported source value is related to the target value. -/
     lax

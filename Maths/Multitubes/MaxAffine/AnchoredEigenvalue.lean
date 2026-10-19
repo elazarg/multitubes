@@ -89,7 +89,7 @@ theorem bddBelow_relaxedStep_of_contractiveCycle (hslope : ∀ edge, 0 ≤ (labe
   have hden : 0 < 1 - composite.slope := by rw [hslope_eq]; linarith
   refine ⟨composite.shift / (1 - composite.slope), ?_⟩
   rintro _ ⟨n, rfl⟩
-  have hwalk := holonomyApply_relax_le_iterate hslope hstep cycle n
+  have hwalk := walkApply_relax_le_iterate hslope hstep cycle n
   have hcomp : composite.apply (orbit n vertex) ≤ orbit (n + cycle.length) vertex := by
     rwa [← apply_compList_edges (fun edge => by simpa using hslope edge)] at hwalk
   have haff := composite.affinePart_le_apply (orbit n vertex)

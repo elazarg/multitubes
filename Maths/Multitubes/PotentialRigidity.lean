@@ -28,7 +28,7 @@ form a torsor for the unit group, even though the ambient labels live in an arbi
 * `Maths.unitPotential_eq_of_rootReaches_of_eq_base`: agreement at the root
   forces agreement everywhere.
 * `Maths.existsUnique_normalizedUnitPotential_of_trivialCycleLabels`: the
-  potential normalised at the root is unique, so the potential space is a torsor for the
+  potential normalized at the root is unique, so the potential space is a torsor for the
   unit group.
 -/
 

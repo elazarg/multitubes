@@ -19,7 +19,7 @@ Composing it with the affine prediction `p ↦ gain * p + processNoise` gives a 
 Riccati map.
 
 Edgewise scalar Riccati maps form a monotone transport. Mixed local covariance bounds
-therefore propagate along every typed walk of a compatible polarity without requiring a closed
+therefore propagate along every typed walk of a compatible mode without requiring a closed
 form for the composite nonlinear recurrence.
 
 ## Main definitions

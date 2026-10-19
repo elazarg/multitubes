@@ -50,21 +50,21 @@ homogeneous, and appears to carry no established name.
 translation labels with additive potentials and coboundaries. At reflected
 labels `(↑0, -g, a)` the transport along a path is the Lindley orbit
 `Maths.TransferSummary.reflectedIter`
-(`holonomyApply_eq_reflectedIter`), whose survival-weighted representation is
+(`walkApply_eq_reflectedIter`), whose survival-weighted representation is
 `Maths.TransferSummary.reflectedIter_eq_sup'`.
 
 A max-affine labelling is read as the constant-fiber transport `toTransport` on `ℝ`, and its
-lax sections and walk transport are those of `Maths.Multitubes.Basic`: `IsLaxSection` is the lax
-section predicate of `toTransport` and `holonomyApply` its walk map, so the generic walk calculus
+lax sections and walk maps are those of `Maths.Multitubes.Basic`: `IsLaxSection` is the lax
+section predicate of `toTransport` and `walkApply` its walk map, so the generic walk calculus
 applies without translation.
-The theorem `holonomyApply_eq_walkLabel_smul` identifies it with
+The theorem `walkApply_eq_walkLabel_smul` identifies it with
 `Maths.walkLabel` in the nonnegative-slope label monoid.
 The affine part of a composite label is represented by the transfer matrices of
 `Maths.InverseCoordinate.affineTransferMatrix` through
 `toTransferMatrix`.
 
 Eigenvalue problems for the vertex operator are outside this file.  The vertex
-operator itself, the identification of a lax section with one of its sub-fixed
+operator itself, the identification of a lax section with one of its pre-fixed
 points, and its eigenvectors in the topical regime are the subject of
 `Maths.Multitubes.MaxAffine.FixedPoint`; its eigenvectors below unit slope
 modulus, where the operator contracts, the subject of
@@ -92,7 +92,7 @@ of a finite linear program, by `Maths.Multitubes.MaxAffine.LeastEigenvalue`.
 * `Maths.MaxAffineTransport.toTransport` -- a labelling as a transport on `ℝ`.
 * `Maths.MaxAffineTransport.IsLaxSection`, `defect` -- the lax section of that transport and
   its edgewise residual.
-* `Maths.MaxAffineTransport.holonomyApply` -- the walk map of that transport.
+* `Maths.MaxAffineTransport.walkApply` -- the walk map of that transport.
 * `Maths.MaxAffineTransport.slopeProd`, `suffixWeight`, `suffixWeightSum`,
   `weightedDefect` -- the survival-weighted accounting along an edge list.
 * `Maths.MaxAffineTransport.cyclicLabel`, `cyclicChain`, `cyclicHolonomy` -- one
@@ -105,11 +105,11 @@ of a finite linear program, by `Maths.Multitubes.MaxAffine.LeastEigenvalue`.
   nonnegative outer slope.
 * `Maths.MaxAffineTransport.Label.apply_add_le` -- the one-sided Lipschitz
   estimate `apply f (x + d) ≤ apply f x + slope * d` for `0 ≤ d`.
-* `Maths.MaxAffineTransport.holonomyApply_le_add_weightedDefect` -- the
+* `Maths.MaxAffineTransport.walkApply_le_add_weightedDefect` -- the
   **weighted-defect telescope**: transport along a walk is bounded by the value
   of the candidate at the far end plus the positive parts of the edge defects,
   each weighted by the product of the slopes traversed after it.
-* `Maths.MaxAffineTransport.holonomyApply_cycle_le` -- a lax section makes
+* `Maths.MaxAffineTransport.walkApply_cycle_le` -- a lax section makes
   its value at the base vertex a pre-fixed point of every cycle's composite
   action.
 * `Maths.MaxAffineTransport.Label.exists_apply_le_self_iff` -- the expansivity
@@ -267,7 +267,7 @@ theorem monotone_apply {f : Label} (hslope : 0 ≤ f.slope) : Monotone f.apply :
 
 /-- **The one-sided Lipschitz estimate.**  Moving the argument up by `d` moves
 the value up by at most `slope * d`.  This is what makes the walk telescope of
-`holonomyApply_le_add_weightedDefect` weight the edge residuals by slope
+`walkApply_le_add_weightedDefect` weight the edge residuals by slope
 products. -/
 theorem apply_add_le {f : Label} (hslope : 0 ≤ f.slope) (x : ℝ) {d : ℝ} (hd : 0 ≤ d) :
     f.apply (x + d) ≤ f.apply x + f.slope * d := by
@@ -432,7 +432,7 @@ instance instMulAction : MulAction {f : Label // 0 ≤ f.slope} ℝ where
 
 /-- The composite label of a list of labels, the head acting first. This is the
 coefficient form of the fold of
-`Maths.MaxAffineTransport.holonomyApply_eq_foldl_map`. -/
+`Maths.MaxAffineTransport.walkApply_eq_foldl_map`. -/
 def compList (labels : List Label) : Label :=
   labels.foldl (fun accumulated next => next.comp accumulated) Label.id
 
@@ -753,9 +753,9 @@ def toTransport (G : EdgeGraph V E) (label : E → Label) : Transport G fun _ : 
     (toTransport G label).edgeMap e x = (label e).apply x := rfl
 
 /-- A **lax section**: traversing an edge does not increase the
-candidate beyond its value at the head of that edge, so it is a lax section of
-`Maths.MaxAffineTransport.toTransport`.  Also called a subsolution, a subinvariant
-family, a superharmonic section, or an inductive invariant. -/
+candidate beyond its value at the target of that edge, so it is a lax section of
+`Maths.MaxAffineTransport.toTransport`.  Also called a subinvariant or
+superharmonic family, or an inductive invariant. -/
 def IsLaxSection (G : EdgeGraph V E) (label : E → Label) (φ : V → ℝ) : Prop :=
   (toTransport G label).IsLaxSection φ
 
@@ -769,8 +769,8 @@ theorem IsLaxSection.apply_le {label : E → Label} {φ : V → ℝ} (hφ : IsLa
     (e : E) : (label e).apply (φ (G.source e)) ≤ φ (G.target e) :=
   hφ e
 
-/-- The amount by which a candidate fails the edge inequality.  Also called the
-edge slack or the residual of the edge. -/
+/-- The amount by which a candidate fails the edge inequality: the negative of the
+slack of that inequality. -/
 def defect (G : EdgeGraph V E) (label : E → Label) (φ : V → ℝ) (e : E) : ℝ :=
   (label e).apply (φ (G.source e)) - φ (G.target e)
 
@@ -778,54 +778,53 @@ theorem isLaxSection_iff_forall_defect_nonpos (G : EdgeGraph V E) (label : E →
     (φ : V → ℝ) : IsLaxSection G label φ ↔ ∀ e : E, defect G label φ e ≤ 0 := by
   simp [isLaxSection_iff, defect]
 
-/-! ### Transport along a walk -/
+/-! ### The walk map -/
 
-/-- Transport along a walk: the actions of the traversed edges composed in
-chronological order.  For a closed walk this is the action of the walk's
-holonomy. -/
-def holonomyApply (label : E → Label) {start finish : V}
+/-- The walk map: the actions of the traversed edges composed in chronological
+order.  For a closed walk this is the holonomy. -/
+def walkApply (label : E → Label) {start finish : V}
     (walk : G.Walk start finish) : ℝ → ℝ :=
   (toTransport G label).walkMap walk
 
-@[simp] theorem holonomyApply_nil (label : E → Label) {start : V} (x : ℝ) :
-    holonomyApply label (.nil : G.Walk start start) x = x := rfl
+@[simp] theorem walkApply_nil (label : E → Label) {start : V} (x : ℝ) :
+    walkApply label (.nil : G.Walk start start) x = x := rfl
 
-@[simp] theorem holonomyApply_concat (label : E → Label) {start : V}
+@[simp] theorem walkApply_concat (label : E → Label) {start : V}
     (edge : E) (walk : G.Walk start (G.source edge)) (x : ℝ) :
-    holonomyApply label (walk.concat edge) x
-      = (label edge).apply (holonomyApply label walk x) := rfl
+    walkApply label (walk.concat edge) x
+      = (label edge).apply (walkApply label walk x) := rfl
 
-theorem holonomyApply_eq_foldl (label : E → Label) {start finish : V}
+theorem walkApply_eq_foldl (label : E → Label) {start finish : V}
     (walk : G.Walk start finish) (x : ℝ) :
-    holonomyApply label walk x = walk.edges.foldl (fun y e => (label e).apply y) x := by
+    walkApply label walk x = walk.edges.foldl (fun y e => (label e).apply y) x := by
   induction walk with
   | nil => rfl
   | concat edge walkSoFar ih =>
-      rw [holonomyApply_concat, EdgeGraph.Walk.edges_concat, List.foldl_append, ih]
+      rw [walkApply_concat, EdgeGraph.Walk.edges_concat, List.foldl_append, ih]
       rfl
 
-theorem holonomyApply_eq_foldl_map (label : E → Label) {start finish : V}
+theorem walkApply_eq_foldl_map (label : E → Label) {start finish : V}
     (walk : G.Walk start finish) (x : ℝ) :
-    holonomyApply label walk x = (walk.edges.map label).foldl (fun y f => f.apply y) x := by
-  rw [holonomyApply_eq_foldl, List.foldl_map]
+    walkApply label walk x = (walk.edges.map label).foldl (fun y f => f.apply y) x := by
+  rw [walkApply_eq_foldl, List.foldl_map]
 
 /-- The composite label of a walk acts by transport along that walk. -/
 theorem apply_compList_edges
     {label : E → Label} (hslope : ∀ edge : E, 0 ≤ (label edge).slope)
     {start finish : V} (walk : G.Walk start finish) (point : ℝ) :
     (Label.compList (walk.edges.map label)).apply point =
-      holonomyApply label walk point := by
-  rw [holonomyApply_eq_foldl_map]
+      walkApply label walk point := by
+  rw [walkApply_eq_foldl_map]
   refine Label.apply_compList (fun candidate hcandidate => ?_) point
   obtain ⟨edge, _, rfl⟩ := List.mem_map.mp hcandidate
   exact hslope edge
 
 /-- At nonnegative slopes the transport is the action of the gain-graph
 holonomy `Maths.walkLabel` in the label monoid. -/
-theorem holonomyApply_eq_walkLabel_smul
+theorem walkApply_eq_walkLabel_smul
     (label : E → {f : Label // 0 ≤ f.slope}) {start finish : V}
     (walk : G.Walk start finish) (x : ℝ) :
-    holonomyApply (fun e => (label e).1) walk x =
+    walkApply (fun e => (label e).1) walk x =
       Maths.walkLabel label walk • x :=
   walkMap_ofSMul_eq_walkLabel_smul (G := G) label walk x
 
@@ -991,10 +990,10 @@ bounded by the candidate at the far end plus the positive parts of the edge
 residuals, each weighted by the product of the slopes traversed after it.  The
 inequalities of successive edges do not telescope additively; they telescope
 with slope-product weights. -/
-theorem holonomyApply_le_add_weightedDefect {label : E → Label}
+theorem walkApply_le_add_weightedDefect {label : E → Label}
     (hslope : ∀ e : E, 0 ≤ (label e).slope) (φ : V → ℝ) {start finish : V}
     (walk : G.Walk start finish) :
-    holonomyApply label walk (φ start) ≤ φ finish + weightedDefect G label φ walk.edges := by
+    walkApply label walk (φ start) ≤ φ finish + weightedDefect G label φ walk.edges := by
   induction walk with
   | nil => simp
   | concat edge walkSoFar ih =>
@@ -1008,22 +1007,22 @@ theorem holonomyApply_le_add_weightedDefect {label : E → Label}
         rw [defect]
         ring
       have hmax := le_max_right 0 (defect G label φ edge)
-      rw [holonomyApply_concat, EdgeGraph.Walk.edges_concat, weightedDefect_append_singleton]
+      rw [walkApply_concat, EdgeGraph.Walk.edges_concat, weightedDefect_append_singleton]
       linarith
 
 /-- A lax section transports laxly: its value can only be undercut. -/
-theorem holonomyApply_le_of_isLaxSection {label : E → Label}
+theorem walkApply_le_of_isLaxSection {label : E → Label}
     (hslope : ∀ e : E, 0 ≤ (label e).slope) {φ : V → ℝ}
     (hφ : IsLaxSection G label φ) {start finish : V} (walk : G.Walk start finish) :
-    holonomyApply label walk (φ start) ≤ φ finish :=
+    walkApply label walk (φ start) ≤ φ finish :=
   Transport.IsLaxSection.walkMap_le (fun e => Label.monotone_apply (hslope e)) hφ walk
 
 /-- **Weak duality.**  A lax section makes its value at a vertex a
 pre-fixed point of the composite action of every closed walk there. -/
-theorem holonomyApply_cycle_le {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
+theorem walkApply_cycle_le {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
     {φ : V → ℝ} (hφ : IsLaxSection G label φ) {base : V} (cycle : G.Walk base base) :
-    holonomyApply label cycle (φ base) ≤ φ base :=
-  holonomyApply_le_of_isLaxSection hslope hφ cycle
+    walkApply label cycle (φ base) ≤ φ base :=
+  walkApply_le_of_isLaxSection hslope hφ cycle
 
 /-- **The quantitative obstruction.**  A closed walk whose composite action
 moves the candidate up by at least `γ > 0` forces one of its edges to fail the
@@ -1032,11 +1031,11 @@ walk.  Zero slopes are allowed.  At all slopes `1` the total suffix weight is th
 of the walk, and the statement becomes that of `Maths.MaxPlusPotential.exists_edge_defect_ge`. -/
 theorem exists_edge_defect_ge {label : E → Label} (hslope : ∀ e : E, 0 ≤ (label e).slope)
     (φ : V → ℝ) {base : V} (cycle : G.Walk base base) {γ : ℝ} (hγ : 0 < γ)
-    (hcycle : φ base + γ ≤ holonomyApply label cycle (φ base)) :
+    (hcycle : φ base + γ ≤ walkApply label cycle (φ base)) :
     ∃ e ∈ cycle.edges, γ / suffixWeightSum label cycle.edges ≤ defect G label φ e := by
   have hne : cycle.edges ≠ [] := by
     intro hnil
-    rw [holonomyApply_eq_foldl, hnil, List.foldl_nil] at hcycle
+    rw [walkApply_eq_foldl, hnil, List.foldl_nil] at hcycle
     linarith
   have hsum : 0 < suffixWeightSum label cycle.edges := suffixWeightSum_pos hslope _ hne
   by_contra hcon
@@ -1047,7 +1046,7 @@ theorem exists_edge_defect_ge {label : E → Label} (hslope : ∀ e : E, 0 ≤ (
     exact hcon ⟨e, he, not_lt.mp hle⟩
   have hlt := weightedDefect_lt (G := G) hslope φ cycle.edges hne hstrict
   rw [div_mul_cancel₀ _ hsum.ne'] at hlt
-  have htel := holonomyApply_le_add_weightedDefect (G := G) hslope φ cycle
+  have htel := walkApply_le_add_weightedDefect (G := G) hslope φ cycle
   linarith
 
 end Graph
@@ -1155,32 +1154,32 @@ theorem foldl_reflectedLabel (a g : ℕ → ℝ) (x : ℝ) : ∀ n : ℕ,
 /-- **Reflected labels recover the Lindley recursion.**  Transport along a path
 whose edges carry the reflected labels of the sequences `a` and `g`, in order,
 is the reflected orbit `TransferSummary.reflectedIter`. -/
-theorem holonomyApply_eq_reflectedIter {label : E → Label} (a g : ℕ → ℝ) {n : ℕ}
+theorem walkApply_eq_reflectedIter {label : E → Label} (a g : ℕ → ℝ) {n : ℕ}
     {start finish : V} (walk : G.Walk start finish)
     (hmatch : walk.edges.map label = (List.range n).map fun i => reflectedLabel (a i) (g i))
-    (x : ℝ) : holonomyApply label walk x = TransferSummary.reflectedIter a g x n := by
-  rw [holonomyApply_eq_foldl_map, hmatch, foldl_reflectedLabel]
+    (x : ℝ) : walkApply label walk x = TransferSummary.reflectedIter a g x n := by
+  rw [walkApply_eq_foldl_map, hmatch, foldl_reflectedLabel]
 
 /-- Transport along a closed walk whose labels are the phases of a cyclic
 max-affine system, in decreasing phase order, is one turn of that system. -/
-theorem holonomyApply_eq_cyclicHolonomy {label : E → Label} (p q : ℕ → ℝ) {L : ℕ}
+theorem walkApply_eq_cyclicHolonomy {label : E → Label} (p q : ℕ → ℝ) {L : ℕ}
     {start finish : V} (walk : G.Walk start finish)
     (hmatch : walk.edges.map label = (List.range L).map fun j => cyclicLabel p q (L - 1 - j))
-    (x : ℝ) : holonomyApply label walk x = cyclicHolonomy p q L x := by
-  rw [holonomyApply_eq_foldl_map, hmatch, cyclicHolonomy, cyclicChain_eq_foldl]
+    (x : ℝ) : walkApply label walk x = cyclicHolonomy p q L x := by
+  rw [walkApply_eq_foldl_map, hmatch, cyclicHolonomy, cyclicChain_eq_foldl]
 
 /-- **The periodic certificate on a closed walk.**  A closed walk labelled by
 the phases of a cyclic max-affine system, in decreasing phase order, whose
 composite action fixes a point, exhibits that point as the terminal value of a
 solution of the system. -/
-theorem cyclicSolution_of_holonomyApply_eq {label : E → Label} {p q : ℕ → ℝ}
+theorem cyclicSolution_of_walkApply_eq {label : E → Label} {p q : ℕ → ℝ}
     (hp : ∀ k, 0 ≤ p k) (hq0 : ∀ k, 0 ≤ q k) (hq1 : ∀ k, q k ≤ 1) {L : ℕ} {base : V}
     (cycle : G.Walk base base)
     (hmatch : cycle.edges.map label = (List.range L).map fun j => cyclicLabel p q (L - 1 - j))
-    {x : ℝ} (hx : holonomyApply label cycle x = x) :
+    {x : ℝ} (hx : walkApply label cycle x = x) :
     CyclicMaxAffine.CyclicSolution p q (fun k => cyclicChain p q L x (L - k)) L :=
   cyclicSolution_cyclicChain hp hq0 hq1
-    (by rw [← holonomyApply_eq_cyclicHolonomy p q cycle hmatch]; exact hx)
+    (by rw [← walkApply_eq_cyclicHolonomy p q cycle hmatch]; exact hx)
 
 end Specialization
 

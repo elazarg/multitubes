@@ -22,7 +22,7 @@ import Mathlib.Tactic.Ring
 /-!
 # Fourier-Motzkin elimination and the theorem of the alternative
 
-This file formalises the theorem of the alternative for a finite system of weak linear
+This file formalizes the theorem of the alternative for a finite system of weak linear
 inequalities over an arbitrary linearly ordered field. For a matrix `A : I → Fin n → 𝕜` and a
 right-hand side `b : I → 𝕜` over a finite row index `I`, exactly one of the following is
 nonempty:
@@ -638,7 +638,7 @@ of `A` strictly positive exactly when no nonzero nonnegative `u` balances the co
 This is *not* Gordan's lemma on affine monoids (`Submonoid.fg_eqLocusM` in mathlib), which is an
 unrelated finite-generation statement; the two classical results merely share a name.
 
-The proof is the homogenization trick: `∀ i, 0 < rowEval A i x` is solvable exactly when
+The proof is the homogenization trick: `∀ i, 0 < rowEval A i x` is feasible exactly when
 `A x ≥ 1` is, and `Maths.LinearProgramming.theorem_of_alternative` at `b = 1` turns the
 failure of the latter into a balanced certificate. -/
 theorem exists_rowEval_pos_iff_not_hasBalancedCertificate

@@ -34,11 +34,11 @@ the generic finite-inequality theory.
   sparsity** - if no lax section exists, some subsystem of at most `Fintype.card V + 1`
   genuine branches is already infeasible. Absent floors are not branches, so they never
   enter the subsystem.
-* `Maths.MaxAffineTransport.exists_sparse_farkas_certificate`: that sparse
+* `Maths.MaxAffineTransport.exists_sparse_farkasCertificate`: that sparse
   subsystem carries a nonnegative real Farkas certificate, indexed by the selected subtype,
   so its support is bounded without padding by zero rows.
-* `Maths.MaxAffineTransport.exists_sparse_rational_farkas_certificate`,
-  `Maths.MaxAffineTransport.exists_sparse_integral_farkas_certificate`: the same
+* `Maths.MaxAffineTransport.exists_sparse_rational_farkasCertificate`,
+  `Maths.MaxAffineTransport.exists_sparse_integral_farkasCertificate`: the same
   bound with rational and integral coefficients, given branch data of the corresponding type
   presented as exact casts of the real data.
 * `Maths.MaxAffineTransport.exists_rankSparse_normalizedBranchCertificate`: a
@@ -174,7 +174,7 @@ theorem exists_sparse_infeasible_branch_subsystem
 /-- A sparse infeasible subsystem carries a Farkas certificate on that
 subsystem.  The coefficient type is the selected subtype, so its support has
 cardinality at most `|V| + 1` without padding by zero rows. -/
-theorem exists_sparse_farkas_certificate
+theorem exists_sparse_farkasCertificate
     (hinfeasible : ¬∃ potential : V → ℝ, IsLaxSection G label potential) :
     ∃ (selected : Finset (Branch label))
         (coefficient : {branch // branch ∈ selected} → ℝ),
@@ -204,7 +204,7 @@ theorem exists_sparse_farkas_certificate
 
 /-- Rational branch data admit a rational Farkas certificate on a Helly-sparse
 infeasible subsystem. -/
-theorem exists_sparse_rational_farkas_certificate
+theorem exists_sparse_rational_farkasCertificate
     (deltaQ : Branch label → V → ℚ) (baseQ : Branch label → ℚ)
     (hdelta : ∀ branch vertex,
       (deltaQ branch vertex : ℝ) = branchDelta G label branch vertex)
@@ -246,7 +246,7 @@ theorem exists_sparse_rational_farkas_certificate
 
 /-- Integral branch data admit a nonnegative integral certificate on a
 Helly-sparse infeasible subsystem. -/
-theorem exists_sparse_integral_farkas_certificate
+theorem exists_sparse_integral_farkasCertificate
     (deltaZ : Branch label → V → ℤ) (baseZ : Branch label → ℤ)
     (hdelta : ∀ branch vertex,
       (deltaZ branch vertex : ℝ) = branchDelta G label branch vertex)

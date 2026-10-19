@@ -26,7 +26,7 @@ labelling once a slope differs from one.
 The comparison object is the set of **relaxation levels**
 `Maths.MaxAffineTransport.relaxationLevels`, the real numbers `lam` for which the
 relaxed labelling `Maths.MaxAffineTransport.Label.relax lam ∘ label` admits a lax
-section, that is for which `F x ≤ lam + x` is solvable.  Two facts are immediate and hold with no
+section, that is for which `F x ≤ lam + x` is feasible.  Two facts are immediate and hold with no
 hypothesis on the slopes at all: an eigenvector is in particular a solution of the inequality, so
 every eigenvalue is a relaxation level, and the inequality only becomes easier as `lam` grows, so
 the relaxation levels form an up-set.  The eigenvalues are therefore squeezed into an up-set whose
@@ -34,7 +34,7 @@ infimum is a lower bound for every eigenvalue, and that up-set is computable: it
 set of a finite system of linear inequalities in the pair `(lam, x)`, one row for each branch of
 each label.
 
-In the two regimes where the sub-fixed-point theory is complete the up-set is described by cycles.
+In the two regimes where the pre-fixed-point theory is complete the up-set is described by cycles.
 For slopes at most one, and for slopes at least one with floors absent, a lax section exists exactly
 when every closed walk of the unit-slope subgraph has nonpositive shift sum, by the two cycle
 criteria of `Maths.Multitubes.MaxAffine.Slopes`.  Those two are one criterion read along
@@ -75,7 +75,7 @@ equivalence under which the topical eigenvector is unique degenerates; it does n
 * `Maths.MaxAffineTransport.eigenvalues`: the set of eigenvalues of the vertex
   operator.
 * `Maths.MaxAffineTransport.relaxationLevels`: the set of levels at which the
-  relaxed labelling has a lax section, equivalently the solvable levels of `F x ≤ lam + x`.
+  relaxed labelling has a lax section, equivalently the feasible levels of `F x ≤ lam + x`.
 
 ## Main results
 
@@ -173,7 +173,7 @@ theorem mem_eigenvalues_iff [Fintype E] [DecidableEq V] (G : EdgeGraph V E) (lab
 
 /-- The set of **relaxation levels** of a labelling: the reals `lam` for which subtracting `lam`
 from every label leaves a labelling with a lax section, equivalently for which the inequality
-`F x ≤ lam + x` is solvable. -/
+`F x ≤ lam + x` is feasible. -/
 def relaxationLevels (G : EdgeGraph V E) (label : E → Label) : Set ℝ :=
   {lam | ∃ x : V → ℝ, IsLaxSection G (fun e => Label.relax lam (label e)) x}
 

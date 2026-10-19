@@ -99,7 +99,7 @@ namespace ReachableConnectedIntegerCirculation
 variable {G} {start : V} {κ : Type uκ} {edgeCharge : E → κ → ℤ}
 
 /-- The Euler realization of a reachable connected circulation is a zero-charge lasso whose
-transient is the supplied route to the support. -/
+transient is the supplied walk to the support. -/
 theorem exists_zeroChargeLasso [Fintype E] [DecidableEq V]
     (circulation : G.ReachableConnectedIntegerCirculation edgeCharge start) :
     Nonempty (G.ZeroChargeLasso edgeCharge start) := by

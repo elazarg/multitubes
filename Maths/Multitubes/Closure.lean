@@ -24,8 +24,8 @@ further descriptions of it follow.
 * For edge maps preserving arbitrary suprema it is given by an explicit formula: the join over
   all directed walks of the transported lower data.
 
-The synchronized-loop theorem shows why one common pre-fixed witness at a root is sufficient
-even when separate cycle witnesses are not.
+The synchronized closure theorem shows why one common pre-fixed witness at a root is sufficient
+even when separate witnesses for individual closed walks are not.
 
 ## Main definitions
 
@@ -392,10 +392,10 @@ theorem walkMap_bot (hbot : ∀ edge : E, T.edgeMap edge ⊥ = ⊥)
       rw [walkMap_concat, ih]
       exact hbot edge
 
-/-- **Synchronized-loop closure.**  If one point is pre-fixed by every loop at the root, path
-closure of the lower data concentrated at the root, `Function.update ⊥ base point`, returns
-exactly that point at the root.  Separate cycle-dependent witnesses would not suffice for this
-argument. -/
+/-- **Synchronized closure.**  If one point is pre-fixed by the holonomy of every closed walk
+at the root, path closure of the lower data concentrated at the root,
+`Function.update ⊥ base point`, returns exactly that point at the root.  Separate witnesses for
+individual closed walks would not suffice for this argument. -/
 theorem pathClosure_update_bot_self
     [DecidableEq V] (hsup : T.PreservesSSup)
     (base : V) (point : Fiber base)

@@ -8,9 +8,9 @@ module
 public import Maths.Multitubes.Mixed.Basic
 
 /-!
-# Walk propagation for mixed-polarity sections
+# Walk propagation for mixed sections
 
-This file propagates mixed-polarity section constraints along typed walks.  An
+This file propagates mixed section constraints along typed walks.  An
 exact walk transports the marked value by equality.  A walk whose edges are
 only lax or exact transports it below the marked terminal value, while a walk
 whose edges are only oplax or exact transports it above that value.  The
@@ -18,7 +18,7 @@ relations on the fibers need only be reflexive and transitive, and edge maps
 need only preserve those relations.  Each statement is an instance of
 `Maths.Transport.IsSectionFor.walkMap_rel`.
 
-The polarity restriction is essential: with arbitrary relations there is no
+The mode restriction is essential: with arbitrary relations there is no
 endpoint comparison across a change from lax to oplax, or from oplax to lax.
 For symmetric relations the distinction disappears, and arbitrary mixed walks
 propagate the relation.
@@ -42,7 +42,7 @@ propagate the relation.
 
 ## Tags
 
-transport, mixed polarity, walk, relation, lax section, oplax section
+transport, mixed section, walk, relation, lax section, oplax section
 -/
 
 @[expose] public section

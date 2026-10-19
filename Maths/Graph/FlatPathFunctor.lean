@@ -71,7 +71,7 @@ private theorem map_append {start middle finish : V}
     F.map (front.append back) = F.map front ≫ F.map back :=
   F.map_comp front back
 
-/-- **Flat path functors invert recurrent walks.**  A walk between objects at which the functor
+/-- **Flat path functors invert walks with a return.**  A walk between objects at which the functor
 is flat, together with any return walk, is sent to an isomorphism whose inverse is the image of
 the return walk.  In types this is an equivalence of fibers and in the one-object category of a
 monoid it is a unit. -/

@@ -381,7 +381,7 @@ def IsFarkasCertificate [Fintype E] (G : EdgeGraph V E) (label : E → Label)
     (∀ v : V, ∑ action, coefficient action * rowDelta G label action v = 0) ∧
     0 < ∑ action, coefficient action * rowBase label action
 
-/-- Strong duality through the certificate predicate. -/
+/-- The theorem of the alternative, stated through the certificate predicate. -/
 theorem exists_isLaxSection_iff_no_farkasCertificate [Fintype E]
     (G : EdgeGraph V E) (label : E → Label) :
     (∃ φ : V → ℝ, IsLaxSection G label φ) ↔

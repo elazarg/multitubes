@@ -45,7 +45,7 @@ back to the forward-indexed recursion of the reflected orbit is `reversed`, and
 
 ## Main definitions
 
-* `Maths.TransferSummary.pastTransport` and
+* `Maths.TransferSummary.pastRetentionProd` and
   `Maths.TransferSummary.pastService` -- the retention and the retention-weighted
   service accumulated over the last `j` stages, indexed by age.
 * `Maths.TransferSummary.loynes` -- the finite-horizon Loynes value.
@@ -87,48 +87,48 @@ variable (a g : ℕ → ℝ)
 
 /-- The retention applied to a stage that occurred `j` steps in the past: the product of the
 retentions of all the stages that have happened since. -/
-def pastTransport (j : ℕ) : ℝ := ∏ p ∈ Finset.range j, a p
+def pastRetentionProd (j : ℕ) : ℝ := ∏ p ∈ Finset.range j, a p
 
 /-- The retention-weighted service accumulated over the last `j` stages, each stage's service
 discounted by the retention that has acted on it since. -/
-def pastService (j : ℕ) : ℝ := ∑ p ∈ Finset.range j, pastTransport a p * g p
+def pastService (j : ℕ) : ℝ := ∑ p ∈ Finset.range j, pastRetentionProd a p * g p
 
 /-- No stages have passed: nothing is retained. -/
-@[simp] theorem pastTransport_zero : pastTransport a 0 = 1 := by simp [pastTransport]
+@[simp] theorem pastRetentionProd_zero : pastRetentionProd a 0 = 1 := by simp [pastRetentionProd]
 
 /-- No stages have passed: nothing is served. -/
 @[simp] theorem pastService_zero : pastService a g 0 = 0 := by simp [pastService]
 
 /-- Reaching one stage further into the past multiplies in that stage's retention. -/
-theorem pastTransport_succ (j : ℕ) :
-    pastTransport a (j + 1) = pastTransport a j * a j := by
-  rw [pastTransport, pastTransport, Finset.prod_range_succ]
+theorem pastRetentionProd_succ (j : ℕ) :
+    pastRetentionProd a (j + 1) = pastRetentionProd a j * a j := by
+  rw [pastRetentionProd, pastRetentionProd, Finset.prod_range_succ]
 
 /-- Reaching one stage further into the past adds that stage's discounted service. -/
 theorem pastService_succ (j : ℕ) :
-    pastService a g (j + 1) = pastService a g j + pastTransport a j * g j := by
+    pastService a g (j + 1) = pastService a g j + pastRetentionProd a j * g j := by
   rw [pastService, pastService, Finset.sum_range_succ]
 
-/-- Nonnegative retentions accumulate to a nonnegative transport. -/
-theorem pastTransport_nonneg (ha : ∀ k, 0 ≤ a k) (j : ℕ) : 0 ≤ pastTransport a j :=
+/-- Nonnegative retentions accumulate to a nonnegative retention product. -/
+theorem pastRetentionProd_nonneg (ha : ∀ k, 0 ≤ a k) (j : ℕ) : 0 ≤ pastRetentionProd a j :=
   Finset.prod_nonneg fun k _ => ha k
 
 /-- An age-indexed input read forwards over the horizon `n`: stage `k` of the forward input is
 the stage `n - (k + 1)` steps into the past. -/
 def reversed (n : ℕ) (u : ℕ → ℝ) : ℕ → ℝ := fun k => u (n - (k + 1))
 
-/-- The forward transport of a reversed input over the window `[k + 1, n)` is the age-indexed
-transport over the last `n - (k + 1)` stages.  No relation between `k` and `n` is needed: past
-the horizon both index sets are empty and the identity reads `1 = 1`. -/
-theorem transport_reversed (k n : ℕ) :
-    transport (reversed n a) (k + 1) n = pastTransport a (n - (k + 1)) := by
+/-- The forward retention product of a reversed input over the window `[k + 1, n)` is the
+age-indexed retention product over the last `n - (k + 1)` stages.  No relation between `k` and `n`
+is needed: past the horizon both index sets are empty and the identity reads `1 = 1`. -/
+theorem retentionProd_reversed (k n : ℕ) :
+    retentionProd (reversed n a) (k + 1) n = pastRetentionProd a (n - (k + 1)) := by
   refine Finset.prod_nbij' (fun i => n - (i + 1)) (fun p => n - (p + 1)) ?_ ?_ ?_ ?_
     fun i _ => rfl <;>
     intro i hi <;> simp only [Finset.mem_Ico, Finset.mem_range] at * <;> omega
 
 /-- The forward service of a reversed input over the window `[m, n)` is the age-indexed service
 over the last `n - m` stages: it depends on the window only through its length.  As for the
-transport, no relation between `m` and `n` is needed. -/
+retention product, no relation between `m` and `n` is needed. -/
 theorem service_reversed (m n : ℕ) :
     service (reversed n a) (reversed n g) m n = pastService a g (n - m) := by
   refine Finset.sum_nbij' (fun k => n - (k + 1)) (fun p => n - (p + 1)) ?_ ?_ ?_ ?_ ?_
@@ -136,7 +136,7 @@ theorem service_reversed (m n : ℕ) :
   · intro p hp; simp only [Finset.mem_Ico, Finset.mem_range] at *; omega
   · intro k hk; simp only [Finset.mem_Ico] at hk; omega
   · intro p hp; simp only [Finset.mem_range] at hp; omega
-  · intro k _; rw [transport_reversed a k n]; rfl
+  · intro k _; rw [retentionProd_reversed a k n]; rfl
 
 /-! ## The finite-horizon Loynes values -/
 
@@ -198,18 +198,18 @@ theorem reflectedIter_reversed (ha : ∀ k, 0 ≤ a k) (n : ℕ) :
 
 variable {a}
 
-/-- Retentions bounded by `ρ` make the accumulated transport geometric. -/
-theorem pastTransport_le_pow {ρ : ℝ} (ha : ∀ k, 0 ≤ a k) (hρ : ∀ k, a k ≤ ρ) (j : ℕ) :
-    pastTransport a j ≤ ρ ^ j := by
+/-- Retentions bounded by `ρ` make the accumulated retention product geometric. -/
+theorem pastRetentionProd_le_pow {ρ : ℝ} (ha : ∀ k, 0 ≤ a k) (hρ : ∀ k, a k ≤ ρ) (j : ℕ) :
+    pastRetentionProd a j ≤ ρ ^ j := by
   have h := Finset.prod_le_prod₀ (s := Finset.range j) (f := a) (g := fun _ => ρ)
     (fun k _ => ha k) fun k _ => hρ k
-  simpa [pastTransport] using h
+  simpa [pastRetentionProd] using h
 
-/-- Geometric retention keeps the total accumulated transport below `1 / (1 - ρ)`, uniformly in
-the number of stages. -/
-theorem sum_pastTransport_le {ρ : ℝ} (ha : ∀ k, 0 ≤ a k) (hρ : ∀ k, a k ≤ ρ) (hρ1 : ρ < 1)
-    (j : ℕ) : ∑ p ∈ Finset.range j, pastTransport a p ≤ 1 / (1 - ρ) := by
-  refine le_trans (Finset.sum_le_sum fun p _ => pastTransport_le_pow ha hρ p) ?_
+/-- Geometric retention keeps the total accumulated retention product below `1 / (1 - ρ)`,
+uniformly in the number of stages. -/
+theorem sum_pastRetentionProd_le {ρ : ℝ} (ha : ∀ k, 0 ≤ a k) (hρ : ∀ k, a k ≤ ρ) (hρ1 : ρ < 1)
+    (j : ℕ) : ∑ p ∈ Finset.range j, pastRetentionProd a p ≤ 1 / (1 - ρ) := by
+  refine le_trans (Finset.sum_le_sum fun p _ => pastRetentionProd_le_pow ha hρ p) ?_
   have h := geom_sum_Ico_le_of_lt_one (m := 0) (n := j) (le_trans (ha 0) (hρ 0)) hρ1
   rwa [← Finset.range_eq_Ico, pow_zero] at h
 
@@ -222,13 +222,13 @@ theorem loynes_le {ρ C : ℝ} (ha : ∀ k, 0 ≤ a k) (hρ : ∀ k, a k ≤ ρ)
   have hρ0 : 0 ≤ ρ := le_trans (ha 0) (hρ 0)
   have hsub : 0 < 1 - ρ := by linarith
   refine (loynes_le_iff a g).mpr fun j _ => ?_
-  have hlow : -(C * ∑ p ∈ Finset.range j, pastTransport a p) ≤ pastService a g j := by
+  have hlow : -(C * ∑ p ∈ Finset.range j, pastRetentionProd a p) ≤ pastService a g j := by
     rw [Finset.mul_sum, ← Finset.sum_neg_distrib, pastService]
     refine Finset.sum_le_sum fun p _ => ?_
-    have hT : 0 ≤ pastTransport a p := pastTransport_nonneg _ ha p
+    have hT : 0 ≤ pastRetentionProd a p := pastRetentionProd_nonneg _ ha p
     nlinarith [mul_le_mul_of_nonneg_left (hC p) hT]
-  have hbound : C * ∑ p ∈ Finset.range j, pastTransport a p ≤ C * (1 / (1 - ρ)) :=
-    mul_le_mul_of_nonneg_left (sum_pastTransport_le ha hρ hρ1 j) hC0
+  have hbound : C * ∑ p ∈ Finset.range j, pastRetentionProd a p ≤ C * (1 / (1 - ρ)) :=
+    mul_le_mul_of_nonneg_left (sum_pastRetentionProd_le ha hρ hρ1 j) hC0
   rw [mul_one_div] at hbound
   linarith
 

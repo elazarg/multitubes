@@ -276,11 +276,11 @@ theorem compList_gaugeCriticalCycle
 /-- A strictly contractive composite of nonnegative-slope edge labels has a
 pre-fixed point.  This statement uses the original, unnormalized walk
 holonomy and allows arbitrary floors. -/
-theorem exists_holonomyApply_le_self_of_cycleProduct_lt_one
+theorem exists_walkApply_le_self_of_cycleProduct_lt_one
     (hslope : ∀ edge : E, 0 ≤ (label edge).slope)
     {base : V} (cycle : G.Walk base base)
     (hproduct : walkProd (fun edge => (label edge).slope) cycle < 1) :
-    ∃ point : ℝ, holonomyApply label cycle point ≤ point := by
+    ∃ point : ℝ, walkApply label cycle point ≤ point := by
   let composite := Label.compList (cycle.edges.map label)
   have hcomposite : composite.slope < 1 := by
     dsimp [composite]
@@ -294,12 +294,12 @@ theorem exists_holonomyApply_le_self_of_cycleProduct_lt_one
 
 /-- A strictly expansive composite of floorless nonnegative-slope edge labels
 has a pre-fixed point. -/
-theorem exists_holonomyApply_le_self_of_one_lt_cycleProduct_of_floorless
+theorem exists_walkApply_le_self_of_one_lt_cycleProduct_of_floorless
     (hslope : ∀ edge : E, 0 ≤ (label edge).slope)
     (hfloor : ∀ edge : E, (label edge).floor = ⊥)
     {base : V} (cycle : G.Walk base base)
     (hproduct : 1 < walkProd (fun edge => (label edge).slope) cycle) :
-    ∃ point : ℝ, holonomyApply label cycle point ≤ point := by
+    ∃ point : ℝ, walkApply label cycle point ≤ point := by
   let composite := Label.compList (cycle.edges.map label)
   have hlabelFloor (candidate : Label) (hcandidate : candidate ∈ cycle.edges.map label) :
       candidate.floor = ⊥ := by
@@ -320,7 +320,7 @@ theorem exists_holonomyApply_le_self_of_one_lt_cycleProduct_of_floorless
 
 /-- A cycle containing a noncritical edge of a nonexpansive gauge has a
 pre-fixed point in the original max-affine coordinates. -/
-theorem exists_holonomyApply_le_self_of_noncriticalCycle_of_nonexpansiveGauge
+theorem exists_walkApply_le_self_of_noncriticalCycle_of_nonexpansiveGauge
     (hslope : ∀ edge : E, 0 ≤ (label edge).slope)
     (gauge : V → ℝ)
     (hgauge : IsNonexpansiveGauge (G := G)
@@ -328,7 +328,7 @@ theorem exists_holonomyApply_le_self_of_noncriticalCycle_of_nonexpansiveGauge
     {base : V} (cycle : G.Walk base base)
     (hnoncritical : ∃ edge ∈ cycle.edges,
       (label edge).slope * gauge (G.source edge) ≠ gauge (G.target edge)) :
-    ∃ point : ℝ, holonomyApply label cycle point ≤ point := by
+    ∃ point : ℝ, walkApply label cycle point ≤ point := by
   have hstrict : ∃ edge ∈ cycle.edges,
       (label edge).slope * gauge (G.source edge) < gauge (G.target edge) := by
     obtain ⟨edge, hedge, hne⟩ := hnoncritical
@@ -336,12 +336,12 @@ theorem exists_holonomyApply_le_self_of_noncriticalCycle_of_nonexpansiveGauge
   have hproduct :=
     cycleProduct_lt_one_of_nonexpansiveGauge_of_exists_strict
       (fun edge => (label edge).slope) hslope hgauge cycle hstrict
-  exact exists_holonomyApply_le_self_of_cycleProduct_lt_one
+  exact exists_walkApply_le_self_of_cycleProduct_lt_one
     hslope cycle hproduct
 
 /-- A cycle containing a noncritical edge of an expansive gauge has a
 pre-fixed point when every original label is floorless. -/
-theorem exists_holonomyApply_le_self_of_noncriticalCycle_of_expansiveGauge
+theorem exists_walkApply_le_self_of_noncriticalCycle_of_expansiveGauge
     (gauge : V → ℝ)
     (hgauge : IsExpansiveGauge (G := G)
       (fun edge => (label edge).slope) gauge)
@@ -349,7 +349,7 @@ theorem exists_holonomyApply_le_self_of_noncriticalCycle_of_expansiveGauge
     {base : V} (cycle : G.Walk base base)
     (hnoncritical : ∃ edge ∈ cycle.edges,
       (label edge).slope * gauge (G.source edge) ≠ gauge (G.target edge)) :
-    ∃ point : ℝ, holonomyApply label cycle point ≤ point := by
+    ∃ point : ℝ, walkApply label cycle point ≤ point := by
   have hstrict : ∃ edge ∈ cycle.edges,
       gauge (G.target edge) <
         (label edge).slope * gauge (G.source edge) := by
@@ -359,13 +359,13 @@ theorem exists_holonomyApply_le_self_of_noncriticalCycle_of_expansiveGauge
     one_lt_cycleProduct_of_expansiveGauge_of_exists_strict
       (fun edge => (label edge).slope) hgauge cycle hstrict
   exact
-    exists_holonomyApply_le_self_of_one_lt_cycleProduct_of_floorless
+    exists_walkApply_le_self_of_one_lt_cycleProduct_of_floorless
       (fun edge => (hgauge.slope_pos edge).le) hfloor cycle hproduct
 
 /-- Every original max-affine cycle holonomy has a pre-fixed point. -/
 def HasPrefixedCycleHolonomies (G : EdgeGraph V E) (label : E → Label) : Prop :=
   ∀ (base : V) (cycle : G.Walk base base),
-    ∃ point : ℝ, holonomyApply label cycle point ≤ point
+    ∃ point : ℝ, walkApply label cycle point ≤ point
 
 /-- Under a nonexpansive positive gauge and nonnegative slopes, feasibility is
 equivalent to pre-fixedness of every original max-affine cycle holonomy.  The
@@ -382,7 +382,7 @@ theorem exists_isLaxSection_iff_prefixedCycleHolonomies_of_nonexpansiveGauge
   constructor
   · rintro ⟨potential, hpotential⟩ base cycle
     exact ⟨potential base,
-      holonomyApply_cycle_le hslope hpotential cycle⟩
+      walkApply_cycle_le hslope hpotential cycle⟩
   · intro hprefixed
     apply
       (exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_nonexpansiveGauge
@@ -409,7 +409,7 @@ theorem exists_isLaxSection_iff_prefixedCycleHolonomies_of_expansiveGauge
   constructor
   · rintro ⟨potential, hpotential⟩ base cycle
     exact ⟨potential base,
-      holonomyApply_cycle_le hslope hpotential cycle⟩
+      walkApply_cycle_le hslope hpotential cycle⟩
   · intro hprefixed
     apply
       (exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_expansiveGauge

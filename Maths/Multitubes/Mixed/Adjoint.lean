@@ -20,7 +20,7 @@ directions on an exact edge.
 ## Main definitions
 
 * `Maths.Transport.LaxificationEdge` - the forward and reversed copies of
-  the edges selected by a mixed polarity.
+  the edges selected by a mode assignment.
 * `Maths.Transport.laxificationGraph` - the graph carrying those copies.
 * `Maths.Transport.laxification` - the transport using original and residual
   maps.
@@ -40,7 +40,7 @@ directions on an exact edge.
 
 ## Tags
 
-transport, mixed polarity, adjoint, residual, reversal
+transport, mixed section, adjoint, residual, reversal
 -/
 
 @[expose] public section

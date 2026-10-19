@@ -19,7 +19,7 @@ remain hypotheses of the walk results in
 
 ## Main definitions
 
-* `Maths.Transport.IsMixedSection` - the ordered mixed-polarity predicate.
+* `Maths.Transport.IsMixedSection` - the ordered mixed-mode predicate.
 
 ## Main results
 
@@ -36,11 +36,11 @@ remain hypotheses of the walk results in
   an exact-mode walk.
 * `Maths.Transport.IsMixedSection.walkMap_le_of_lax_or_exact` and
   `Maths.Transport.IsMixedSection.le_walkMap_of_oplax_or_exact` - ordered walk
-  propagation for the two inequality polarities.
+  propagation for the two inequality modes.
 
 ## Tags
 
-transport, mixed polarity, lax section, oplax section, order
+transport, mixed section, lax section, oplax section, order
 -/
 
 @[expose] public section
@@ -58,7 +58,7 @@ variable {T : Transport G Fiber}
 variable {start finish : V} {mode : E → EdgeMode}
 variable {family : ∀ vertex : V, Fiber vertex}
 
-/-- A mixed-polarity section using the fiberwise `≤` relation. -/
+/-- A mixed section using the fiberwise `≤` relation. -/
 def IsMixedSection [∀ vertex : V, LE (Fiber vertex)]
     (T : Transport G Fiber) (mode : E → EdgeMode)
     (family : ∀ vertex, Fiber vertex) : Prop :=

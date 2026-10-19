@@ -53,7 +53,7 @@ forbids arbitrarily heavy open walks.
 * `Maths.MaxPlusPotential.budgetEN_eq_iInf_oscillation`: the same duality with no finiteness
   hypothesis, in `ℝ≥0∞`, both sides being `⊤` in the unbounded case.
 * `Maths.MaxPlusPotential.isLeast_supIncomingWeight` and
-  `Maths.MaxPlusPotential.supIncomingWeight_le_iff`: Bellman characterisation,
+  `Maths.MaxPlusPotential.supIncomingWeight_le_iff`: Bellman characterization,
   `supIncomingWeight` is the least nonnegative potential.
 * `Maths.MaxPlusPotential.not_hasFiniteBudget_of_positive_cycle` and
   `Maths.MaxPlusPotential.not_exists_boundedPotential_of_positive_cycle`: a closed walk of
@@ -68,7 +68,7 @@ The oscillation is taken over *all* vertices, not only over those touched by an 
 duality is nevertheless exact: `supIncomingWeight` is globally nonnegative and globally bounded
 by the budget, so its oscillation over all vertices is already at most the budget.
 
-No maximising walk is assumed to exist: `supIncomingWeight` is a supremum, and its edge
+No maximizing walk is assumed to exist: `supIncomingWeight` is a supremum, and its edge
 inequality is obtained by extending an arbitrary walk by one edge.
 
 ## Tags
@@ -220,7 +220,7 @@ theorem budget_le_oscillation {φ : V → ℝ} (hφ : IsBoundedPotential G weigh
 /-! ### The supremum of arriving weights is an optimal potential -/
 
 /-- Under a finite budget, `supIncomingWeight` obeys the edge increment inequality.  No
-maximising walk is assumed: an arbitrary walk arriving at the source is extended by the
+maximizing walk is assumed: an arbitrary walk arriving at the source is extended by the
 edge. -/
 theorem isPotential_supIncomingWeight (h : HasFiniteBudget G weight) :
     IsPotential G weight (supIncomingWeight G weight) := by
@@ -305,7 +305,7 @@ theorem sInf_range_supIncomingWeight (h : HasFiniteBudget G weight) :
   simp only [oscillation] at hosc
   linarith
 
-/-! ### Bellman characterisation -/
+/-! ### Bellman characterization -/
 
 /-- Every nonnegative potential dominates `supIncomingWeight`.  No finiteness hypothesis is
 needed: the potential itself bounds the weights of the walks arriving at each vertex. -/
@@ -316,7 +316,7 @@ theorem supIncomingWeight_le_of_isPotential {φ : V → ℝ} (hnonneg : 0 ≤ φ
     have : (0 : ℝ) ≤ φ start := hnonneg start
     linarith
 
-/-- **Bellman characterisation.**  Under a finite budget, `supIncomingWeight` is the least
+/-- **Bellman characterization.**  Under a finite budget, `supIncomingWeight` is the least
 nonnegative potential, in the pointwise order. -/
 theorem isLeast_supIncomingWeight (h : HasFiniteBudget G weight) :
     IsLeast {φ : V → ℝ | 0 ≤ φ ∧ IsPotential G weight φ} (supIncomingWeight G weight) :=

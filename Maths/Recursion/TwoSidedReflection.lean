@@ -418,12 +418,12 @@ original time indices, of the orbit that restarts from the top of the band at ti
 theorem bandRestart_eq_sup' (ha : ∀ k, 0 ≤ a k) (x : ℝ) {m n : ℕ} (hmn : m ≤ n) :
     bandRestart lo hi a g x m n =
       (Finset.range (n - m + 1)).sup' Finset.nonempty_range_add_one
-        (fun j => transport a (m + j) n * (if j = 0 then (if m = 0 then x else hi) else lo) -
+        (fun j => retentionProd a (m + j) n * (if j = 0 then (if m = 0 then x else hi) else lo) -
           service a g (m + j) n) := by
   have hidx : m + (n - m) = n := by omega
   rw [bandRestart, floorIter_eq_sup' _ _ _ (fun k => ha (m + k))]
   refine Finset.sup'_congr _ rfl fun j _ => ?_
-  rw [floorTerm, floorRestartState, transport_shift, service_shift, hidx]
+  rw [floorTerm, floorRestartState, retentionProd_shift, service_shift, hidx]
 
 /-- **The two-sided Lindley representation in closed form.** The two-sided reflected state at
 time `n` is an infimum over upper restart times of suprema over lower restart times: the state
@@ -436,7 +436,7 @@ theorem bandIter_eq_inf'_sup' (ha : ∀ k, 0 ≤ a k) (x : ℝ) (n : ℕ) :
     bandIter lo hi a g x n =
       (Finset.range (n + 1)).inf' Finset.nonempty_range_add_one (fun m =>
         (Finset.range (n - m + 1)).sup' Finset.nonempty_range_add_one
-          (fun j => transport a (m + j) n * (if j = 0 then (if m = 0 then x else hi) else lo) -
+          (fun j => retentionProd a (m + j) n * (if j = 0 then (if m = 0 then x else hi) else lo) -
             service a g (m + j) n)) := by
   rw [bandIter_eq_inf' lo hi a g ha x n]
   refine Finset.inf'_congr _ rfl fun m hm => ?_
@@ -590,16 +590,16 @@ theorem bandStep_sub_le {c : ℝ} (hc : 0 ≤ c) {x y : ℝ} (hxy : x ≤ y) (d 
 /-- **The backward orbit is Lipschitz with the accumulated retention as its constant.** -/
 theorem pastBandIter_sub_le (ha : ∀ k, 0 ≤ a k) :
     ∀ (n : ℕ) {x y : ℝ}, x ≤ y →
-      pastBandIter lo hi a g n y - pastBandIter lo hi a g n x ≤ pastTransport a n * (y - x)
+      pastBandIter lo hi a g n y - pastBandIter lo hi a g n x ≤ pastRetentionProd a n * (y - x)
   | 0, x, y, hxy => by simp
   | n + 1, x, y, hxy => by
     have hstep : min hi (max lo (a n * x - g n)) ≤ min hi (max lo (a n * y - g n)) :=
       min_le_min le_rfl (max_le_max le_rfl
         (sub_le_sub_right (mul_le_mul_of_nonneg_left hxy (ha n)) _))
     have hIH := pastBandIter_sub_le ha n hstep
-    have hT : 0 ≤ pastTransport a n := pastTransport_nonneg _ ha n
+    have hT : 0 ≤ pastRetentionProd a n := pastRetentionProd_nonneg _ ha n
     have hLip := bandStep_sub_le lo hi (ha n) hxy (g n)
-    rw [pastBandIter_succ, pastBandIter_succ, pastTransport_succ]
+    rw [pastBandIter_succ, pastBandIter_succ, pastRetentionProd_succ]
     nlinarith
 
 /-- **Geometric retention closes the band.** If every retention lies in `[0, ρ]` with `ρ < 1`,
@@ -616,7 +616,7 @@ theorem tendsto_pastBandIter_sub {ρ : ℝ} (hlh : lo ≤ hi) (ha : ∀ k, 0 ≤
     simpa using (tendsto_pow_atTop_nhds_zero_of_lt_one hρ0 hρ1).mul_const (hi - lo)
   refine squeeze_zero (fun n => by linarith [monotone_pastBandIter lo hi a g ha n hlh])
     (fun n => le_trans (pastBandIter_sub_le lo hi a g ha n hlh) ?_) hpow
-  exact mul_le_mul_of_nonneg_right (pastTransport_le_pow ha hρ n) (by linarith)
+  exact mul_le_mul_of_nonneg_right (pastRetentionProd_le_pow ha hρ n) (by linarith)
 
 /-- **The two-sided Loynes limit under geometric retention.** The backward orbit from the top of
 the band converges to the same limit as the one from the bottom. -/

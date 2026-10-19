@@ -511,10 +511,10 @@ theorem forall_gaugeCriticalCycles_nonpos_iff_holonomy_prefixed
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
         ∃ point : ℝ,
-          holonomyApply
+          walkApply
               (fun edge => translationLabel
                 (gaugeCriticalShift label gauge edge)) cycle point ≤ point := by
-  simp [holonomyApply_translationLabel]
+  simp [walkApply_translationLabel]
 
 /-- The feasibility companion of the residual reduction above, asking the same three things of
 the recession direction: that every branch recede along it, that it annihilate an affine row
@@ -617,7 +617,7 @@ theorem exists_isLaxSection_iff_gaugeCriticalHolonomy_prefixed_of_nonexpansiveGa
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
         ∃ point : ℝ,
-          holonomyApply
+          walkApply
               (fun edge => translationLabel
                 (gaugeCriticalShift label gauge edge)) cycle point ≤ point := by
   rw [exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_nonexpansiveGauge
@@ -635,7 +635,7 @@ theorem exists_isLaxSection_iff_gaugeCriticalHolonomy_prefixed_of_expansiveGauge
       ∀ (base : V)
         (cycle : (gaugeCriticalGraph (G := G) label gauge).Walk base base),
         ∃ point : ℝ,
-          holonomyApply
+          walkApply
               (fun edge => translationLabel
                 (gaugeCriticalShift label gauge edge)) cycle point ≤ point := by
   rw [exists_isLaxSection_iff_gaugeCriticalCycles_nonpos_of_expansiveGauge

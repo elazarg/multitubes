@@ -53,8 +53,8 @@ the two roots to be opposite, which happens only inside a single component.
   of the weighting to it, with `Maths.MaxPlusPotential.liftCriticalWalk` reading a
   walk of the former in the ambient graph.
 * `Maths.MaxPlusPotential.IsGraphEigenvector`: the max-plus eigenvalue equation on a
-  weighted digraph, namely the subeigenvector inequality together with an incoming tight edge at
-  every vertex.
+  weighted directed multigraph, namely the subeigenvector inequality together with an
+  incoming tight edge at every vertex.
 * `Maths.MaxPlusPotential.CriticalClass`,
   `Maths.MaxPlusPotential.toCriticalClass`: the critical classes, that is the strongly
   connected components of the critical graph, and the class of a vertex.
@@ -389,9 +389,9 @@ end Kleene
 
 /-! ### The eigenspace -/
 
-/-- The max-plus eigenvalue equation on a weighted digraph: the shifted weighting `weight - lam`
-admits `φ` as a potential, and at every vertex some incoming edge makes the inequality an
-equality.  On the complete digraph of a matrix this is
+/-- The max-plus eigenvalue equation on a weighted directed multigraph: the shifted weighting
+`weight - lam` admits `φ` as a potential, and at every vertex some incoming edge makes the
+inequality an equality.  On the complete digraph of a matrix this is
 `Maths.MaxPlusPotential.IsEigenvector`, by
 `Maths.MaxPlusPotential.isEigenvector_iff_isGraphEigenvector`. -/
 def IsGraphEigenvector (G : EdgeGraph V E) (weight : E → 𝕜) (lam : 𝕜) (φ : V → 𝕜) : Prop :=

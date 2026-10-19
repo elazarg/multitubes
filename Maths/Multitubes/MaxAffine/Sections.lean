@@ -17,7 +17,7 @@ import Mathlib.Data.Fintype.Order
 `Maths.MaxAffineTransport` develops the obstruction side of max-affine
 transport: at nonnegative slopes, a lax section forces the composite action of
 every closed walk to have a pre-fixed point
-(`Maths.MaxAffineTransport.holonomyApply_cycle_le`; without the slope
+(`Maths.MaxAffineTransport.walkApply_cycle_le`; without the slope
 hypothesis this fails -- two labels of slope `-1` can each admit a lax value
 while their composite is a positive translation).  This file supplies the
 converse in two regimes.
@@ -205,7 +205,7 @@ theorem isPotential_of_isLaxSection {label : E → Label} (hslope : ∀ e : E, (
     Maths.MaxPlusPotential.IsPotential G (fun e => (label e).shift) φ := fun e =>
   (Label.add_shift_le_apply (hslope e) (φ (G.source e))).trans (hφ e)
 
-/-- A potential for the shifts that clears every floor at the head of its edge
+/-- A potential for the shifts that clears every floor at the target of its edge
 is a lax section, at unit slopes. -/
 theorem isLaxSection_of_isPotential {label : E → Label} (hslope : ∀ e : E, (label e).slope = 1)
     {φ : V → ℝ} (hφ : Maths.MaxPlusPotential.IsPotential G (fun e => (label e).shift) φ)
@@ -226,7 +226,7 @@ floored labels.  The translation inequalities are unchanged by adding a
 constant and the floor inequalities only improve upward, and that is what
 carries the lift: a potential for the shifts, raised by a constant large
 enough for every floor, is a lax section.  Adjoining a
-vertex pinned to zero and an edge from it to the head of each floored edge is
+vertex pinned to zero and an edge from it to the target of each floored edge is
 the same reduction performed on an enlarged graph. -/
 theorem exists_isLaxSection_iff_forall_cycle_shift_nonpos [Finite E]
     {label : E → Label} (hslope : ∀ e : E, (label e).slope = 1) :
@@ -267,7 +267,7 @@ section exists exactly when the composite label of every closed walk admits a
 pre-fixed point, the condition that
 `Maths.MaxAffineTransport.Label.exists_apply_le_self_iff` decides from the
 coefficients.  Together with
-`Maths.MaxAffineTransport.holonomyApply_cycle_le` this closes the unit-slope case
+`Maths.MaxAffineTransport.walkApply_cycle_le` this closes the unit-slope case
 of the duality: the necessary condition of weak duality is sufficient.  The
 composite is the one that acts by transport,
 `Maths.MaxAffineTransport.apply_compList_edges`. -/

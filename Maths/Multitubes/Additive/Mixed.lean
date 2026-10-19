@@ -11,7 +11,7 @@ public import Maths.Multitubes.Mixed.AdjointOrder
 import Mathlib.Basic.Finite.Sum
 
 /-!
-# Additive mixed-polarity transport
+# Additive mixed-mode transport
 
 An additive edge label acts by translation.  A lax edge keeps its orientation,
 an oplax edge is reversed and receives the negative label, and an exact edge
@@ -27,7 +27,7 @@ potentials on the laxification graph.
 * `Maths.MixedAdditiveTransport.laxifiedTranslationTransport` - translation
   transport on the laxification graph.
 * `Maths.MixedAdditiveTransport.mixedMaxIncomingWeight` - the unrooted incoming
-  path envelope on the laxification graph.
+  path closure on the laxification graph.
 
 ## Main results
 
@@ -48,11 +48,11 @@ potentials on the laxification graph.
 * `Maths.MixedAdditiveTransport.isLeast_nonnegativeMixedSections` - the
   envelope is the least nonnegative mixed section.
 * `Maths.MixedAdditiveTransport.isGreatest_laxifiedIncomingWeights` - the
-  path-envelope characterization.
+  path-closure characterization.
 
 ## Tags
 
-transport, additive transport, mixed polarity, potential, laxification
+transport, additive transport, mixed section, potential, laxification
 -/
 
 @[expose] public section
@@ -99,7 +99,7 @@ def translationResidual (mode : E → EdgeMode) (weight : E → A)
     translationResidual mode weight edge point = point - weight edge.1 :=
   rfl
 
-/-- The subtraction residual is the left adjoint of addition in the orientation
+/-- The subtraction residual is the lower adjoint of addition in the orientation
 used by the mixed laxification theorem. -/
 theorem translationResidual_galoisConnection (mode : E → EdgeMode) (weight : E → A)
     [Preorder A] [IsOrderedAddMonoid A]
@@ -221,7 +221,7 @@ section Finite
 
 variable [LinearOrder A] [IsOrderedAddMonoid A]
 
-/-- The signed incoming path envelope on the laxification graph. -/
+/-- The signed incoming path closure on the laxification graph. -/
 def mixedMaxIncomingWeight (G : EdgeGraph V E) (mode : E → EdgeMode)
     [Finite (Transport.LaxificationEdge mode)] (weight : E → A) (vertex : V) : A :=
   MaxPlusPotential.maxIncomingWeight
@@ -268,7 +268,7 @@ theorem mixedMaxIncomingWeight_isMixedSection
   apply (isMixedSection_iff_isPotential_laxified G mode weight _).2
   exact MaxPlusPotential.maxIncomingWeight_isPotential hcycle
 
-/-- The signed incoming path envelope is the least nonnegative mixed section.
+/-- The signed incoming path closure is the least nonnegative mixed section.
 It is a maximum over path weights and simultaneously a minimum over normalized
 feasible sections. -/
 theorem isLeast_nonnegativeMixedSections

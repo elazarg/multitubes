@@ -22,7 +22,7 @@ import Mathlib.Tactic.Linarith
 import Mathlib.Tactic.Ring
 
 /-!
-# Additive potentials on a weighted digraph
+# Additive potentials on a weighted directed multigraph
 
 A directed multigraph is represented by `Maths.EdgeGraph`, so parallel
 edges keep their identities, and its finite walks are endpoint-indexed typed
@@ -211,8 +211,9 @@ section AddGroup
 variable {𝕜g : Type*} [AddCommGroup 𝕜g] [Preorder 𝕜g] [IsOrderedAddMonoid 𝕜g]
 
 /-- The amount by which a candidate function fails the increment inequality at
-one edge.  Also called the edge slack, the reduced weight, or the residual of the
-edge; a potential is exactly a function whose defects are all nonpositive. -/
+one edge.  Also called the reduced weight of the edge; it is the negative of the
+slack of the edge inequality.  A potential is exactly a function whose defects are all
+nonpositive. -/
 def defect (G : EdgeGraph V E) (weight : E → 𝕜g) (φ : V → 𝕜g) (e : E) : 𝕜g :=
   φ (G.source e) + weight e - φ (G.target e)
 
@@ -479,7 +480,7 @@ theorem maxIncomingWeight_isPotential {weight : E → 𝕜}
   have hle := walkSum_le_maxIncomingWeight hcyc (walk.concat e)
   rwa [walkSum_concat, hwalk] at hle
 
-/-- The incoming path envelope is the least nonnegative potential.  Thus its
+/-- The incoming path closure is the least nonnegative potential.  Thus its
 maximum-over-paths description and its minimum-over-feasible-potentials
 description are two sides of the same normalization. -/
 theorem isLeast_nonnegativePotentials {weight : E → 𝕜}
@@ -605,8 +606,7 @@ variable {𝕜m : Type*} [Add 𝕜m] [LE 𝕜m]
 /-- A subeigenvector of a max-plus matrix for the value `lam`: the max-plus
 matrix-vector product `A ⊙ v`, whose `i`-th coordinate is the supremum over `j`
 of `A i j + v j`, is dominated coordinatewise by `lam + v`.  Also called a
-subinvariant vector, a subharmonic vector, or a super-solution of the max-plus
-eigenvalue equation.  The infimum of the values `lam` for which a subeigenvector
+subinvariant or superharmonic vector.  The infimum of the values `lam` for which a subeigenvector
 exists is called the max cycle mean of `A`, the max-plus Perron root, or the
 tropical spectral radius. -/
 def IsSubeigenvector (A : ι → ι → 𝕜m) (lam : 𝕜m) (v : ι → 𝕜m) : Prop :=

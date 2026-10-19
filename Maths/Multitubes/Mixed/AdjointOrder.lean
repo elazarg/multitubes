@@ -12,7 +12,7 @@ public import Mathlib.Order.GaloisConnection.Defs
 /-!
 # Ordered adjoint reversal
 
-For partially ordered fibers, a left residual of each edge map is a
+For partially ordered fibers, the residual of each edge map is its lower adjoint: a
 `GaloisConnection` in the direction needed to reverse an oplax constraint.
 Antisymmetry then supplies the exact-edge separation law, so the general
 relation-parametric theorem has a compact ordered form.
@@ -32,7 +32,7 @@ relation-parametric theorem has a compact ordered form.
 
 ## Tags
 
-transport, mixed polarity, adjoint, residual, Galois connection, order
+transport, mixed section, adjoint, residual, Galois connection, order
 -/
 
 @[expose] public section
@@ -96,7 +96,7 @@ theorem IsMixedSection.isLaxSection_laxification_of_galoisConnection
   intro edge sourcePoint targetPoint
   exact (hresidual edge targetPoint sourcePoint).symm
 
-/-- In partially ordered fibers, edgewise left residuals turn mixed sections
+/-- In partially ordered fibers, edgewise lower adjoints turn mixed sections
 into all-lax sections on the laxification graph. -/
 theorem isMixedSection_iff_laxification_of_galoisConnection
     [∀ vertex : V, PartialOrder (Fiber vertex)]

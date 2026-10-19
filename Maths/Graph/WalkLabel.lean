@@ -30,7 +30,8 @@ multiplication are natural.
 
 The first is the second in the opposite monoid (`Maths.walkLabel_eq_unop_walkProd`), and the two
 agree in a commutative monoid (`Maths.walkLabel_eq_walkProd`).  A labelling is
-*flat*, or *balanced*, when every closed walk has trivial label.
+*flat* (*balanced*, in the language of gain graphs) when every closed walk has
+trivial label.
 
 ## Main definitions
 

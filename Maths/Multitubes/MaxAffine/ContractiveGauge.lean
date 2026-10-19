@@ -10,7 +10,7 @@ public import Maths.Multitubes.MaxAffine.Slopes
 import Maths.Multitubes.Additive.ShortCycles
 
 /-!
-# Strict contraction gauges for scalar gains
+# Strict contractive gauges for scalar gains
 
 Nonnegative edge gains on a finite graph admit a positive vertex scaling with one
 contraction factor below one exactly when every nonempty directed cycle has gain product
@@ -27,7 +27,7 @@ additive residual bound. Finiteness makes a uniform strict margin possible.
 
 * `Maths.MaxAffineTransport.walkProd_mul_gauge_le_pow`: a geometric bound along walks.
 * `Maths.MaxAffineTransport.exists_contractiveGauge_iff_cycleProduct_lt_one`: exact cycle
-  criterion for a strict contraction gauge, including zero-gain transitions.
+  criterion for a strict contractive gauge, including zero-gain edges.
 * `Maths.MaxAffineTransport.exists_contractiveGauge_iff_shortCycleProduct_lt_one`: it suffices
   to check nonempty closed walks up to the number of vertices.
 -/
@@ -65,7 +65,7 @@ theorem walkProd_mul_gauge_le_pow (gain : E → ℝ)
           mul_le_mul_of_nonneg_left (hgauge.2 edge) (pow_nonneg hrate _)
         _ = _ := by ring
 
-/-- A strict contraction gauge forces every nonempty directed cycle product below one. -/
+/-- A strict contractive gauge forces every nonempty directed cycle product below one. -/
 theorem cycleProduct_lt_one_of_contractiveGauge (gain : E → ℝ)
     (hnonneg : ∀ edge, 0 ≤ gain edge) {rate : ℝ} (hrate : 0 ≤ rate) (hlt : rate < 1)
     {gauge : V → ℝ} (hgauge : IsContractiveGauge (G := G) gain rate gauge)
@@ -76,7 +76,7 @@ theorem cycleProduct_lt_one_of_contractiveGauge (gain : E → ℝ)
   have hbound := mul_lt_mul_of_pos_right hpower (hgauge.1 vertex)
   nlinarith
 
-/-- A finite nonnegative gain graph has a strict contraction gauge exactly when nonempty
+/-- A finite nonnegative gain graph has a strict contractive gauge exactly when nonempty
 closed walks up to the number of vertices have gain product below one. -/
 theorem exists_contractiveGauge_iff_shortCycleProduct_lt_one [Fintype V] [Finite E]
     (gain : E → ℝ) (hnonneg : ∀ edge, 0 ≤ gain edge) :
@@ -123,7 +123,7 @@ theorem exists_contractiveGauge_iff_shortCycleProduct_lt_one [Fintype V] [Finite
         rw [hzero, zero_mul]
         positivity
 
-/-- A finite nonnegative gain graph has a strict positive contraction gauge exactly when all
+/-- A finite nonnegative gain graph has a strict positive contractive gauge exactly when all
 nonempty directed cycle products are below one. The chosen rate is strictly positive even
 when the graph has no positive-gain cycle. -/
 theorem exists_contractiveGauge_iff_cycleProduct_lt_one [Fintype V] [Finite E]

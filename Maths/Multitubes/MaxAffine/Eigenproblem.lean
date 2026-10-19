@@ -109,7 +109,7 @@ closed convex subsets is given in `Maths.Multitubes.MaxAffine.PolicySpectrum`; e
 computation and structural criteria avoiding enumeration require additional results.
 
 The **least** eigenvalue is not open, and needs none of this file: every eigenvalue is a level at
-which the inequality `F x ≤ lam + x` is solvable, and by
+which the inequality `F x ≤ lam + x` is feasible, and by
 `Maths.Multitubes.MaxAffine.LeastEigenvalue` a least such level is the least eigenvalue
 whenever every vertex has an incoming edge, so the value is the optimum of an explicit finite linear
 program. The cyclewise description of that optimum available in the comparable regimes -- the

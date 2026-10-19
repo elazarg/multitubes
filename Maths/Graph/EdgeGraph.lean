@@ -88,6 +88,13 @@ circulations, and application-specific semantics belong in files that import thi
 * `Maths.EdgeGraph.symmetrization_hasEdgeReturns`: every edge of the symmetrization
   returns along its opposite orientation.
 
+## Implementation notes
+
+A *cycle* in a declaration name, as in `Maths.HasTrivialCycleLabels` or
+`Maths.HasZeroCycleSums`, means an arbitrary closed walk, which may repeat vertices and edges.
+This differs from mathlib's `SimpleGraph.Walk.IsCycle`.  The simple cycles, closed walks with
+no proper closed subwalk, are `Maths.EdgeGraph.Walk.IsSimpleCycle`.
+
 ## Tags
 
 directed multigraph, quiver, walk, path, parallel edges, edge multiplicity
@@ -967,8 +974,8 @@ theorem HasEdgeReturns.linkedTo (hreturn : HasEdgeReturns G) (edge : E) :
     LinkedTo G (G.source edge) (G.target edge) :=
   ⟨⟨EdgeGraph.Walk.singleton edge⟩, hreturn edge⟩
 
-/-- A graph whose every edge lies in a strongly connected component reachable from `base`
-has edge returns. -/
+/-- A graph whose every edge lies in the strongly connected component of `base` has edge
+returns. -/
 theorem EdgeEndpointsLinkedTo.hasEdgeReturns {base : V}
     (hlinked : EdgeEndpointsLinkedTo G base) : HasEdgeReturns G :=
   fun edge => ((hlinked edge).2.symm.trans (hlinked edge).1).1

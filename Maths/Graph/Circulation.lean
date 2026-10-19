@@ -24,7 +24,7 @@ a closed walk the correction cancels and the multiplicity vector is an honest ci
 A nonnegative integer circulation is packaged together with the two side conditions its
 Eulerian realization needs: its total charge vanishes, and its positive support is weakly
 connected, certified by a finite traversal in which consecutive edges share an endpoint. The
-reachable variant adds an explicit finite route from a prescribed start vertex into that
+reachable variant adds an explicit finite walk from a prescribed start vertex into that
 support.
 
 ## Main definitions
@@ -42,7 +42,7 @@ support.
   set and its flow balance.
 * `Maths.EdgeGraph.ConnectedIntegerCirculation`,
   `Maths.EdgeGraph.ReachableConnectedIntegerCirculation`: nonzero balanced
-  zero-charge multiplicities with a connected support, and their reachable refinement.
+  zero-charge multiplicities with a weakly connected support, and their reachable refinement.
 
 ## Main results
 
@@ -255,14 +255,14 @@ structure ConnectedIntegerCirculation {κ : Type uκ}
   /-- The positive support is weakly connected. -/
   connected : G.HasWalkConnectedSupport multiplicity
 
-/-- A connected circulation together with an explicit finite route from the prescribed start
+/-- A connected circulation together with an explicit finite walk from the prescribed start
 into its positive support. -/
 structure ReachableConnectedIntegerCirculation {κ : Type uκ}
     (edgeCharge : E → κ → ℤ) [Fintype E] [DecidableEq V]
     (start : V) extends G.ConnectedIntegerCirculation edgeCharge where
-  /-- The vertex at which the route meets the support. -/
+  /-- The vertex at which the walk meets the support. -/
   entry : V
-  /-- The route from `start` to `entry`. -/
+  /-- The walk from `start` to `entry`. -/
   initialWalk : G.Walk start entry
   /-- Some used edge is incident to `entry`. -/
   entry_mem_support : ∃ edge, 0 < multiplicity edge ∧

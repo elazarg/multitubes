@@ -39,7 +39,7 @@ threshold on the laxification graph with signed edge weights.
 
 ## Tags
 
-transport, additive transport, mixed polarity, residual, cycle mean
+transport, additive transport, mixed section, residual, cycle mean
 -/
 
 @[expose] public section

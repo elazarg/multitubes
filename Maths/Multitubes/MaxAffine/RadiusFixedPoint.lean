@@ -13,7 +13,7 @@ import Mathlib.Data.Fintype.Sum
 /-!
 # Least radii from a contractive gauge
 
-A positive contraction gauge turns affine edge demands into a contraction after dividing each
+A positive contractive gauge turns affine edge demands into a contraction after dividing each
 vertex coordinate by its gauge.  A constant synthetic edge at every vertex incorporates an
 arbitrary lower bound.  Consequently the Bellman operator has a unique fixed point even at
 vertices with no original incoming edges, and that fixed point is the least radius satisfying
@@ -23,7 +23,7 @@ the lower and edge constraints.
 
 * `Maths.MaxAffineTransport.radiusOperator`: the maximum of a vertex lower bound and all
   incoming affine demands.
-* `Maths.MaxAffineTransport.leastRadius`: the fixed point selected by a contraction gauge.
+* `Maths.MaxAffineTransport.leastRadius`: the fixed point selected by a contractive gauge.
 
 ## Main results
 
@@ -39,7 +39,7 @@ the lower and edge constraints.
 
 ## Tags
 
-Bellman operator, contraction gauge, least fixed point, invariant radius
+Bellman operator, contractive gauge, least fixed point, invariant radius
 -/
 
 @[expose] public section

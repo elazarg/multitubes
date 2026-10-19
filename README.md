@@ -3,7 +3,7 @@
 Multitubes is a Lean 4 library for compositional data and constraints on directed multigraphs.
 It covers weighted graphs, gain graphs, and flow/circulation identities, then extends them to
 graphs whose edges carry arbitrary transformations. It studies how edge data compose along
-walks and what paths and cycles imply about potentials, sections, inequalities, fixed points,
+walks and what walks and closed walks imply about potentials, sections, inequalities, fixed points,
 and spectra.
 
 The library starts with familiar graph constructions and progressively removes their customary
@@ -13,7 +13,7 @@ same type of value.
 
 The Lean package is named `maths`, and its modules live under the `Maths` namespace.
 
-## From weighted and gain graphs to path actions and constraints
+## From weighted and gain graphs to transports and constraints
 
 The basic graph is a directed multigraph: edges are objects in their own right, so parallel edges
 retain their identities. Its finite walks are indexed by both endpoints, making composability
@@ -40,17 +40,18 @@ Several increasingly general kinds of edge data can be placed on this graph.
    need not initially be an order; ordered, lattice, additive, and residuated results are later
    layers.
 
-The central abstraction is an operator-labelled quiver. Let `G` be a directed multigraph. Each
-vertex `v` has a type `F v`, called its fiber, and an edge `e : s → t` carries a function
+The central abstraction is a transport on a directed multigraph. Let `G` be a directed
+multigraph. Each vertex `v` has a type `F v`, called its fiber, and a transport gives each edge
+`e : s → t` a function
 
 ```text
 Tₑ : F s → F t.
 ```
 
-A walk acts by composing its edge maps in traversal order. A closed walk therefore acts on the
-fiber over its base vertex; this action is its holonomy.
+A walk has a walk map, the composite of its edge maps in traversal order. The walk map of a
+closed walk acts on the fiber over its base vertex; it is the holonomy of the walk.
 
-A section chooses one value `x v : F v` at every vertex. Depending on the application, an edge
+A family chooses one value `x v : F v` at every vertex. Depending on the application, an edge
 can require
 
 ```text
@@ -59,21 +60,22 @@ lax:    Tₑ (x s) ≤ x t
 oplax:  x t ≤ Tₑ (x s).
 ```
 
-A mixed section chooses one of these three modes independently for each edge. More generally,
-`≤` can be replaced by a fiberwise relation `R`; the core definition does not assume that `R` is
-an order.
+A family meeting the exact condition on every edge is a section, and the other two
+conditions give lax and oplax sections. A mixed section chooses one of these three modes
+independently for each edge. More generally, `≤` can be replaced by a fiberwise relation `R`;
+the core definition does not assume that `R` is an order.
 
 In the ordered picture, a pair of lax and oplax constraints bounds an admissible tube along an
 edge, while exact compatibility is the zero-width case. The name *Multitubes* evokes the
-interacting tubes of a branching quiver. This is an intuition, not an assumption: the underlying
-path action needs no order, and the mixed-constraint layer can use an arbitrary relation.
+interacting tubes of a branching quiver. This is an intuition, not an assumption: the walk maps
+need no order, and the mixed-constraint layer can use an arbitrary relation.
 
 According to the application, this same object can be read as:
 
 - a representation of the free path category of a quiver;
-- a discrete connection, with path transport and holonomy;
+- a discrete connection, with parallel transport and holonomy;
 - a labelled transition system, with walks as compositional semantics;
-- subsolutions, supersolutions, and inductive invariants;
+- inductive invariants and superharmonic families, as lax sections;
 - a gain or voltage graph when labels act on a common fiber;
 - a system of additive difference constraints or feasible node potentials;
 - a max-plus subeigenvector or eigenvector problem; or
@@ -94,20 +96,20 @@ It is likely a good fit if you need to formalize one of the following.
 | Graph morphisms and isomorphisms | [`Maths.Graph.Morphism`](Maths/Graph/Morphism.lean) |
 | Path categories, mathlib quivers, and flat functors on paths | [`Maths.Graph.PathCategory`](Maths/Graph/PathCategory.lean), [`Quiver`](Maths/Graph/Quiver.lean), and [`FlatPathFunctor`](Maths/Graph/FlatPathFunctor.lean) |
 | Max-plus cycle means, critical graphs, and eigenvectors | [`Additive.CycleMean`](Maths/Multitubes/Additive/CycleMean.lean), [`CriticalGraph`](Maths/Multitubes/Additive/CriticalGraph.lean), and [`Eigenvector`](Maths/Multitubes/Additive/Eigenvector.lean) |
-| Functions between possibly different state spaces along edges | [`Maths.Multitubes.Basic`](Maths/Multitubes/Basic.lean) |
+| Functions between possibly different fibers along edges | [`Maths.Multitubes.Basic`](Maths/Multitubes/Basic.lean) |
 | Morphisms, lax and oplax morphisms, and closure soundness | [`Maths.Multitubes.Morphism`](Maths/Multitubes/Morphism.lean) |
-| Relations between possibly different state spaces along edges | [`Maths.Multitubes.Relational`](Maths/Multitubes/Relational.lean) |
+| Relations between possibly different fibers along edges | [`Maths.Multitubes.Relational`](Maths/Multitubes/Relational.lean) |
 | Path independence, trivial holonomy, or exact-section normal forms | [`Maths.Multitubes.Exact`](Maths/Multitubes/Exact.lean) and [`NormalForms`](Maths/Multitubes/NormalForms.lean) |
 | Least solutions of monotone graph inequalities | [`Maths.Multitubes.Closure`](Maths/Multitubes/Closure.lean) |
 | Fair local relaxation and finite covering sweeps | [`Maths.Multitubes.Worklist`](Maths/Multitubes/Worklist.lean) |
 | Exact, lax, oplax, or per-edge mixed constraints | [`Maths.Multitubes.Mixed`](Maths/Multitubes/Mixed/Basic.lean) |
-| Mixed constraints reducible through residuals or adjoints | [`Mixed.AdjointOrder`](Maths/Multitubes/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/Multitubes/Mixed/Closure.lean) |
+| Mixed constraints reducible through lower adjoints | [`Mixed.AdjointOrder`](Maths/Multitubes/Mixed/AdjointOrder.lean) and [`Mixed.Closure`](Maths/Multitubes/Mixed/Closure.lean) |
 | Finite inequalities and executable rational witness checking | [`FiniteInequality.Basic`](Maths/Multitubes/FiniteInequality/Basic.lean) and [`CertificateCheck`](Maths/Multitubes/FiniteInequality/CertificateCheck.lean) |
 | Balanced active certificates for least residual levels | [`FiniteInequality.OptimalCertificate`](Maths/Multitubes/FiniteInequality/OptimalCertificate.lean) |
 | Maps of the form `x ↦ max a (b + c * x)` | [`Maths.Multitubes.MaxAffine`](Maths/Multitubes/MaxAffine/Basic.lean) |
 | Finite-policy description of max-affine spectra | [`MaxAffine.PolicySpectrum`](Maths/Multitubes/MaxAffine/PolicySpectrum.lean) |
 | Reachability criteria for max-affine eigenvectors | [`MaxAffine.AnchoredEigenvalue`](Maths/Multitubes/MaxAffine/AnchoredEigenvalue.lean) and [`ReducibleExamples`](Maths/Multitubes/MaxAffine/ReducibleExamples.lean) |
-| Strict contraction gauges from finite cycle checks | [`MaxAffine.ContractiveGauge`](Maths/Multitubes/MaxAffine/ContractiveGauge.lean) |
+| Strict contractive gauges from finite cycle checks | [`MaxAffine.ContractiveGauge`](Maths/Multitubes/MaxAffine/ContractiveGauge.lean) |
 | Least max-affine radii and contractive Bellman iteration | [`MaxAffine.RadiusFixedPoint`](Maths/Multitubes/MaxAffine/RadiusFixedPoint.lean) |
 | Executable finite-state reachability | [`ProgramSemantics.FiniteReachability`](Applications/ProgramSemantics/ProgramSemantics/FiniteReachability.lean) |
 | Finite abstract analysis of infinite concrete state spaces | [`ProgramSemantics.AbstractAnalysis`](Applications/ProgramSemantics/ProgramSemantics/AbstractAnalysis.lean) |
@@ -132,7 +134,7 @@ path closure. Finite abstract saturation also proves safety for infinite concret
 through lax transport morphisms. Other capstones connect finite-horizon hitting with stopped-kernel
 probabilities and barriers, timed synchronization with optimal bottleneck-cycle schedules, and
 affine sensor consistency with rational certificates and an attained least uniform tolerance.
-The switched and hybrid control client proves geometric error bounds in a contraction gauge,
+The switched and hybrid control client proves geometric error bounds in a contractive gauge,
 robustness under bounded bias perturbations, a least invariant-radius construction with an exact
 upper-budget criterion, and executable rational checking of radius and infeasibility certificates.
 These results concern finite executions or explicitly defined finite-horizon suprema; they do
@@ -174,7 +176,7 @@ The library includes the following theorem families.
 - **Additive potentials.** For finite edge types, potential feasibility is characterized by
   closed-walk weights under the stated ordered-cancellation assumptions. There are circulation
   duals, strongly connected decompositions, shortest cycle witnesses, quantitative defect
-  bounds, and mixed-polarity cycle and path-envelope criteria.
+  bounds, and mixed-mode cycle and path-closure criteria.
 - **Max-plus spectral theory.** The additive layer includes cycle means, Karp's formula, critical
   graphs, Kleene-star generators, subeigenvectors, and eigenvectors.
 - **Gain graphs.** Monoid-valued walk labels compose in path order. Switching acts through
@@ -187,14 +189,14 @@ The library includes the following theorem families.
 - **Graphs of elements.** Every transport unfolds into a graph over its base: the derived graph
   of a voltage graph, or the state graph of a relation. Walks lift uniquely, holonomy is
   monodromy, sections are sheets, and switching acts by graph isomorphism.
-- **Operator-valued walk semantics.** Arbitrary edge functions compose chronologically.
+- **Function-labelled walk semantics.** Arbitrary edge functions compose chronologically.
   Transport respects concatenation, and exact, lax, and oplax edge constraints propagate along
-  suitable walks. Fiberwise morphisms commute with all walk transports and preserve sections;
+  suitable walks. Fiberwise morphisms commute with all walk maps and preserve sections;
   lax and oplax morphisms preserve the corresponding ordered sections and give a global soundness
   bound between least lax-majorant closures. A section is itself a morphism out of the transport
   with one-point fibers.
-- **Relation-valued walk semantics.** Arbitrary edge relations compose existentially. Their
-  native walk relations agree exactly with ordinary walk transport under the existential-image
+- **Relation-labelled walk semantics.** Arbitrary edge relations compose existentially. Their
+  native walk relations agree exactly with ordinary walk maps under the existential-image
   embedding into powersets; point-valued relational sections become singleton-valued oplax
   sections, and optional path closure is exact reachability.
 - **Exact transport.** Trivial holonomy, path independence, rooted and strongly connected normal
@@ -207,8 +209,8 @@ The library includes the following theorem families.
   operator gives the least lax majorant as a least fixed point. Fair schedules of local edge
   relaxations eventually reach it when the product order satisfies ACC. Repeated finite sweeps
   have the same conclusion when each sweep list covers every edge.
-- **Mixed polarity.** Lax, exact, and oplax edges share one relation-parametric interface. When
-  appropriate residuals exist, reversing and relabelling the oplax edges reduces the system to
+- **Mixed modes.** Lax, exact, and oplax edges share one relation-parametric interface. When
+  appropriate lower adjoints exist, reversing and relabelling the oplax edges reduces the system to
   ordinary lax transport, yielding least-majorant and bounded-sandwich criteria. Separately, a
   complete-lattice Bellman interval characterizes mixed sections without assuming residuals.
 - **Finite inequalities.** Farkas-style alternatives, quantitative certificates, arithmetic
@@ -223,7 +225,7 @@ The library includes the following theorem families.
   nonnegative slopes and an incoming edge at every vertex, the spectrum equals the relaxation set
   when vertices carrying constant branches or contracting closed walks reach every vertex. At the
   least level, reachable critical vertices of an optimal certificate also suffice, without strong
-  connectivity. A strict contraction gauge selects the least feasible radius above arbitrary lower
+  connectivity. A strict contractive gauge selects the least feasible radius above arbitrary lower
   data, with geometric Bellman iteration bounds and no incoming-edge assumption. For finite graphs
   with an incoming edge at every vertex, the spectrum is represented as a finite union of closed
   convex policy-level sets.
@@ -295,7 +297,7 @@ example (x : Bool → Nat) :
     simpa [oneEdgeGraph, successorTransport] using h
 ```
 
-For mixed-polarity constraints:
+For mixed-mode constraints:
 
 ```lean
 import Maths.Multitubes.Mixed.Basic
@@ -331,6 +333,8 @@ mathlib; the Multitubes layer consumes them.
 The umbrella module [`Maths.lean`](Maths.lean) imports everything. Each group is also a separate
 Lake target: `MathsGraph`, `MathsRecursion`, `MathsLinearProgramming`, `MathsAlgebra`, and
 `MathsMultitubes`.
+
+[`TERMINOLOGY.md`](TERMINOLOGY.md) fixes the vocabulary used in docstrings and in this README.
 
 [`Applications/`](Applications/) contains domain dossiers. Selected dossiers also contain
 independent downstream Lake packages; they import `Maths` without entering its module or

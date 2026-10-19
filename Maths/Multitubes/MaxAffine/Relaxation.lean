@@ -48,7 +48,7 @@ when all floors are absent.
   the subunit and floorless superunit escape cases.
 * `Maths.MaxAffineTransport.Label.hasCyclicSlack_iff_cyclicSlackThreshold_le` and
   `Maths.MaxAffineTransport.Label.cyclicSlackThreshold_eq_bot_iff_all_levels`:
-  the closed criterion and the characterisation of the all-levels case.
+  the closed criterion and the characterization of the all-levels case.
 -/
 
 @[expose] public section

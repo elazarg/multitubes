@@ -14,7 +14,7 @@ import Mathlib.Tactic.Ring
 /-!
 # Finite linear-inequality compatibility
 
-This file transports the Fourier--Motzkin theorem of alternatives from
+This file transports the Fourier--Motzkin theorem of the alternative from
 `Fin (Fintype.card State)` to an arbitrary finite state type, over an arbitrary linearly
 ordered field.
 

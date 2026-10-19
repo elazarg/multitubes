@@ -12,7 +12,7 @@ public import Maths.Multitubes.MaxAffine.Basic
 # Additive transport as unit-slope max-affine transport
 
 Floorless unit-slope max-affine labels are translations. This module identifies
-their lax sections, residuals, exact sections, and walk transport with additive
+their lax sections, residuals, exact sections, and walk maps with additive
 potentials, coboundaries, and walk sums.
 
 ## Main results
@@ -24,7 +24,7 @@ potentials, coboundaries, and walk sums.
 * `Maths.MaxAffineTransport.isCoboundary_iff_exists_translation_defect_eq_zero`:
   edge weights are a coboundary exactly when some translation-labelled candidate has zero
   defect on every edge.
-* `Maths.MaxAffineTransport.holonomyApply_translationLabel`: translation transport
+* `Maths.MaxAffineTransport.walkApply_translationLabel`: translation transport
   along a walk is addition of the walk weight.
 -/
 
@@ -65,14 +65,14 @@ theorem isCoboundary_iff_exists_translation_defect_eq_zero
   simp only [defect_translationLabel]
 
 /-- Translation transport is addition of the walk weight. -/
-theorem holonomyApply_translationLabel
+theorem walkApply_translationLabel
     (weight : E → ℝ) {start finish : V} (walk : G.Walk start finish) (point : ℝ) :
-    holonomyApply (fun edge => translationLabel (weight edge)) walk point =
+    walkApply (fun edge => translationLabel (weight edge)) walk point =
       point + walkSum weight walk := by
   induction walk with
   | nil => simp
   | concat edge walkSoFar ih =>
-      rw [holonomyApply_concat, ih, apply_translationLabel,
+      rw [walkApply_concat, ih, apply_translationLabel,
         walkSum_concat]
       ring
 

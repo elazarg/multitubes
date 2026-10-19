@@ -60,7 +60,7 @@ still has a bounded number of coefficients.
   `Maths.TransferSummary.MaxAffineSummary.comp`.
 * `Maths.TransferSummary.reflectedIter` -- the reflected orbit, and
   `Maths.TransferSummary.floorIter` -- the one-sided orbit above a general floor.
-* `Maths.TransferSummary.transport`,
+* `Maths.TransferSummary.retentionProd`,
   `Maths.TransferSummary.service`,
   `Maths.TransferSummary.lindleyTerm` -- the three ingredients of Lindley's
   representation.
@@ -439,42 +439,42 @@ theorem reflectedIter_nonneg (x : ℝ) (n : ℕ) (hn : n ≠ 0) : 0 ≤ reflecte
   obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hn
   exact le_max_left _ _
 
-/-- The retention transported across the window `[m, n)`. -/
-def transport (m n : ℕ) : ℝ := ∏ k ∈ Finset.Ico m n, a k
+/-- The retention product: the product of the retentions over the window `[m, n)`. -/
+def retentionProd (m n : ℕ) : ℝ := ∏ k ∈ Finset.Ico m n, a k
 
 /-- The retention-weighted service accumulated across the window `[m, n)`: each stage's service
 is discounted by the retention that acts on it after that stage. -/
-def service (m n : ℕ) : ℝ := ∑ k ∈ Finset.Ico m n, transport a (k + 1) n * g k
+def service (m n : ℕ) : ℝ := ∑ k ∈ Finset.Ico m n, retentionProd a (k + 1) n * g k
 
-/-- The empty window transports nothing. -/
-@[simp] theorem transport_self (m : ℕ) : transport a m m = 1 := by
-  simp [transport]
+/-- The empty window has retention product one. -/
+@[simp] theorem retentionProd_self (m : ℕ) : retentionProd a m m = 1 := by
+  simp [retentionProd]
 
 /-- The empty window accumulates no service. -/
 @[simp] theorem service_self (m : ℕ) : service a g m m = 0 := by
   simp [service]
 
-/-- Extending the window by one stage multiplies the transport by that stage's retention. -/
-theorem transport_succ_right {m n : ℕ} (hmn : m ≤ n) :
-    transport a m (n + 1) = transport a m n * a n := by
-  rw [transport, transport, Finset.prod_Ico_succ_top hmn]
+/-- Extending the window by one stage multiplies the retention product by that stage's retention. -/
+theorem retentionProd_succ_right {m n : ℕ} (hmn : m ≤ n) :
+    retentionProd a m (n + 1) = retentionProd a m n * a n := by
+  rw [retentionProd, retentionProd, Finset.prod_Ico_succ_top hmn]
 
 /-- Extending the window by one stage attenuates the accumulated service and adds the new
 stage's service. -/
 theorem service_succ_right {m n : ℕ} (hmn : m ≤ n) :
     service a g m (n + 1) = a n * service a g m n + g n := by
-  rw [service, service, Finset.sum_Ico_succ_top hmn, transport_self, one_mul,
+  rw [service, service, Finset.sum_Ico_succ_top hmn, retentionProd_self, one_mul,
     Finset.mul_sum]
   congr 1
   refine Finset.sum_congr rfl fun k hk => ?_
   have hk' : k + 1 ≤ n := (Finset.mem_Ico.mp hk).2
-  rw [transport_succ_right a hk']
+  rw [retentionProd_succ_right a hk']
   ring
 
-/-- Time-shifting the input shifts the window: the transport of the data read from time `m`
-onwards over `[i, j)` is the transport of the original data over `[m + i, m + j)`. -/
-theorem transport_shift (m i j : ℕ) :
-    transport (fun k => a (m + k)) i j = transport a (m + i) (m + j) := by
+/-- Time-shifting the input shifts the window: the retention product of the data read from time `m`
+onwards over `[i, j)` is the retention product of the original data over `[m + i, m + j)`. -/
+theorem retentionProd_shift (m i j : ℕ) :
+    retentionProd (fun k => a (m + k)) i j = retentionProd a (m + i) (m + j) := by
   refine Finset.prod_nbij' (fun p => m + p) (fun k => k - m) ?_ ?_ ?_ ?_ fun p _ => rfl <;>
     intro p hp <;> simp only [Finset.mem_Ico] at * <;> omega
 
@@ -487,7 +487,7 @@ theorem service_shift (m i j : ℕ) :
   · intro k hk; simp only [Finset.mem_Ico] at *; omega
   · intro p _; omega
   · intro k hk; simp only [Finset.mem_Ico] at hk; omega
-  · intro p _; rw [transport_shift a m (p + 1) j]; rfl
+  · intro p _; rw [retentionProd_shift a m (p + 1) j]; rfl
 
 /-! ### The one-sided orbit above a general floor -/
 
@@ -523,7 +523,7 @@ def floorRestartState (lo x : ℝ) (m : ℕ) : ℝ := if m = 0 then x else lo
 /-- One term of Lindley's representation above the floor `lo`: the state at restart time `m`,
 transported to time `n` and reduced by the service accumulated in between. -/
 def floorTerm (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) (m n : ℕ) : ℝ :=
-  transport a m n * floorRestartState lo x m - service a g m n
+  retentionProd a m n * floorRestartState lo x m - service a g m n
 
 /-- Restarting at a positive time `n` contributes the floor at time `n`. -/
 theorem floorTerm_self (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) (n : ℕ) (hn : n ≠ 0) :
@@ -533,7 +533,7 @@ theorem floorTerm_self (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) (n : ℕ) (hn : 
 /-- A Lindley term satisfies the one-sided recursion's affine branch in its end time. -/
 theorem floorTerm_succ_right (lo : ℝ) (a g : ℕ → ℝ) (x : ℝ) {m n : ℕ} (hmn : m ≤ n) :
     floorTerm lo a g x m (n + 1) = a n * floorTerm lo a g x m n - g n := by
-  rw [floorTerm, floorTerm, transport_succ_right a hmn, service_succ_right a g hmn]
+  rw [floorTerm, floorTerm, retentionProd_succ_right a hmn, service_succ_right a g hmn]
   ring
 
 /-- **Lindley's representation above a general floor.** The one-sided state at time `n` is the
@@ -543,7 +543,7 @@ the floor. Only nonnegative retention is used. -/
 theorem floorIter_eq_sup' (lo : ℝ) (a g : ℕ → ℝ) (ha : ∀ k, 0 ≤ a k) (x : ℝ) :
     ∀ n : ℕ, floorIter lo a g x n =
       (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one (fun m => floorTerm lo a g x m n)
-  | 0 => by simp [floorTerm, floorRestartState, transport, service]
+  | 0 => by simp [floorTerm, floorRestartState, retentionProd, service]
   | n + 1 => by
     have hcongr (m : ℕ) (hm : m ∈ Finset.range (n + 1)) :
         floorTerm lo a g x m (n + 1) = (fun y => a n * y - g n) (floorTerm lo a g x m n) :=
@@ -577,7 +577,7 @@ def restartState (x : ℝ) : ℕ → ℝ
 /-- One term of Lindley's representation: the state at restart time `m`, transported to time
 `n` and reduced by the service accumulated in between. -/
 def lindleyTerm (x : ℝ) (m n : ℕ) : ℝ :=
-  transport a m n * restartState x m - service a g m n
+  retentionProd a m n * restartState x m - service a g m n
 
 /-- From the zero initial state every Lindley term is minus the accumulated service. -/
 @[simp] theorem lindleyTerm_zero_state (m n : ℕ) :

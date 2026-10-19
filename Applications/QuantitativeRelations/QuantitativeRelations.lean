@@ -20,7 +20,7 @@ Graded mixed relations attach an additive edge cost to dependent transport.
 
 * `QuantitativeRelations.IsGradedMixedSectionFor.walkMap_rel_of_lax_or_exact` and
   `QuantitativeRelations.IsGradedMixedSectionFor.walkMap_rel_of_oplax_or_exact` - propagation
-  with one compatible polarity.
+  with one compatible mode.
 * `QuantitativeRelations.IsGradedMixedSectionFor.walkMap_rel_of_symmetric` - propagation
   along an arbitrary mixed walk under symmetry.
 * `QuantitativeRelations.walkMap_nndist_le` - the pseudometric nonexpansiveness sanity test.
@@ -28,7 +28,7 @@ Graded mixed relations attach an additive edge cost to dependent transport.
 
 ## Tags
 
-graded relation, dependent transport, mixed polarity, walk sum, pseudometric
+graded relation, dependent transport, mixed section, walk sum, pseudometric
 -/
 
 @[expose] public section

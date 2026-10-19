@@ -12,7 +12,7 @@ public import Maths.Multitubes.Mixed.AdjointOrder
 # Complete-lattice closure for mixed transport
 
 When the fibers are complete lattices, the least mixed section above prescribed lower data is the
-infimum of all of them.  Residuals turn mixed-polarity constraints into ordinary lax constraints
+infimum of all of them.  Residuals turn mixed-mode constraints into ordinary lax constraints
 on the laxification graph, so mixed sections form a Moore family and the infimum is itself a
 mixed section: it is the least lax majorant on the laxification graph.  Only the maps on edges
 already in lax mode need a separate monotonicity hypothesis: the Galois connections provide the
@@ -42,7 +42,7 @@ remaining monotonicity.
 
 ## Tags
 
-transport, mixed polarity, laxification, closure, complete lattice
+transport, mixed section, laxification, closure, complete lattice
 -/
 
 @[expose] public section

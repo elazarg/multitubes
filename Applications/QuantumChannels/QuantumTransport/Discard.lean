@@ -310,7 +310,7 @@ def discardOrder : (vertex : Bool) →
 def discardTransport : Transport discardGraph discardFiber where
   edgeMap _ := discard
 
-/-- The discard edge is assigned oplax polarity. -/
+/-- The discard edge is assigned the oplax mode. -/
 def discardMode : Unit → EdgeMode :=
   fun _ => .oplax
 

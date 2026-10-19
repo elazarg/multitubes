@@ -21,7 +21,7 @@ closed walk no longer than the number of vertices.  Two things are developed her
 that.
 
 First, the composite of the two: some short cycle is an exact threshold, so the set of
-admissible max-plus eigenvalues is the closed ray above its mean.  That mean is the max
+values `lam` admitting a subeigenvector is the closed ray above its mean.  That mean is the max
 cycle mean, the tropical spectral radius, or the max-plus Perron root.
 
 Second, Karp's formula for that same quantity.  Write `n` for the number of vertices and
@@ -309,8 +309,8 @@ theorem exists_le_stepValue_sub [Fintype V] [Finite E]
 /-! ### Karp's formula -/
 
 /-- **Karp's minimum (here maximum) mean cycle formula.**  Let every vertex of a finite
-weighted digraph have an incoming edge, and let `best` be a nonempty closed walk of maximum
-mean weight.  Then that maximum cycle mean is
+weighted directed multigraph have an incoming edge, and let `best` be a nonempty closed walk
+of maximum mean weight.  Then that maximum cycle mean is
 `max_v min_{0 ≤ k < n} (D n v - D k v) / (n - k)`, where `n` is the number of vertices and
 `D` is the step-value table `Maths.MaxPlusPotential.stepValue`. -/
 theorem sup'_inf'_stepValue_div [Fintype V] [Nonempty V] [Finite E]

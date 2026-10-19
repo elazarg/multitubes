@@ -42,7 +42,7 @@ oplax section rules give harmonic, superharmonic, and subharmonic path bounds.
 * `StochasticProcesses.isSection_iff_harmonic`,
   `StochasticProcesses.isLaxSection_iff_superharmonic`, and
   `StochasticProcesses.isOplaxSection_iff_subharmonic` - the three section
-  polarities as pointwise kernel inequalities.
+  modes as pointwise kernel inequalities.
 * `StochasticProcesses.walkMap_reverse_eq_expect_pathKernel` - reversed pullback as
   expectation under the forward path kernel.
 * `StochasticProcesses.pathKernel_append` - kernel composition respects walk

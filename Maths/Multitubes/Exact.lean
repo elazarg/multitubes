@@ -15,7 +15,7 @@ import Mathlib.Algebra.Group.Units.Basic
 
 Forward typed walks support exact transport without assuming that
 edge labels form a group.  Parallel-walk equality is primitive, while
-invertibility is derived on recurrent flat regions.
+invertibility is derived on strongly connected flat regions.
 
 Path independence of flat transport and of flat labels is one statement about flat path functors
 (`Maths.map_eq_of_isFlatAt_of_return`), and so is their invertibility: a walk with a return
@@ -31,8 +31,8 @@ connected component.  Additive edge data are the same theory read through `Multi
 
 * `Maths.Transport.HasRootPathIndependence`: parallel walks out of the base
   agree.
-* `Maths.Transport.IsSectionWithBase` and
-  `Maths.Transport.rootedSection`: sections normalised at the base, and the
+* `Maths.Transport.IsRootedSection` and
+  `Maths.Transport.rootedSection`: sections normalized at the base, and the
   canonical one built by transporting a base point.
 * `Maths.Transport.IsHolonomyFixedAt`: a point fixed by every closed walk at the base.
 * `Maths.IsUnitPotential`: a unit-valued section of the regular representation, the
@@ -42,18 +42,18 @@ connected component.  Additive edge data are the same theory read through `Multi
 
 ## Main results
 
-* `Maths.Transport.existsUnique_sectionWithBase_iff_pointwise_path_independence` and
+* `Maths.Transport.existsUnique_isRootedSection_iff_pointwise_path_independence` and
   `Maths.Transport.hasRootPathIndependence_iff_unique_section`: rooted integrability without
   inverses, pointwise and for every base point.
 * `Maths.Transport.walkMapEquivOfTrivialHolonomy` and
   `Maths.Transport.walkMap_eq_of_trivialHolonomy_of_stronglyConnected`:
-  recurrence makes flat transport groupoidal.
+  strong connectivity makes flat transport groupoidal.
 * `Maths.Transport.existsUnique_section_of_base_fixed_of_injective_returns`:
   the sharp injective-return section criterion, needing only reachability from the base.
 * `Maths.hasTrivialCycleLabels_of_base_of_dedekindFinite`: direct finiteness
   is the sufficient one-sided-inverse hypothesis used to move flatness between bases.
 * `Maths.walkLabel_eq_of_trivialCycleLabels_of_return`: flat labels are path independent
-  on recurrent regions.
+  between vertices joined by a return walk.
 * `Maths.isUnit_edge_of_trivialCycleLabels`: under flatness, the label of an edge on a closed
   walk is a unit.
 * `Maths.isUnitPotential_iff_label_eq`: a unit potential is a coboundary.
@@ -91,8 +91,8 @@ def HasRootPathIndependence (T : Transport G Fiber) (base : V) : Prop :=
   ∀ (vertex : V) (first second : G.Walk base vertex),
     T.walkMap first = T.walkMap second
 
-/-- A section with prescribed value at one base vertex. -/
-def IsSectionWithBase (T : Transport G Fiber) (base : V) (point : Fiber base)
+/-- A rooted section: a section with a prescribed value at the root `base`. -/
+def IsRootedSection (T : Transport G Fiber) (base : V) (point : Fiber base)
     (family : ∀ vertex, Fiber vertex) : Prop :=
   T.IsSection family ∧ family base = point
 
@@ -103,60 +103,60 @@ def rootedSection (T : Transport G Fiber) (base : V)
 
 variable {base : V}
 
-/-- A section normalised at the base is the transport of the base point along every walk out of
+/-- A section normalized at the base is the transport of the base point along every walk out of
 the base. -/
-theorem IsSectionWithBase.walkMap_eq {point : Fiber base} {family : ∀ vertex, Fiber vertex}
-    (hfamily : T.IsSectionWithBase base point family) {vertex : V}
+theorem IsRootedSection.walkMap_eq {point : Fiber base} {family : ∀ vertex, Fiber vertex}
+    (hfamily : T.IsRootedSection base point family) {vertex : V}
     (walk : G.Walk base vertex) : T.walkMap walk point = family vertex :=
   hfamily.2 ▸ hfamily.1.walkMap_eq walk
 
-theorem eq_rootedSection_of_isSectionWithBase
+theorem eq_rootedSection_of_isRootedSection
     (hreach : RootReaches G base) (point : Fiber base)
     {family : ∀ vertex, Fiber vertex}
-    (hfamily : T.IsSectionWithBase base point family) :
+    (hfamily : T.IsRootedSection base point family) :
     family = T.rootedSection base hreach point :=
   funext fun vertex ↦ (hfamily.walkMap_eq (hreach vertex).some).symm
 
 /-- **Pointwise rooted integrability.**  One base point extends uniquely to a section exactly
 when all walks out of the base agree on that point.  No cycle, inverse, or algebraic structure
 is used. -/
-theorem existsUnique_sectionWithBase_iff_pointwise_path_independence
+theorem existsUnique_isRootedSection_iff_pointwise_path_independence
     (hreach : RootReaches G base) (point : Fiber base) :
-    (∃! family, T.IsSectionWithBase base point family) ↔
+    (∃! family, T.IsRootedSection base point family) ↔
       ∀ (vertex : V) (first second : G.Walk base vertex),
         T.walkMap first point = T.walkMap second point := by
   refine ⟨fun ⟨_, hfamily, _⟩ _ first second ↦
     (hfamily.walkMap_eq first).trans (hfamily.walkMap_eq second).symm, fun hpoint ↦ ?_⟩
   refine ⟨T.rootedSection base hreach point,
     ⟨fun edge ↦ hpoint _ ((hreach _).some.concat edge) (hreach _).some, hpoint base _ .nil⟩,
-    fun _ hfamily ↦ T.eq_rootedSection_of_isSectionWithBase hreach point hfamily⟩
+    fun _ hfamily ↦ T.eq_rootedSection_of_isRootedSection hreach point hfamily⟩
 
 /-- Rooted path independence is equivalent to unique extension of every base
 point to a section. -/
 theorem hasRootPathIndependence_iff_unique_section
     (hreach : RootReaches G base) :
     T.HasRootPathIndependence base ↔
-      ∀ point : Fiber base, ∃! family, T.IsSectionWithBase base point family := by
-  simp only [existsUnique_sectionWithBase_iff_pointwise_path_independence hreach,
+      ∀ point : Fiber base, ∃! family, T.IsRootedSection base point family := by
+  simp only [existsUnique_isRootedSection_iff_pointwise_path_independence hreach,
     HasRootPathIndependence, funext_iff]
   exact ⟨fun h point vertex first second ↦ h vertex first second point,
     fun h vertex first second point ↦ h point vertex first second⟩
 
-theorem rootedSection_isSectionWithBase (hpath : T.HasRootPathIndependence base)
+theorem rootedSection_isRootedSection (hpath : T.HasRootPathIndependence base)
     (hreach : RootReaches G base) (point : Fiber base) :
-    T.IsSectionWithBase base point (T.rootedSection base hreach point) := by
+    T.IsRootedSection base point (T.rootedSection base hreach point) := by
   obtain ⟨family, hfamily, -⟩ := (T.hasRootPathIndependence_iff_unique_section hreach).1 hpath point
-  exact T.eq_rootedSection_of_isSectionWithBase hreach point hfamily ▸ hfamily
+  exact T.eq_rootedSection_of_isRootedSection hreach point hfamily ▸ hfamily
 
 theorem rootedSection_base (hpath : T.HasRootPathIndependence base)
     (hreach : RootReaches G base) (point : Fiber base) :
     T.rootedSection base hreach point base = point :=
-  (T.rootedSection_isSectionWithBase hpath hreach point).2
+  (T.rootedSection_isRootedSection hpath hreach point).2
 
 theorem rootedSection_isSection (hpath : T.HasRootPathIndependence base)
     (hreach : RootReaches G base) (point : Fiber base) :
     T.IsSection (T.rootedSection base hreach point) :=
-  (T.rootedSection_isSectionWithBase hpath hreach point).1
+  (T.rootedSection_isRootedSection hpath hreach point).1
 
 /-! ## Trivial holonomy on a strongly connected graph -/
 
@@ -176,7 +176,8 @@ def walkMapEquivOfTrivialHolonomy {start finish : V} (hstart : T.HasTrivialHolon
     T.walkMapEquivOfTrivialHolonomy hstart hfinish walk back point = T.walkMap walk point :=
   rfl
 
-/-- On a recurrent region flat at both endpoints, parallel forward walks induce the same map.
+/-- Between two vertices at which the transport is flat and which are joined by a return walk,
+parallel forward walks induce the same map.
 This is `Maths.map_eq_of_isFlatAt_of_return` for the path functor of the transport. -/
 theorem walkMap_eq_of_trivialHolonomy_of_return {start finish : V}
     (hstart : T.HasTrivialHolonomyAt start) (hfinish : T.HasTrivialHolonomyAt finish)
@@ -200,7 +201,7 @@ connected transport. -/
 theorem existsUnique_section_of_trivialHolonomy_of_stronglyConnected
     (hflat : T.HasTrivialHolonomy) {base : V}
     (hconnected : IsStronglyConnectedAt G base) (point : Fiber base) :
-    ∃! family, T.IsSectionWithBase base point family :=
+    ∃! family, T.IsRootedSection base point family :=
   (T.hasRootPathIndependence_iff_unique_section (fun vertex ↦ (hconnected vertex).1)).mp
     (fun _ first second ↦
       T.walkMap_eq_of_trivialHolonomy_of_stronglyConnected hflat hconnected first second) point
@@ -213,14 +214,14 @@ def IsHolonomyFixedAt (T : Transport G Fiber) (base : V)
   ∀ cycle : G.Walk base base, T.holonomy cycle point = point
 
 /-- A common fixed point of the base holonomies extends uniquely when every vertex is reached
-from the base and one chosen return map at each vertex is injective. -/
+from the base and the walk map of one chosen return walk at each vertex is injective. -/
 theorem existsUnique_section_of_base_fixed_of_injective_returns
     {base : V} (hreach : RootReaches G base)
     (point : Fiber base) (hfixed : T.IsHolonomyFixedAt base point)
     (returns : ∀ vertex, G.Walk vertex base)
     (hinjective : ∀ vertex, Function.Injective (T.walkMap (returns vertex))) :
-    ∃! family, T.IsSectionWithBase base point family := by
-  refine (T.existsUnique_sectionWithBase_iff_pointwise_path_independence hreach point).2
+    ∃! family, T.IsRootedSection base point family := by
+  refine (T.existsUnique_isRootedSection_iff_pointwise_path_independence hreach point).2
     fun vertex first second ↦ hinjective vertex ?_
   rw [← T.walkMap_append, ← T.walkMap_append]
   exact (hfixed _).trans (hfixed _).symm

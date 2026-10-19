@@ -24,7 +24,7 @@ dependent fiber. Exact, lax, and oplax edges are all allowed when the relation i
 
 * `QuantitativeRelations.IsGradedMixedSectionFor.walkMap_rel_of_lax_or_exact` and
   `QuantitativeRelations.IsGradedMixedSectionFor.walkMap_rel_of_oplax_or_exact` - graded
-  propagation with one compatible polarity.
+  propagation with one compatible mode.
 * `QuantitativeRelations.IsGradedMixedSectionFor.walkMap_rel_of_symmetric` - graded
   propagation for an arbitrary mixed walk under symmetry.
 * `QuantitativeRelations.walkMap_nndist_le` - a compact nonexpansive pseudometric instance.

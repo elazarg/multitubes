@@ -21,7 +21,7 @@ labelling is a functor to the one-object category of the monoid, and a relation-
 transport is a functor to the category of types and relations.  By the universal property of
 the path category each is the unique extension of its values on edges
 (`Maths.Transport.toPathFunctor_eq_lift` and `Maths.labelFunctor_eq_lift`), and conversely every
-type-valued functor on the path category is the walk transport of its edge maps.
+type-valued functor on the path category is given by the walk maps of its edge maps.
 
 The inductive walk and transport definitions remain the computational interface for walk
 recursion, endpoint typing, and ordered lax-section arguments; this file identifies them with
@@ -42,7 +42,7 @@ the categorical ones.
 ## Main results
 
 * `Maths.Transport.toPathFunctor_eq_lift`, `Maths.labelFunctor_eq_lift`, and
-  `Maths.RelationTransport.toPathFunctor_eq_lift`: walk transport, walk labels, and walk
+  `Maths.RelationTransport.toPathFunctor_eq_lift`: walk maps, walk labels, and walk
   relations are the extensions of edge data along the universal property.
 * `Maths.RelationTransport.ofTransport_toPathFunctor`: function-graph transport is ordinary
   transport followed by the embedding of functions into relations.

@@ -14,7 +14,7 @@ public import Mathlib.Analysis.Matrix.Order
 A finite Kraus family from one coordinate space to another defines a positive
 map between their matrix algebras. These maps preserve the Löwner order and
 therefore label a transport whose lax and oplax constraints propagate
-along walks of a compatible polarity.
+along walks of a compatible mode.
 
 The input and output coordinate types may differ.
 

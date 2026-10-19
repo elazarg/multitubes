@@ -30,7 +30,7 @@ finitely many coefficient denominators gives an integral certificate.
 ## Main results
 
 * `Maths.FiniteInequality.exists_rationalPotential_or_rationalCertificate`: the
-  theorem of alternatives entirely over `ℚ`, as an instance of the ordered-field statement.
+  theorem of the alternative entirely over `ℚ`, as an instance of the ordered-field statement.
 * `Maths.FiniteInequality.exists_rationalPotential_iff_exists_realPotential`: a
   rational system is feasible over `ℚ` exactly when it is feasible over `ℝ`, so passing to the
   reals gains nothing.
@@ -60,7 +60,7 @@ universe uS uR
 variable {State : Type uS} {Row : Type uR}
 variable [Fintype State] [Fintype Row]
 
-/-- The finite theorem of alternatives directly over the rational field: the instance `𝕜 = ℚ`
+/-- The finite theorem of the alternative directly over the rational field: the instance `𝕜 = ℚ`
 of `Maths.exists_potential_or_nonnegative_incompatibility`. -/
 theorem exists_rationalPotential_or_rationalCertificate
     (delta : Row → State → ℚ) (base : Row → ℚ) :

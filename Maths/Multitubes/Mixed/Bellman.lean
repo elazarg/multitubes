@@ -9,9 +9,9 @@ public import Maths.Multitubes.Closure
 public import Maths.Multitubes.Mixed.Order
 
 /-!
-# Bellman intervals for mixed-polarity transport
+# Bellman intervals for mixed-mode transport
 
-On complete-lattice fibers, the incoming constraints of a mixed-polarity section have two
+On complete-lattice fibers, the incoming constraints of a mixed section have two
 canonical aggregations.  Lower demand is the incoming join of the transport restricted to its lax
 and exact edges, and upper demand is the incoming meet of the transport restricted to its oplax
 and exact edges.  Exact edges occur in both aggregations; the resulting two inequalities are
@@ -37,7 +37,7 @@ precisely equality on such an edge.
 
 ## Tags
 
-transport, mixed polarity, Bellman operator, complete lattice
+transport, mixed section, Bellman operator, complete lattice
 -/
 
 @[expose] public section

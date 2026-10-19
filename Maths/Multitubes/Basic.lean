@@ -10,18 +10,15 @@ public import Mathlib.Algebra.Group.Action.Defs
 public import Mathlib.Order.Monotone.Defs
 
 /-!
-# Transport on operator-labelled transition graphs
+# Transports on directed multigraphs
 
 A directed multigraph supplies the control-flow skeleton.  Each vertex carries a
-state space (its **fiber**), and each edge carries a map from the fiber at its
-source to the fiber at its target.  A walk denotes the chronological composite
-of its edge maps; a closed walk denotes an endomorphism of the fiber over its
-base vertex.
-
-The phrase **operator-labelled transition graph** names the carrier.  The phrase
-**transport** names the compositional semantics and its proof tools:
-walk maps, holonomy, sections, lax and oplax sections, and monoid-valued walk
-labels.
+type, its **fiber**, and a **transport** assigns to each edge a map from the fiber
+at its source to the fiber at its target.  A walk then has a **walk map**, the
+chronological composite of its edge maps, and the transport carries a point
+along the walk by applying it.  The walk map of a closed walk is an
+endomorphism of the fiber over its base vertex, the **holonomy** of the walk.
+A graph together with a transport is an operator-labelled transition graph.
 
 The same structure can be read in several ways.
 
@@ -35,11 +32,12 @@ The same structure can be read in several ways.
   that the classical notion carries.
 * A section is a flat or equivariant section; in the gain-graph case with the
   group acting simply transitively on the fiber, a trivialization or switching
-  function.  Lax and oplax sections are respectively subsolutions and
-  supersolutions, or pre-invariants and post-invariants, according to the
-  application.
-* Computationally it is a labelled transition system transforming a per-state
-  value, and `walkMap` is the denotational semantics of paths: a walk denotes
+  function.  A lax section is an inductive invariant, or a superharmonic family,
+  according to the application, and an oplax section is the dual notion.  Over
+  complete lattices they are the pre-fixed points of `Maths.Transport.incomingSup`
+  and the post-fixed points of `Maths.Transport.incomingInf`.
+* Computationally it is a labelled transition system whose control states carry
+  values, and `walkMap` is the denotational semantics of walks: a walk denotes
   the composite of its edge maps, and concatenation denotes composition
   (`Transport.walkMap_append`).
 
@@ -54,8 +52,8 @@ products of slopes.
 ## Main definitions
 
 * `Maths.Transport` - vertex-indexed fibers with edge maps.
-* `Maths.Transport.walkMap` - transport along a typed walk.
-* `Maths.Transport.holonomy` - transport around a closed walk.
+* `Maths.Transport.walkMap` - the walk map of a typed walk.
+* `Maths.Transport.holonomy` - the walk map of a closed walk.
 * `Maths.Transport.restrictEdges` - the restriction to an edge subgraph.
 * `Maths.Transport.HasTrivialHolonomyAt` and `Maths.Transport.HasTrivialHolonomy` - every
   closed-walk map at one base, or at every base, is the identity.
@@ -223,8 +221,8 @@ variable {start finish middle finish' base : V}
   subst hfinish
   rfl
 
-/-- Transport along a concatenation is the chronological composite of the two
-walk transports. -/
+/-- The walk map of a concatenation is the chronological composite of the two
+walk maps. -/
 theorem walkMap_append (first : G.Walk start middle) (second : G.Walk middle finish)
     (point : Fiber start) :
     T.walkMap (first.append second) point = T.walkMap second (T.walkMap first point) := by

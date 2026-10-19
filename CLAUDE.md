@@ -52,6 +52,8 @@ from `Maths/Multitubes/` into any of them inverts the layering.
 - Docstrings state mathematics, not history. No mention of porting, extraction, provenance, this
   repository's own development, or other project documents; and "this file", never "this
   library".
+- Vocabulary follows `TERMINOLOGY.md`: use its canonical terms in docstrings, comments, and the
+  README, and update it in the same commit when a term is introduced or changed.
 
 ## Style is enforced by mathlib's own linters
 

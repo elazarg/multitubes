@@ -15,7 +15,7 @@ A relation-labelled graph assigns a relation between the endpoint fibers of ever
 fiber elements are related along a walk when intermediate elements can be chosen at every edge.
 This gives the free path-category composition of the edge relations.
 
-Existential image embeds relation-labelled transport into ordinary map-labelled transport on
+Existential image embeds relation-labelled transport into ordinary function-labelled transport on
 powersets. The native composite relation and the induced walk map agree exactly. Function graphs
 embed ordinary transport in the other direction, and this embedding also commutes with walks.
 Every section condition of ordinary transport, exact, lax, oplax or mixed, is a relational
@@ -34,10 +34,10 @@ section condition (`Maths.RelationTransport.ofSectionFor`).
 ## Main results
 
 * `Maths.RelationTransport.walkRelation_append` - native walk relations compose under append.
-* `Maths.RelationTransport.walkMap_eq_image_walkRelation` - powerset walk transport is native
-  relational image.
-* `Maths.RelationTransport.walkRelation_ofTransport` - function-graph relations recover ordinary
-  walk transport.
+* `Maths.RelationTransport.walkMap_eq_image_walkRelation` - the powerset walk map is the
+  native relational image.
+* `Maths.RelationTransport.walkRelation_ofTransport` - function-graph relations recover
+  ordinary walk maps.
 * `Maths.RelationTransport.isOplaxSection_singleton_iff` - relational sections are singleton
   oplax sections after the powerset embedding.
 * `Maths.RelationTransport.IsSection.walkRelation` - edgewise compatibility propagates along
@@ -101,7 +101,7 @@ def powersetTransport : Transport G (fun vertex ↦ Set (Fiber vertex)) where
 
 variable {T}
 
-/-- On function-graph edges, the native walk relation is the graph of ordinary walk transport. -/
+/-- On function-graph edges, the native walk relation is the graph of the ordinary walk map. -/
 theorem walkRelation_ofTransport {start finish : V} (transport : Transport G Fiber)
     (walk : G.Walk start finish) :
     (ofTransport transport).walkRelation walk = Function.graph (transport.walkMap walk) := by
@@ -119,7 +119,7 @@ theorem walkRelation_ofTransport_iff {start finish : V} (transport : Transport G
   rw [walkRelation_ofTransport]
   exact Function.mem_graph
 
-/-- Powerset walk transport is exactly image under the composite native walk relation. -/
+/-- The powerset walk map is exactly image under the composite native walk relation. -/
 theorem walkMap_eq_image_walkRelation {start finish : V}
     (walk : G.Walk start finish) (set : Set (Fiber start)) :
     T.powersetTransport.walkMap walk set = (T.walkRelation walk).image set := by

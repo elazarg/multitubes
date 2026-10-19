@@ -79,10 +79,10 @@ eigenvalue (`Maths.MaxAffineTransport.eigenvalues_eq_univ_of_slope_eq`).
 * `Maths.MaxAffineTransport.vertexOperator_eq_of_mem_criticalVertices`: **the critical
   coordinates are frozen** by one step of the relaxed operator.
 * `Maths.MaxAffineTransport.antitone_of_relaxedStep`: **the relaxed orbit descends** from a
-  sub-fixed point.
+  pre-fixed point.
 * `Maths.MaxAffineTransport.relaxedStep_eq_of_mem_criticalVertices`: it is frozen on the
   critical set at every stage, not only the first.
-* `Maths.MaxAffineTransport.holonomyApply_relax_le_iterate`: relaxed transport bounds later
+* `Maths.MaxAffineTransport.walkApply_relax_le_iterate`: relaxed transport bounds later
   iterates along a walk.
 * `Maths.MaxAffineTransport.exists_lowerBound_of_walk`: a lower bound propagates along a
   walk, which is how strong connectivity bounds the orbit below at every vertex.
@@ -501,8 +501,8 @@ section Iteration
 variable [Fintype V] [DecidableEq V] [Fintype E] {G : EdgeGraph V E} {label : E → Label}
 
 omit [Fintype V] in
-/-- **The relaxed iteration descends from a sub-fixed point.**  Subtracting the level from the
-vertex operator sends a sub-fixed point weakly below itself, and monotonicity of the operator
+/-- **The relaxed iteration descends from a pre-fixed point.**  Subtracting the level from the
+vertex operator sends a pre-fixed point weakly below itself, and monotonicity of the operator
 carries that first descent to every later step. -/
 theorem antitone_of_relaxedStep (hslope : ∀ e : E, 0 ≤ (label e).slope) {lam : ℝ}
     {iterate : ℕ → V → ℝ}
@@ -567,16 +567,16 @@ theorem continuous_vertexOperator (G : EdgeGraph V E) (label : E → Label) {v :
 
 omit [Fintype V] in
 /-- A relaxed edge inequality propagates along a walk, with a time shift equal to its length. -/
-theorem holonomyApply_relax_le_iterate (hslope : ∀ edge, 0 ≤ (label edge).slope)
+theorem walkApply_relax_le_iterate (hslope : ∀ edge, 0 ≤ (label edge).slope)
     {level : ℝ} {orbit : ℕ → V → ℝ}
     (hstep : ∀ n vertex, vertexOperator G label (orbit n) vertex - level ≤ orbit (n + 1) vertex)
     {start finish : V} (walk : G.Walk start finish) (n : ℕ) :
-    holonomyApply (fun edge => Label.relax level (label edge)) walk (orbit n start) ≤
+    walkApply (fun edge => Label.relax level (label edge)) walk (orbit n start) ≤
       orbit (n + walk.length) finish := by
   induction walk with
   | nil => simp
   | concat edge walk ih =>
-      rw [holonomyApply_concat, EdgeGraph.Walk.length_concat]
+      rw [walkApply_concat, EdgeGraph.Walk.length_concat]
       have hmono := Label.monotone_apply (f := Label.relax level (label edge))
         (by simpa using hslope edge) ih
       simp only [Label.apply_relax] at hmono
@@ -589,7 +589,7 @@ theorem holonomyApply_relax_le_iterate (hslope : ∀ edge, 0 ≤ (label edge).sl
 
 omit [Fintype V] in
 /-- **A lower bound propagates along a walk.**  Relaxed transport along the walk is monotone and
-bounds the iterate at its end, by `Maths.MaxAffineTransport.holonomyApply_relax_le_iterate`, so a
+bounds the iterate at its end, by `Maths.MaxAffineTransport.walkApply_relax_le_iterate`, so a
 uniform lower bound at the start of a walk yields one at its end, offset by the length of the
 walk. -/
 theorem exists_lowerBound_of_walk (hslope : ∀ e : E, 0 ≤ (label e).slope) {lam : ℝ}
@@ -598,10 +598,10 @@ theorem exists_lowerBound_of_walk (hslope : ∀ e : E, 0 ≤ (label e).slope) {l
     {start finish : V} (walk : G.Walk start finish) {bound : ℝ}
     (hstart : ∀ n : ℕ, bound ≤ iterate n start) :
     ∃ C : ℝ, ∀ n : ℕ, C ≤ iterate (n + walk.length) finish := by
-  have hmono : Monotone (holonomyApply (fun edge => Label.relax lam (label edge)) walk) :=
+  have hmono : Monotone (walkApply (fun edge => Label.relax lam (label edge)) walk) :=
     Transport.IsMonotone.walkMap (fun edge => Label.monotone_apply (by simpa using hslope edge))
       walk
-  exact ⟨_, fun n => (hmono (hstart n)).trans (holonomyApply_relax_le_iterate hslope hstep walk n)⟩
+  exact ⟨_, fun n => (hmono (hstart n)).trans (walkApply_relax_le_iterate hslope hstep walk n)⟩
 
 end Iteration
 
