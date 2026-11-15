@@ -3,7 +3,8 @@
 A survey of work that generalizes Zaslavsky's group-valued gain graphs along the directions
 Multitubes takes, and of the applications those generalizations serve. Status markers:
 
-- **[verified]**: checked against the primary source.
+- **[verified]**: the entry matches the primary source. Statements are the source's; they are
+  not independently proved here, and a source's own error is flagged where found.
 - **[lead]**: located but not checked against the source; a pointer, not a claim.
 - **[open]**: not found in the literature searched; absence is not evidence of nonexistence.
 
@@ -29,10 +30,9 @@ The contribution to claim is therefore *unification*, not new specializations:
 > mixed constraints; and holonomy criteria for each regime, together with the counterexamples
 > marking where cyclewise criteria fail. The construction itself has antecedents: Riess (2022)
 > defines order-preserving transport on the free category of a graph, with vertex-dependent
-> lattices and an ordered holonomy monoid, as a tool for one theorem about lattice-valued
-> sheaves; Seigal–Harrington–Nanda compute section spaces of linear quiver representations. To
-> our knowledge no prior work takes the construction as a general framework, proves the
-> solvability theorems of these regimes in it, or does so machine-checked.
+> lattices and an ordered holonomy monoid, in the service of one theorem about lattice-valued
+> sheaves; Seigal–Harrington–Nanda compute section spaces of linear quiver representations. No
+> source surveyed here supplies this collection of solvability results within one framework.
 
 *Scope of the claim.* The definitions are not new, and neither is admitting exact, lax, and
 oplax edges side by side (as relations, any constraint network does). The contribution is the
@@ -42,8 +42,10 @@ in machine-checked form.
 Expected objections: category theory (sections as limits, lax sections as lax cones of a
 functor from the free category, folklore as definitions); abstract interpretation (per-point
 lattices, monotone transfer maps, invariants as pre-fixed points); path algebras (Carré,
-Gondran–Minoux) as an earlier one-algebra-for-all-path-problems attempt, for summaries rather
-than solvability. One concrete payoff of unification: the "every cycle passes, no solution
+Gondran–Minoux) as an earlier one-algebra-for-all-path-problems attempt. Path algebras mostly
+compute summaries, but in nonlinear small-gain theory (Karafyllis–Jiang, Rüffer) a finite path
+closure directly constructs solutions of inequalities, so the line between summaries and
+solvability is not sharp. One concrete payoff of unification: the "every cycle passes, no solution
 exists" obstruction appears independently as Montanari's K₄, Shostak's Fig. 1, Cohen–Megiddo's
 path-plus-cycle certificates, and `MaxAffine/Farkas` here, and no prior source relates them.
 
@@ -85,12 +87,16 @@ path-plus-cycle certificates, and `MaxAffine/Farkas` here, and no prior source r
   post-fixed points of the Tarski Laplacian. So vertex-dependent fibers, non-invertible transport,
   a free-category functor, a holonomy monoid, and order-theoretic section conditions already
   occur together.
-  - *How the construction is used.* It is a tool, not a framework. Transport is introduced to
-    prove the Tarski–Hodge theorem, whose proof uses Lemmas 7.1–7.2 and nothing else from §7.2;
-    holonomy is defined, with the remark that further geometric constructions "wait at the
-    door", and then not used. The setting is narrower than it needs to be: undirected graphs,
-    transports only of the form r* ∘ r for Galois-connected restrictions, one order-theoretic
-    constraint type, and no closed-walk existence criterion.
+  - *How the construction is used.* Transport is introduced to prove the Tarski–Hodge theorem,
+    whose proof uses Lemmas 7.1–7.2 and nothing else from §7.2; holonomy is defined, with the
+    remark that further geometric constructions "wait at the door", and then not used. The
+    setting: undirected graphs, transports of the form r* ∘ r for Galois-connected restrictions,
+    and no closed-walk existence criterion.
+  - *Which hypotheses do work.* Lemma 7.1 is walk propagation of a one-sided section and holds
+    for any monotone transport (`Maths.Transport.IsLaxSection.walkMap_le`,
+    `Maths.Transport.IsOplaxSection.le_walkMap`); the adjunction is not needed. Lemma 7.2 and
+    the Tarski–Hodge theorem use the adjunction essentially: it is what converts the exact
+    sheaf equalities into transport inequalities.
 - **[verified, full text]** A. Seigal, H. A. Harrington, V. Nanda, *Principal components along
   quiver representations* (Found. Comput. Math., online 2022; arXiv:2104.10666). Sections
   x_{t(e)} = A_e x_{s(e)} of a linear quiver representation with arbitrary, non-invertible
@@ -391,9 +397,13 @@ local consistency plus structural (convexity, topology, domain-size) hypotheses.
   strict contraction on cycles.
 - **[verified, full text]** B. S. Rüffer, *Nonlinear left and right eigenvectors for
   max-preserving maps* (arXiv:1609.06217, 2016). Max-preserving maps on ℝⁿ₊ form a
-  (∘, max)-semiring (Lemma 1). Theorem 1 (from Rüffer's earlier work): Aᵏx → 0 iff Ax ≱ x for
-  x ≠ 0 iff every cycle composite is a contraction iff every minimal cycle is iff x ≤ Ax ⊕ b has a
-  unique maximal solution for every b. Lemma 2: the closure A* = ⊕ₖ Aᵏ satisfies
+  (∘, max)-semiring (Lemma 1); the zero map is absorbing only among zero-preserving maps, since
+  A ∘ 0 is the constant A(0). Theorem 1 (from Rüffer's earlier work), for continuous A with
+  A(0) = 0: Aᵏx → 0 iff Ax ≱ x for x ≠ 0 iff every cycle composite is a contraction iff every
+  minimal cycle is. Each of these implies that x ≤ Ax ⊕ b has a unique maximal solution for
+  every b. *Error in the source:* Theorem 1 also lists that last property as equivalent, and the
+  converse is false. For n = 1 and A(t) = min(t, 1), the solutions of x ≤ max(A(x), b) form
+  [0, max(1, b)], so a unique maximal solution exists for every b, yet Aᵏ(1) = 1. Lemma 2: the closure A* = ⊕ₖ Aᵏ satisfies
   A* = id ⊕ AA* and reduces to ⊕_{k<n} Aᵏ (Remark 1), proved by reading entries as composites
   of edge functions along paths and discarding contracting cycles. Here path closure *solves*
   inequalities, qualifying this survey's separation of path summaries from solvability.
@@ -440,9 +450,10 @@ local consistency plus structural (convexity, topology, domain-size) hypotheses.
 
 **[open]** No prior art found for:
 
-- gain or voltage graphs over monoids, semigroups, or categories (searches return only group
-  gains, groupoid-*domain* voltage assignments, and graphs of monoids in C*-algebra theory; the
-  nearest monoid-labelled work, Baez–Chaudhuri, has no section theory);
+- section-solvability or holonomy criteria for labels in monoids, semigroups, or categories.
+  Monoid-labelled digraphs themselves exist (Baez–Chaudhuri generalize signed digraphs to
+  arbitrary monoid labels), so the gap is the section theory, not the labelling; whether such
+  graphs are called labelled graphs or gain graphs does not bear on it;
 - a theorem "a section exists iff every closed-walk holonomy fixes a point" for non-invertible
   labels;
 - *theorems* that exploit mixed exact/lax edges beyond STPs with equalities. Admitting them is
