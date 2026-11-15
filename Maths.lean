@@ -51,6 +51,7 @@ public import Maths.Multitubes.Worklist
 public import Maths.Multitubes.Morphism
 public import Maths.Multitubes.Relational
 public import Maths.Multitubes.RelationalClosure
+public import Maths.Multitubes.RelationalCycles
 public import Maths.Multitubes.Mixed.Closure
 public import Maths.Multitubes.Exact
 public import Maths.Multitubes.SCC

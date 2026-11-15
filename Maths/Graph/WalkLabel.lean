@@ -59,6 +59,13 @@ trivial label.
 * `Maths.countP_nsmul_le_walkSum` - a lower bound per marked traversal bounds the walk sum of
   nonnegative data.
 
+## References
+
+* J. L. Gross, *Voltage graphs*, Discrete Math. 9 (1974), 239-246, for voltages and their products
+  along walks.
+* T. Zaslavsky, *Biased graphs. I. Bias, balance, and gains*, J. Combin. Theory Ser. B 47 (1989),
+  32-52, for gains of walks.
+
 ## Tags
 
 walk label, gain graph, voltage graph, balance, walk sum, tension, cycle sum, flat labelling,

@@ -51,6 +51,12 @@ fixed summary is a dichotomy governed entirely by the slope.
   `Maths.TransferSummary.AffineSummary.exists_apply_eq_iff_of_slope_eq_one` -- the
   degenerate translation case.
 
+## References
+
+* B. Aspvall and Y. Shiloach, *A polynomial time algorithm for solving systems of linear
+  inequalities with two variables per inequality*, SIAM J. Comput. 9 (1980), 827-845, Section 2, for
+  the fixed point of a composite affine map and its classification by slope.
+
 ## Tags
 
 affine map, fixed point, geometric convergence, contraction

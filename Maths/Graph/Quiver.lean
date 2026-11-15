@@ -43,6 +43,11 @@ Morphisms of edge graphs are prefunctors, and their action on walks is `Prefunct
 * `Maths.PathCategory.toPaths_comp_ofPaths` and `Maths.PathCategory.ofPaths_comp_toPaths`: the
   two path categories are isomorphic.
 
+## References
+
+* S. Mac Lane, *Categories for the Working Mathematician*, 2nd ed., Graduate Texts in Mathematics 5,
+  Springer (1998), Section II.7, for graphs, quivers, and free categories.
+
 ## Tags
 
 quiver, path, prefunctor, path category, free category

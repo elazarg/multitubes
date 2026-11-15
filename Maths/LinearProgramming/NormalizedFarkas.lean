@@ -38,6 +38,11 @@ standard-form Farkas lemma of `Maths.LinearProgramming.Duality`.
 * `Maths.LinearProgramming.isClosed_normalizedFarkasCertificateSet`: the certificate
   set is closed.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for Farkas certificates
+  and their normalization.
+
 ## Tags
 
 Farkas lemma, Farkas certificate, normalization, standard form, polyhedron, extreme point, cone

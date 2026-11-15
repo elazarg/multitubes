@@ -15,7 +15,7 @@ file maps them to the canonical term and the module that develops it.
 | source, target | The endpoints of an edge. | head, tail |
 | `start`, `finish` | Binder names for the endpoints of a walk. | `source`, `target` as vertex binders |
 | walk | A typed finite sequence of composable edges, `G.Walk start finish`. | route; path (see below) |
-| path | Only in the fixed phrases *path category*, *path functor*, *path closure*, *path independence*. Never a vertex-simple walk. | |
+| path | Only in the fixed phrases *path category*, *path functor*, *path closure*, *path independence*, *path consistency*. Never a vertex-simple walk. | |
 | closed walk | A walk whose endpoints agree. Its common endpoint is its *base*. | loop, circuit, cycle (in prose) |
 | cycle | In prose, only in *simple cycle*, *cycle mean*, and named results such as the Kolmogorov cycle criterion. In identifiers (`HasTrivialCycleLabels`, `HasZeroCycleSums`, …) it means an arbitrary closed walk; see the implementation notes of `Maths/Graph/EdgeGraph.lean`. | |
 | simple cycle | A closed walk with no proper closed subwalk, `IsSimpleCycle`. | simple circuit |
@@ -130,6 +130,7 @@ Domain readings in the application packages are collected in
 | local system, trivialization | trivial holonomy on a component | [`Multitubes/SCC`](Maths/Multitubes/SCC.lean) |
 | max-affine eigenvalue, spectrum | eigenvalue, relaxation level | [`MaxAffine/Spectrum`](Maths/Multitubes/MaxAffine/Spectrum.lean), [`MaxAffine/Eigenproblem`](Maths/Multitubes/MaxAffine/Eigenproblem.lean) |
 | mean payoff | maximum cycle mean | [`Additive/CycleMean`](Maths/Multitubes/Additive/CycleMean.lean), [`MaxAffine/Sections`](Maths/Multitubes/MaxAffine/Sections.lean) |
+| path consistency, constraint network | relation-labelled transport, closed-walk consistency | [`Multitubes/Relational`](Maths/Multitubes/Relational.lean), [`Multitubes/RelationalCycles`](Maths/Multitubes/RelationalCycles.lean) |
 | path independence, integrability, flat connection | flat | [`Multitubes/Exact`](Maths/Multitubes/Exact.lean) |
 | polarity | mode | [`Mixed/Basic`](Maths/Multitubes/Mixed/Basic.lean) |
 | quiver representation, path category | transport, path category | [`Multitubes/Category`](Maths/Multitubes/Category.lean), [`Graph/PathCategory`](Maths/Graph/PathCategory.lean) |
@@ -137,4 +138,5 @@ Domain readings in the application packages are collected in
 | shortest path, longest path | path closure | [`Additive/Potentials`](Maths/Multitubes/Additive/Potentials.lean), [`Additive/Budget`](Maths/Multitubes/Additive/Budget.lean) |
 | strongly connected component, condensation | strongly connected component | [`Graph/Condensation`](Maths/Graph/Condensation.lean) |
 | subeigenvector, subinvariant vector | subeigenvector | [`Additive/Potentials`](Maths/Multitubes/Additive/Potentials.lean) |
+| TVPI system, loop residue, two variables per inequality | lax section of max-affine transport | [`MaxAffine/Sections`](Maths/Multitubes/MaxAffine/Sections.lean), [`MaxAffine/Farkas`](Maths/Multitubes/MaxAffine/Farkas.lean) |
 | transition system, nondeterministic transition | transport, relation-labelled transport | [`Multitubes/Basic`](Maths/Multitubes/Basic.lean), [`Multitubes/Relational`](Maths/Multitubes/Relational.lean) |

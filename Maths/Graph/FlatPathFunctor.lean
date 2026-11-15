@@ -41,6 +41,11 @@ is the concrete retract-groupoid statement usually described through the Karoubi
 * `Maths.categorical_coreMap_comp_reverse` and `Maths.categorical_reverse_comp_coreMap`: the
   core morphisms are mutually inverse relative to the projectors.
 
+## References
+
+* S. Mac Lane, *Categories for the Working Mathematician*, 2nd ed., Graduate Texts in Mathematics 5,
+  Springer (1998), Section II.7, for functors out of a free category.
+
 ## Tags
 
 path category, flat functor, holonomy, retract, idempotent, Karoubi envelope

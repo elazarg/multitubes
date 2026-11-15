@@ -80,6 +80,14 @@ settled there is existence; the eigenvalue there is not.
 * S. Gaubert and J. Gunawardena, *The Perron--Frobenius theorem for homogeneous,
   monotone functions*, Trans. Amer. Math. Soc. 356 (2004), 4931-4950, for the
   Perron--Frobenius theory of topical maps.
+* R. Shostak, *Deciding linear inequalities by computing loop residues*, J. ACM 28 (1981), 769-779,
+  for Pratt's test for difference constraints and the loop-residue criterion.
+* B. Aspvall and Y. Shiloach, *A polynomial time algorithm for solving systems of linear
+  inequalities with two variables per inequality*, SIAM J. Comput. 9 (1980), 827-845, for the fixed
+  point of a closed walk's composite affine bound.
+* E. Cohen and N. Megiddo, *Improved algorithms for linear inequalities with two variables per
+  inequality*, SIAM J. Comput. 23 (1994), 1313-1347, Proposition 2.17, for the bound a closed walk
+  imposes at the fixed point of its map.
 
 ## Tags
 

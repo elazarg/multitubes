@@ -29,7 +29,9 @@ reset has slope product `0`, so it is contractive; a walk of pure doublings has
 slope product above one and no floor, so its affine branch has a fixed point
 below which everything is dominated; and the empty walk is the identity.  The
 pre-fixed points of the separate closed walks exist at incompatible values, and
-nothing makes them synchronize.
+nothing makes them synchronize.  The same obstruction appears for relation-labelled
+transport in `Maths.Multitubes.RelationalCycles`, and for two-variable linear systems as
+Shostak's unsatisfiable system with no infeasible closed walk.
 
 **The complete test is linear, not cyclewise.**  Each edge contributes two
 linear inequalities in the candidate, `floor e ≤ φ (target e)` when the floor is
@@ -87,6 +89,15 @@ bounds its size.
 * R. K. Ahuja, T. L. Magnanti and J. B. Orlin, *Network Flows: Theory,
   Algorithms, and Applications*, Prentice Hall (1993), for generalized network
   flows.
+* R. Shostak, *Deciding linear inequalities by computing loop residues*, J. ACM 28 (1981), 769-779,
+  Section 3 and Figure 1, for an unsatisfiable system with no infeasible closed walk and the
+  closure that restores a cyclewise test.
+* E. Cohen and N. Megiddo, *Improved algorithms for linear inequalities with two variables per
+  inequality*, SIAM J. Comput. 23 (1994), 1313-1347, Section 2.5, for certificates of infeasibility
+  made of a walk and a closed walk.
+* U. Montanari, *Networks of constraints: fundamental properties and applications to picture
+  processing*, Inform. Sci. 7 (1974), 95-132, for the closed but unsatisfiable tetrahedron, the
+  relational analogue.
 
 ## Tags
 

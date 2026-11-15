@@ -51,6 +51,12 @@ branches into a nonlinear defect identity.
   `Maths.MaxAffineTransport.Label.coe_exact_defect_eq_resetBranchSup_sup_affineSum`:
   the exact defect identity and its branch decomposition.
 
+## References
+
+* B. Aspvall and Y. Shiloach, *A polynomial time algorithm for solving systems of linear
+  inequalities with two variables per inequality*, SIAM J. Comput. 9 (1980), 827-845, for
+  composition of affine bounds along paths.
+
 ## Tags
 
 path coefficients, composite label, telescoping sum, last reset, defect normal form, max-affine

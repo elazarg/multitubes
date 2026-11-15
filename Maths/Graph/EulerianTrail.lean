@@ -50,6 +50,14 @@ carries the circulation's charge.
   every connected integer circulation is the exact edge count of a nonempty zero-charge closed
   walk based at any vertex incident to its support.
 
+## References
+
+* L. Euler, *Solutio problematis ad geometriam situs pertinentis*, Comment. Acad. Sci. Petropol. 8
+  (1741), 128-140, for Eulerian circuits.
+* C. Hierholzer, *Ueber die Möglichkeit, einen Linienzug ohne Wiederholung und ohne Unterbrechung zu
+  umfahren*, Math. Ann. 6 (1873), 30-32, for the augmentation of a closed trail into an Eulerian
+  one.
+
 ## Tags
 
 Eulerian trail, Euler circuit, Hierholzer, circulation, directed multigraph

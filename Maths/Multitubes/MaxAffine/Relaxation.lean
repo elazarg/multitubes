@@ -52,6 +52,12 @@ when all floors are absent.
   `Maths.MaxAffineTransport.Label.cyclicRelaxationThreshold_eq_bot_iff_all_levels`:
   the closed criterion and the characterization of the all-levels case.
 
+## References
+
+* B. Aspvall and Y. Shiloach, *A polynomial time algorithm for solving systems of linear
+  inequalities with two variables per inequality*, SIAM J. Comput. 9 (1980), 827-845, for the
+  composite affine map of a closed walk.
+
 ## Tags
 
 relaxation level, max-affine cycle, cycle mean, path slope, threshold

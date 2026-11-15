@@ -42,9 +42,21 @@ section condition (`Maths.RelationTransport.ofSectionFor`).
   oplax sections after the powerset embedding.
 * `Maths.RelationTransport.IsSection.walkRelation` - edgewise compatibility propagates along
   walks.
+* `Maths.RelationTransport.mem_walkRelation_concat_ofSectionFor_le_iff` - lax constraints of
+  monotone maps are closed under composition: along a nonempty walk their composite relation is
+  the lax constraint of the walk map.
 * `Maths.RelationTransport.isSection_ofSectionFor_iff` and
   `Maths.RelationTransport.isSection_ofTransport_iff` - exact, lax, oplax, and mixed sections
   are relational sections.
+
+## References
+
+* U. Montanari, *Networks of constraints: fundamental properties and applications to picture
+  processing*, Inform. Sci. 7 (1974), 95-132, for relation-labelled constraint networks,
+  composition along paths, and the closure of monotone relations under composition and
+  intersection (Theorem 5.5).
+* P. B. Ladkin and R. D. Maddux, *On binary constraint problems*, J. ACM 41 (1994), 435-469, for
+  constraint networks over relation algebras.
 
 ## Tags
 
@@ -189,6 +201,48 @@ theorem IsSection.walkRelation {family : ∀ vertex, Fiber vertex}
   | nil => rfl
   | concat edge walk ih =>
       exact ⟨family _, ih, hfamily edge⟩
+
+/-! ### Lax constraints compose -/
+
+section Lax
+
+variable [∀ vertex, Preorder (Fiber vertex)]
+
+/-- Every walk relates a source value to its transported value in the lax constraint network:
+the transported value is a witness at every intermediate vertex. -/
+theorem walkMap_mem_walkRelation_ofSectionFor_le (transport : Transport G Fiber)
+    {start finish : V} (walk : G.Walk start finish) (source : Fiber start) :
+    source ~[(ofSectionFor transport fun _ => (· ≤ ·)).walkRelation walk]
+      transport.walkMap walk source := by
+  induction walk with
+  | nil => rfl
+  | concat edge walk ih => exact ⟨_, ih, le_rfl⟩
+
+/-- With monotone edge maps, a pair related along a walk of the lax constraint network satisfies
+the lax constraint of the walk map. -/
+theorem walkMap_le_of_mem_walkRelation_ofSectionFor_le (transport : Transport G Fiber)
+    (hmono : transport.IsMonotone) {start finish : V} (walk : G.Walk start finish)
+    {source : Fiber start} {target : Fiber finish}
+    (hrel : source ~[(ofSectionFor transport fun _ => (· ≤ ·)).walkRelation walk] target) :
+    transport.walkMap walk source ≤ target := by
+  induction walk with
+  | nil => exact le_of_eq hrel
+  | concat edge walk ih =>
+      obtain ⟨middle, hmiddle, hedge⟩ := hrel
+      exact (hmono edge (ih hmiddle)).trans hedge
+
+/-- **Lax constraints of monotone maps are closed under composition.**  Along a nonempty walk,
+the composite relation of the lax constraints `transport e x ≤ y` is the lax constraint of the
+walk map.  The empty walk is excluded because its relation is equality. -/
+theorem mem_walkRelation_concat_ofSectionFor_le_iff (transport : Transport G Fiber)
+    (hmono : transport.IsMonotone) {start : V} {edge : E} (walk : G.Walk start (G.source edge))
+    (source : Fiber start) (target : Fiber (G.target edge)) :
+    source ~[(ofSectionFor transport fun _ => (· ≤ ·)).walkRelation (walk.concat edge)] target ↔
+      transport.walkMap (walk.concat edge) source ≤ target :=
+  ⟨walkMap_le_of_mem_walkRelation_ofSectionFor_le transport hmono _, fun hle =>
+    ⟨_, walkMap_mem_walkRelation_ofSectionFor_le transport walk source, hle⟩⟩
+
+end Lax
 
 end RelationTransport
 

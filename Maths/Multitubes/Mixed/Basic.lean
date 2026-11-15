@@ -41,6 +41,12 @@ edge maps.
 * `Maths.fiberCast_relation` - transport of an arbitrary fiberwise relation
   across an equality of vertices.
 
+## References
+
+* R. Dechter, I. Meiri and J. Pearl, *Temporal constraint networks*, Artificial Intelligence 49
+  (1991), 61-95, for simple temporal problems, which mix lower, upper, and exact difference
+  constraints.
+
 ## Tags
 
 transport, mixed section, lax section, oplax section, relation

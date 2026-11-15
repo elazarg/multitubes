@@ -47,6 +47,14 @@ relaxation mean is the normalized shift sum divided by the reciprocal-target mas
   feasibility is equivalent to pre-fixedness of every *original* cycle holonomy, not only the
   critical ones. The expansive form assumes floors absent.
 
+## References
+
+* K. Truemper, *On max flows with gains and pure min-cost flows*, SIAM J. Appl. Math. 32 (1977),
+  450-456, for networks with gains and their relation to pure networks.
+* E. Cohen and N. Megiddo, *Improved algorithms for linear inequalities with two variables per
+  inequality*, SIAM J. Comput. 23 (1994), 1313-1347, Proposition 2.17, for the bound a closed walk
+  imposes at the fixed point of its map.
+
 ## Tags
 
 holonomy, gauge, critical path, path coefficients, cycle mean, max-affine

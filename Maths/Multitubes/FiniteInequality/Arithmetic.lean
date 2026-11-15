@@ -44,6 +44,11 @@ finitely many coefficient denominators gives an integral certificate.
   `exists_integralCoefficientCertificate_of_real_infeasible` still states its balance and
   objective over `ℚ`.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for rational Farkas
+  certificates.
+
 ## Tags
 
 Farkas certificate, rational certificate, integral certificate, Fourier-Motzkin, exact arithmetic

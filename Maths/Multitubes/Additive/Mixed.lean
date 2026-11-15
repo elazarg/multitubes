@@ -50,6 +50,11 @@ potentials on the laxification graph.
 * `Maths.AdditiveTransport.isGreatest_laxificationIncomingWeights` - the
   path-closure characterization.
 
+## References
+
+* R. Dechter, I. Meiri and J. Pearl, *Temporal constraint networks*, Artificial Intelligence 49
+  (1991), 61-95, for simple temporal problems and their distance graphs.
+
 ## Tags
 
 transport, additive transport, mixed section, potential, laxification

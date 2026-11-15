@@ -53,6 +53,11 @@ At a raw residual level, the exact critical-cycle bound is `T_C / S_C`, where
   normalized shifts on every critical cycle. Equivalently, every normalized critical-cycle
   holonomy has a pre-fixed point. The expansive statements require absent floors.
 
+## References
+
+* K. Truemper, *On max flows with gains and pure min-cost flows*, SIAM J. Appl. Math. 32 (1977),
+  450-456, for networks with gains and their relation to pure networks.
+
 ## Tags
 
 gauge, critical graph, recession direction, cycle mean, max-affine feasibility

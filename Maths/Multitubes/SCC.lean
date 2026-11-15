@@ -30,6 +30,11 @@ unconstrained.
 * `Maths.Transport.hasTrivialHolonomy_iff_hasSCCTrivializations`: trivial
   holonomy is exactly componentwise triviality.
 
+## References
+
+* T. Zaslavsky, *Biased graphs. I. Bias, balance, and gains*, J. Combin. Theory Ser. B 47 (1989),
+  32-52, for balance and switching in the group case.
+
 ## Tags
 
 strongly connected component, trivial holonomy, trivialization, local system, normal form

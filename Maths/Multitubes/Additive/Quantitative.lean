@@ -46,6 +46,11 @@ convention `max ∅ = -∞`, so every real threshold is feasible.
   threshold zero the symmetric theory becomes exact additive transport, with all edge defects
   vanishing.
 
+## References
+
+* R. M. Karp, *A characterization of the minimum cycle mean in a digraph*, Discrete Mathematics 23
+  (1978), 309-311, for the maximum cycle mean.
+
 ## Tags
 
 maximum cycle mean, duality, threshold, difference constraints, sup norm, max-plus,

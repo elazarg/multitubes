@@ -76,6 +76,10 @@ products of slopes.
 * `Maths.Transport.walkMap_castStart` and `Maths.Transport.walkMap_castFinish` -
   endpoint reindexing commutes with transport.
 * `Maths.Transport.walkMap_append` - path composition.
+* `Maths.Transport.holonomy_append_rotate` - rotating a closed walk conjugates its holonomy by
+  the first leg, so fixed points (`Maths.Transport.holonomy_append_rotate_eq_of_eq`) and, for
+  monotone maps, pre-fixed points (`Maths.Transport.IsMonotone.holonomy_append_rotate_le`) do
+  not depend on the starting vertex.
 * `Maths.Transport.walkMap_injective` - walks of injective edge maps transport injectively.
 * `Maths.Transport.HomFor.walkMap_rel_of_forall_mem_edges` - walk propagation of a
   relational morphism, for a transitive relation preserved by the target edge maps.
@@ -87,6 +91,9 @@ products of slopes.
   `Maths.Transport.IsOplaxSection.le_walkMap` - its exact, lax, and oplax instances.
 * `Maths.Transport.IsSection.isLaxSection` and `Maths.Transport.IsSection.isOplaxSection` -
   exact sections are lax and oplax.
+* `Maths.Transport.IsLaxSection.inf`, `Maths.Transport.IsLaxSection.sup`, and
+  `Maths.Transport.IsLaxSection.sup_of_linearOrder` - with monotone edge maps lax sections are
+  closed under meets, and under joins when edge maps preserve them, as on chains.
 * `Maths.walkMap_ofSMul_eq_walkLabel_smul` - a monoid-labelled walk acts by its composite
   label.
 * `Maths.hasTrivialHolonomy_ofSMul` - trivial cycle labels
@@ -128,6 +135,11 @@ those layers have no operator-valued analogue, while the layers below them do.
 * R. V. Kadison, *Order properties of bounded self-adjoint operators*, Proc.
   Amer. Math. Soc. 2 (1951), 505-510, for the anti-lattice property of the
   Löwner order referred to in the implementation notes.
+* R. Shostak, *Deciding linear inequalities by computing loop residues*, J. ACM 28 (1981),
+  769-779, Lemma 6, for the rotation invariance of closed-walk infeasibility in the affine case.
+* E. Cohen and N. Megiddo, *Improved algorithms for linear inequalities with two variables per
+  inequality*, SIAM J. Comput. 23 (1994), 1313-1347, Proposition 4.1, for the lattice of
+  solutions of a monotone two-variable system.
 
 ## Tags
 
@@ -271,6 +283,22 @@ def holonomy (T : Transport G Fiber) {base : V} (cycle : G.Walk base base) :
 theorem holonomy_append (first second : G.Walk base base) (point : Fiber base) :
     T.holonomy (first.append second) point = T.holonomy second (T.holonomy first point) :=
   walkMap_append first second point
+
+/-- **Rotation conjugates holonomy.**  Starting a closed walk at another of its vertices
+intertwines the two holonomies with the walk map of the first leg. -/
+theorem holonomy_append_rotate {turn : V} (first : G.Walk base turn) (second : G.Walk turn base)
+    (point : Fiber base) :
+    T.holonomy (second.append first) (T.walkMap first point) =
+      T.walkMap first (T.holonomy (first.append second) point) := by
+  simp only [holonomy, walkMap_append]
+
+/-- A fixed point of a closed walk's holonomy is carried by the first leg to a fixed point of
+the rotated walk's holonomy. -/
+theorem holonomy_append_rotate_eq_of_eq {turn : V} (first : G.Walk base turn)
+    (second : G.Walk turn base) {point : Fiber base}
+    (hfixed : T.holonomy (first.append second) point = point) :
+    T.holonomy (second.append first) (T.walkMap first point) = T.walkMap first point := by
+  rw [holonomy_append_rotate, hfixed]
 
 /-- Every closed-walk holonomy at one base vertex is the identity map on its fiber. -/
 def HasTrivialHolonomyAt (T : Transport G Fiber) (base : V) : Prop :=
@@ -543,7 +571,46 @@ theorem IsOplaxSection.le_holonomy (hmono : T.IsMonotone)
     family base ≤ T.holonomy cycle (family base) :=
   hfamily.le_walkMap hmono cycle
 
+/-- With monotone edge maps, a pre-fixed point of a closed walk's holonomy is carried by the
+first leg to a pre-fixed point of the rotated walk's holonomy.  So whether a closed walk admits
+a pre-fixed point does not depend on where it starts. -/
+theorem IsMonotone.holonomy_append_rotate_le (hmono : T.IsMonotone) {turn : V}
+    (first : G.Walk base turn) (second : G.Walk turn base) {point : Fiber base}
+    (hprefixed : T.holonomy (first.append second) point ≤ point) :
+    T.holonomy (second.append first) (T.walkMap first point) ≤ T.walkMap first point := by
+  rw [holonomy_append_rotate]
+  exact hmono.walkMap first hprefixed
+
 end Ordered
+
+/-! ### Lattice operations on lax sections -/
+
+/-- With monotone edge maps, the meet of two lax sections is a lax section. -/
+theorem IsLaxSection.inf [∀ vertex : V, SemilatticeInf (Fiber vertex)] (hmono : T.IsMonotone)
+    {family other : ∀ vertex, Fiber vertex} (hfamily : T.IsLaxSection family)
+    (hother : T.IsLaxSection other) : T.IsLaxSection (family ⊓ other) := fun edge =>
+  le_inf ((hmono edge inf_le_left).trans (hfamily edge))
+    ((hmono edge inf_le_right).trans (hother edge))
+
+/-- When every edge map is subadditive for joins, the join of two lax sections is a lax
+section.  Monotonicity alone gives only the reverse inequality. -/
+theorem IsLaxSection.sup [∀ vertex : V, SemilatticeSup (Fiber vertex)]
+    (hsup : ∀ (edge : E) (first second : Fiber (G.source edge)),
+      T.edgeMap edge (first ⊔ second) ≤ T.edgeMap edge first ⊔ T.edgeMap edge second)
+    {family other : ∀ vertex, Fiber vertex} (hfamily : T.IsLaxSection family)
+    (hother : T.IsLaxSection other) : T.IsLaxSection (family ⊔ other) := fun edge =>
+  (hsup edge _ _).trans (sup_le_sup (hfamily edge) (hother edge))
+
+/-- **Lax sections form a lattice over chains.**  On linearly ordered fibers a monotone map
+preserves binary joins, so with monotone edge maps the join of two lax sections is a lax
+section; with `Maths.Transport.IsLaxSection.inf`, lax sections form a sublattice of the
+product order. -/
+theorem IsLaxSection.sup_of_linearOrder [∀ vertex : V, LinearOrder (Fiber vertex)]
+    (hmono : T.IsMonotone) {family other : ∀ vertex, Fiber vertex}
+    (hfamily : T.IsLaxSection family) (hother : T.IsLaxSection other) :
+    T.IsLaxSection (family ⊔ other) :=
+  hfamily.sup (fun edge first second => ((hmono edge).map_max (a := first) (b := second)).le)
+    hother
 
 end Transport
 

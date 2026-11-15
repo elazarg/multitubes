@@ -37,6 +37,12 @@ propagates to an eigenvector even though the graph is not strongly connected.
 * `Maths.MaxAffineTransport.eigenvalues_loopLabel_eq_relaxationLevels`: the reset branch in the
   mixed reset-doubling example makes every feasible relaxation level an eigenvalue.
 
+## References
+
+* F. Baccelli, G. Cohen, G. J. Olsder and J.-P. Quadrat, *Synchronization and Linearity*, Wiley
+  (1992), for the spectrum of reducible max-plus matrices.
+* P. Butkovič, *Max-linear Systems: Theory and Algorithms*, Springer (2010), Chapter 4.
+
 ## Tags
 
 max-affine, eigenvalue, reducible graph, relaxation level, reachability

@@ -31,6 +31,13 @@ additive residual bound. Finiteness makes a uniform strict margin possible.
 * `Maths.MaxAffineTransport.exists_contractiveGauge_iff_shortCycleProduct_lt_one`: it suffices
   to check nonempty closed walks up to the number of vertices.
 
+## References
+
+* W. S. Jewell, *Optimal flow through networks with gains*, Oper. Res. 10 (1962), 476-499, for
+  networks with gains and flow-generating cycles.
+* K. Truemper, *On max flows with gains and pure min-cost flows*, SIAM J. Appl. Math. 32 (1977),
+  450-456, for networks with gains and their relation to pure networks.
+
 ## Tags
 
 contraction, contractive gauge, diagonal scaling, weighted sup norm, cycle product, spectral radius

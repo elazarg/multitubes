@@ -37,6 +37,12 @@ scalar classification computes every finite cycle without introducing a fake rea
 * `Maths.MaxAffineTransport.Label.isCyclicRelaxationLevel_iff_coefficient_trichotomy`:
   the complete scalar classification, covering the optimum unbounded below.
 
+## References
+
+* B. Aspvall and Y. Shiloach, *A polynomial time algorithm for solving systems of linear
+  inequalities with two variables per inequality*, SIAM J. Comput. 9 (1980), 827-845, for the
+  composite affine map of a closed walk.
+
 ## Tags
 
 max-affine cycle, relaxation level, pre-fixed point, threshold, cyclic system

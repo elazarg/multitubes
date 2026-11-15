@@ -31,6 +31,11 @@ form a torsor for the unit group, even though the ambient labels live in an arbi
   potential normalized at the root is unique, so the potential space is a torsor for the
   unit group.
 
+## References
+
+* T. Zaslavsky, *Biased graphs. I. Bias, balance, and gains*, J. Combin. Theory Ser. B 47 (1989),
+  32-52, for switching functions.
+
 ## Tags
 
 potential, coboundary, torsor, unit group, rigidity, uniqueness

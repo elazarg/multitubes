@@ -51,6 +51,11 @@ condition holds vacuously.
 * `Maths.AdditiveTransport.hasSCCPotentialAt_iff_exists_isPotential_induce`:
   the two componentwise phrasings agree, without any finiteness hypothesis.
 
+## References
+
+* R. E. Tarjan, *Depth-first search and linear graph algorithms*, SIAM J. Comput. 1 (1972), 146-160,
+  for strongly connected components.
+
 ## Tags
 
 potential, difference constraints, strongly connected component, condensation, Bellman-Ford,

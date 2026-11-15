@@ -44,6 +44,14 @@ point.  These statements determine the extended-real infimum exactly.
   `Maths.MaxAffineTransport.isPrefixed_foldl_rotate`: forward rotation of exact
   and lax cyclic certificates, using no inverse maps.
 
+## References
+
+* B. Aspvall and Y. Shiloach, *A polynomial time algorithm for solving systems of linear
+  inequalities with two variables per inequality*, SIAM J. Comput. 9 (1980), 827-845, Section 2, for
+  the classification of a closed walk's composite affine map by its slope.
+* E. Cohen and N. Megiddo, *Improved algorithms for linear inequalities with two variables per
+  inequality*, SIAM J. Comput. 23 (1994), 1313-1347, Proposition 2.17.
+
 ## Tags
 
 fixed point, pre-fixed point, max-affine map, expansive map, contraction, cyclic rotation

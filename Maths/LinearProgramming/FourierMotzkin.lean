@@ -67,6 +67,13 @@ at the application boundary.
 * `Maths.LinearProgramming.exists_rowEval_pos_iff_not_hasBalancedCertificate`:
   **Gordan's transposition theorem**, the homogeneous corollary at `b = 1`.
 
+## References
+
+* T. S. Motzkin, *Beiträge zur Theorie der linearen Ungleichungen*, Dissertation, Basel (1936), for
+  the elimination method and the transposition theorem.
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), Section 12.2, for
+  Fourier-Motzkin elimination.
+
 ## Tags
 
 Fourier-Motzkin elimination, theorem of the alternative, Farkas lemma, Gordan's theorem,

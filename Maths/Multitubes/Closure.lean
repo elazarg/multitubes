@@ -74,6 +74,17 @@ boundedness that finiteness hypotheses supply.
 counterparts of `Maths.Transport.pathClosure`, and their least-solution theorems
 are proved in their own files directly from maximum and `csSup` bounds.
 
+## References
+
+* A. Tarski, *A lattice-theoretical fixpoint theorem and its applications*, Pacific J. Math. 5
+  (1955), 285-309, for least fixed points of monotone maps on complete lattices.
+* P. Cousot and R. Cousot, *Abstract interpretation: a unified lattice model for static analysis of
+  programs by construction or approximation of fixpoints*, POPL 1977, 238-252, for inductive
+  invariants as post-fixed points and the soundness of abstraction.
+* R. Ghrist and H. Riess, *Cellular sheaves of lattices and the Tarski Laplacian*, Homology Homotopy
+  Appl. 24 (2022), 325-345, for lattice-valued sections as fixed points of an order-preserving
+  Laplacian.
+
 ## Tags
 
 Moore family, closure operator, least fixed point, Knaster-Tarski, Kleene iteration,

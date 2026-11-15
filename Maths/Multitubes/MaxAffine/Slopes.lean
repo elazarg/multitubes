@@ -71,6 +71,11 @@ satisfy every cycle-product equation vacuously while carrying a zero slope.
   have unit product around every closed walk exactly when they are ratios of one positive
   vertex gauge. Strong connectivity is needed: see the DAG remark above.
 
+## References
+
+* K. Truemper, *On max flows with gains and pure min-cost flows*, SIAM J. Appl. Math. 32 (1977),
+  450-456, for networks with gains and their relation to pure networks.
+
 ## Tags
 
 recession direction, slope gauge, critical subsystem, unit slope, cycle product, max-affine

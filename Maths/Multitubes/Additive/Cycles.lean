@@ -33,6 +33,11 @@ mean inequalities can be checked on simple cycles alone.
   results above, this one assumes `Finite E`, inherited from the residual duality it
   rewrites through.
 
+## References
+
+* R. M. Karp, *A characterization of the minimum cycle mean in a digraph*, Discrete Mathematics 23
+  (1978), 309-311, for the maximum cycle mean.
+
 ## Tags
 
 simple cycle, closed walk, cycle mean, mean weight, difference constraints

@@ -44,6 +44,11 @@ evaluated over `ℚ`.
   `exists_rankSparse_integralBranchCertificate_of_real_infeasible`: the same certificates
   with support bounded by the rank.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for rational linear
+  systems.
+
 ## Tags
 
 rational arithmetic, integral certificate, Farkas certificate, max-affine

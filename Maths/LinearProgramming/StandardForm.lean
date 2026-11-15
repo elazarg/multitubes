@@ -76,6 +76,11 @@ arguments in `Maths.FiniteInequality` and `Maths.Multitubes.MaxAffine` consume.
 * The Cramer/parametric-basis theory (support Gram matrices, analytic selection of a basis
   along a parameter) that a quantitative *stability* result would need.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for standard-form
+  polyhedra and their basic solutions.
+
 ## Tags
 
 linear programming, standard form, polyhedron, basic feasible solution, extreme point, Krein-Milman

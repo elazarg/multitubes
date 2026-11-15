@@ -39,6 +39,11 @@ alone.
   `normalizedSignedDual_le_iff_simpleSignedCycles_le`: the dual reading of the same pair -
   normalized signed circulations and nonempty closed walks impose exactly the same thresholds.
 
+## References
+
+* L. R. Ford and D. R. Fulkerson, *Flows in Networks*, Princeton University Press (1962), for
+  circulations.
+
 ## Tags
 
 signed circulation, doubled graph, symmetric difference constraints, sup norm, duality,

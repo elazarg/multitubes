@@ -71,6 +71,14 @@ by the budget, so its oscillation over all vertices is already at most the budge
 No maximizing walk is assumed to exist: `supIncomingWeight` is a supremum, and its edge
 inequality is obtained by extending an arbitrary walk by one edge.
 
+## References
+
+* R. Bellman, *On a routing problem*, Quart. Appl. Math. 16 (1958), 87-90, for shortest-path
+  potentials.
+* R. Dechter, I. Meiri and J. Pearl, *Temporal constraint networks*, Artificial Intelligence 49
+  (1991), 61-95, Theorem 3.1, for shortest-path distances as extremal solutions of difference
+  constraints.
+
 ## Tags
 
 potential, budget, oscillation, duality, max-plus, Bellman equation

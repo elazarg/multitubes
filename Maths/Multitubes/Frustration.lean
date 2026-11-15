@@ -51,6 +51,8 @@ no approximation or complexity claim is made.
 
 * T. Zaslavsky, *Biased graphs. I. Bias, balance, and gains*, J. Combin. Theory Ser. B 47
   (1989), 32-52.
+* F. Harary, *On the notion of balance of a signed graph*, Michigan Math. J. 2 (1953), 143-146, for
+  balance of signed graphs.
 
 ## Tags
 

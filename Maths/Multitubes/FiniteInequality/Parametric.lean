@@ -29,6 +29,10 @@ For affinely varying real lower bounds, the feasible parameter set is also conve
 * `Maths.FiniteInequality.isClosed_feasibleParameters` - closedness for continuous lower bounds.
 * `Maths.FiniteInequality.convex_feasibleParameters` - convexity for affine real lower bounds.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for Farkas duality.
+
 ## Tags
 
 parametric linear inequalities, feasible parameter set, closed set, convex set, Farkas lemma

@@ -59,6 +59,11 @@ the categorical ones.
   flatness of a transport or of a labelling is flatness of its path functor, in the sense of
   `Maths.IsFlatAt`.
 
+## References
+
+* S. Mac Lane, *Categories for the Working Mathematician*, 2nd ed., Graduate Texts in Mathematics 5,
+  Springer (1998), Section II.7, for representations of the free category on a graph.
+
 ## Tags
 
 path category, free category, quiver representation, functor, universal property,

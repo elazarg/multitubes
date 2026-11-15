@@ -63,6 +63,11 @@ multigraph cycles.
 The decomposition results above all assume `Nonempty E`, because the canonical lift needs an
 edge on which to park unused `l1` mass.
 
+## References
+
+* L. R. Ford and D. R. Fulkerson, *Flows in Networks*, Princeton University Press (1962), for the
+  decomposition of circulations into cycles.
+
 ## Tags
 
 circulation, flow decomposition, cycle decomposition, signed circulation, simple cycle, convex hull,

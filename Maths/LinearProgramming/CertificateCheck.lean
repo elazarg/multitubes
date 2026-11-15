@@ -40,6 +40,10 @@ not establish the requested conclusion.
 * `Maths.LinearProgramming.not_realFeasible_of_checkRationalCertificate`: a checked rational
   certificate also proves infeasibility after extending the system to the reals.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for Farkas certificates.
+
 ## Tags
 
 rational arithmetic, executable verification, linear inequalities, Farkas certificate

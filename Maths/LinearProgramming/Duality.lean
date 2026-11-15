@@ -78,6 +78,15 @@ linearly ordered field.
   the transfer of all of this to
   `Maths.LinearProgramming.IsStandardOptimal`.
 
+## References
+
+* J. Farkas, *Theorie der einfachen Ungleichungen*, J. Reine Angew. Math. 124 (1902), 1-27, for the
+  lemma of the alternative.
+* D. Gale, H. W. Kuhn and A. W. Tucker, *Linear programming and the theory of games*, in *Activity
+  Analysis of Production and Allocation*, Cowles Commission Monograph 13, Wiley (1951), 317-329, for
+  linear programming duality.
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), Chapter 7.
+
 ## Tags
 
 linear programming, duality, weak duality, strong duality, complementary slackness, Farkas lemma

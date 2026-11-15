@@ -38,6 +38,14 @@ asserted.
 * `Maths.Transport.exists_sweepRelaxation_eq_leastLaxMajorant` - repeated covering sweeps reach
   the least lax majorant under the ascending chain condition.
 
+## References
+
+* G. A. Kildall, *A unified approach to global program optimization*, POPL 1973, 194-206, for local,
+  worklist-driven dataflow iteration.
+* D. S. Hochbaum and J. Naor, *Simple and fast algorithms for linear and integer programs with two
+  variables per inequality*, SIAM J. Comput. 23 (1994), 1179-1192, for descending iteration to the
+  greatest solution of a monotone two-variable integer system.
+
 ## Tags
 
 worklist, chaotic iteration, relaxation, fair schedule, ascending chain condition

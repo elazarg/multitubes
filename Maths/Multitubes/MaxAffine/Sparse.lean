@@ -47,6 +47,14 @@ the generic finite-inequality theory.
 * `Maths.MaxAffineTransport.exists_positiveBranchCircuit_of_infeasible`:
   infeasibility yields a positive-objective circuit of genuine branch normals.
 
+## References
+
+* E. Helly, *Über Mengen konvexer Körper mit gemeinschaftlichen Punkten*, Jahresber. Dtsch.
+  Math.-Ver. 32 (1923), 175-176, for Helly's theorem.
+* E. Cohen and N. Megiddo, *Improved algorithms for linear inequalities with two variables per
+  inequality*, SIAM J. Comput. 23 (1994), 1313-1347, Proposition 2.12, for the sharper Helly number
+  two of two-variable systems.
+
 ## Tags
 
 Helly's theorem, sparse certificate, infeasible subsystem, Farkas lemma, max-affine

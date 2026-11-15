@@ -39,6 +39,11 @@ also supply the required bounds.
 * `Maths.MaxAffineTransport.isLeast_eigenvalues_of_reachable_certificate`: optimal
   certificate criticality and reachable lower bounds replace strong connectivity.
 
+## References
+
+* F. Baccelli, G. Cohen, G. J. Olsder and J.-P. Quadrat, *Synchronization and Linearity*, Wiley
+  (1992), for max-plus spectral theory.
+
 ## Tags
 
 eigenvector, eigenvalue, reducible graph, reachability, lower bound, spectrum, max-affine

@@ -27,6 +27,11 @@ by the rank of the row vectors plus one.
 * `Maths.FiniteInequality.exists_rankSparse_normalizedCertificate_of_isLeast`: an optimal
   certificate can be chosen active at a supplied optimal point and rank-sparse.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for linear programming
+  duality.
+
 ## Tags
 
 complementary slackness, active constraints, Chebyshev approximation, minimax, sparse certificate,

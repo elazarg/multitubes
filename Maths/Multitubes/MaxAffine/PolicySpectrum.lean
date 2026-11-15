@@ -39,6 +39,11 @@ only finiteness and an incoming edge at every vertex are required.
 * `Maths.MaxAffineTransport.isLeast_csInf_eigenvalues` - a nonempty spectrum bounded below
   attains its infimum, even with negative slopes or without strong connectivity.
 
+## References
+
+* F. Baccelli, G. Cohen, G. J. Olsder and J.-P. Quadrat, *Synchronization and Linearity*, Wiley
+  (1992), for max-plus spectral theory.
+
 ## Tags
 
 policy, strategy, spectrum, eigenvalue, max-affine, linear inequality system

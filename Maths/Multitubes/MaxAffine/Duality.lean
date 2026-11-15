@@ -54,6 +54,10 @@ that critical subsystem.
 * `Maths.MaxAffineTransport.exists_isLaxSection_iff_normalizedBranchCertificate_nonpos`:
   existence of a lax section at threshold zero.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for Farkas duality.
+
 ## Tags
 
 strong duality, Farkas lemma, recession direction, normalized certificate, max-affine, threshold

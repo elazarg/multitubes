@@ -40,6 +40,11 @@ remaining monotonicity.
 * `Maths.Transport.leastMixedMajorant_eq_self_iff` - the closed points of the
   least-majorant operator are exactly the mixed sections.
 
+## References
+
+* A. Tarski, *A lattice-theoretical fixpoint theorem and its applications*, Pacific J. Math. 5
+  (1955), 285-309, for least fixed points on complete lattices.
+
 ## Tags
 
 transport, mixed section, laxification, closure, complete lattice

@@ -51,6 +51,10 @@ threshold is attainable, which is precisely the unbounded-below case.
 * `Maths.FiniteInequality.Recession.exists_potential_iff_exists_critical_potential`:
   feasibility of the whole system reduces to feasibility of that critical subsystem.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for Farkas duality.
+
 ## Tags
 
 Farkas lemma, strong duality, worst residual, recession direction, minimax, normalized certificate

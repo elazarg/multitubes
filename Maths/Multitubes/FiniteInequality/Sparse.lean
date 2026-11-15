@@ -53,6 +53,11 @@ columns, which is at most the coordinate rank plus one.
   `exists_rankSparse_integralCoefficientCertificate_of_real_infeasible` clears only the
   certificate denominators, stating balance and objective over `ℚ`.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for Carathéodory-type
+  support bounds.
+
 ## Tags
 
 Caratheodory, sparse certificate, rank, support, Farkas certificate

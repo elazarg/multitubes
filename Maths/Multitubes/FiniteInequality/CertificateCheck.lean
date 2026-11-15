@@ -24,6 +24,10 @@ point or certificate; these declarations verify witnesses but do not search for 
 * `Maths.FiniteInequality.not_realPotential_of_checkRationalCertificate`: a checked rational
   Farkas certificate proves that no real potential satisfies every finite inequality.
 
+## References
+
+* A. Schrijver, *Theory of Linear and Integer Programming*, Wiley (1986), for Farkas certificates.
+
 ## Tags
 
 rational arithmetic, executable verification, finite inequalities, Farkas certificate

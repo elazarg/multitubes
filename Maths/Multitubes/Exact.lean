@@ -70,6 +70,11 @@ connected component.  Additive edge data are the same theory read through `Multi
   `Maths.isAddUnit_edge_of_zeroCycleSums`: the additive commutative-monoid versions, requiring
   no ambient subtraction or group completion.
 
+## References
+
+* T. Zaslavsky, *Biased graphs. I. Bias, balance, and gains*, J. Combin. Theory Ser. B 47 (1989),
+  32-52, for balance and switching in the group case.
+
 ## Tags
 
 path independence, flat connection, trivial holonomy, integrability, groupoid, unit,

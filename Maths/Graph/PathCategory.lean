@@ -38,6 +38,11 @@ composite relation of a walk is the extension into relations.
 * `Maths.PathCategory.eq_lift` and `Maths.PathCategory.eq_lift_of_map_edge`: every functor out
   of the path category is the extension of its values on edges.
 
+## References
+
+* S. Mac Lane, *Categories for the Working Mathematician*, 2nd ed., Graduate Texts in Mathematics 5,
+  Springer (1998), Section II.7, for the free category on a graph.
+
 ## Tags
 
 path category, free category, quiver, walk, universal property

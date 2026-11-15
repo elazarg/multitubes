@@ -34,6 +34,11 @@ walk in it strictly increases the component order.
 * `Maths.source_mem_sccSet_of_mem_edges` and `Maths.target_mem_sccSet_of_mem_edges`: a
   closed walk stays inside the strongly connected component of its base vertex.
 
+## References
+
+* R. E. Tarjan, *Depth-first search and linear graph algorithms*, SIAM J. Comput. 1 (1972), 146-160,
+  for strongly connected components and the acyclic condensation.
+
 ## Tags
 
 strongly connected component, condensation, reachability, directed acyclic graph

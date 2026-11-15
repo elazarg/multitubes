@@ -59,6 +59,11 @@ support.
 * `Maths.EdgeGraph.Walk.toConnectedIntegerCirculation`: a nonempty zero-charge
   closed walk is a connected integer circulation.
 
+## References
+
+* L. R. Ford and D. R. Fulkerson, *Flows in Networks*, Princeton University Press (1962), for flows,
+  circulations, and flow conservation.
+
 ## Tags
 
 circulation, flow conservation, walk, edge multiplicity, directed multigraph

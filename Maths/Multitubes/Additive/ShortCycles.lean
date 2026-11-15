@@ -48,6 +48,13 @@ walk witness of length at most `Fintype.card V`.
 * `Maths.AdditiveTransport.exists_negative_residual_bound`: strictly negative nonempty cycle
   weights admit one uniformly negative residual bound on a finite graph.
 
+## References
+
+* R. Bellman, *On a routing problem*, Quart. Appl. Math. 16 (1958), 87-90, for completeness of
+  relaxation along walks of bounded length.
+* R. M. Karp, *A characterization of the minimum cycle mean in a digraph*, Discrete Mathematics 23
+  (1978), 309-311, for the maximum cycle mean.
+
 ## Tags
 
 short cycle, simple cycle, closed walk, cycle mean, Bellman-Ford, pigeonhole

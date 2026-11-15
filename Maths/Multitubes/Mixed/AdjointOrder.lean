@@ -30,6 +30,11 @@ relation-parametric theorem has a compact ordered form.
 * `Maths.Transport.not_exists_galoisConnection_right_of_witnesses` - a family
   of upper witnesses can rule out an upper adjoint.
 
+## References
+
+* R. Ghrist and H. Riess, *Cellular sheaves of lattices and the Tarski Laplacian*, Homology Homotopy
+  Appl. 24 (2022), 325-345, for Galois connections as restriction maps.
+
 ## Tags
 
 transport, mixed section, lower adjoint, Galois connection, order

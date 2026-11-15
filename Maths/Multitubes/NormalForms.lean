@@ -36,6 +36,11 @@ path family need not be an arborescence.
 * `Maths.hasTrivialCycleLabels_iff_chosen_return_nonGeneratedEdges`: the same
   reduction over a directly finite monoid, using chosen return walks.
 
+## References
+
+* T. Zaslavsky, *Biased graphs. I. Bias, balance, and gains*, J. Combin. Theory Ser. B 47 (1989),
+  32-52, for balance as a coboundary condition.
+
 ## Tags
 
 coboundary, flatness, rooted walks, arborescence, strongly connected component, gain graph, balance
