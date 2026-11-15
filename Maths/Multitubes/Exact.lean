@@ -74,6 +74,9 @@ connected component.  Additive edge data are the same theory read through `Multi
 
 * T. Zaslavsky, *Biased graphs. I. Bias, balance, and gains*, J. Combin. Theory Ser. B 47 (1989),
   32-52, for balance and switching in the group case.
+* A. Seigal, H. A. Harrington and V. Nanda, *Principal components along quiver representations*,
+  Found. Comput. Math. (2022), arXiv:2104.10666, for the fixed-point and equalizer constraints that
+  closed walks and parallel walks impose on sections.
 
 ## Tags
 

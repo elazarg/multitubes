@@ -140,6 +140,12 @@ those layers have no operator-valued analogue, while the layers below them do.
 * E. Cohen and N. Megiddo, *Improved algorithms for linear inequalities with two variables per
   inequality*, SIAM J. Comput. 23 (1994), 1313-1347, Proposition 4.1, for the lattice of
   solutions of a monotone two-variable system.
+* H. Riess, *Lattice Theory in Multi-Agent Systems*, PhD dissertation, University of Pennsylvania
+  (2022), arXiv:2304.02568, Section 7.2, for parallel transport as a functor from the free category
+  to posets, with vertex-dependent lattices and an ordered holonomy monoid.
+* A. Seigal, H. A. Harrington and V. Nanda, *Principal components along quiver representations*,
+  Found. Comput. Math. (2022), arXiv:2104.10666, for sections of quiver representations with
+  non-invertible maps.
 
 ## Tags
 

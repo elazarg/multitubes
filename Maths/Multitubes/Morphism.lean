@@ -47,6 +47,12 @@ sections forward.
 * `Maths.Transport.LaxHom.map_isLaxSection` and `Maths.Transport.OplaxHom.map_isOplaxSection` -
   directed section preservation.
 
+## References
+
+* S. Katsumata, X. Rival and J. Dubut, *A categorical framework for program semantics and semantic
+  abstraction*, Electron. Notes Theor. Inform. Comput. Sci. 3 (2023), MFPS XXXIX, for
+  interpretations as oplax functors into posets and abstraction as lax natural transformations.
+
 ## Tags
 
 morphism, lax morphism, oplax morphism, natural transformation, abstract interpretation, soundness,

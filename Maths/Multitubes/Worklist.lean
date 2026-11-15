@@ -45,6 +45,8 @@ asserted.
 * D. S. Hochbaum and J. Naor, *Simple and fast algorithms for linear and integer programs with two
   variables per inequality*, SIAM J. Comput. 23 (1994), 1179-1192, for descending iteration to the
   greatest solution of a monotone two-variable integer system.
+* K. R. Apt, *The essence of constraint propagation*, Theoret. Comput. Sci. 221 (1999), 179-210,
+  Theorem 11, for chaotic iteration of monotone inflationary updates and its worklist algorithm.
 
 ## Tags
 

@@ -80,10 +80,19 @@ are proved in their own files directly from maximum and `csSup` bounds.
   (1955), 285-309, for least fixed points of monotone maps on complete lattices.
 * P. Cousot and R. Cousot, *Abstract interpretation: a unified lattice model for static analysis of
   programs by construction or approximation of fixpoints*, POPL 1977, 238-252, for inductive
-  invariants as post-fixed points and the soundness of abstraction.
-* R. Ghrist and H. Riess, *Cellular sheaves of lattices and the Tarski Laplacian*, Homology Homotopy
-  Appl. 24 (2022), 325-345, for lattice-valued sections as fixed points of an order-preserving
-  Laplacian.
+  invariants as pre-fixed points and the soundness of abstraction.
+* R. Ghrist and H. Riess, *Cellular sheaves of lattices and the Tarski Laplacian*, Homology
+  Homotopy Appl. 24 (2022), 325-345, Theorem 3.1, for lattice-valued sections as the
+  post-fixed points of an order-preserving Laplacian.
+* H. Riess, *Lattice Theory in Multi-Agent Systems*, PhD dissertation, University of Pennsylvania
+  (2022), arXiv:2304.02568, Section 7.2, for order-preserving parallel transport on the free
+  category and its ordered holonomy monoid.
+* I. Karafyllis and Z.-P. Jiang, *A vector small-gain theorem for general non-linear control
+  systems*, IMA J. Math. Control Inform. 28 (2011), 309-344, Proposition 2.7 and Remark 2.8, for the
+  finite closure of max-preserving maps under strictly contracting closed walks as a least lax
+  section above floors.
+* B. S. Rüffer, *Nonlinear left and right eigenvectors for max-preserving maps*, arXiv:1609.06217
+  (2016), Lemma 2, for the closure in the semiring of max-preserving maps as a supremum over walks.
 
 ## Tags
 
