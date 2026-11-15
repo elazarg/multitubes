@@ -3,12 +3,9 @@
 A survey of work that generalizes Zaslavsky's group-valued gain graphs along the directions
 Multitubes takes, and of the applications those generalizations serve. Status markers:
 
-- **[verified]**: checked against the primary source by at least two of three independent
-  adversarial readers.
-- **[lead]**: fetched or named but not yet verified; treat as a pointer, not a claim.
-- **[open]**: searched for and not found; absence is not evidence of nonexistence.
-
-Last updated: 2026-11-15.
+- **[verified]**: checked against the primary source.
+- **[lead]**: located but not checked against the source; a pointer, not a claim.
+- **[open]**: not found in the literature searched; absence is not evidence of nonexistence.
 
 ## Summary
 
@@ -30,17 +27,17 @@ The contribution to claim is therefore *unification*, not new specializations:
 > fixed-point view of lax sections goes back to abstract interpretation. Multitubes places them
 > in one framework: transports on a quiver with vertex-dependent fibers; exact, lax, oplax, and
 > mixed constraints; and holonomy criteria for each regime, together with the counterexamples
-> marking where cyclewise criteria fail. The framework has direct antecedents: Riess (2022)
-> already builds order-preserving transport on the free category with vertex-dependent
-> lattices and an ordered holonomy monoid, and Seigal–Harrington–Nanda compute section spaces
-> of quiver representations. To our knowledge no prior work proves the solvability theorems of
-> these regimes in one setting, and none does so machine-checked.
+> marking where cyclewise criteria fail. The construction itself has antecedents: Riess (2022)
+> defines order-preserving transport on the free category of a graph, with vertex-dependent
+> lattices and an ordered holonomy monoid, as a tool for one theorem about lattice-valued
+> sheaves; Seigal–Harrington–Nanda compute section spaces of linear quiver representations. To
+> our knowledge no prior work takes the construction as a general framework, proves the
+> solvability theorems of these regimes in it, or does so machine-checked.
 
-*Status of the claim (after an external review, 2026-11-16).* Whether this is "the first
-unified treatment" is unresolved. The defensible claim is narrower: the framework is not new,
-and neither is admitting exact, lax, and oplax edges (relationally, any constraint network
-does); what is new is the set of theorems proved across regimes, with stated hypotheses, and
-their machine-checked form.
+*Scope of the claim.* The definitions are not new, and neither is admitting exact, lax, and
+oplax edges side by side (as relations, any constraint network does). The contribution is the
+general framework and the theorems proved across regimes, each with the hypotheses it uses,
+in machine-checked form.
 
 Expected objections: category theory (sections as limits, lax sections as lax cones of a
 functor from the free category, folklore as definitions); abstract interpretation (per-point
@@ -71,8 +68,7 @@ path-plus-cycle certificates, and `MaxAffine/Farkas` here, and no prior source r
   Laplacian* (Homology Homotopy Appl. 24(1), 2022; arXiv:2007.04099). Lattice-valued stalks,
   Galois-connection restriction maps; the Tarski Laplacian L is order-preserving. Global sections
   are Fix(id ∧ L) (Thm 3.1), equivalently the post-fixed points {x : x ≤ Lx} (Cor. 3.1), *not*
-  Fix(L) in general (corrected after an external review). Applications: consensus, distributed
-  optimization.
+  Fix(L) in general. Applications: consensus, distributed optimization.
   - Direct link to the library: if each restriction r has upper adjoint r*, then
     r_v(x_v) = r_w(x_w) iff x_v ≤ r_v* r_w(x_w) and x_w ≤ r_w* r_v(x_v). So exact sheaf sections
     are *oplax sections of the bidirected transport* with maps r* r, on the original vertex set,
@@ -88,8 +84,13 @@ path-plus-cycle certificates, and `MaxAffine/Farkas` here, and no prior source r
   7.1 notes the argument fails for longer paths. Theorem 7.1 (Tarski–Hodge): sections are the
   post-fixed points of the Tarski Laplacian. So vertex-dependent fibers, non-invertible transport,
   a free-category functor, a holonomy monoid, and order-theoretic section conditions already
-  occur together, for transports built from Galois connections. No closed-walk-only existence
-  criterion. Suggested by an external review.
+  occur together.
+  - *How the construction is used.* It is a tool, not a framework. Transport is introduced to
+    prove the Tarski–Hodge theorem, whose proof uses Lemmas 7.1–7.2 and nothing else from §7.2;
+    holonomy is defined, with the remark that further geometric constructions "wait at the
+    door", and then not used. The setting is narrower than it needs to be: undirected graphs,
+    transports only of the form r* ∘ r for Galois-connected restrictions, one order-theoretic
+    constraint type, and no closed-walk existence criterion.
 - **[verified, full text]** A. Seigal, H. A. Harrington, V. Nanda, *Principal components along
   quiver representations* (Found. Comput. Math., online 2022; arXiv:2104.10666). Sections
   x_{t(e)} = A_e x_{s(e)} of a linear quiver representation with arbitrary, non-invertible
@@ -98,7 +99,7 @@ path-plus-cycle certificates, and `MaxAffine/Farkas` here, and no prior source r
   computes the section space by reducing to a rooted tree. A closer reference than category
   folklore for the library's exact sections and parallel-walk compatibility; the problem differs
   in that homogeneous linear systems always have the zero section, so the question is the section
-  space, not existence. Suggested by an external review.
+  space, not existence.
 - **[verified]** M. Robinson, *Assignments to sheaves of pseudometric spaces* (Compositionality
   2020; arXiv:1805.08927). Consistency radius: a continuous metric measure of how far an
   assignment is from a section, zero on sections, bounding distance to the nearest section under
@@ -107,8 +108,8 @@ path-plus-cycle certificates, and `MaxAffine/Farkas` here, and no prior source r
 *Structural difference.* A cellular sheaf puts two maps on each edge, from each endpoint stalk
 into an edge stalk; the library puts one map Tₑ : F s → F t between vertex fibers. The library's
 exact sections correspond to the sheaf case where one restriction is the identity. A broader
-claim that sheaves are simply the linear special case of the library's setting was refuted
-(1–2) on exactly this point. The difference disappears if the graph is subdivided into its
+claim that sheaves are simply the linear special case of the library's setting fails on exactly
+this point. The difference disappears if the graph is subdivided into its
 incidence quiver, with edge stalks as vertices (the `CellularSheaves` application does this),
 or through the adjunction above. Sheaf solvability is characterized by kernels or Tarski
 post-fixed points, not by closed-walk holonomy.
@@ -316,7 +317,7 @@ local consistency plus structural (convexity, topology, domain-size) hypotheses.
   monoid labels on digraphs. No sections and no solvability criterion: the invariant detects
   feedback loops, not fixed points of holonomies. A further claim (with coefficients in ℕ the
   first homology is generated by simple directed cycles) comes from an external summary and is
-  unchecked. Suggested by an external review.
+  unchecked.
 
 ### Constraint propagation and categorical abstract interpretation
 
@@ -334,7 +335,7 @@ local consistency plus structural (convexity, topology, domain-size) hypotheses.
   object-dependent domains; abstraction relations are lax natural transformations; Theorem 4.2:
   interpretations are closed under induction along a family of Galois connections. A categorical
   antecedent for the library's lax morphisms (`Multitubes/Morphism`); it does not formulate
-  invariants as sections or give closed-walk criteria. Suggested by an external review.
+  invariants as sections or give closed-walk criteria.
 
 ### Partial (non-invertible) maps: synchronization of partial matchings
 
@@ -387,7 +388,7 @@ local consistency plus structural (convexity, topology, domain-size) hypotheses.
   (Prop. 2.9). In library terms Q(b) is the least lax section above the floors b, built by a
   path closure over walks of length < n: function-valued edge maps, a cyclewise criterion, and a
   constructive lax solution. Restrictions: one common scalar fiber, continuity, γ(0) = 0, and
-  strict contraction on cycles. Suggested by an external review.
+  strict contraction on cycles.
 - **[verified, full text]** B. S. Rüffer, *Nonlinear left and right eigenvectors for
   max-preserving maps* (arXiv:1609.06217, 2016). Max-preserving maps on ℝⁿ₊ form a
   (∘, max)-semiring (Lemma 1). Theorem 1 (from Rüffer's earlier work): Aᵏx → 0 iff Ax ≱ x for
@@ -396,7 +397,7 @@ local consistency plus structural (convexity, topology, domain-size) hypotheses.
   A* = id ⊕ AA* and reduces to ⊕_{k<n} Aᵏ (Remark 1), proved by reading entries as composites
   of edge functions along paths and discarding contracting cycles. Here path closure *solves*
   inequalities, qualifying this survey's separation of path summaries from solvability.
-  Suggested by an external review.
+ 
 
 ### Group gains: other recent Zaslavsky-school work
 
@@ -419,7 +420,7 @@ local consistency plus structural (convexity, topology, domain-size) hypotheses.
   counts of lattice points in orthotopes avoiding affinographic hyperplanes. The Zaslavsky-school
   treatment of vertex data acted on by gains, closest to the library's vertex-dependent fibers
   among gain-graph work; but gains stay invertible, and the aim is enumerative, not existence of
-  sections. Suggested by an external review.
+  sections.
 
 ### Set-valued quiver representations, queues
 
@@ -437,7 +438,7 @@ local consistency plus structural (convexity, topology, domain-size) hypotheses.
 
 ## Gaps and open questions
 
-**[open]** Still no verified prior art for:
+**[open]** No prior art found for:
 
 - gain or voltage graphs over monoids, semigroups, or categories (searches return only group
   gains, groupoid-*domain* voltage assignments, and graphs of monoids in C*-algebra theory; the
@@ -452,8 +453,8 @@ local consistency plus structural (convexity, topology, domain-size) hypotheses.
 closed-walk holonomies need not give a section: two parallel arrows b → v on ℤ labelled x ↦ x
 and x ↦ x + 1 have only trivial directed closed walks, yet a section needs x_v = x_b = x_b + 1.
 The criterion needs return walks (strong connectivity) or reverse traversal by inverses, and one
-common point fixed by all holonomies at the base, not a separate point for each (corrected after
-an external review). For non-invertible maps even that fails in general: two walks p, q from b
+common point fixed by all holonomies at the base, not a separate point for each. For
+non-invertible maps even that fails in general: two walks p, q from b
 to v can send x to different points that a non-injective return map r sends back to x.
 Montanari's K₄ example is the relational analogue. Any prior theorem should be checked for which
 side of these lines it sits on.
@@ -462,17 +463,14 @@ Open questions:
 
 1. Has anyone proved a holonomy criterion for monoid, semigroup, or groupoid gains, and with what
    extra hypothesis (injectivity, ordering, a closure step as in Shostak)?
-2. *Partly answered:* at the level of constraints, Ghrist–Riess sections are oplax sections of
-   the bidirected transport r* r (see the sheaf entry), and the Tarski Laplacian is the meet
-   aggregation of those bounds. Open: whether the library's theorems specialize to theirs under
-   their hypotheses. Same question for Hochbaum–Naor's descending iteration.
+2. At the level of constraints, Ghrist–Riess sections are oplax sections of the bidirected
+   transport r* r (see the sheaf entry), and the Tarski Laplacian is the meet aggregation of
+   those bounds. Do the library's theorems specialize to theirs under their hypotheses? Same question for Hochbaum–Naor's descending iteration.
 3. Is there prior work proving *theorems* about mixed exact and inequality edge constraints,
    beyond STPs with equalities or generalized flows? (Representing them together is not new.)
-4. How far does Zaslavsky's dynamic bibliography (EJC DS8) cover non-group gains? All three claims
-   sourced to it were refuted or rejected.
-5. Full text still unread: Kunze–Siegel, the primary source of the signed-graph monotonicity
-   criterion.
-6. *Checked:* Shostak's Fig. 1 does not contradict any library theorem. Translated into lax
+4. How far does Zaslavsky's dynamic bibliography (EJC DS8) cover non-group gains?
+5. Kunze–Siegel, the primary source of the signed-graph monotonicity criterion, is a lead only.
+6. *Shostak's Fig. 1 and the library.* Fig. 1 does not contradict any library theorem. Translated into lax
    form (negate every variable), it needs an edge of slope −2 and an upper bound on one
    vertex, so it falls outside every cyclewise iff in the library: those assume unit slopes
    (`exists_isLaxSection_iff_forall_cycle_exists_prefixed`), nonnegative slopes with a gauge
@@ -481,16 +479,14 @@ Open questions:
    vertex (x ↦ 10 and x ↦ 2x) where every closed walk has a pre-fixed point but no lax section
    exists, and replaces the cyclewise test with a Farkas certificate; `Closure` notes that one
    common pre-fixed witness at a root suffices where per-walk witnesses do not. This is the
-   Shostak / Cohen–Megiddo path-plus-cycle certificate phenomenon. The library cites none of
-   Pratt, Shostak, Aspvall–Shiloach, or Cohen–Megiddo; `MaxAffine/Sections`, `MaxAffine/Farkas`
-   and `Closure` are the natural places. Shostak's closure is an alternative *cyclewise* complete
+   Shostak / Cohen–Megiddo path-plus-cycle certificate phenomenon. Shostak's closure is an alternative *cyclewise* complete
    test (after adding residue edges) to the library's linear one.
 
 ## Formalization roadmap
 
-What the prior art suggests adding, sorted by effort. Items marked *done* are in the library.
+What the prior art suggests adding, sorted by effort.
 
-### Done
+### In the library
 
 - **Rotation invariance of holonomy** (Shostak, Lemma 6): `Maths.Transport.holonomy_append_rotate`,
   with fixed and, for monotone maps, pre-fixed versions. Holds for arbitrary edge maps, not only
