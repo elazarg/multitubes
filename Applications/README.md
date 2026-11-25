@@ -30,7 +30,7 @@ stopping, and control are domains that can use it.
 | [Cellular sheaves](CellularSheaves/) | Compatible assignments across heterogeneous stalks |
 | [Stochastic processes](StochasticProcesses/) | Expectation pullback, finite hitting, and barrier bounds |
 | [Resource theories](ResourceTheories/) | Monotones on networks of free conversions |
-| [Quantum channels](QuantumChannels/) | Kraus maps on ordered positive-semidefinite matrices |
+| [Quantum channels](QuantumChannels/) | Kraus transport, sequential instruments, and sharp detection probabilities |
 | [Data migration](DataMigration/) | Route consistency and adjoint migration |
 | [Formal concept analysis](FormalConceptAnalysis/) | Transport among concept lattices |
 | [Conic finance](ConicFinance/) | Solvency orders and attainable portfolio increments |
