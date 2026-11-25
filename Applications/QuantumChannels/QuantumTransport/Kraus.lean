@@ -86,6 +86,7 @@ theorem krausMap_sub (K : κ → Matrix O I ℂ) (X Y : Matrix I I ℂ) :
 
 variable [Fintype O]
 
+omit [Fintype O] in
 /-- A finite Kraus map preserves positive semidefiniteness. -/
 theorem krausMap_posSemidef (K : κ → Matrix O I ℂ) {X : Matrix I I ℂ}
     (hX : X.PosSemidef) : (krausMap K X).PosSemidef := by
@@ -93,6 +94,7 @@ theorem krausMap_posSemidef (K : κ → Matrix O I ℂ) {X : Matrix I I ℂ}
   exact (Finset.sum_nonneg fun a _ =>
     (hX.mul_mul_conjTranspose_same (K a)).nonneg).posSemidef
 
+omit [Fintype O] in
 /-- A finite Kraus map is monotone for the Löwner order. -/
 theorem monotone_krausMap (K : κ → Matrix O I ℂ) : Monotone (krausMap K) := by
   intro X Y hXY

@@ -301,7 +301,7 @@ private theorem walkSum_gaugeCriticalRelaxedShift
       have htarget : gauge (G.target edge.1) ≠ 0 :=
         (hgauge (G.target edge.1)).ne'
       field_simp [htarget]
-      all_goals ring
+      ring
 
 omit [Fintype V] [DecidableEq V] in
 /-- **Raw gauge-critical cycle formula.**  A raw affine residual threshold is

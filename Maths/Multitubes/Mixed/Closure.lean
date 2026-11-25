@@ -126,8 +126,10 @@ def leastMixedMajorantClosure
     (hadjoint : ∀ edge : LaxificationReverseEdge mode,
       GaloisConnection (adjoint edge) (T.edgeMap edge.1))
     (lower : ∀ vertex : V, Fiber vertex) :
-    T.leastMixedMajorantClosure hlax hadjoint lower = T.leastMixedMajorant mode lower :=
-  (sInf_eq_iInf' _).symm
+    T.leastMixedMajorantClosure hlax hadjoint lower = T.leastMixedMajorant mode lower := by
+  change (⨅ family : {family // lower ≤ family ∧ T.IsMixedSection mode family}, family.1) = _
+  exact (sInf_eq_iInf' {family : ∀ vertex, Fiber vertex |
+    lower ≤ family ∧ T.IsMixedSection mode family}).symm
 
 /-- A family is fixed by least-majorant closure exactly when it is a mixed
 section. -/

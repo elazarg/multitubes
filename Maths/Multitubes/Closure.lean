@@ -234,8 +234,10 @@ def leastLaxMajorantClosure (hmono : T.IsMonotone) :
 /-- Applying the bundled closure operator computes the least lax majorant. -/
 @[simp] theorem leastLaxMajorantClosure_apply (hmono : T.IsMonotone)
     (lower : ∀ vertex : V, Fiber vertex) :
-    leastLaxMajorantClosure hmono lower = T.leastLaxMajorant lower :=
-  (sInf_eq_iInf' _).symm
+    leastLaxMajorantClosure hmono lower = T.leastLaxMajorant lower := by
+  change (⨅ family : {family // lower ≤ family ∧ T.IsLaxSection family}, family.1) = _
+  exact (sInf_eq_iInf' {family : ∀ vertex, Fiber vertex |
+    lower ≤ family ∧ T.IsLaxSection family}).symm
 
 /-- A family is fixed by least-majorant closure exactly when it is a lax section. -/
 theorem leastLaxMajorant_eq_self_iff (hmono : T.IsMonotone)

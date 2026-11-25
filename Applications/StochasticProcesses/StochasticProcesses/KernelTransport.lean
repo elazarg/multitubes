@@ -85,7 +85,7 @@ def expect (p : PMF S) (f : S → ℝ≥0∞) : ℝ≥0∞ :=
 theorem expect_mono (p : PMF S) {f g : S → ℝ≥0∞}
     (hfg : ∀ s, f s ≤ g s) : expect p f ≤ expect p g := by
   unfold expect
-  exact ENNReal.tsum_le_tsum fun s => mul_le_mul_right (hfg s) (p s)
+  exact tsum_le_tsum fun s => mul_le_mul_right (hfg s) (p s)
 
 /-- Expectation under a point mass is evaluation at its support point. -/
 @[simp] theorem expect_pure (state : S) (f : S → ℝ≥0∞) :
@@ -112,7 +112,7 @@ theorem expect_bind {T : Type*}
       apply tsum_congr
       intro t
       rw [ENNReal.tsum_mul_right]
-    _ = ∑' s, ∑' t, (p s * k s t) * f t := ENNReal.tsum_comm
+    _ = ∑' s, ∑' t, (p s * k s t) * f t := tsum_comm
     _ = ∑' s, p s * (∑' t, k s t * f t) := by
       apply tsum_congr
       intro s

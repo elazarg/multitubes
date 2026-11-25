@@ -98,7 +98,7 @@ def normalizedFarkasRhs
 
 /-- The nonnegative normalized Farkas certificates of a homogeneous balance system: the
 standard-form fiber of the mass-augmented matrix. -/
-def normalizedFarkasCertificateSet
+noncomputable def normalizedFarkasCertificateSet
     {Row Col : Type*} [Fintype Col]
     (balance : Matrix Row Col ℝ) (mass : Col → ℝ) :
     Set (Col → ℝ) :=
