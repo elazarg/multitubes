@@ -36,3 +36,19 @@ construction gives phase `(-2, 0)`, a translate of `(0, 2)`, and proves both the
 schedule and the lower bound `3` for every competing feasible cycle time.
 
 Build the capstone from this directory with `lake build`.
+
+## Finite schedules with correlated delays
+
+A supplier delay can lengthen several dependencies before two production paths rejoin.
+The calendar algorithm charges that cause once across the schedule. Given a budget of distinct
+causes, it computes the worst deadline lateness and how that value changes when each cause is
+ruled out or required. The running time depends on how many causes the scan must remember
+at once. [Algorithm, production example and exact scenario checks](algorithms/README.md)
+
+## Restarting a periodic machine within its buffer limits
+
+A connected circulation with zero total charge supplies exact transition counts for a
+balanced period. The schedule can be stored as repeated words even when the counts are
+large binary integers. Given the starting stock, the restart index computes all phases
+of that period that satisfy the capacities throughout the cycle for every allowed value
+of a fixed calibration. [Construction, phase queries and checks](algorithms/periodic-buffers.md)

@@ -33,3 +33,12 @@ in the first `n` trials is `(1 − (16/25)ⁿ) ρ₀₀`. It tends to the initia
 certificate in the full matrix order.
 
 Run `lake build` from this directory to check the client.
+
+## Which measurement reports affect detection?
+
+Suppose the apparatus still executes a measurement when its report is suppressed. For each
+time, find the minimum cost of suppressing other reports that makes the chosen report change
+the probability of a logged hit by the deadline. Two passes through the Kraus operators
+compute all the costs and retain witnesses. Even commuting projective measurements give an
+NP-hard problem when the change must reach a prescribed positive magnitude.
+[Derivation, executable instrument and independent probability checks](algorithms/README.md)

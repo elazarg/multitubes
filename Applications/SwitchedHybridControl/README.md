@@ -38,3 +38,11 @@ A checked rational radius yields the real all-walk error bound, while a checked 
 certificate rules out every real radius satisfying the stated lower bounds, upper budgets, and
 affine transition constraints. The checker validates the weighted two-mode radii and a sparse
 certificate for an incompatible tighter budget.
+
+## Simultaneous margins for new transitions
+
+Several proposed transitions can enter the same mode. Under an explicit test on their gains,
+one assignment of radii attains the largest feasible offset for each transition simultaneously.
+Starting from a least feasible radius and a suitable gauge, one backward graph pass and one
+forward pass per destination compute the limits and supply paths certifying rejected offsets.
+[Derivation, Python implementation and two-mode example](algorithms/README.md)

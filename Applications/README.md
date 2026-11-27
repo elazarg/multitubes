@@ -23,6 +23,7 @@ stopping, and control are domains that can use it.
 | Dossier | Central interpretation |
 | --- | --- |
 | [Switched and hybrid control](SwitchedHybridControl/) | Lyapunov certificates, affine error radii, and gauge contraction |
+| [Max-affine operating points](AffineOperatingPoints/) | Exact common offsets for networks of monotone affine responses |
 | [Riccati equations and filtering](RiccatiFiltering/) | Covariance transport in the Löwner order |
 | [Program semantics](ProgramSemantics/) | Invariants, predicate transformers, and finite reachability |
 | [Mathematical morphology](MathematicalMorphology/) | Adjoint morphology on image lattices |
@@ -41,6 +42,29 @@ stopping, and control are domains that can use it.
 | [Discrete-event systems](DiscreteEventSystems/) | Max-plus timed synchronization and cycle time |
 | [Quantitative relations](QuantitativeRelations/) | Additive path budgets and pseudometric error bounds |
 | [Web of trust](WebOfTrust/) | Provenance-aware endorsement and evidence closure |
+
+## Executable application algorithms
+
+These notes connect Lean results with derived algorithms, their hypotheses and Python examples.
+The algorithms and complexity proofs are documented in the linked application dossiers.
+
+| Application | Computation |
+| --- | --- |
+| [Rooted linear quivers](PersistenceModules/algorithms/README.md) | Compute section dimensions after every single arrow deletion, including failures that cut off a subtree. |
+| [Battery storage](ObstacleProblems/algorithms/README.md) | Compute the full solar-rating curves for grid imports and spill on a finite or contractive periodic trace. |
+| [Switched error bounds](SwitchedHybridControl/algorithms/README.md) | Compute jointly attainable offset margins for new transitions entering the same mode. |
+| [Single storage interventions](ObstacleProblems/algorithms/pulse-response.md) | Compute the changes in shortage, spill and terminal charge from one signed injection at a chosen time, through any deadline. |
+| [Routes under interval uncertainty](ProgramSemantics/algorithms/README.md) | Find one sequence of actions guaranteed to take every possible initial state and outcome into a target band. |
+| [Quantum measurement reports](QuantumChannels/algorithms/README.md) | For each report, find the cheapest set of other reports whose suppression makes that report affect detection by the deadline. |
+| [Inverse binary dilation](MathematicalMorphology/algorithms/README.md) | After any contiguous outage on a scan line, find the cheapest seed mask that still produces the observed pixels. |
+| [Scalar filter deadlines](RiccatiFiltering/algorithms/README.md) | On any window of a fixed observation log, find the peak relative covariance, the first cap violation, and the largest safe starting covariance. |
+| [Correlated production delays](DiscreteEventSystems/algorithms/README.md) | Compute worst deadline lateness under a budget of shared delay causes, including the effect of ruling out or requiring each cause. |
+| [Max-affine operating points](AffineOperatingPoints/) | Test an offset with certificates, compute all offsets for a strongly connected network, or synthesize a network for a prescribed set of intervals. |
+| [Feedback connection repair](AffineOperatingPoints/algorithms/connection-retuning.md) | At a missing operating level, find every intercept of each candidate connection that restores an operating point in an expansive network. |
+| [Operating points from partial readings](AffineOperatingPoints/algorithms/counting-operating-points.md) | Represent all readings at a fixed level by a partial order and find the greatest operating point within reported measurement ranges. |
+| [Individual calibration replacements](CellularSheaves/algorithms/calibration-replacement.md) | Compute the best uniform fit after any one comparison changes, and find all replacement offsets that meet a given tolerance. |
+| [Migration round trips](DataMigration/algorithms/round-trip-audit.md) | Classify every record by round-trip stability and compute the largest domain of unambiguous registry readback. |
+| [Zero-drift schedules](DiscreteEventSystems/algorithms/periodic-buffers.md) | Realize a connected circulation in compressed form and find every restart phase safe under shared calibration uncertainty. |
 
 ## Compiled capstones
 

@@ -1,6 +1,7 @@
 /.lake
 /Applications/*/.lake
 /.design
+__pycache__/
 
 # audit dumps written by scripts/audit.lean
 scripts/.decls

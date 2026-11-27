@@ -28,3 +28,12 @@ that graph admits a potential, equivalently when every closed walk has nonnegati
 The integer case is different: `2x ≤ 1` and `-2x ≤ -1` pass the cycle test but have no integer
 solution, which is checked in `integer_gap`. Integer tightening and closure algorithms are not
 formalized.
+
+## A common route under state uncertainty
+
+Given an interval of possible states, can one fixed sequence of instructions send every
+outcome into a specified target band? Partial, many-to-one instructions can merge uncertainty,
+and a single instruction can also have several possible outputs. On finite ordered state
+spaces with monotone transition bounds, a checkable order condition gives an index linear
+in the size of the transition tables. A successful query returns an instruction sequence.
+[Algorithm, proof and explicit subset checks](algorithms/README.md)

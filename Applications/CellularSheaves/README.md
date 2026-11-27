@@ -43,8 +43,12 @@ optimal certificate whose positive rows are tight signed comparisons. The certif
 chosen with support at most the rank of the signed comparison normals plus one. This is an
 existence theorem; it does not assert uniqueness, minimum support, or ordered alternation.
 
-The executable functions check supplied assignments and certificates. A general solver that
-searches for either witness is not implemented.
+The Lean functions check supplied assignments and certificates. For unit scales, the Python
+index computes the optimal tolerance as a function of each individual comparison's offset.
+It also returns the entire interval of replacements that meet a requested tolerance. On the
+six score margins from the 2022 World Cup Group E, changing the Spain–Costa Rica margin from
++7 to any value in $[-2,2]$ reduces the best uniform error in an additive rating model from
+$3$ to $4/3$ goals. [Algorithm, data and exact certificates](algorithms/calibration-replacement.md)
 
 Sheaf cohomology, topology, richer uncertainty models, and fusion algorithms remain outside the
 current scope.

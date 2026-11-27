@@ -339,6 +339,8 @@ Lake target: `MathsGraph`, `MathsRecursion`, `MathsLinearProgramming`, `MathsAlg
 [`Applications/`](Applications/) contains domain dossiers. Selected dossiers also contain
 independent downstream Lake packages; they import `Maths` without entering its module or
 dependency graph.
+The [executable application index](Applications/README.md#executable-application-algorithms)
+links to the algorithm derivations, Python implementations and reproduction commands.
 
 ## Building this repository
 

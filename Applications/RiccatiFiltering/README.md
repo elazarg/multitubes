@@ -25,3 +25,11 @@ monotonicity, and composition without assuming lattice joins. Exact sections des
 covariance families; lax and oplax sections describe one-sided covariance bounds. Statistical
 model validity, matrix observation updates, contraction, and convergence require their own
 analytic hypotheses.
+
+## Checking deadlines on a recorded observation log
+
+A filter may restart partway through a log with a revised initial variance. A range index
+finds the time of greatest covariance relative to a specified tolerance profile, the first
+violation, and the largest initial variance consistent with every tolerance in the window.
+Received and missing observations can vary by step.
+[Scalar filter algorithm and exact replay checks](algorithms/README.md)
